@@ -5,6 +5,6 @@ There are a user interface, a chat and the games will be multiplayer online and 
 
 Some rules :
 
-	<p align="center">
-	<img src="Transcendence2.png" width="900">
-	</p>
+<p align="center">
+<img src="Transcendence2.png" width="900">
+</p>
