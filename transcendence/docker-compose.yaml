@@ -16,7 +16,6 @@ volumes:
 services:
 
   postgres:
-    build: ./requirements/postgres/
     image: postgres
     container_name: postgres
     environment:
