@@ -16,7 +16,7 @@ volumes:
 services:
 
   postgres:
-    image: ./requirements/postgres/
+    image: ./requirements/postgres/Dockerfile
     container_name: postgres
     environment:
       - POSTGRES_PASSWORD=pouet
