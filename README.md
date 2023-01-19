@@ -37,6 +37,8 @@ https://docs.nestjs.com/cli/overview
 
 ### React
 
+React is a front-end JavaScript library developed by Facebook. Its aim is to allow developers to easily create fast user interfaces for websites and applications alike. The main concept of React js is virtual DOM. React is capable of making API calls (sending the request to the backend), which deal with the data. React cannot process the database or the data source itself.
+
 #### Installation guide :
 
 	npm install npm@latest -g
@@ -50,5 +52,12 @@ https://docs.nestjs.com/cli/overview
 	npm run dev
 	Open port in VM
 
+LEARN REACT
+https://roadmap.sh/react/
 
+Use Forms React Hook Form : https://reactjs.org/docs/hooks-custom.html
+Use REST react-query : https://www.youtube.com/watch?v=novnyCaa7To
+Use Styling Materia UI : https://mui.com/
 
+Activate server :
+https://www.digitalocean.com/community/tutorials/react-server-side-rendering-fr
