@@ -42,15 +42,14 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 #### Installation guide :
 
 	npm install npm@latest -g
-	npm install -g create-react-app
-	npm update --save react 
-	npm view react version
-
 	npm create vite@latest
 	Choose React and give a name to the project
 	cd project-name
 	npm run dev
 	Open port in VM
+
+	npm update --save react 
+	npm view react version
 
 LEARN REACT
 https://roadmap.sh/react/
