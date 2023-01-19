@@ -6,7 +6,7 @@ There are a user interface, a chat and the games will be multiplayer online and 
 Some rules :
 
 <p align="center">
-<img src="transcendence.png" width="800">
+<img src="transcendence.png" width="1000">
 </p>
 
 ## Docker
