@@ -20,7 +20,7 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      - PATH=/var/lib/postgres
+      - PATH=/var/lib/postgresql
     networks:
       - localhost
     restart: always
