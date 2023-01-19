@@ -1,0 +1,18 @@
+version: '2.2'
+
+networks:
+  localhost:
+    name: transe_network
+
+volumes:
+  db:
+    name: db
+    driver: local
+    driver_opts:
+      device: ./requirements/postGres/volume
+      o: bind
+      type: none
+
+services:
+
+  postgres:
