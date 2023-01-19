@@ -19,6 +19,8 @@ services:
     build: ./requirements/postgres/
     image: postgres
     container_name: postgres
+    environment:
+      - PATH=/var/lib/postgres
     networks:
       - localhost
     restart: always
