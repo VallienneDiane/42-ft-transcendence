@@ -6,10 +6,10 @@ networks:
 
 volumes:
   db:
-    name: db
+    name: dbpouet
     driver: local
     driver_opts:
-      device: ./requirements/postgres/volume
+      device: ./postgres_database
       o: bind
       type: none
 
@@ -22,10 +22,6 @@ services:
       - POSTGRES_PASSWORD=pouet
     networks:
       - localhost
+    volumes:
+      - postgres_database:/var/lib/postgresql
     restart: always
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
