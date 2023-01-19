@@ -9,16 +9,16 @@ volumes:
     name: db
     driver: local
     driver_opts:
-      device: ./requirements/postGres/volume
+      device: ./requirements/postgres/volume
       o: bind
       type: none
 
 services:
 
   postgres:
-    build: ./requirements/postGres/
-    image: postGres
-    container_name: postGres
+    build: ./requirements/postgres/
+    image: postgres
+    container_name: postgres
     networks:
       - localhost
     restart: always
