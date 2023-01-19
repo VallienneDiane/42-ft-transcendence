@@ -19,7 +19,13 @@ services:
     image: postgres
     container_name: postgres
     environment:
-      - PATH=/var/lib/postgresql
+      - POSTGRES_PASSWORD=pouet
     networks:
       - localhost
     restart: always
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
