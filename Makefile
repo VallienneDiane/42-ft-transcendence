@@ -3,7 +3,7 @@ all : dir build run
 dir : dir_db dir_pgadmin
 
 dir_db :
-	sudo mkdir -p db
+	sudo mkdir -p postgres
 
 dir_pgadmin :
 	sudo mkdir -p pgadmin
@@ -17,8 +17,8 @@ run :
 re : start
 	sudo docker-compose -f docker-compose.yml up -d --build
 
-clean :
-	sudo docker rmi -f $(docker images -qa); echo y | docker builder prune -a
+clean : down
+		sudo docker rmi -f $(docker images -qa); echo y | sudo docker builder prune -a
 
 fclean : clean down
 
@@ -26,8 +26,9 @@ down :
 	sudo docker-compose -f docker-compose.yml down
 
 vclean :
-	sudo rm -rf db pgadmin
-	sudo docker volume rm -f data pgadmin
+	sudo docker volume rm $(docker volume ls -q)
+	sudo rm -rf /home/$(USER)/data/pgadmin/*
+	sudo rm -rf /home/$(USER)/data/postgres/*
 
 prune : down vclean
 	echo y | sudo docker system prune -a
