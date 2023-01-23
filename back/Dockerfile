@@ -1,13 +1,14 @@
-FROM node:12.19.0-alpine3.9
+FROM node:latest
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
+RUN ls -al
+# RUN npm install glob rimraf
+# RUN npm install --only=development
+RUN npm install
 
-RUN npm install glob rimraf
+COPY ./ ./
+# RUN npm run build
 
-RUN npm install --only=development
-
-COPY . .
-
-RUN npm run build
+CMD ["npm", "run", "start"]

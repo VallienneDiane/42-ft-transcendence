@@ -5,8 +5,6 @@ services:
     container_name: postgres_container
     hostname: postgres
     restart: always
-    # ports:
-    #   - 5432:5423
     env_file:
       - .env
     volumes:
@@ -33,23 +31,41 @@ services:
     image: nestjs_img
     build:
       context: ./back
-      dockerfile: Dockerfile
     container_name: nest_container
     command: npm run start:dev
     restart: always
     ports:
-      - 3000:3000
+      - "3000:3000"
     networks:
       - transcendence_network
     volumes:
-      - .:/usr/src/app
+      - nest:/usr/src/app
       - /usr/src/app/node_modules
 
 volumes:
   postgres:
+    driver: local
     name: nest-db
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/dvallien/data/postgres
   pgadmin:
+    driver: local
     name: pgadmin
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/dvallien/data/pgadmin
+  nest:
+    driver: local
+    name: nest
+    driver_opts:
+      type: none 
+      o: bind
+      device: ./back
 
 networks:
   transcendence_network:
+    driver: bridge
+    name: transcendence_network
