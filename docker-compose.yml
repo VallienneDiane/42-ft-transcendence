@@ -49,14 +49,14 @@ volumes:
     driver_opts:
       type: none 
       o: bind
-      device: /home/dvallien/data/postgres
+      device: ./postgres
   pgadmin:
     driver: local
     name: pgadmin
     driver_opts:
       type: none 
       o: bind
-      device: /home/dvallien/data/pgadmin
+      device: ./pgadmin
   nest:
     driver: local
     name: nest

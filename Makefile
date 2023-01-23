@@ -1,4 +1,4 @@
-all : build run
+all : make_dir build run
 
 build :
 	sudo docker-compose -f docker-compose.yml build
@@ -6,24 +6,31 @@ build :
 run :
 	sudo docker-compose -f docker-compose.yml up -d
 
-re : start
-	sudo docker-compose -f docker-compose.yml up -d --build
+re : prune all
 
 clean : down
 		sudo docker rmi -f $(docker images -qa); echo y | sudo docker builder prune -a
 
-fclean : clean down
+fclean : clean vclean
 
 down :
 	sudo docker-compose -f docker-compose.yml down
 
 vclean :
 	sudo docker volume rm $(docker volume ls -q)
-	sudo rm -rf /home/$(USER)/data/pgadmin/*
-	sudo rm -rf /home/$(USER)/data/postgres/*
+	sudo rm -rf ./pgadmin
+	sudo rm -rf ./postgres
 
-prune : down vclean
+prune : fclean
 	echo y | sudo docker system prune -a
 
 logs :
 	sudo docker-compose logs
+
+make_dir : make_dir_db make_dir_pgadmin
+
+make_dir_db :
+	sudo mkdir -p postgres
+
+make_dir_pgadmin :
+	sudo mkdir -p pgadmin
