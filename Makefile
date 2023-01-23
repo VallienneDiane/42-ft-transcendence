@@ -1,12 +1,4 @@
-all : dir build run
-
-dir : dir_db dir_pgadmin
-
-dir_db :
-	sudo mkdir -p postgres
-
-dir_pgadmin :
-	sudo mkdir -p pgadmin
+all : build run
 
 build :
 	sudo docker-compose -f docker-compose.yml build
