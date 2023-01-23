@@ -95,4 +95,9 @@ pgAdmin is a management tool for PostgreSQL and derivative relational databases.
 
 PGADMIN IMAGE : https://hub.docker.com/r/dpage/pgadmin4
 
+### React
+
+https://javascript.plainenglish.io/step-by-step-guide-to-dockerize-react-app-created-using-vite-90772423f7fb
+
+
 

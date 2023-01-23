@@ -10,7 +10,7 @@ re : start
 	sudo docker-compose -f docker-compose.yml up -d --build
 
 clean : down
-		sudo docker rmi -f $(docker images -qa); echo y | sudo docker builder prune -a
+		sudo docker rmi -f $(docker images -qa)
 
 fclean : clean down
 
