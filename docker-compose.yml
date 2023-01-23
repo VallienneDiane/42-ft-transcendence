@@ -42,6 +42,22 @@ services:
       - nest:/usr/src/app
       - /usr/src/app/node_modules
 
+  react:
+    image: reactjs_img
+    build:
+      context: ./front
+    container_name: react_container
+    command: npm run dev
+    restart: always
+    ports:
+      - "8000:8000"
+    networks:
+      - transcendence_network
+    volumes:
+      - react:/app
+      - /usr/src/app/node_modules
+
+
 volumes:
   postgres:
     driver: local
@@ -49,14 +65,14 @@ volumes:
     driver_opts:
       type: none 
       o: bind
-      device: /home/dvallien/data/postgres
+      device: ./postgres
   pgadmin:
     driver: local
     name: pgadmin
     driver_opts:
       type: none 
       o: bind
-      device: /home/dvallien/data/pgadmin
+      device: ./pgadmin
   nest:
     driver: local
     name: nest
@@ -64,6 +80,13 @@ volumes:
       type: none 
       o: bind
       device: ./back
+  react:
+    driver: local
+    name: react
+    driver_opts:
+      type: none 
+      o: bind
+      device: ./front
 
 networks:
   transcendence_network:

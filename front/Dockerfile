@@ -1,6 +1,6 @@
 FROM node:latest
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -9,4 +9,6 @@ RUN npm install
 
 COPY ./ ./
 
-CMD ["npm", "run", "start"]
+EXPOSE 8000
+
+CMD ["npm", "run", "dev"]
