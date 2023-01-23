@@ -32,8 +32,8 @@ services:
   nest:
     image: nestjs_img
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./back
+      dockerfile: Dockerfile
     container_name: nest_container
     command: npm run start:dev
     restart: always
