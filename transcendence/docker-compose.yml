@@ -1,0 +1,55 @@
+version: '3.3'
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    hostname: postgres
+    restart: always
+    # ports:
+    #   - 5432:5423
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - transcendence_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    networks:
+      - transcendence_network
+    depends_on:
+      - postgres
+    restart: always
+
+  nest:
+    image: nestjs_img
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    container_name: nest_container
+    command: npm run start:dev
+    restart: always
+    ports:
+      - 3000:3000
+    networks:
+      - transcendence_network
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+
+volumes:
+  postgres:
+    name: nest-db
+  pgadmin:
+    name: pgadmin
+
+networks:
+  transcendence_network:
