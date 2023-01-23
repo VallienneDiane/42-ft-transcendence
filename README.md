@@ -45,6 +45,7 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 	npm create vite@latest
 	Choose React and give a name to the project
 	cd project-name
+	npm install
 	npm run dev
 	Open port in VM
 
@@ -62,3 +63,36 @@ Use Styling Materia UI : https://mui.com/
 
 Activate server :
 https://www.digitalocean.com/community/tutorials/react-server-side-rendering-fr
+
+
+## Docker
+
+### POSTGRESSQL
+
+PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
+
+POSTGRES IMAGE : https://hub.docker.com/_/postgres
+POSTGRESQL CLI : https://www.geeksforgeeks.org/postgresql-create-database/?ref=lbp
+
+Build and run container: 
+	docker run --name postgres -e POSTGRES_PASSWORD=mypassword -d postgres
+
+
+Exec container :
+	docker exec -t <name> bash  		//get into container
+	su postgres							//role root
+	psql								//access to CLI
+	\l	or \l+							//listing databases
+	\c <name>							//connect db
+	\dt									//listing tables
+
+	CREATE DATABASE <name>; CREATE DATABASE
+	CREATE TABLE <name> (column_name TYPE column constraint, table_constraint table_constraint) INHERITS 
+
+### PGADMIN : front-end database
+
+pgAdmin is a management tool for PostgreSQL and derivative relational databases.
+
+PGADMIN IMAGE : https://hub.docker.com/r/dpage/pgadmin4
+
+
