@@ -8,20 +8,17 @@ run :
 
 re : prune all
 
-clean : down
-		sudo docker rmi -f $(docker images -qa)
-
-fclean : clean vclean
+clean : down prune
 
 down :
 	sudo docker-compose -f docker-compose.yml down
 
 vclean :
-	sudo docker volume rm $(docker volume ls -q)
+	sudo docker volume rm -f pgadmin postgres nest react
 	sudo rm -rf ./pgadmin
 	sudo rm -rf ./postgres
 
-prune : fclean
+prune :
 	echo y | sudo docker system prune -a
 
 logs :
