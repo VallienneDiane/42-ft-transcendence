@@ -68,14 +68,25 @@ Build and run container:
 
 Exec container :
 	docker exec -t <name> bash  		//get into container
-	su postgres							//role root
-	psql								//access to CLI
+	su - postgres						//role root
+	psql postgres						//access to CLI
 	\l	or \l+							//listing databases
 	\c <name>							//connect db
 	\dt									//listing tables
+	\d <name_table>						//see table structure
+	\q									//quit table/database
 
 	CREATE DATABASE <name>; CREATE DATABASE
-	CREATE TABLE <name> (column_name TYPE column constraint, table_constraint table_constraint) INHERITS 
+	CREATE TABLE IF NOT EXISTS person (
+    	ID 	INT PRIMARY KEY,
+    	First_name VARCHAR(50) NOT NULL,
+    	Last_name VARCHAR(50) NOT NULL,
+    	Login VARCHAR(100) UNIQUE,
+    	Email VARCHAR(100) UNIQUE,
+	);
+
+	docker-compose down -v
+	docker-compose up
 
 ### Pgadmin : front-end database
 
@@ -95,6 +106,16 @@ Guide To Dockerize NestJS App :
 https://www.tomray.dev/nestjs-docker-production
 https://dev.to/erezhod/setting-up-a-nestjs-project-with-docker-for-back-end-development-30lg
 
+# FRONT-END USING REACT 
+
+## JAVASCRIPT
+
+Notions :
+	- const, let
+	- sucre syntaxique (++, ??, person?.age, const {name, ...others} = (), const [note1, note2, ...others] = [12, 4, 15, 20])
+	- timers : blocking and asynchronous functions (wait != setTimeOut)
+	- promise : is an object (Promise) that represents the completion or failure of an asynchronous operation
+	  (resolve, reject, catch, then, finally) - (const p = new Promise(resolve, reject))
 
 # SOURCES
 
@@ -104,7 +125,7 @@ NestJS : https://docs.nestjs.com/
 
 React : https://reactjs.org/
 
-## Youtube
+## REACT
 
 Formation React : https://grafikart.fr/formations/react
 
