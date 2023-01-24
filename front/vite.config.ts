@@ -13,3 +13,7 @@ export default defineConfig({
     port: 8000, // you can replace this port with any port
   }
 })
+
+// export default defineConfig({
+//   plugins: [react()],
+// })

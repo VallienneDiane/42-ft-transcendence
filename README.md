@@ -1,4 +1,4 @@
-# Transcendence
+# TRANSCENDENCE
 
 Implement a website where users can play Pong with each other. 
 There are a user interface, a chat and the games will be multiplayer online and in real time.
@@ -9,7 +9,7 @@ Some rules :
 <img src="transcendence.png" width="1000">
 </p>
 
-## Install frameworks
+## INSTALL FRAMEWORKS
 
 ### Node JS
 
@@ -27,6 +27,8 @@ https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-debia
 	npm -v
 
 ### Nest JS
+
+Nest is a framework for building efficient, scalable Node.js server-side applications. It uses progressive JavaScript, is built with and fully supports TypeScript.
 
 #### Installation guide :
 
@@ -52,22 +54,9 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 	npm update --save react 
 	npm view react version
 
-LEARN REACT
-https://roadmap.sh/react/
+## CONTAINERIZATION USING DOCKER
 
-Use Forms React Hook Form : https://reactjs.org/docs/hooks-custom.html
-
-Use REST react-query : https://www.youtube.com/watch?v=novnyCaa7To
-
-Use Styling Materia UI : https://mui.com/
-
-Activate server :
-https://www.digitalocean.com/community/tutorials/react-server-side-rendering-fr
-
-
-## Docker
-
-### POSTGRESSQL
+### PostgreSQL
 
 PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
 
@@ -76,7 +65,6 @@ POSTGRESQL CLI : https://www.geeksforgeeks.org/postgresql-create-database/?ref=l
 
 Build and run container: 
 	docker run --name postgres -e POSTGRES_PASSWORD=mypassword -d postgres
-
 
 Exec container :
 	docker exec -t <name> bash  		//get into container
@@ -89,15 +77,42 @@ Exec container :
 	CREATE DATABASE <name>; CREATE DATABASE
 	CREATE TABLE <name> (column_name TYPE column constraint, table_constraint table_constraint) INHERITS 
 
-### PGADMIN : front-end database
+### Pgadmin : front-end database
 
 pgAdmin is a management tool for PostgreSQL and derivative relational databases.
 
 PGADMIN IMAGE : https://hub.docker.com/r/dpage/pgadmin4
 
-### React
+### React App using Vite
 
+Guide To Dockerize React App :
 https://javascript.plainenglish.io/step-by-step-guide-to-dockerize-react-app-created-using-vite-90772423f7fb
 
+### NestJS
 
+Guide To Dockerize NestJS App :
+
+https://www.tomray.dev/nestjs-docker-production
+https://dev.to/erezhod/setting-up-a-nestjs-project-with-docker-for-back-end-development-30lg
+
+
+# SOURCES
+
+## DOCUMENTATIONS
+
+NestJS : https://docs.nestjs.com/
+
+React : https://reactjs.org/
+
+## Youtube
+
+Formation React : https://grafikart.fr/formations/react
+
+Roadmap React : https://roadmap.sh/react/
+
+Use Forms React Hook Form : https://reactjs.org/docs/hooks-custom.html
+
+Use REST react-query : https://www.youtube.com/watch?v=novnyCaa7To
+
+Use Styling Materia UI : https://mui.com/
 
