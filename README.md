@@ -35,6 +35,7 @@ Nest is a framework for building efficient, scalable Node.js server-side applica
 https://docs.nestjs.com/cli/overview
 
 	npm install -g @nestjs/cli
+	nest new <nameproject>
 	npm install -g npm@9.3.1
 
 ### React
@@ -44,15 +45,25 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 #### Installation guide :
 
 	npm install npm@latest -g
-	npm create vite@latest
-	Choose React and give a name to the project
+	npm create vite@latest(choose React and give a name)
 	cd project-name
-	npm install
-	npm run dev
 	Open port in VM
 
 	npm update --save react 
 	npm view react version
+
+	In vite.config :
+
+	// https://vitejs.dev/config/
+	export default defineConfig({
+	plugins: [react()],
+	server: {
+		port: 8000
+	}
+	})
+
+	In package.json, add this to scripts : 
+	"host": "vite --host"
 
 ## CONTAINERIZATION USING DOCKER
 
