@@ -1,11 +1,7 @@
+############### BACK-END NEST JS #################
 FROM node:latest
-
 WORKDIR /usr/src/app
-
-COPY package*.json ./
-
-RUN npm install -g npm@9.3.1
-
-COPY ./ ./
-
-CMD ["npm", "run", "start"]
+RUN npm install -g npm@9.3.1 && npm install -g @nestjs/cli
+COPY nest.sh .
+EXPOSE 3000
+CMD ["sh", "nest.sh"]

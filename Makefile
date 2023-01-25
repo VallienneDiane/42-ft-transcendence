@@ -8,15 +8,20 @@ run :
 
 re : clean all
 
-clean : down prune
+ps :
+	docker images
+	docker ps
+	docker volume ls
 
 down :
 	docker-compose -f docker-compose.yml down
 
-vclean :
-	docker volume rm -f pgadmin postgres nest react
-	rm -rf ./pgadmin
-	rm -rf ./postgres
+clean : down prune
+
+vclean: down
+	docker volume rm -f nestdb pgadmin back front
+	sudo rm -rf ./postgres
+	sudo rm -rf ./pgadmin
 
 prune :
 	echo y | docker system prune -a
@@ -27,7 +32,11 @@ logs :
 make_dir : make_dir_db make_dir_pgadmin
 
 make_dir_db :
-	mkdir -p postgres
+			mkdir -p postgres
 
 make_dir_pgadmin :
-	mkdir -p pgadmin
+			mkdir -p pgadmin
+
+
+# docker-compose -f docker-compose.yml down; docker rm $(docker ps -qa); 
+# docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q);

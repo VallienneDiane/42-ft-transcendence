@@ -1,17 +1,6 @@
 version: '3.3'
 services:
-  postgres:
-    image: postgres:latest
-    container_name: postgres_container
-    hostname: postgres
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - postgres:/var/lib/postgresql/data
-    networks:
-      - transcendence_network
-
+######################################### PGADMIN - FRONT DATABASE ###########################
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -24,48 +13,69 @@ services:
     networks:
       - transcendence_network
     depends_on:
-      - postgres
+      - db
     restart: always
-
-  nest:
+########################################## POSTGRESQL - DATABASE ##############################
+  db:
+    image: postgres:latest
+    container_name: db_container
+    hostname: postgres
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - db:/var/lib/postgresql/data
+    networks:
+      - transcendence_network
+########################################## BACK-END NEST JS ##################################
+  back:
     image: nestjs_img
     build:
       context: ./back
     container_name: nest_container
-    command: npm run start:dev
     restart: always
     ports:
       - "3000:3000"
     networks:
       - transcendence_network
     volumes:
-      - nest:/usr/src/app
-      - /usr/src/app/node_modules
-
-  react:
+      - back:/usr/src/app
+########################################## FRONT-END REACT VITE  ############################
+  front:
     image: reactjs_img
     build:
       context: ./front
     container_name: react_container
-    command: npm run dev
     restart: always
     ports:
       - "8000:8000"
     networks:
       - transcendence_network
     volumes:
-      - react:/app
-      - /usr/src/app/node_modules
-
-
+      - front:/usr/src/app
+########################################### VOLUMES  #########################################
 volumes:
-  postgres:
+  db:
     driver: local
     name: nest-db
     driver_opts:
       type: none 
       o: bind
       device: ./postgres
+  back:
+    driver: local
+    name: back
+    driver_opts:
+      type: none
+      o: bind
+      device: ./back
+  front:
+    driver: local
+    name: front
+    driver_opts:
+      type: none 
+      o: bind
+      device: ./front
   pgadmin:
     driver: local
     name: pgadmin
@@ -73,21 +83,7 @@ volumes:
       type: none 
       o: bind
       device: ./pgadmin
-  nest:
-    driver: local
-    name: nest
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./back
-  react:
-    driver: local
-    name: react
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./front
-
+########################################## NETWORK  ########################################
 networks:
   transcendence_network:
     driver: bridge
