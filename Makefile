@@ -1,4 +1,4 @@
-all : make_dir build run
+all : build run
 
 build :
 	docker-compose -f docker-compose.yml build
@@ -28,15 +28,6 @@ prune :
 
 logs :
 	docker-compose logs
-
-make_dir : make_dir_db make_dir_pgadmin
-
-make_dir_db :
-			mkdir -p postgres
-
-make_dir_pgadmin :
-			mkdir -p pgadmin
-
 
 # docker-compose -f docker-compose.yml down; docker rm $(docker ps -qa); 
 # docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q);
