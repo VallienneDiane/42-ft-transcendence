@@ -1,20 +1,5 @@
 version: '3.3'
 services:
-######################################### PGADMIN - FRONT DATABASE ###########################
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    env_file:
-      - .env
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin:/var/lib/pgadmin
-    networks:
-      - transcendence_network
-    depends_on:
-      - db
-    restart: always
 ########################################## POSTGRESQL - DATABASE ##############################
   db:
     image: postgres:latest
@@ -61,28 +46,18 @@ volumes:
     driver_opts:
       type: none 
       o: bind
-      device: ./postgres
   back:
     driver: local
     name: back
     driver_opts:
       type: none
       o: bind
-      device: ./back
   front:
     driver: local
     name: front
     driver_opts:
       type: none 
       o: bind
-      device: ./front
-  pgadmin:
-    driver: local
-    name: pgadmin
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./pgadmin
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:
