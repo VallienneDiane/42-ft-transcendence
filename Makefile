@@ -1,6 +1,5 @@
 all : make_dir build run
 
-
 build :
 	docker-compose -f docker-compose.yml build
 
@@ -18,9 +17,8 @@ down :
 	docker-compose -f docker-compose.yml down
 
 clean : down prune
-		docker volume rm -f nest-db pgadmin back front
+		docker volume rm -f nest-db back front
 		sudo rm -rf ./postgres
-		sudo rm -rf ./pgadmin
 
 prune :
 	echo y | docker system prune -a
