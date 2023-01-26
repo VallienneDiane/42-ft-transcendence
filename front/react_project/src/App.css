@@ -1,41 +1,67 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+body {
+  background-color: rgb(33, 149, 144);
+  margin:0;
+  padding:0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.App {
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.navbar {
+  width: 100%;
+  height:4%;
+  display: flex;
+  align-items: flex-end;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.navbar ul {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 20px;
+  background-color: rgb(0, 0, 0);
+  list-style: none;
 }
 
-.card {
-  padding: 2em;
+.navbar a {
+  color: white;
 }
 
-.read-the-docs {
-  color: #888;
+.login {
+  width:100%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.login input {
+  height:30px;
+  padding:10px;
+  margin-bottom: 50px;
+  width: 300px;
+  border-radius: 3px;
+  border: none;
+  cursor: pointer;
+}
+
+.login button {
+  width: 100px;
+  color:rgb(255, 255, 255);
+  background-color: rgb(0, 0, 0);
+}
+
+.login button:hover {
+  background-color: rgb(155, 205, 219);
+  color: black;
 }
