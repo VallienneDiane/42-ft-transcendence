@@ -8,8 +8,6 @@ services:
     restart: always
     env_file:
       - .env
-    volumes:
-      - db:/var/lib/postgresql/data
     networks:
       - transcendence_network
 ########################################## BACK-END NEST JS ##################################
