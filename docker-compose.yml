@@ -24,7 +24,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - back:/usr/src/app
+      - ./back:/usr/src/app
 ########################################## FRONT-END REACT VITE  ############################
   front:
     image: reactjs_img
@@ -37,30 +37,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - front:/usr/src/app
-########################################### VOLUMES  #########################################
-volumes:
-  db:
-    driver: local
-    name: nest-db
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./postgres
-  back:
-    driver: local
-    name: back
-    driver_opts:
-      type: none
-      o: bind
-      device: ./back
-  front:
-    driver: local
-    name: front
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./front
+      - ./front:/usr/src/app
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:
