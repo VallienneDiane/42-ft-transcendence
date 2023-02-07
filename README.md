@@ -9,6 +9,10 @@ Some rules :
 <img src="transcendence.png" width="1000">
 </p>
 
+<p align="center">
+<img src="https://www.bezkoder.com/wp-content/uploads/2020/03/react-node-express-postgresql-crud-example-architecture.png" width="1000">
+</p>
+
 ## INSTALL FRAMEWORKS
 
 ### Node JS
@@ -78,6 +82,7 @@ Build and run container:
 	docker run --name postgres -e POSTGRES_PASSWORD=mypassword -d postgres
 
 Exec container :
+
 	docker exec -t <name> bash  		//get into container
 	su - postgres						//role root
 	psql postgres						//access to CLI
@@ -117,16 +122,56 @@ Guide To Dockerize NestJS App :
 https://www.tomray.dev/nestjs-docker-production
 https://dev.to/erezhod/setting-up-a-nestjs-project-with-docker-for-back-end-development-30lg
 
-# FRONT-END USING REACT 
+# FRONT-END USING REACT && BACK-END USING NEST JS && DATABASE POSTGRESQL
 
-## JAVASCRIPT
+## Get login and create JWT Token
 
-Notions :
-	- const, let
-	- sucre syntaxique (++, ??, person?.age, const {name, ...others} = (), const [note1, note2, ...others] = [12, 4, 15, 20])
-	- timers : blocking and asynchronous functions (wait != setTimeOut)
-	- promise : is an object (Promise) that represents the completion or failure of an asynchronous operation
-	  (resolve, reject, catch, then, finally) - (const p = new Promise(resolve, reject))
+### Login
+
+In React : create a form that allows the user to enter their login and password. When the form is submitted, dispatch an action that sends a request to the back-end to create a new user account.
+
+In Nest.js : create a controller that listens for the request from the front-end and creates a new user in the database. To interact with the database, use a database library such as TypeORM.
+
+In the controller, you can use the TypeORM Repository to insert a new user into the database. You can retrieve the login and password from the request body and use them to create a new instance of your User model. Then you can save the user to the database using the Repository.save() method.
+
+After the user is successfully saved, you can return a response to the front-end indicating that the account was created.
+
+### Nest JS documentation
+
+- MODULE
+
+Module is a class annotated with a Module decorator. Modules allows to organize the application structure/components.
+
+The starting point of the Nest to build the app graph is the Application module.
+Each module has his properties : providers, controllers, imports, exports.
+
+	chat module
+	authentification module
+	game module
+	etc
+
+Each module has controller and service.
+
+- CONTROLLER
+
+Controller handle incoming requests and returning responses to the client.
+In the controller you specified the post request and call the functions in the file service.
+To visualize the post request you can use Postman. It is an application that allows us to test APIs utilizing a graphical user interface.
+
+- PROVIDERS
+
+A provider can be injected as a dependency. This means objects can create relationships btw them.
+A Service is a provider which use a decorator @Injectable(), it can have class and methods.
+
+https://medium.com/att-israel/authentication-authorization-using-react-nestjs-jwt-token-55f52070a3f2
+
+
+## OAuth
+
+https://www.youtube.com/watch?v=Iv77m1mxAWE
+
+
+
 
 # SOURCES
 

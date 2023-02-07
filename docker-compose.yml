@@ -42,27 +42,23 @@ services:
 volumes:
   db:
     driver: local
-    name: nest-db
     driver_opts:
       type: none 
       o: bind
-      device: ./postgres
+      device: /home/vallienne/42_Projects/transcendence/postgres
   back:
     driver: local
-    name: back
     driver_opts:
       type: none
       o: bind
-      device: ./back
+      device: /home/vallienne/42_Projects/transcendence/back
   front:
     driver: local
-    name: front
     driver_opts:
       type: none 
       o: bind
-      device: ./front
+      device: /home/vallienne/42_Projects/transcendence/front
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:
     driver: bridge
-    name: transcendence_network

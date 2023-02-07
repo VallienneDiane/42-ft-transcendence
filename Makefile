@@ -1,10 +1,10 @@
-all : make_dir build run
-
-build :
-	docker-compose -f docker-compose.yml build
+all : run
 
 run :
-	docker-compose -f docker-compose.yml up -d
+	sudo docker-compose -f docker-compose.yml up --build
+
+down:
+	sudo docker-compose -f docker-compose.yml down
 
 re : clean all
 
@@ -16,8 +16,8 @@ ps :
 down :
 	docker-compose -f docker-compose.yml down
 
-clean : down prune
-		docker volume rm -f nest-db back front
+clean : prune
+		docker volume rm -f db back front
 		sudo rm -rf ./postgres
 
 prune :
