@@ -18,7 +18,7 @@ Some rules :
 ## NODEJS
 
 <p align="center">
-<img src="https://imgs.search.brave.com/siYYlprg8CKMxqTSw4jv8Ma2VnLTdEqOQZqcsh_qQM0/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9kb3du/bG9hZC5sb2dvLndp/bmUvbG9nby9Ob2Rl/LmpzL05vZGUuanMt/TG9nby53aW5lLnBu/Zw" width="400">
+<img src="https://imgs.search.brave.com/siYYlprg8CKMxqTSw4jv8Ma2VnLTdEqOQZqcsh_qQM0/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9kb3du/bG9hZC5sb2dvLndp/bmUvbG9nby9Ob2Rl/LmpzL05vZGUuanMt/TG9nby53aW5lLnBu/Zw" width="200">
 </p>
 
 Node.js is not a programming language. 
@@ -37,7 +37,7 @@ https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-debia
 ## NESTJS
 
 <p align="center">
-<img src="https://imgs.search.brave.com/whas0hjkR981TA2evmgspzOtUKKjcSCOnJdRNgizY2w/rs:fit:960:467:1/g:ce/aHR0cHM6Ly92ZXJp/ZmVyZGlhbnN5YWgu/Y29tL3N0YXRpYy9k/NGM4NTY2OTA4MWQ2/MWFkMjFlY2JmMTY1/ZmU3NjgxYi83ZDc2/OS9uZXN0anNfbG9n/by5wbmc" width="400">
+<img src="https://imgs.search.brave.com/whas0hjkR981TA2evmgspzOtUKKjcSCOnJdRNgizY2w/rs:fit:960:467:1/g:ce/aHR0cHM6Ly92ZXJp/ZmVyZGlhbnN5YWgu/Y29tL3N0YXRpYy9k/NGM4NTY2OTA4MWQ2/MWFkMjFlY2JmMTY1/ZmU3NjgxYi83ZDc2/OS9uZXN0anNfbG9n/by5wbmc" width="200">
 </p>
 
 Nest is a framework for building efficient, scalable Node.js server-side applications. It uses progressive JavaScript, is built with and fully supports TypeScript.
@@ -53,7 +53,7 @@ https://docs.nestjs.com/cli/overview
 ## REACT
 
 <p align="center">
-<img src="https://imgs.search.brave.com/mdCc2VwqhSTyRi4goBMdoeNypU6y6rU21kiHWtd-CE8/rs:fit:840:817:1/g:ce/aHR0cHM6Ly93d3cu/cG5nZmluZC5jb20v/cG5ncy9tLzYzOC02/Mzg2NTA3XzEwLXll/YXJzLW9mLWV4cGVy/aWVuY2UtcmVhY3Qt/bmF0aXZlLWxvZ28t/c3ZnLnBuZw" width="400">
+<img src="https://imgs.search.brave.com/5U-TlX9w0gEFKtb06kHzatooCcgVayhK_9hrlZfSPuI/rs:fit:560:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5I/Yl92REJXcTBoX1ZZ/QVpoenRTZlFnSGFH/UiZwaWQ9QXBp" width="200">
 </p>
 
 React is a front-end JavaScript library developed by Facebook. Its aim is to allow developers to easily create fast user interfaces for websites and applications alike. The main concept of React js is virtual DOM. React is capable of making API calls (sending the request to the backend), which deal with the data. React cannot process the database or the data source itself.
@@ -84,15 +84,14 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 ## CONTAINERIZATION USING DOCKER
 
 <p align="center">
-<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="400">
+<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="200">
 </p>
 
 ### PostgreSQL
 
 <p align="center">
 <img src="<p align="center">
-<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="400">
-</p>" width="400">
+<img src="https://imgs.search.brave.com/CEnJk-0ij5lbnXKGDGRjntqr18jseue4AfxPIddn8JQ/rs:fit:840:389:1/g:ce/aHR0cHM6Ly93d3cu/Y2xpcGFydG1heC5j/b20vcG5nL21pZGRs/ZS8yNDItMjQyMzcy/MV9sb2dvLXBvc3Rn/cmVzcWwucG5n" width="200">
 </p>
 
 PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
