@@ -1,9 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    console.log('qualities :\n');
+    fetch('localhost:3000/johnboule/qualities')
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        setPosts(data);
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  }, []);
 
   return (
     <div className="App">
@@ -16,6 +30,18 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+      <div>
+        <form action="localhost:3000/johnboule" method="POST">  
+          <label>content of quality
+            <input name="content" type="string" />
+          </label>
+          <br/>
+          <label>grade level
+            <input name="grade" type="number" />
+          </label>
+          <button>Send quality</button>
+        </form>
+      </div>
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}

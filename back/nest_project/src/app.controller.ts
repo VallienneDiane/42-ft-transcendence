@@ -1,5 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post, Body } from '@nestjs/common';
 import { AppService } from './app.service';
+import { JohnBouleService } from './app.service';
+import { JohnBouleQualities } from './interfaces/JohnBouleQualities.interface';
+import { CreateQualityDto } from './dto/create-quality.dto';
 
 @Controller()
 export class AppController {
@@ -13,6 +16,8 @@ export class AppController {
 
 @Controller('johnboule')
 export class BoolJohnController {
+  constructor(private johnBouleService: JohnBouleService) {}
+
   @Get('look')
   showBoule(): string {
     return 'OO';
@@ -22,7 +27,20 @@ export class BoolJohnController {
     return 'Always!';
   }
   @Get()
-  mainPageOfJohnBoule(): string {
-    return 'Hello ! Welcome to the "Boule a John" main page. You can : /look to see it or /isAvailable to ask if it is available';
+  mainPageOfJohnBoule(): any {
+    return (
+      {
+        welcomeMsg: 'Welcome to the main boule a John page',
+        possibleAccesses: ['/look', '/isAvailable'],
+      }
+    );
+  }
+  @Get('qualities')
+  async listQualities(): Promise<JohnBouleQualities[]> {
+    return this.johnBouleService.show();
+  }
+  @Post()
+  async create(@Body() createQualityDto: CreateQualityDto) {
+    this.johnBouleService.create(createQualityDto);
   }
 }
