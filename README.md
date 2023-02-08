@@ -15,7 +15,11 @@ Some rules :
 
 ## INSTALL FRAMEWORKS
 
-### Node JS
+## NODEJS
+
+<p align="center">
+<img src="https://imgs.search.brave.com/siYYlprg8CKMxqTSw4jv8Ma2VnLTdEqOQZqcsh_qQM0/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9kb3du/bG9hZC5sb2dvLndp/bmUvbG9nby9Ob2Rl/LmpzL05vZGUuanMt/TG9nby53aW5lLnBu/Zw" width="400">
+</p>
 
 Node.js is not a programming language. 
 Node.js is an open-source runtime environment for the JavaScript language that reshapes JavaScript’s characteristics and upgrades its functionality.
@@ -30,7 +34,11 @@ https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-debia
 	node -v
 	npm -v
 
-### Nest JS
+## NESTJS
+
+<p align="center">
+<img src="https://imgs.search.brave.com/whas0hjkR981TA2evmgspzOtUKKjcSCOnJdRNgizY2w/rs:fit:960:467:1/g:ce/aHR0cHM6Ly92ZXJp/ZmVyZGlhbnN5YWgu/Y29tL3N0YXRpYy9k/NGM4NTY2OTA4MWQ2/MWFkMjFlY2JmMTY1/ZmU3NjgxYi83ZDc2/OS9uZXN0anNfbG9n/by5wbmc" width="400">
+</p>
 
 Nest is a framework for building efficient, scalable Node.js server-side applications. It uses progressive JavaScript, is built with and fully supports TypeScript.
 
@@ -42,7 +50,11 @@ https://docs.nestjs.com/cli/overview
 	nest new <nameproject>
 	npm install -g npm@9.3.1
 
-### React
+## REACT
+
+<p align="center">
+<img src="https://imgs.search.brave.com/mdCc2VwqhSTyRi4goBMdoeNypU6y6rU21kiHWtd-CE8/rs:fit:840:817:1/g:ce/aHR0cHM6Ly93d3cu/cG5nZmluZC5jb20v/cG5ncy9tLzYzOC02/Mzg2NTA3XzEwLXll/YXJzLW9mLWV4cGVy/aWVuY2UtcmVhY3Qt/bmF0aXZlLWxvZ28t/c3ZnLnBuZw" width="400">
+</p>
 
 React is a front-end JavaScript library developed by Facebook. Its aim is to allow developers to easily create fast user interfaces for websites and applications alike. The main concept of React js is virtual DOM. React is capable of making API calls (sending the request to the backend), which deal with the data. React cannot process the database or the data source itself.
 
@@ -71,7 +83,17 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 
 ## CONTAINERIZATION USING DOCKER
 
+<p align="center">
+<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="400">
+</p>
+
 ### PostgreSQL
+
+<p align="center">
+<img src="<p align="center">
+<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="400">
+</p>" width="400">
+</p>
 
 PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
 
@@ -113,6 +135,7 @@ PGADMIN IMAGE : https://hub.docker.com/r/dpage/pgadmin4
 ### React App using Vite
 
 Guide To Dockerize React App :
+
 https://javascript.plainenglish.io/step-by-step-guide-to-dockerize-react-app-created-using-vite-90772423f7fb
 
 ### NestJS
@@ -122,21 +145,6 @@ Guide To Dockerize NestJS App :
 https://www.tomray.dev/nestjs-docker-production
 https://dev.to/erezhod/setting-up-a-nestjs-project-with-docker-for-back-end-development-30lg
 
-# FRONT-END USING REACT && BACK-END USING NEST JS && DATABASE POSTGRESQL
-
-## Get login and create JWT Token
-
-### Login
-
-In React : create a form that allows the user to enter their login and password. When the form is submitted, dispatch an action that sends a request to the back-end to create a new user account.
-
-In Nest.js : create a controller that listens for the request from the front-end and creates a new user in the database. To interact with the database, use a database library such as TypeORM.
-
-In the controller, you can use the TypeORM Repository to insert a new user into the database. You can retrieve the login and password from the request body and use them to create a new instance of your User model. Then you can save the user to the database using the Repository.save() method.
-
-After the user is successfully saved, you can return a response to the front-end indicating that the account was created.
-
-### Nest JS documentation
 
 - MODULE
 
@@ -163,14 +171,27 @@ To visualize the post request you can use Postman. It is an application that all
 A provider can be injected as a dependency. This means objects can create relationships btw them.
 A Service is a provider which use a decorator @Injectable(), it can have class and methods.
 
+
+## IMPLEMENT THE FEATURES
+
+## 1. AUTHENTIFICATION (get login and create JWT Token)
+
+### Login
+
+In React : create a form that allows the user to enter their login and password. When the form is submitted, dispatch an action that sends a request to the back-end to create a new user account.
+
+In Nest.js : create a controller that listens for the request from the front-end and creates a new user in the database. To interact with the database, use a database library such as TypeORM.
+
+In the controller, you can use the TypeORM Repository to insert a new user into the database. You can retrieve the login and password from the request body and use them to create a new instance of your User model. Then you can save the user to the database using the Repository.save() method.
+
+After the user is successfully saved, you can return a response to the front-end indicating that the account was created.
+
 https://medium.com/att-israel/authentication-authorization-using-react-nestjs-jwt-token-55f52070a3f2
 
 
 ## OAuth
 
 https://www.youtube.com/watch?v=Iv77m1mxAWE
-
-
 
 
 # SOURCES
