@@ -10,7 +10,7 @@ Some rules :
 </p>
 
 <p align="center">
-<img src="https://www.bezkoder.com/wp-content/uploads/2020/03/react-node-express-postgresql-crud-example-architecture.png" width="1000">
+<img src="https://www.bezkoder.com/wp-content/uploads/2020/03/react-node-express-postgresql-crud-example-architecture.png" width="500">
 </p>
 
 ## INSTALL FRAMEWORKS
@@ -53,7 +53,7 @@ https://docs.nestjs.com/cli/overview
 ## REACT
 
 <p align="center">
-<img src="https://imgs.search.brave.com/5U-TlX9w0gEFKtb06kHzatooCcgVayhK_9hrlZfSPuI/rs:fit:560:225:1/g:ce/aHR0cHM6Ly90c2U0/Lm1tLmJpbmcubmV0/L3RoP2lkPU9JUC5I/Yl92REJXcTBoX1ZZ/QVpoenRTZlFnSGFH/UiZwaWQ9QXBp" width="200">
+<img src="https://imgs.search.brave.com/6PDkpxLSa1Xfaq__JHSG9OqsAKF8VSMAXa7oaRvzDOI/rs:fit:840:795:1/g:ce/aHR0cHM6Ly93d3cu/cG5nZmluZC5jb20v/cG5ncy9tLzY4NS02/ODU0OTcwX3JlYWN0/LWxvZ28tcG5nLXBu/Zy1kb3dubG9hZC1s/b2dvLXBuZy1yZWFj/dGpzLnBuZw" width="200">
 </p>
 
 React is a front-end JavaScript library developed by Facebook. Its aim is to allow developers to easily create fast user interfaces for websites and applications alike. The main concept of React js is virtual DOM. React is capable of making API calls (sending the request to the backend), which deal with the data. React cannot process the database or the data source itself.
@@ -90,8 +90,7 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 ### PostgreSQL
 
 <p align="center">
-<img src="<p align="center">
-<img src="https://imgs.search.brave.com/CEnJk-0ij5lbnXKGDGRjntqr18jseue4AfxPIddn8JQ/rs:fit:840:389:1/g:ce/aHR0cHM6Ly93d3cu/Y2xpcGFydG1heC5j/b20vcG5nL21pZGRs/ZS8yNDItMjQyMzcy/MV9sb2dvLXBvc3Rn/cmVzcWwucG5n" width="200">
+<img src="https://imgs.search.brave.com/hF7n4_uyADu8Zflp9AugEHEJbLt7oCfYYGAlwu-yHhE/rs:fit:880:867:1/g:ce/aHR0cHM6Ly93d3cu/cGluY2xpcGFydC5j/b20vcGljZGlyL21p/ZGRsZS81MTktNTE5/OTIyNF9wb3N0Z3Jl/c3FsLWxvZ28tcG5n/LXRyYW5zcGFyZW50/LWNsaXBhcnQucG5n" width="200">
 </p>
 
 PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
