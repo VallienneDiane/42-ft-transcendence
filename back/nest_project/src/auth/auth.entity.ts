@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
-export class Auth {
+export class AuthEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -11,6 +11,6 @@ export class Auth {
   @Column()
   lastName: string;
 
-  @Column({ default: true })
-  isActive: boolean;
+  // @Column({ default: true })
+  // isActive: boolean;
 }
