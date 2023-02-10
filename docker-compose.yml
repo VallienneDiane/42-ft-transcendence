@@ -41,18 +41,18 @@ services:
     volumes:
       - front:/usr/src/app
 ########################################## PGADMIN  ########################################
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   container_name: pgadmin_container
-  #   env_file:
-  #     - .env
-  #   ports:
-  #     - "5050:80"
-  #   networks:
-  #     - transcendence_network
-  #   depends_on:
-  #     - db
-  #   restart: always
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+    networks:
+      - transcendence_network
+    depends_on:
+      - db
+    restart: always
 ########################################### VOLUMES  #########################################
 volumes:
   db:
@@ -73,12 +73,12 @@ volumes:
       type: none 
       o: bind
       device: /home/vallienne/42_Projects/transcendence/front
-  # pgadmin:
-  #   driver: local
-  #   driver_opts:
-  #     type: none 
-  #     o: bind
-  #     device: /home/vallienne/42_Projects/transcendence/pgadmin
+  pgadmin:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/vallienne/42_Projects/transcendence/pgadmin
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:

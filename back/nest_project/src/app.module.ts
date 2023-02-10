@@ -17,6 +17,7 @@ import { AuthEntity } from './auth/auth.entity';
       password: 'inception',
       database: 'users',
       entities: [AuthEntity],
+      autoLoadEntities: true,
       synchronize: true,
     })
   ],

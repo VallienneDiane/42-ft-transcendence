@@ -7,4 +7,6 @@ export class AuthDto {
     readonly firstname: string;
     @IsNotEmpty()
     readonly lastname: string;
+    @IsNotEmpty()
+    readonly test: string;
 }
