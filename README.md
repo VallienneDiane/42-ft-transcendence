@@ -53,7 +53,7 @@ https://docs.nestjs.com/cli/overview
 ## REACT
 
 <p align="center">
-<img src="https://imgs.search.brave.com/6PDkpxLSa1Xfaq__JHSG9OqsAKF8VSMAXa7oaRvzDOI/rs:fit:840:795:1/g:ce/aHR0cHM6Ly93d3cu/cG5nZmluZC5jb20v/cG5ncy9tLzY4NS02/ODU0OTcwX3JlYWN0/LWxvZ28tcG5nLXBu/Zy1kb3dubG9hZC1s/b2dvLXBuZy1yZWFj/dGpzLnBuZw" width="200">
+<img src="https://imgs.search.brave.com/mdCc2VwqhSTyRi4goBMdoeNypU6y6rU21kiHWtd-CE8/rs:fit:840:817:1/g:ce/aHR0cHM6Ly93d3cu/cG5nZmluZC5jb20v/cG5ncy9tLzYzOC02/Mzg2NTA3XzEwLXll/YXJzLW9mLWV4cGVy/aWVuY2UtcmVhY3Qt/bmF0aXZlLWxvZ28t/c3ZnLnBuZw" width="200">
 </p>
 
 React is a front-end JavaScript library developed by Facebook. Its aim is to allow developers to easily create fast user interfaces for websites and applications alike. The main concept of React js is virtual DOM. React is capable of making API calls (sending the request to the backend), which deal with the data. React cannot process the database or the data source itself.
@@ -84,13 +84,13 @@ React is a front-end JavaScript library developed by Facebook. Its aim is to all
 ## CONTAINERIZATION USING DOCKER
 
 <p align="center">
-<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="200">
+<img src="https://imgs.search.brave.com/fJ0XoOAkhu9ASBJ1vahXdYCCtCMUKDYr5aLE2q2Zhvs/rs:fit:1200:1200:1/g:ce/aHR0cHM6Ly9sb2dv/cy13b3JsZC5uZXQv/d3AtY29udGVudC91/cGxvYWRzLzIwMjEv/MDIvRG9ja2VyLUxv/Z28tMjAxMy0yMDE1/LnBuZw" width="300">
 </p>
 
 ### PostgreSQL
 
 <p align="center">
-<img src="https://imgs.search.brave.com/hF7n4_uyADu8Zflp9AugEHEJbLt7oCfYYGAlwu-yHhE/rs:fit:880:867:1/g:ce/aHR0cHM6Ly93d3cu/cGluY2xpcGFydC5j/b20vcGljZGlyL21p/ZGRsZS81MTktNTE5/OTIyNF9wb3N0Z3Jl/c3FsLWxvZ28tcG5n/LXRyYW5zcGFyZW50/LWNsaXBhcnQucG5n" width="200">
+<img src="https://imgs.search.brave.com/3bUl4yws9eOJiUKxdkx8MhKwuVSJjUbeB8h1CFBBxic/rs:fit:900:555:1/g:ce/aHR0cHM6Ly9lNy5w/bmdlZ2cuY29tL3Bu/Z2ltYWdlcy8zNTgv/ODQ5L3BuZy1jbGlw/YXJ0LXBvc3RncmVz/cWwtZGF0YWJhc2Ut/bG9nby1kYXRhYmFz/ZS1zeW1ib2wtYmx1/ZS10ZXh0LnBuZw" width="200">
 </p>
 
 PostgreSQL is an advanced, enterprise class open source relational database that supports both SQL (relational) and JSON (non-relational) querying.
