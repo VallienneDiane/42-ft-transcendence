@@ -1,7 +1,7 @@
 import reactLogo from './assets/react.svg'
 import './App.css'
 
-function App(props) {
+function App2(props) {
   return (
     <div className="todoapp stack-large">
       <h1>TodoMatic</h1>
