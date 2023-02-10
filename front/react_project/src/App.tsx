@@ -1,6 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, } from 'react'
 import reactLogo from './assets/react.svg'
 import './App.css'
+
+function SendQuality(content: string, grade: number) {
+  var formData = new FormData();
+  formData.append('content', JSON.stringify(content));
+  formData.append('grade', JSON.stringify(grade));
+  fetch('localhost:3000/johnboule', {
+    method: 'POST',
+    mode: 'cors',
+    body: formData
+})
+}
+
+function tick() {
+  const element = (
+    <div>
+      <h1>Bonjour, monde !</h1>
+      <h2>Il est {new Date().toLocaleTimeString()}.</h2>
+    </div>
+  );
+  HTMLElement.render(
+    element,
+    document.getElementById('HTMLElement')
+  );
+}
+
+setInterval(tick, 1000);
 
 function App() {
   const [count, setCount] = useState(0);
@@ -31,7 +57,7 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div>
-        <form action="localhost:3000/johnboule" method="POST">  
+        <form action="localhost:3000/johnboule" method="POST">
           <label>content of quality
             <input name="content" type="string" />
           </label>
@@ -39,7 +65,7 @@ function App() {
           <label>grade level
             <input name="grade" type="number" />
           </label>
-          <button>Send quality</button>
+          <button onClick={() => SendQuality(content, grade)}>Send quality</button>
         </form>
       </div>
       <div className="card">
@@ -49,6 +75,9 @@ function App() {
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
+      </div>
+      <div>
+        <Clock />
       </div>
       <p className="read-the-docs">
         Click on the Vite and React logos to learn more
