@@ -6,11 +6,11 @@ export class AuthEntity {
   id: number;
 
   @Column()
-  firstName: string;
+  firstname: string;
 
   @Column()
-  lastName: string;
+  lastname: string;
 
-  // @Column({ default: true })
-  // isActive: boolean;
+  @Column()
+  test: string;
 }

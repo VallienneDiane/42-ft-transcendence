@@ -1,40 +1,33 @@
-import { Body, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { AuthDto } from "./auth.dto";
 import { Repository } from "typeorm";
 import { AuthEntity } from "./auth.entity";
-import { AuthInterface } from "./auth.interface";
 
 @Injectable({})
 export class AuthService {
-    public users: AuthDto[] = [];
+    constructor(
+        @InjectRepository(AuthEntity)
+        private usersRepository: Repository<AuthEntity>,
+      ) {}
 
-    createUser(infosUser: AuthDto) {
-        this.users.push(infosUser);
-        return infosUser;
+    async create(newUser: AuthEntity): Promise<AuthEntity> { 
+        return await this.usersRepository.save(newUser);
+    }
+    
+    async findAll(): Promise<AuthEntity[]> {
+        return await this.usersRepository.find();
+    }
+        
+    async findOne(id: number): Promise<AuthEntity> {
+        return await this.usersRepository.findOneBy({id});
+    }
+            
+    async update(id: number, auth: AuthEntity): Promise<void> {
+        await this.usersRepository.update(id, auth);
     }
 
-    findAll(): AuthDto[] {
-        return this.users;
+    async delete(id: number): Promise<void> {
+        await this.usersRepository.delete(id);
     }
-    // constructor(
-    //     @InjectRepository(AuthEntity)
-    //     private usersRepository: Repository<AuthEntity>,
-    //   ) {}
-
-    //   createUser(infosUser: AuthInterface) { 
-    //     return this.usersRepository.create(infosUser);
-    //   }
-    
-    //   findAll(@Body() infosUser: AuthDto): Promise<AuthEntity[]> {
-    //     return this.usersRepository.find();
-    //   }
-    
-    //   findOne(id: number): Promise<AuthEntity> {
-    //     return this.usersRepository.findOneBy({ id });
-    //   }
-    
-    //   async remove(id: string): Promise<void> {
-    //     await this.usersRepository.delete(id);
-    // }
 }
