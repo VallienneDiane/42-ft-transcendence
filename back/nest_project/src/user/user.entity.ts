@@ -1,12 +1,13 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
-import { Unique } from 'typeorm';
 
 @Entity()
 export class UserEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column(
+    {unique: true}
+  )
   login: string;
   
   @Column()
