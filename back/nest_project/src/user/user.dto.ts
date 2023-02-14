@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength } from "class-validator";
 
 export class UserDto {
-    @IsUUID()
     readonly id: number;
 
     @IsNotEmpty()
@@ -14,6 +13,6 @@ export class UserDto {
 
     @IsNotEmpty()
     @IsString()
-    @MinLength(8)
+    // @MinLength(8)
     password: string;
 }
