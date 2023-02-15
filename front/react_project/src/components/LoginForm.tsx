@@ -1,8 +1,10 @@
 import React from "react";
+import NavBar from "./Navbar";
 
 const LoginForm: React.FC = () => {
     return (
         <div >
+            <NavBar/>
             <h1>Login page</h1>
             <form className="login">
             <input
@@ -11,6 +13,7 @@ const LoginForm: React.FC = () => {
             name="login"
             />
             <button>Submit</button>
+            <a href="/signin">Not registered ? Sign In !</a>
         </form>
         </div>
     )
