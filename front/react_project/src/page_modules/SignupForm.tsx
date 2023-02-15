@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import Axios from 'axios';
 
 interface FormData {
   login: string;
@@ -16,14 +16,14 @@ const SignupForm: React.FC = () => {
     event.preventDefault();
 
     try {
-      await axios.post<{ message: string }, FormData>('/api/signup', formData);
+      await Axios.post<{ message: string }, FormData>('/api/signup', formData);
       alert('Account created successfully!');
     } catch (error) {
       console.error(error);
       alert('Failed to create account');
     }
   };
-  "@nestjs/common
+  // "@nestjs/common
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -32,11 +32,14 @@ const SignupForm: React.FC = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input type="text" name="login" value={formData.login} onChange={handleInputChange} />
-      <input type="password" name="password" value={formData.password} onChange={handleInputChange} />
-      <button type="submit">Sign up</button>
-    </form>
+    <div>
+      <h1>SignUp Page</h1>
+      <form className="signup" onSubmit={handleSubmit}>
+        <input type="text" name="login" value={formData.login} onChange={handleInputChange} placeholder="Login"/>
+        <input type="password" name="password" value={formData.password} onChange={handleInputChange} placeholder="Password"/>
+        <button type="submit">Sign up</button>
+      </form>
+    </div>
   );
 };
 
