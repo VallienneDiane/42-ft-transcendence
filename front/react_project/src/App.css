@@ -39,3 +39,12 @@
 .read-the-docs {
   color: #888;
 }
+
+.FancyBorder {
+  padding: 10px 10px;
+  border: 10px solid;
+}
+
+.FancyBorder-blue {
+  border-color: blue;
+}

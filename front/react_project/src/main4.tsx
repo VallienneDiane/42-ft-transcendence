@@ -1,4 +1,4 @@
-import React, { createElement, JSXElementConstructor } from 'react'
+import React, { createElement, DOMAttributes, JSXElementConstructor } from 'react'
 import { useState, useEffect, } from 'react'
 import ReactDOM from 'react-dom'
 import { createRoot } from 'react-dom/client'
@@ -9,6 +9,10 @@ const cond = createRoot(container!);
 interface User {
   isLoggedIn: boolean;
   name?: string;
+};
+
+interface IbuttonEvent {
+  event: React.DOMAttributes<HTMLButtonElement>
 };
 
 function UserGreeting(): JSX.Element | null {
