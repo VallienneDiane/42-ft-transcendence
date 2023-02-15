@@ -1,30 +1,19 @@
 import { useState } from 'react'
 import './App.css'
+import SignupForm from './page_modules/SignupForm'
+import NavBar from './page_modules/NavBar'
+import LoginForm from './page_modules/LoginForm'
 
 function App() {
   const [count, setCount] = useState(0)
   
   return (
 
+    
     <div className="App">
-
-      <div className="navbar">
-        <ul>
-          <li><a href="#">Profil</a></li>
-          <li><a href="#">Game</a></li>
-          <li><a href="#">Chat</a></li>
-          <li><a href="#">Quit</a></li>
-        </ul>
-      </div>
-
-      <div className="login">
-        <input
-          type="text"
-          placeholder="Enter your login ..."
-          name="login"
-        />
-        <button>Submit</button>
-      </div>
+      {/* <NavBar/> */}
+      <SignupForm/>
+      {/* <LoginForm/> */}
 
     </div>
   )

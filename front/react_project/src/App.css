@@ -37,7 +37,8 @@ body {
   color: white;
 }
 
-.login {
+.login, .signup {
+  background-color: red;
   width:100%;
   height: 90%;
   display: flex;
@@ -46,7 +47,7 @@ body {
   justify-content: center;
 }
 
-.login input {
+.login input, .signup input {
   height:30px;
   padding:10px;
   margin-bottom: 50px;

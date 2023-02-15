@@ -1,33 +1,63 @@
-all : run
+NETWORKS := $(shell docker network ls --quiet)
+VOLUMES := $(shell docker volume ls --quiet)
+IMAGES := $(shell docker images --quiet)
+CONTAINERS := $(shell docker ps --quiet)
+OWNER := $(shell echo $(USER))
+
+all : make_dir build run
+
+build :
+	docker-compose -f docker-compose.yml build
 
 run :
-	sudo docker-compose -f docker-compose.yml up --build
+	docker-compose -f docker-compose.yml up #-d
 
-down:
-	sudo docker-compose -f docker-compose.yml down
+down :
+	docker-compose -f docker-compose.yml down
 
-re : clean all
+stop :
+	docker-compose -f docker-compose.yml stop
 
-ps :
-	docker images
-	docker ps
-	docker volume ls
+start :
+	docker-compose -f docker-compose.yml start
 
-clean : prune
-		docker-compose -f docker-compose.yml down
-		docker volume rm -f db back front pgadmin
-		sudo rm -rf ./postgres
-		sudo rm -rf ./pgadmin
+re : fclean all
+
+clean : down
+ifneq ($(strip $(CONTAINERS)),)
+	docker rm -f $(CONTAINERS)
+endif
+ifneq ($(strip $(IMAGES)),)
+	docker rmi -f $(IMAGES)
+endif
+# ifneq ($(strip $(NETWORKS)),)
+# 	docker network rm $(NETWORKS)
+# endif
+
+vclean :
+ifneq ($(strip $(VOLUMES)),)
+	docker volume rm $(VOLUMES)
+endif
+	sudo rm -rf ./back/postgres
+
+fclean : clean vclean prune
 
 prune :
-	echo y | docker system prune -a
+	docker system prune -a
 
 logs :
 	docker-compose logs
 
-make_dir :
-			mkdir -p postgres
-# mkdir -p pgadmin
+make_dir : make_dir_db
 
-# docker-compose -f docker-compose.yml down; docker rm $(docker ps -qa); 
-# docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q);
+make_dir_db :
+	mkdir -p ./back/postgres
+
+ls :
+	@docker ps -a
+	@echo ""
+	@docker images -a
+	@echo ""
+	@docker volume ls
+	@echo ""
+	@docker network ls
