@@ -1,0 +1,16 @@
+#root, #square {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.photo {
+  height: 20em;
+  padding: 1em;
+  will-change: filter;
+}
+
+.card {
+  padding: 2em;
+}

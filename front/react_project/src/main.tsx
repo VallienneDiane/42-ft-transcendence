@@ -1,10 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import App from './App'
-import './index.css'
+import { createRoot } from 'react-dom/client'
+import App from './components/App'
+import Test from './components/test'
+import './styles/index.css'
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)
+const DomRoot = document.getElementById('root');
+const Root = createRoot(DomRoot!); // ! pour forcer la possibilite que la variable soit null
+
+Root.render(<App firstName='Clem' lastName='Cartet' />);
+
+const DomSquare = document.getElementById('square');
+const Squaree = createRoot(DomSquare!); // ! pour forcer la possibilite que la variable soit null
+
+Squaree.render(
+<div>
+<Test />
+</div>);
