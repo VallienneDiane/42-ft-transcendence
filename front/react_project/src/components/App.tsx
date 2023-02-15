@@ -2,6 +2,9 @@ import '../styles/App.css'
 import photoAzu from '../assets/DSC09400-10.jpg'
 import React from 'react'
 
+const DomRoot = document.getElementById('root');
+const Root = createRoot(DomRoot!); // ! pour forcer la possibilite que la variable soit null
+
 
 type MyProps = {
   message: string;
@@ -37,16 +40,16 @@ function FormatName(user: user): string {
 function Avatar({text}: {text: string}): JSX.Element {
   return (
     <img src={text} className="photo" alt="Photo d'Azu" />
-  );
-}
-
-function ActionLink() {
-  function handleClick(e) {
+    );
+  }
+  
+  function ActionLink() {
+    function handleClick(e) {
       e.preventDefault();
       console.log('Le lien a été cliqué.');
-  }
-  return (
-    <a href="#" onClick={handleClick}> Clique ici </a>
+    }
+    return (
+      <a href="#" onClick={handleClick}> Clique ici </a>
   );
 }
 
@@ -63,4 +66,4 @@ function App(user: user) {
   );
 }
 
-export default App
+Root.render(<App firstName='Clem' lastName='Cartet' />);

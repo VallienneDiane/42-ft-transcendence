@@ -4,11 +4,13 @@ import { JohnBouleService } from './app.service';
 import { JohnBouleQualities } from './interfaces/JohnBouleQualities.interface';
 import { CreateQualityDto } from './dto/create-quality.dto';
 
+//Controller purpose is to receive requests
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
+  
   getHello(): string {
     return this.appService.getHello();
   }
