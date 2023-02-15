@@ -24,7 +24,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - back:/usr/src/app
+      - ./back:/usr/src/app
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################
@@ -39,7 +39,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - front:/usr/src/app
+      - ./front:/usr/src/app
 ########################################## PGADMIN  ########################################
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -54,25 +54,25 @@ services:
   #     - db
   #   restart: always
 ########################################### VOLUMES  #########################################
-volumes:
-  db:
-    driver: local
-    driver_opts:
-      type: none 
-      o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
-  back:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
-  front:
-    driver: local
-    driver_opts:
-      type: none 
-      o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
+# volumes:
+#   db:
+#     driver: local
+#     driver_opts:
+#       type: none 
+#       o: bind
+#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
+#   back:
+#     driver: local
+#     driver_opts:
+#       type: none
+#       o: bind
+#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
+#   front:
+#     driver: local
+#     driver_opts:
+#       type: none 
+#       o: bind
+#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
   # pgadmin:
   #   driver: local
   #   driver_opts:
