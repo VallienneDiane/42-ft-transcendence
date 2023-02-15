@@ -55,10 +55,11 @@ body {
   border-radius: 3px;
   border: none;
   cursor: pointer;
+  font-size: 20px;
 }
 
 .login button {
-  width: 100px;
+  width: 200px;
   color:rgb(255, 255, 255);
   background-color: rgb(0, 0, 0);
 }
@@ -66,4 +67,12 @@ body {
 .login button:hover {
   background-color: rgb(155, 205, 219);
   color: black;
+}
+
+label {
+  color: white;
+}
+
+.errorsSignup {
+  color: red;
 }

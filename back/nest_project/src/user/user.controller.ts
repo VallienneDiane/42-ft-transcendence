@@ -16,7 +16,7 @@ export class UserController {
         return this.userService.create(newUser);
     }
     
-    @Get()
+    @Get('signup')
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
     }
