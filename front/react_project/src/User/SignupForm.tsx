@@ -4,10 +4,13 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import Axios from 'axios';
 import * as yup from "yup";
 
-type defaultFormData = {
+// Interfaces are basically a way to describe data shapes, for example, an object.
+// Type is a definition of a type of data, for example, a union, primitive, intersection, tuple, or any other type.
+interface defaultFormData { 
   login: string,
   email: string,
   password: string,
+  errors?: string
 }
 
 const userSchema = yup.object().shape({
@@ -17,7 +20,6 @@ const userSchema = yup.object().shape({
 })
 
 const SignupForm: React.FC = () => {
-
   const { register, handleSubmit, formState: { errors }} = useForm<defaultFormData>({
     resolver: yupResolver(userSchema)
   });
@@ -29,13 +31,12 @@ const SignupForm: React.FC = () => {
 
   return (
     <div>
-      <h1>SignUp Page</h1>
       <form className="login" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label>Login</label>
           <br/>
           <input type="text" {...register("login")}/>
-          {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}
+          {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
         </div>
         <div>
           <label>Email</label>

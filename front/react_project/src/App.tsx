@@ -1,22 +1,17 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import Axios from 'axios';
-import * as yup from "yup";
 import './App.css'
-import SignupForm from './page_modules/SignupForm'
-import NavBar from './page_modules/NavBar'
-import LoginForm from './page_modules/LoginForm'
+import NavBar from './User/NavBar'
+import LoginForm from './User/LoginForm'
+import SignupForm from './User/SignupForm'
 
-function App() {
+export default function App() {
 
     return (
       <div className="App">
-          <NavBar/>
-          {/* <SignupForm/> */}
-          <LoginForm/>
+          {/* <NavBar/> */}
+          <SignupForm/>
+          {/* <LoginForm/> */}
       </div>
   )
 }
 
-export default App
+// export default App
