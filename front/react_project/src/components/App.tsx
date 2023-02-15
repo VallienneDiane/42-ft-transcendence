@@ -2,6 +2,7 @@ import '../styles/App.css'
 import photoAzu from '../assets/DSC09400-10.jpg'
 import React from 'react'
 
+
 type MyProps = {
   message: string;
 };
