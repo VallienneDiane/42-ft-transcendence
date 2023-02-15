@@ -38,7 +38,7 @@ body {
 }
 
 .login, .signup {
-  background-color: red;
+  background-color: rgb(214, 136, 136);
   width:100%;
   height: 90%;
   display: flex;

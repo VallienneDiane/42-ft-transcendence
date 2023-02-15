@@ -17,10 +17,6 @@ const userSchema = yup.object().shape({
 })
 
 const SignupForm: React.FC = () => {
-  const [formData, setFormData] = useState<FormData>({
-    login: '',
-    password: ''
-  });
 
   const { register, handleSubmit, formState: { errors }} = useForm<defaultFormData>({
     resolver: yupResolver(userSchema)
@@ -30,25 +26,6 @@ const SignupForm: React.FC = () => {
     Axios.post('http://localhost:3000/user/signup', data);
     console.log(data);
   }
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    try {
-      await Axios.post<{ message: string }, FormData>('/api/signup', formData);
-      alert('Account created successfully!');
-    } catch (error) {
-      console.error(error);
-      alert('Failed to create account');
-    }
-  };
-  // "@nestjs/common
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value
-    });
-  };
 
   return (
     <div>
