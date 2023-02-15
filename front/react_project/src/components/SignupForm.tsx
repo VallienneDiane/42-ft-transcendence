@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Axios from 'axios';
 import * as yup from "yup";
+import NavBar from './Navbar';
+import { UserContext } from '../user/UserContext';
 
 type defaultFormData = {
   login: string,
@@ -29,6 +31,7 @@ const SignupForm: React.FC = () => {
 
   return (
     <div>
+      <NavBar/>
       <h1>SignUp Page</h1>
       <form className="login" onSubmit={handleSubmit(onSubmit)}>
         <div>
@@ -51,6 +54,7 @@ const SignupForm: React.FC = () => {
         </div>
         <button type="submit">SIGN UP</button>
       </form>
+      <a href="/login">Already registered ? Log In</a>
     </div>
   );
 };
