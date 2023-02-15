@@ -1,4 +1,3 @@
-import React from 'react'
 import { BrowserRouter as Route, Switch, useRouteMatch } from 'react-router-dom'
 
 function Home() {
