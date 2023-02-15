@@ -6,10 +6,10 @@ services:
     container_name: db_container
     hostname: postgres
     restart: always
+    ports:
+      - "5432:5432"
     env_file:
       - .env
-    volumes:
-      - db:/var/lib/postgresql/data
     networks:
       - transcendence_network
 ########################################## BACK-END NEST JS ##################################
@@ -25,6 +25,8 @@ services:
       - transcendence_network
     volumes:
       - back:/usr/src/app
+    depends_on:
+      - db
 ########################################## FRONT-END REACT VITE  ############################
   front:
     image: reactjs_img
@@ -38,31 +40,46 @@ services:
       - transcendence_network
     volumes:
       - front:/usr/src/app
+########################################## PGADMIN  ########################################
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin_container
+    env_file:
+      - .env
+    ports:
+      - "5050:80"
+    networks:
+      - transcendence_network
+    depends_on:
+      - db
+    restart: always
 ########################################### VOLUMES  #########################################
 volumes:
   db:
     driver: local
-    name: nest-db
     driver_opts:
       type: none 
       o: bind
-      device: ./postgres
+      device: /home/vallienne/42_Projects/transcendence/postgres
   back:
     driver: local
-    name: back
     driver_opts:
       type: none
       o: bind
-      device: ./back
+      device: /home/vallienne/42_Projects/transcendence/back
   front:
     driver: local
-    name: front
     driver_opts:
       type: none 
       o: bind
-      device: ./front
+      device: /home/vallienne/42_Projects/transcendence/front
+  pgadmin:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/vallienne/42_Projects/transcendence/pgadmin
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:
     driver: bridge
-    name: transcendence_network
