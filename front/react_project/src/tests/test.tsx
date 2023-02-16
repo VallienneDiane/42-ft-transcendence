@@ -6,11 +6,12 @@ type MyState = {
     date: Date;
 };
 
-
 class Test extends React.Component<MyProps, MyState> {
+    timerID: number;
 constructor(props: MyProps) {
     super(props);
     this.state = {date: new Date()};
+    this.timerID = 0;
 }
 
 componentDidMount(): void {

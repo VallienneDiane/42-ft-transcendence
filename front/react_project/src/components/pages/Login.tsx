@@ -7,8 +7,8 @@ function Login() {
 
     return (
       <div className="App">
-          <NavBar/>
-          {/* <SignupForm/> */}
+          {/* <NavBar/>
+          <SignupForm/> */}
           <LoginForm/>
       </div>
   )

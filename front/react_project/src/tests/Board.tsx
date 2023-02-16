@@ -41,7 +41,7 @@ interface state {
   value: any;
 };
 
-class Square extends React.Component<props, any> {
+class Square extends React.Component<props, state> {
   constructor(props: props) {
     super(props);
     this.state = { // attention ne pas appeler this.setState() ici
