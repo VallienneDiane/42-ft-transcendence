@@ -38,7 +38,7 @@ vclean :
 ifneq ($(strip $(VOLUMES)),)
 	docker volume rm $(VOLUMES)
 endif
-	sudo rm -rf ./back/postgres
+	rm -rf ./back/postgres
 
 fclean : clean vclean prune
 
