@@ -9,24 +9,31 @@ import LoginForm from './components/LoginForm'
 import Home from './components/Home'
 import { Routes, Route } from "react-router-dom"
 import Profile from './components/Profile';
-import { UserContext } from './user/UserContext';
+import UserProvider from './user/UserProvider';
+import ProtectedRoutes from './components/ProtectedRoutes';
 
 function App() {
+  let user = {
+    id: 666,
+    login: "",
+    email: "",
+    password: "",
+    logedIn: false
+  };
 
     return (
       <div className="App">
-        <Routes>
-          {/* <UserContext.Provider value={{}}> */}
-            <Route path='/login' element={<LoginForm/>}/>
-            <Route path='/signin' element={<SignupForm/>}/>
-            {/* Route pour par exemple localhost/profile/12 */}
-            <Route path='/profile/:id' element={<Profile/>}/>
-            {/* Route pour par exemple localhost/profile/12/games/win */}
-            <Route path='/profile/*' element={<Profile/>}/>
-
-          {/* </UserContext.Provider> */}
-          <Route path='/' element={<Home/>}/>
-        </Routes>
+        <UserProvider user={user}>
+          <Routes>
+            <Route path='/login' element={<LoginForm />} />
+            <Route path='/signin' element={<SignupForm />} />
+            <Route element={<ProtectedRoutes/>}>
+              <Route path='/profile' element={<Profile />} />
+              <Route path='/profile/:id' element={<Profile />} />
+              <Route path='/' element={<Home />} />
+            </Route>
+          </Routes>
+        </UserProvider>
       </div>
   )
 }
