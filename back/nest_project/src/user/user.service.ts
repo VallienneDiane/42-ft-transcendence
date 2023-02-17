@@ -1,9 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { AuthDto } from "src/auth/auth.dto";
 import { Repository } from "typeorm";
+import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
-import * as bcrypt from 'bcrypt';
 
 @Injectable({})
 export class UserService {
@@ -15,26 +14,14 @@ export class UserService {
     async create(newUser: UserEntity): Promise<UserEntity> {
         return await this.usersRepository.save(newUser);
     }
-    // SIGN IN : CHECK IF ENTERED PASSWORD AND DATABASE HASHED PASSWORD ARE MATCHING
-    async validateUser(login: string , password: string): Promise<AuthDto> {
-        const user= await this.usersRepository.findOneBy({login});
-        if(!user) {
-            throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
-        }
-        const passwdIsMatching = await bcrypt.compare(password, user.password);
-        if(!passwdIsMatching) {
-            throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-        }
-        return user;
+    // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
+    async findByLogin(login: string): Promise<UserDto> {
+        return await this.usersRepository.findOneBy({login});
     }
+    
     // DISPLAY ALL USERS
     async findAll(): Promise<UserEntity[]> {
         return await this.usersRepository.find();
-    }
-    // // DISPLAY ONE USER PROFILE BY LOGIN
-    async findByLogin(login: string): Promise<UserEntity> {
-        const user = await this.usersRepository.findOneBy({login});
-        return user;
     }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
