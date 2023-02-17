@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
-import { SocketEvents } from "./socketEvents";
+import { PingEvent, Chat } from "./socketEvents";
 
 @Module({
-    providers: [SocketEvents]
+    providers: [PingEvent, Chat]
 })
 export class SocketModule {}

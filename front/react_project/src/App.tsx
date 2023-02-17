@@ -7,14 +7,18 @@ import './App.css'
 import SignupForm from './page_modules/SignupForm'
 import NavBar from './page_modules/NavBar'
 import LoginForm from './page_modules/LoginForm'
+import PingHandler from './page_modules/SocketHandler'
+import ChatHandler from './page_modules/ChatHandler';
 
 function App() {
 
     return (
       <div className="App">
           <NavBar/>
-          {/*<SignupForm/>*/}
+          <SignupForm/>
           <LoginForm/>
+          <PingHandler/>
+          <ChatHandler/>
       </div>
   )
 }

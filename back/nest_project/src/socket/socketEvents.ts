@@ -2,25 +2,28 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, Conne
 import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({transports: ['websocket']})
-export class SocketEvents {
+export class PingEvent {
     @WebSocketServer()
     server: Server;
-
-    //connexion
-    handleConnexion(client: Socket) {
-        console.log(`Client Connected: ${client.id}`);
-    }
-
-    //disconnection
-    handleDisConnect(client: Socket) {
-        console.log(`Client Disconnected: ${client.id}`);
-    }
 
     //receive events
     @SubscribeMessage('ping')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         // send an event
-        console.log(data);
+        console.log(client.id + ' sent a ping');
         this.server.emit('pong', client.id, data);
+    }
+
+}
+
+@WebSocketGateway({transports: ['websocket']})
+export class Chat {
+    @WebSocketServer()
+    server: Server;
+
+    @SubscribeMessage('message')
+    handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+        console.log('message to send : ' + data);
+        this.server.emit('newMessage', client.id, data);
     }
 }
