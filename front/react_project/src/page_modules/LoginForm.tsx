@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import io from 'socket.io-client';
+import socketIOClient from 'socket.io-client';
+
 /*
 const LoginForm: React.FC = () => {
     return (
@@ -17,11 +18,23 @@ const LoginForm: React.FC = () => {
     )
 }*/
 
-const socket = io();
+interface pingData {
+    isConnected: boolean,
+    lastPing: string,
+    lastPong: string
+}
+
+interface IsConnected {
+    isConnected: boolean,
+}
+
+const socket = socketIOClient("127.0.0.1:3000", {transports: ['websocket']});
 
 function LoginForm(): JSX.Element {
-    const [isConnected, setIsConnected] = useState(socket.connected);
-    const [lastPong, setLastPong] = useState(null);
+    const [isConnected, setIsConnected] = useState<Boolean>(socket.connected);
+    const [lastPong, setLastPong] = useState<string>("");
+    const [lastPing, setLastPing] = useState<string>("");
+    const [serverId, setServerID] = useState<string>(socket.id);
 
     useEffect(() => {
         socket.on('connect', () => {
@@ -33,7 +46,8 @@ function LoginForm(): JSX.Element {
         });
 
         socket.on('pong', () => {
-            const bug : any = new Date().toISOString();
+            const bug : string = new Date().toISOString();
+            setServerID(socket.id);
             setLastPong(bug);
         });
 
@@ -45,13 +59,17 @@ function LoginForm(): JSX.Element {
     }, []);
 
     const sendPing = () => {
-        socket.emit('ping');
+        socket.emit('ping', 'jm les fruits o siro');
+        const bug: string = new Date().toISOString();
+        setLastPing(bug);
     }
 
     return (
         <div>
             <p>Connected: { isConnected === true ? 'YES' : 'NO' } </p>
             <p>Last pong: { lastPong || '-' } </p>
+            <p>Last ping: { lastPing || '-' }</p>
+            <p>Server id: { serverId }</p>
             <button onClick={ sendPing }>Send ping </button>
         </div>
     );
