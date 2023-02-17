@@ -1,8 +1,3 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import Axios from 'axios';
-import * as yup from "yup";
 import './App.css'
 import SignupForm from './components/SignupForm'
 import LoginForm from './components/LoginForm'
@@ -38,4 +33,4 @@ function App() {
   )
 }
 
-export default App
+// export default App

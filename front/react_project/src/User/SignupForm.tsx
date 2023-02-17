@@ -12,8 +12,12 @@ import { Navigate, redirect } from 'react-router-dom';
 interface defaultFormData { 
   login: string,
   email: string,
+<<<<<<< HEAD:front/react_project/src/components/SignupForm.tsx
+  password: string
+=======
   password: string,
   errors?: string
+>>>>>>> master:front/react_project/src/User/SignupForm.tsx
 }
 
 const userSchema = yup.object().shape({
@@ -23,9 +27,12 @@ const userSchema = yup.object().shape({
 })
 
 const SignupForm: React.FC = () => {
+<<<<<<< HEAD:front/react_project/src/components/SignupForm.tsx
   let user = useContext(UserContext);
   
   
+=======
+>>>>>>> master:front/react_project/src/User/SignupForm.tsx
   const { register, handleSubmit, formState: { errors }} = useForm<defaultFormData>({
     resolver: yupResolver(userSchema)
   });
@@ -41,8 +48,11 @@ const SignupForm: React.FC = () => {
 
   return (
     <div>
+<<<<<<< HEAD:front/react_project/src/components/SignupForm.tsx
       <NavBar/>
       <h1>SignUp Page</h1>
+=======
+>>>>>>> master:front/react_project/src/User/SignupForm.tsx
       <form className="login" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label>Login</label>
