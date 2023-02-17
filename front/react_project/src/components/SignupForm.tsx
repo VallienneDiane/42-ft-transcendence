@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Axios from 'axios';
 import * as yup from "yup";
 import NavBar from './Navbar';
 import { UserContext } from '../user/UserContext';
+import { Navigate, redirect } from 'react-router-dom';
 
 type defaultFormData = {
   login: string,
   email: string,
-  password: string,
+  password: string
 }
 
 const userSchema = yup.object().shape({
@@ -19,14 +20,20 @@ const userSchema = yup.object().shape({
 })
 
 const SignupForm: React.FC = () => {
-
+  let user = useContext(UserContext);
+  
+  
   const { register, handleSubmit, formState: { errors }} = useForm<defaultFormData>({
     resolver: yupResolver(userSchema)
   });
   
   const onSubmit = (data: defaultFormData) => {
+    
     Axios.post('http://localhost:3000/user/signup', data);
-    console.log(data);
+    user.login = data.login;
+    user.email = data.email;
+    user.password = data.password;
+    user.logedIn = true;
   }
 
   return (
