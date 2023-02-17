@@ -6,7 +6,9 @@ export class UserEntity {
   id: number;
 
   @Column(
-    {unique: true}
+    {type: 'varchar', 
+     nullable: false,
+     unique: true}
   )
   login: string;
   
