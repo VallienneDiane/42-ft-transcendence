@@ -1,7 +1,7 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io';
 
-@WebSocketGateway({namespace: 'pouet'})
+@WebSocketGateway({transports: ['websocket']})
 export class SocketEvents {
     @WebSocketServer()
     server: Server;
@@ -17,9 +17,10 @@ export class SocketEvents {
     }
 
     //receive events
-    @SubscribeMessage('message')
+    @SubscribeMessage('ping')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         // send an event
-        this.server.emit('message', client.id, data);
+        console.log(data);
+        this.server.emit('pong', client.id, data);
     }
 }
