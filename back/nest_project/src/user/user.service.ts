@@ -31,21 +31,17 @@ export class UserService {
     async findAll(): Promise<UserEntity[]> {
         return await this.usersRepository.find();
     }
-    // DISPLAY ONE USER PROFILE BY ID
-    async findById(id: number): Promise<UserEntity> {
-        return await this.usersRepository.findOneBy({id});
-    }
     // // DISPLAY ONE USER PROFILE BY LOGIN
     async findByLogin(login: string): Promise<UserEntity> {
-        const user = await this.usersRepository.findOne({ where: {login} });
+        const user = await this.usersRepository.findOneBy({login});
         return user;
     }
     // UPDATE USER INFOS
-    async update(id: number, User: UserEntity): Promise<void> {
-        await this.usersRepository.update(id, User);
+    async update(login: string, User: UserEntity): Promise<void> {
+        await this.usersRepository.update(login, User);
     }
     // DELETE USER ACCOUNT BY ID
-    async delete(id: number): Promise<void> {
-        await this.usersRepository.delete(id);
+    async delete(login: string): Promise<void> {
+        await this.usersRepository.delete(login);
     }
 }

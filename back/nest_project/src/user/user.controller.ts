@@ -27,24 +27,20 @@ export class UserController {
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
     }
-    // GET ONE USER BY ID
-    @Get(':id')
-    async displayUserById(@Param('id') id: string): Promise<UserEntity> {
-        return await this.userService.findById(+id);
-    }
     // GET ONE USER BY LOGIN
     @Get(':login')
     async displayUserByLogin(@Param('login') login: string): Promise<UserEntity> {
+        console.log("coucou");
         return await this.userService.findByLogin(login);
     }
 
-    @Patch(':id')
-    async update(@Param('id') id: string, @Body() user: UserDto): Promise<void> {
-        return await this.userService.update(+id, user); //+id = cast in number or Number(id)
+    @Patch(':login')
+    async update(@Param('login') login: string, @Body() user: UserDto): Promise<void> {
+        return await this.userService.update(login, user); //+id = cast in number or Number(id)
     }
 
-    @Delete(':id')
-    async delete(@Param('id') id: string) {
-        return this.userService.delete(+id);
+    @Delete('login')
+    async delete(@Param('login') login: string) {
+        return this.userService.delete(login);
     }
 }
