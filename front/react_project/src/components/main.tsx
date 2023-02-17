@@ -1,9 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom'
 import Login from './pages/Login'
-import Home from './pages/Home-test'
+import Home from './pages/Home'
 import Error from './pages/Error'
 import Header from './Header'
 import '../styles/index.css'
@@ -11,51 +11,38 @@ import '../styles/index.css'
 const DomRoot = document.getElementById('root');
 const Root = createRoot(DomRoot!); // ! pour forcer la possibilite que la variable soit null
 
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Login />,
-        errorElement: <Error />,
-        // loader: rootLoader,
-    },
-    {
-        path: "/game",
-        element: <Home />,
-        // children: [ // nested routes
-        //     {
-        //         path: "/chat",
-        //         element: <Chat />,
-        //     },
-        // ],
-    },
-]);
+function App() {
+    return (
+        <>
+        <nav>
+        <ul>
+          <li><Link to="/">Login</Link></li>
+          <li><Link to="/game">Home</Link></li>
+        </ul>
+      </nav>
+        <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/game">
+          <Route index element={<Home />} />
+          {/* <Route path="play" element={<Play />} />
+          <Route path="watch" element={<Watch />} />
+          <Route path="history" element={<History />} /> */}
+        </Route>
+        {/* </Route>
+          <Route element={<OtherLayout />}>
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/about" element={<About />} />
+        </Route> */}
+        <Route path="*" element={<Error />} />
+      </Routes>
+      </>
+    )
+}
 
 Root.render(
     <React.StrictMode>
-        <RouterProvider router={router} />
+        <BrowserRouter>
+            <App />
+        </BrowserRouter> 
     </React.StrictMode>
 );
-
-//     <BrowserRouter>
-//         <Router>
-//             <Header />
-//             <Switch>
-//                 <Route exact path="/">
-//                     <Login />
-//                 </Route>
-//                 <Route path="/game">
-//                     <Home />
-//                 </Route>
-//                 {/* <Route path="/params">
-//                     <Params />
-//                 </Route>
-//                 <Route path="/profil">
-//                     <Profil />
-//                 </Route> */}
-//                 <Route>
-//                     <Error />
-//                 </Route>
-//             </Switch>
-//         </Router>
-//     </BrowserRouter>
-// );

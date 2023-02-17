@@ -1,5 +1,5 @@
 body {
-  background-color: #2F2B8C;
+  background-color: #313456ff;
   margin:0;
   padding:0;
 }
@@ -15,7 +15,6 @@ body {
 }
 
 .navbar {
-
   width: 100%;
   height:4%;
   display: flex;
@@ -29,7 +28,7 @@ body {
   align-items: center;
   justify-content: space-around;
   font-size: 20px;
-  background-color: #AC99F2;
+  background-color: #CDC4E0ff;
   list-style: none;
 }
 
@@ -38,15 +37,14 @@ body {
 }
 
 .login, .signup {
-  background-color: #AC99F2;
+  background-color: #CDC4E0ff;
   width:100%;
   height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-left: 30px;
-  padding-right: 30px;
+  padding: 30px;
 }
 
 .login input, .signup input {
@@ -63,11 +61,11 @@ body {
 .login button {
   width: 200px;
   color:rgb(255, 255, 255);
-  background-color: #4A44F2;
+  background-color: #A88FEAff;
 }
 
 .login button:hover {
-  background-color: #3833bd;
+  background-color: #352A98ff;
   color: white;
 }
 
