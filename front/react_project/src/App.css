@@ -76,3 +76,7 @@ label {
 .errorsSignup {
   color: red;
 }
+
+.block {
+  padding: 50px
+}

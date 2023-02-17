@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import Axios from 'axios';
 import * as yup from "yup";
+import '../App.css'
 
 type defaultFormData = {
   login: string,
@@ -28,7 +29,7 @@ const SignupForm: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="block">
       <h1>SignUp Page</h1>
       <form className="login" onSubmit={handleSubmit(onSubmit)}>
         <div>
