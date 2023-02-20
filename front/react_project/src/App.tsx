@@ -9,6 +9,7 @@ import NavBar from './page_modules/NavBar'
 import LoginForm from './page_modules/LoginForm'
 import PingHandler from './page_modules/SocketHandler'
 import ChatHandler from './page_modules/ChatHandler';
+import ChatModule from './page_modules/ChatModule';
 
 function App() {
 
@@ -18,7 +19,8 @@ function App() {
           <SignupForm/>
           <LoginForm/>
           <PingHandler/> */}
-          <ChatHandler/>
+          <ChatModule />
+          <ChatHandler />
       </div>
   )
 }
