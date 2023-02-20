@@ -42,8 +42,11 @@ function ChatHandler(): JSX.Element {
     
     }, []);
     
-    const sendMessage : any = (message: string) => {
+    const sendMessage = (event: any) => {
+        event.preventDefault();
+        // alert(message);
         socket.emit('message', message);
+        console.log(message);
     }
 
     const handleMessage = (message: any) => {
@@ -51,12 +54,12 @@ function ChatHandler(): JSX.Element {
     }
 
     return (
-        <div className="block">
+        <div className="chat">
             <p>Current chat :</p>
             <ListMessages strings={messages} />
-            <form onSubmit={sendMessage(message)}>
+            <form onSubmit={sendMessage}>
                 <label>
-                    type your message : 
+                    type your message :  
                     <input type="text" value={message} onChange={handleMessage} />
                 </label>
                 <input type="submit" value="send" />

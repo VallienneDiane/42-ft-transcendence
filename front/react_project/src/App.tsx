@@ -14,10 +14,10 @@ function App() {
 
     return (
       <div className="App">
-          <NavBar/>
+          {/* <NavBar/>
           <SignupForm/>
           <LoginForm/>
-          <PingHandler/>
+          <PingHandler/> */}
           <ChatHandler/>
       </div>
   )
