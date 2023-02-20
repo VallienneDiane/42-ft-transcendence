@@ -3,11 +3,11 @@ import { UserContext } from "./UserContext";
 
 type UserProviderProps = {
     user: {
+        token: string;
         id: number;
         login: string;
         email: string;
         password: string;
-        logedIn: boolean;
     };
     children: ReactNode;
 }

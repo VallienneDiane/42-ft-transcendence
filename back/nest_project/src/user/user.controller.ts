@@ -17,8 +17,8 @@ export class UserController {
         newUser.password = hash;
         return this.userService.create(newUser);
     }
-    // POST REQUEST TO SIGN IN THE WEBSITE
-    @Post(':login') // localhost:3000/user/login
+    // POST REQUEST TO LOG IN THE WEBSITE
+    @Post('login') // localhost:3000/user/login
     async validate(@Body() checkUser: AuthDto) {
         return this.userService.validateUser(checkUser.login, checkUser.password);
     }
