@@ -1,13 +1,8 @@
-import { useContext } from "react"
 import { Navigate, Outlet } from "react-router-dom";
-import { UserContext } from "../user/UserContext"
-import SignupForm from "./SignupForm";
+import { accountService } from "../services/account.service";
 
 const ProtectedRoutes = () => {
-    const user = useContext(UserContext);
-    console.log(user);
-    
-    return user.logedIn ? <Outlet/> : <Navigate to="/signin"/>;
+    return accountService.isLogged() ? <Outlet/> : <Navigate to="/login"/>;
 }
 
 export default ProtectedRoutes;

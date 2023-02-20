@@ -24,7 +24,7 @@ const Home: React.FC = () => {
             <div>
                 <NavBar/>
                 <h1>Home Page</h1>
-                <p>Bonjour {user?.login} ayant comme mail {user?.email} et comme password {user?.password}</p>
+                <p>Bonjour {user?.login} ayant comme mail {user?.email}</p>
                 <p>Ici on aura les boutons pour rejoindre des parties etc</p>
             </div>
         )
