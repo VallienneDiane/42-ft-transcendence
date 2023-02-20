@@ -10,7 +10,7 @@ export class PingEvent {
     @SubscribeMessage('ping')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         // send an event
-        console.log(client.id + ' sent a ping');
+        console.log(client.id + data);
         this.server.emit('pong', client.id, data);
     }
 
@@ -21,9 +21,12 @@ export class Chat {
     @WebSocketServer()
     server: Server;
 
+    currentChat: string[] = [];
     @SubscribeMessage('message')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-        console.log('message to send : ' + data);
-        this.server.emit('newMessage', client.id, data);
+        console.log('message to add from ' + client.id + ' : ' + data);
+        this.currentChat.push(client.id);
+        this.currentChat.push(data);
+        this.server.emit('newMessage', ...this.currentChat);
     }
 }
