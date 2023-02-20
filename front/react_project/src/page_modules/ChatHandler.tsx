@@ -43,10 +43,11 @@ function ChatHandler(): JSX.Element {
     }, []);
     
     const sendMessage = (event: any) => {
-        event.preventDefault();
+        event.preventDefault(); // permet d'eviter le chargement d'une nouvelle page
         // alert(message);
         socket.emit('message', message);
         console.log(message);
+        setMessage('');
     }
 
     const handleMessage = (message: any) => {
