@@ -28,25 +28,33 @@ function ListMessages(value: Istrings): JSX.Element {
 
 function ChatHandler(): JSX.Element {
     const [message, setMessage] = useState<string>('');
-    const [messages, setMessages] = useState<string[]>([]);
+    const [history, setHistory] = useState<string[]>([]);
+    const [bug, setBug] = useState<boolean>(false); // bug is here to realize React that a change was done and update the history
 
     useEffect(() => {
 
-        socket.on('newMessage', (...args: string[]) => {
-            setMessages(args);
+        socket.on('newMessage', (data: string) => {
+            console.log('message from nest : ' + data);
+            history.push(data);
+            setHistory(history);
+            setBug((bug) => {
+                if (bug)
+                    return false;
+                return true;
+            });
+            console.log('chat history : ' + history);
         });
 
         return () => {
             socket.off('newMessage');
         };
     
-    }, []);
+    }, [history.length]);
     
     const sendMessage = (event: any) => {
         event.preventDefault(); // permet d'eviter le chargement d'une nouvelle page
         // alert(message);
         socket.emit('message', message);
-        console.log(message);
         setMessage('');
     }
 
@@ -57,7 +65,7 @@ function ChatHandler(): JSX.Element {
     return (
         <div className="chat">
             <p>Current chat :</p>
-            <ListMessages strings={messages} />
+            <ListMessages strings={history} />
             <form onSubmit={sendMessage}>
                 <label>
                     type your message :  
