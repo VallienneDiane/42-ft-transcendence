@@ -6,6 +6,7 @@ const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
 interface Message {
     text: string;
     senderName: string;
+    change?: any;
 }
 
 interface ChatHistory {
@@ -27,6 +28,11 @@ function ListMessage(value: Message): JSX.Element {
 }
 
 class MessageList extends React.Component<ChatHistory> {
+
+    componentDidMount(): void {
+        
+    }
+
     render() {
         const listItems: JSX.Element[] = this.props.messages.map(
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
@@ -51,16 +57,18 @@ class SendMessageForm extends React.Component<Message> {
     constructor(props: Message) {
         super(props);
         this.handleMessage = this.handleMessage.bind(this);
+        this.sendMessage = this.sendMessage.bind(this);
     }
 
     handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-        this.props.handle(event.target.value);
+        this.props.change(event.target.value);
     }
 
-    sendMessage = (event: React.ChangeEvent<HTMLInputElement>) => {
+    sendMessage(event: any) {
         event.preventDefault();
-        socket.emit('message', message);
-        console.log(this.state,text);
+        socket.emit('message', this.props.text);
+        console.log(this.props.text);
+        this.props.change('');
     }
 
     render() {
@@ -83,6 +91,7 @@ class SendMessageForm extends React.Component<Message> {
 export default class ChatModule extends React.Component<{}, MyState> {
     constructor(props: {}) {
         super(props);
+        this.handleMessageChange = this.handleMessageChange.bind(this);
         this.state = { 
             chatHistory: { messages: []}, 
             message: { text: '', senderName: ''} 
@@ -98,7 +107,7 @@ export default class ChatModule extends React.Component<{}, MyState> {
             <div className="chat">
                 <Title />
                 <MessageList messages={this.state.chatHistory.messages} />
-                <SendMessageForm text={this.state.message.text} senderName={this.state.message.senderName} />
+                <SendMessageForm text={this.state.message.text} senderName={this.state.message.senderName} change={this.handleMessageChange}/>
             </div>
         )
     }

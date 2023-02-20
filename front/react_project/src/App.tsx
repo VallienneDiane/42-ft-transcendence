@@ -20,7 +20,7 @@ function App() {
           <LoginForm/>
           <PingHandler/> */}
           <ChatModule />
-          <ChatHandler />
+          {/* <ChatHandler /> */}
       </div>
   )
 }
