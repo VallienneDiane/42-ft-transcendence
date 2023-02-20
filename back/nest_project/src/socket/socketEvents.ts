@@ -13,7 +13,6 @@ export class PingEvent {
         console.log(client.id + data);
         this.server.emit('pong', client.id, data);
     }
-
 }
 
 @WebSocketGateway({transports: ['websocket']})
@@ -21,12 +20,10 @@ export class Chat {
     @WebSocketServer()
     server: Server;
 
-    currentChat: string[] = [];
     @SubscribeMessage('message')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         console.log('message to add from ' + client.id + ' : ' + data);
-        this.currentChat.push(client.id);
-        this.currentChat.push(data);
-        this.server.emit('newMessage', ...this.currentChat);
+        this.server.emit('newMessage', client.id + ' : ' + data);
+        console.log();
     }
 }
