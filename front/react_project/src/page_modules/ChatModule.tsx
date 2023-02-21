@@ -5,18 +5,12 @@ const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
 
 interface Message {
     text: string;
-    senderName: string;
-    change?: any;
+    senderName?: string;
 }
 
 interface ChatHistory {
     messages: Message[];
 }
-
-type MyState = {
-    chatHistory: ChatHistory;
-    message: Message;
-} 
 
 function ListMessage(value: Message): JSX.Element {
     return (
@@ -68,33 +62,32 @@ function Title() {
     )
 }
 
-class SendMessageForm extends React.Component<Message> {
-    constructor(props: Message) {
+class SendMessageForm extends React.Component<{}, Message> {
+    constructor(props: {}) {
         super(props);
+        this.state = { text: '' };
         this.handleMessage = this.handleMessage.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
     }
 
     handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-        this.props.change(event.target.value);
+        this.setState({ text: event.target.value });
     }
 
     sendMessage(event: any) {
         event.preventDefault();
-        socket.emit('message', this.props.text);
-        console.log(this.props.text);
-        this.props.change('');
+        socket.emit('message', this.state.text);
+        console.log(this.state.text);
+        this.setState({ text: '' });
     }
 
     render() {
-        const text = this.props.text;
-        const senderName = this.props.senderName;
         return (
             <div>
                 <form onSubmit={this.sendMessage}>
                     <label>
                         Type your message :  
-                        <input type="text" value={text} onChange={this.handleMessage} />
+                        <input type="text" value={this.state.text} onChange={this.handleMessage} />
                     </label>
                     <input type="submit" value="send" />
                 </form>
@@ -103,26 +96,13 @@ class SendMessageForm extends React.Component<Message> {
     }
 }
 
-export default class ChatModule extends React.Component<{}, MyState> {
-    constructor(props: {}) {
-        super(props);
-        this.handleMessageChange = this.handleMessageChange.bind(this);
-        this.state = { 
-            chatHistory: { messages: []}, 
-            message: { text: '', senderName: ''} 
-        };
-    }
-
-    handleMessageChange(text: string) {
-        this.setState({message: {text, senderName: 'blop'}});
-    }
-
+export default class ChatModule extends React.Component {
     render() {
         return (
             <div className="chat">
                 <Title />
                 <MessageList />
-                <SendMessageForm text={this.state.message.text} senderName={this.state.message.senderName} change={this.handleMessageChange}/>
+                <SendMessageForm />
             </div>
         )
     }
