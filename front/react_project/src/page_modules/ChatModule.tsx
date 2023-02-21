@@ -27,14 +27,29 @@ function ListMessage(value: Message): JSX.Element {
     )   
 }
 
-class MessageList extends React.Component<ChatHistory> {
+class MessageList extends React.Component<{}, ChatHistory> {
+    constructor(props: {}) {
+        super(props);
+        this.state = { messages: [] };
+    }
 
     componentDidMount(): void {
-        
+        socket.on('newMessage', (data: string) => {
+            console.log('message from nest : ' + data);
+            var pouet: Message = {text : data, senderName: 'unknow'};
+            this.setState({
+                messages: [...this.state.messages, pouet]
+            });
+        });
+        console.log('chat history : ' + this.state.messages);
+    }
+
+    componentWillUnmount(): void {
+        socket.off('newMessage');
     }
 
     render() {
-        const listItems: JSX.Element[] = this.props.messages.map(
+        const listItems: JSX.Element[] = this.state.messages.map(
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
         );
         return (
@@ -106,7 +121,7 @@ export default class ChatModule extends React.Component<{}, MyState> {
         return (
             <div className="chat">
                 <Title />
-                <MessageList messages={this.state.chatHistory.messages} />
+                <MessageList />
                 <SendMessageForm text={this.state.message.text} senderName={this.state.message.senderName} change={this.handleMessageChange}/>
             </div>
         )
