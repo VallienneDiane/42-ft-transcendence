@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
+import './ChatModule.css'
 
 const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
 
@@ -12,32 +13,35 @@ interface ChatHistory {
     messages: Message[];
 }
 
-interface ChatLocation {
-    location: string;
+interface ChatDestination {
+    dest: string;
+    action?: any;
 }
 
 function ListMessage(value: Message): JSX.Element {
     return (
-        <li>
-            <div>{value.senderName}</div>
-            <div>{value.text}</div>
-        </li>
+        <div className="message">
+            <div className="messageUserName">{value.senderName}</div>
+            <div className="bubble">{value.text}</div>
+        </div>
     )   
 }
 
-class MessageList extends React.Component<{}, ChatHistory> {
-    constructor(props: {}) {
+class MessageList extends React.Component<ChatDestination, ChatHistory> {
+    constructor(props: ChatDestination) {
         super(props);
         this.state = { messages: [] };
     }
 
     componentDidMount(): void {
         socket.on('newMessage', (...data: string[]) => {
-            console.log('message from nest : ' + data);
-            var pouet: Message = {text : data[2], senderName: data[1]};
-            this.setState({
-                messages: [...this.state.messages, pouet]
-            });
+            if (data[0] == this.props.dest) {
+                console.log('message from nest : ' + data);
+                var pouet: Message = {text : data[2], senderName: data[1]};
+                this.setState({
+                    messages: [...this.state.messages, pouet]
+                });
+            }
         });
         
         socket.on('notice', (data: string) => {
@@ -54,23 +58,32 @@ class MessageList extends React.Component<{}, ChatHistory> {
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
         );
         return (
-            <ul className="messageList">
+            <div className="messageList">
                 {listItems}
-            </ul>
+            </div>
         );
     }
 }
 
-function Title() {
+function Header(title: ChatDestination) {
+    let location: string;
+    console.log(title);
+    if (title.dest[0] == '_') {
+        location = 'Welcome to channel ' + title.dest.substring(1);
+    }
+    else {
+        location = 'Current discussion with ' + title.dest;
+    }
     return (
-        <div>
-            <h1>Channel 1</h1>
+        <div className="chatMessageHeader">
+            <h1>{location}</h1>
+            First test
         </div>
     )
 }
 
-class SendMessageForm extends React.Component<{}, Message> {
-    constructor(props: {}) {
+class SendMessageForm extends React.Component<ChatDestination, Message> {
+    constructor(props: ChatDestination) {
         super(props);
         this.state = { text: '' };
         this.handleMessage = this.handleMessage.bind(this);
@@ -83,37 +96,73 @@ class SendMessageForm extends React.Component<{}, Message> {
 
     sendMessage(event: any) {
         event.preventDefault();
-        socket.emit('chat', 'send', '_general', this.state.text);
+        socket.emit('chat', 'send', this.props.dest, this.state.text);
         console.log(this.state.text);
         this.setState({ text: '' });
     }
 
     render() {
         return (
-            <div>
-                <form onSubmit={this.sendMessage}>
-                    <label>
-                        Type your message :  
-                        <input type="text" value={this.state.text} onChange={this.handleMessage} />
-                    </label>
-                    <input type="submit" value="send" />
+            <div className="sendMessage">
+                <form className="sendMessageForm" onSubmit={this.sendMessage}>
+                    <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
+                    <input type="submit" value="Send" />
                 </form>
             </div>
         )
     }
 }
 
-export default class ChatModule extends React.Component<{}, ChatLocation> {
-    constructor(props : {}) {
+class ChangeDestination extends React.Component<ChatDestination, Message> {
+    constructor(props : ChatDestination) {
         super(props);
-        this.state = {location: '_general'};
+        this.state = { text: '' };
+        this.handleDestination = this.handleDestination.bind(this);
+        this.changeDestination = this.changeDestination.bind(this);
     }
+
+    handleDestination(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ text: event.target.value });
+    }
+
+    changeDestination(event: any) {
+        event.preventDefault();
+        console.log("event target value : " + event.target.value);
+        this.props.dest = event.target.value;
+    }
+
     render() {
         return (
-            <div className="chat">
-                <Title />
-                <MessageList />
-                <SendMessageForm />
+            <div className="changeLocation">
+                <form className="changeLocationForm" onSubmit={this.changeDestination}>
+                    <input type="textarea" placeholder="insert the new destination..." value={this.state.text} onChange={this.handleDestination} />
+                    <input type="submit" value="change" />
+                </form>
+            </div>
+        )
+    }
+}
+
+export default class ChatModule extends React.Component<{}, ChatDestination> {
+    constructor(props : {}) {
+        super(props);
+        this.state = {dest: '_general'};
+        this.changeLoc = this.changeLoc.bind(this);
+    }
+
+    changeLoc(newLocation: string): void {
+        this.setState({dest: newLocation});
+    }
+
+    render() {
+        return (
+            <div className="chatWrapper">
+                <div className="chatMessageWrapper">
+                    <Header dest={this.state.dest} />
+                    <MessageList dest={this.state.dest}/>
+                    <SendMessageForm dest={this.state.dest} />
+                    <ChangeDestination dest={this.state.dest} />
+                </div>
             </div>
         )
     }

@@ -1,13 +1,11 @@
 body {
-  background-color: rgb(81, 33, 149);
+  background-color: #313456ff;
   margin:0;
   padding:0;
 }
 
 .App {
-  display:flex;
-  align-items: center;
-  justify-content: center;
+  display: flex;
   flex-direction: column;
   width: 100vw;
   height: 100vh;
@@ -15,7 +13,6 @@ body {
 }
 
 .navbar {
-
   width: 100%;
   height:4%;
   display: flex;
@@ -29,7 +26,7 @@ body {
   align-items: center;
   justify-content: space-around;
   font-size: 20px;
-  background-color: rgb(0, 0, 0);
+  background-color: #CDC4E0ff;
   list-style: none;
 }
 
@@ -38,13 +35,14 @@ body {
 }
 
 .login, .signup {
-  background-color: rgb(214, 136, 136);
+  background-color: #CDC4E0ff;
   width:100%;
   height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 30px;
 }
 
 .login input, .signup input {
@@ -61,12 +59,12 @@ body {
 .login button {
   width: 200px;
   color:rgb(255, 255, 255);
-  background-color: rgb(0, 0, 0);
+  background-color: #A88FEAff;
 }
 
 .login button:hover {
-  background-color: rgb(155, 205, 219);
-  color: black;
+  background-color: #352A98ff;
+  color: white;
 }
 
 label {
@@ -75,8 +73,4 @@ label {
 
 .errorsSignup {
   color: red;
-}
-
-.block {
-  padding: 50px
 }
