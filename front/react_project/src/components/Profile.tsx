@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams } from "react-router-dom"
-import NavBar from "./Navbar";
 
 export default function Profile() {
     
@@ -9,7 +8,6 @@ export default function Profile() {
     
     return (
         <div>
-            <NavBar/>
             <h1>Votre profil</h1>
         </div>
     )

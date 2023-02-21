@@ -1,7 +1,6 @@
 
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
-import NavBar from "./Navbar";
 import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
@@ -28,7 +27,6 @@ const LoginForm: React.FC = () => {
     
     return (
         <div >
-            <NavBar/>
             <h1>Login page</h1>
             <form className="login" onSubmit={handleSubmit(onSubmit)}> 
             <input

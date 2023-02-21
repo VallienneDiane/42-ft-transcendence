@@ -2,7 +2,6 @@ import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import NavBar from './Navbar';
 import { UserContext } from '../user/UserContext';
 import { useNavigate } from 'react-router-dom';
 import SignInForm from '../models'
@@ -39,7 +38,6 @@ const SignupForm: React.FC = () => {
 
   return (
     <div>
-      <NavBar/>
       <h1>SignUp Page</h1>
       <form className="login" onSubmit={handleSubmit(signIn)}>
         <div>
