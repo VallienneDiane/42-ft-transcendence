@@ -19,7 +19,7 @@ let logout = () => {
 }
 
 let isLogged = () => {
-    // NEED TO CHECK IF TOKEN IS VALID !!
+    // NEED TO CHECK IF TOKEN IS VALID !! ou pas, sera fait par le back
     let token = localStorage.getItem('token');
     return !!token; // !! return false if token = (null)
 }

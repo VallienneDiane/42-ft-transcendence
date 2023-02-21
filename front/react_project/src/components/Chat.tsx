@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { userService } from "../services/user.service";
-import NavBar from "./Navbar";
 import UserData from "../models"
 
 
@@ -28,7 +27,6 @@ const Chat: React.FC = () => {
 
     return ( 
         <div>
-            <NavBar />
             <h1>Chat Page</h1>
             <h2>Users in database :</h2>
             <ul>

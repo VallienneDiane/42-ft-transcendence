@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { UserContext } from "../user/UserContext";
-import NavBar from "./Navbar";
 
 // export default function Home() {
 //     let user = useContext(UserContext);
@@ -22,7 +21,6 @@ const Home: React.FC = () => {
 
         return (
             <div>
-                <NavBar/>
                 <h1>Home Page</h1>
                 <p>Bonjour {user?.login} ayant comme mail {user?.email}</p>
                 <p>Ici on aura les boutons pour rejoindre des parties etc</p>
