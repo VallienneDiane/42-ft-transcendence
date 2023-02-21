@@ -34,9 +34,9 @@ class MessageList extends React.Component<{}, ChatHistory> {
     }
 
     componentDidMount(): void {
-        socket.on('newMessage', (data: string) => {
+        socket.on('newMessage', (...data: string[]) => {
             console.log('message from nest : ' + data);
-            var pouet: Message = {text : data, senderName: 'unknow'};
+            var pouet: Message = {text : data[1], senderName: data[0]};
             this.setState({
                 messages: [...this.state.messages, pouet]
             });

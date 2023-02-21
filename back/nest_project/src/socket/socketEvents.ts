@@ -23,7 +23,7 @@ export class Chat {
     @SubscribeMessage('message')
     handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         console.log('message to add from ' + client.id + ' : ' + data);
-        this.server.emit('newMessage', client.id + ' : ' + data);
+        this.server.emit('newMessage', client.id, data);
         console.log();
     }
 }
