@@ -32,7 +32,7 @@ function PingHandler(): JSX.Element {
   }, []);
 
   const sendPing = () => {
-      socket.emit('ping', 'j\'apprecie les fruits au sirop.');
+      socket.emit('ping', { to: socket.id, data: 'j\'aime les fruits au sirop'});
       const bug: string = new Date().toISOString();
       setLastPing(bug);
   }
