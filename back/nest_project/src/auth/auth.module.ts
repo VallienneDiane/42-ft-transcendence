@@ -6,7 +6,6 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { JwtStrategy } from "./jwt.strategy";
 
-// process.env.SECRET_KEY
 @Module({
     imports: 
     [
@@ -18,8 +17,7 @@ import { JwtStrategy } from "./jwt.strategy";
         }),
     ],
     controllers: [AuthController],
-    providers: [AuthService, JwtStrategy],
-    exports: [AuthService]
+    providers: [AuthService, JwtStrategy]
   })
 
   export class AuthModule { }
