@@ -2,32 +2,24 @@ import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-// import { Response } from 'express';
-import { AuthDto } from './auth.dto';
 import { UserDto } from 'src/user/user.dto';
 
 @Injectable()
 export class AuthService {
   constructor(private userService: UserService, private jwtService: JwtService) {}
 
-  async validateUser(login: string, password: string): Promise<AuthDto> {
-    const user = await this.userService.findByLogin(login);
-    if(!user) {
+  async validateUser(user: UserDto) {
+    const userCheck = await this.userService.findByLogin(user.login);
+    if(!userCheck) {
         throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
     }
-    const passwdIsMatching = await bcrypt.compare(password, user.password);
+    const passwdIsMatching = await bcrypt.compare(user.password, userCheck.password);
     if(!passwdIsMatching) {
         throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
-    return user;
-  }
-
-  async loginJwt(user: UserDto) {
-    const payload = { login: user.login, sub: user.id};
-
+    const payload = {login: userCheck.login, sub: userCheck.id};    
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
-    // response.cookie('access_token', access_token, {httpOnly: true});
 }
