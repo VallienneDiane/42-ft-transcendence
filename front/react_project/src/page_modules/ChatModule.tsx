@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
+import './ChatModule.css'
 
 const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
 
@@ -14,10 +15,10 @@ interface ChatHistory {
 
 function ListMessage(value: Message): JSX.Element {
     return (
-        <li>
-            <div>{value.senderName}</div>
-            <div>{value.text}</div>
-        </li>
+        <div className="message">
+            <div className="messageUserName">{value.senderName}</div>
+            <div className="bubble">{value.text}</div>
+        </div>
     )   
 }
 
@@ -47,17 +48,18 @@ class MessageList extends React.Component<{}, ChatHistory> {
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
         );
         return (
-            <ul className="messageList">
+            <div className="messageList">
                 {listItems}
-            </ul>
+            </div>
         );
     }
 }
 
-function Title() {
+function Header() {
     return (
-        <div>
+        <div className="chatMessageHeader">
             <h1>Channel 1</h1>
+            First test
         </div>
     )
 }
@@ -83,13 +85,10 @@ class SendMessageForm extends React.Component<{}, Message> {
 
     render() {
         return (
-            <div>
-                <form onSubmit={this.sendMessage}>
-                    <label>
-                        Type your message :  
-                        <input type="text" value={this.state.text} onChange={this.handleMessage} />
-                    </label>
-                    <input type="submit" value="send" />
+            <div className="sendMessage">
+                <form className="sendMessageForm" onSubmit={this.sendMessage}>
+                    <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
+                    <input type="submit" value="Send" />
                 </form>
             </div>
         )
@@ -99,10 +98,12 @@ class SendMessageForm extends React.Component<{}, Message> {
 export default class ChatModule extends React.Component {
     render() {
         return (
-            <div className="chat">
-                <Title />
-                <MessageList />
-                <SendMessageForm />
+            <div className="chatWrapper">
+                <div className="chatMessageWrapper">
+                    <Header />
+                    <MessageList />
+                    <SendMessageForm />
+                </div>
             </div>
         )
     }
