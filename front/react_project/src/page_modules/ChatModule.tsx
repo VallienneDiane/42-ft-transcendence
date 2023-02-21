@@ -12,6 +12,10 @@ interface ChatHistory {
     messages: Message[];
 }
 
+interface ChatLocation {
+    location: string;
+}
+
 function ListMessage(value: Message): JSX.Element {
     return (
         <li>
@@ -30,12 +34,15 @@ class MessageList extends React.Component<{}, ChatHistory> {
     componentDidMount(): void {
         socket.on('newMessage', (...data: string[]) => {
             console.log('message from nest : ' + data);
-            var pouet: Message = {text : data[1], senderName: data[0]};
+            var pouet: Message = {text : data[2], senderName: data[1]};
             this.setState({
                 messages: [...this.state.messages, pouet]
             });
         });
-        console.log('chat history : ' + this.state.messages);
+        
+        socket.on('notice', (data: string) => {
+            console.log(data);
+        })
     }
 
     componentWillUnmount(): void {
@@ -76,7 +83,7 @@ class SendMessageForm extends React.Component<{}, Message> {
 
     sendMessage(event: any) {
         event.preventDefault();
-        socket.emit('message', this.state.text);
+        socket.emit('chat', 'send', '_general', this.state.text);
         console.log(this.state.text);
         this.setState({ text: '' });
     }
@@ -96,7 +103,11 @@ class SendMessageForm extends React.Component<{}, Message> {
     }
 }
 
-export default class ChatModule extends React.Component {
+export default class ChatModule extends React.Component<{}, ChatLocation> {
+    constructor(props : {}) {
+        super(props);
+        this.state = {location: '_general'};
+    }
     render() {
         return (
             <div className="chat">
