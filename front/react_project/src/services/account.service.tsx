@@ -15,6 +15,7 @@ let saveToken = (token: string) => {
 }
 
 let logout = () => {
+    Axios.post('/auth/logout');
     localStorage.removeItem('token');
 }
 

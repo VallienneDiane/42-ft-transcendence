@@ -4,7 +4,12 @@ import { useForm } from "react-hook-form";
 import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
+import jwt from 'jsonwebtoken';
+import * as jsrsasign from 'jsrsasign';
+
+import { Buffer } from 'buffer';
 import LogInForm from "../models";
+import JwtPayload from "../models";
 
 const LoginForm: React.FC = () => {
     let navigate = useNavigate();
@@ -14,11 +19,14 @@ const LoginForm: React.FC = () => {
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
         .then(Response => {
-            console.log("loginform access token");
             accountService.saveToken(Response.data.access_token);
             // accountService.saveToken("temporarytokenthatitypedmyself18930890246c2e0ce6zcz1rce61");
-            user.login = Response.data.login;
-            user.email = Response.data.email;
+            const token: string = accountService.getToken()!;
+            console.log('token', token);
+            const payload: JwtPayload = jsrsasign.KJUR.jws.JWS.parse(token).payloadObj!;
+            console.log('payload login', payload.login);
+            user.login = payload.login;
+            // user.email = Response.data.email;
             navigate("/");
         })
         .catch(error => {
