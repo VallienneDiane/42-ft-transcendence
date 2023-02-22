@@ -1,8 +1,9 @@
-import { Controller, Post, Get, Body, Delete, Param, Patch } from "@nestjs/common";
+import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
+import { AuthGuard } from "@nestjs/passport";
 
 @Controller('user')
 export class UserController {
@@ -18,6 +19,7 @@ export class UserController {
     }
     
     // GET ALL USERS
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();

@@ -11,14 +11,14 @@ import { JwtStrategy } from "./jwt.strategy";
     [
         UserModule,
         PassportModule,
-        // PassportModule.register({             
-        //     defaultStrategy: 'jwt',
-        //     property: 'user',
-        //     session: false,
-        // }),
+        PassportModule.register({             
+            defaultStrategy: 'jwt',
+            property: 'user',
+            session: false,
+        }),
         JwtModule.register({
             secret: process.env.SECRET, 
-            signOptions: { expiresIn: '60s' },
+            signOptions: { expiresIn: '1d' },
         }),
     ],
     controllers: [AuthController],

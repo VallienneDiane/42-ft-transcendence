@@ -25,7 +25,7 @@ const SignupForm: React.FC = () => {
   });
   
   const onSubmit = (data: defaultFormData) => {
-    Axios.post('http://localhost:3000/user', data);
+    Axios.post('http://localhost:3000/user/', data);
     console.log(data);
   }
 
