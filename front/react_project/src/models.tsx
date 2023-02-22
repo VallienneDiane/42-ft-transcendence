@@ -18,4 +18,11 @@ export default interface UserData {
     password: string,
   }
 
+export default interface JwtPayload {
+  login: string;
+  sub: number;
+  iat: number;
+  exp: number;
+}
+
 // export default LogInForm, SignInForm
