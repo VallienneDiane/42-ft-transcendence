@@ -33,7 +33,12 @@ class MessageList extends React.Component<IChat, {}> {
         socket.on('newMessage', (...data: string[]) => {
             if (data[0] == this.props.dest) {
                 console.log('message from nest : ' + data);
-                var pouet: Message = {text : data[2], senderName: data[1]};
+                let pouet: Message = {text: data[2], senderName: data[1]};
+                this.props.action(pouet);
+            }
+            else if (data[0][0] != '_')
+            {
+                let pouet: Message = {text: 'private message : ' + data[2], senderName: data[1] }
                 this.props.action(pouet);
             }
         });
@@ -45,6 +50,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentWillUnmount(): void {
         socket.off('newMessage');
+        socket.off('notice');
     }
 
     render() {
@@ -214,7 +220,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
                     <Header dest={this.state.dest} />
                     <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} />
                     <SendMessageForm dest={this.state.dest} />
-                    {/* <ChangeDestination action={this.changeLoc} /> */}
+                    <ChangeDestination action={this.changeLoc} />
                 </div>
             </div>
         )
