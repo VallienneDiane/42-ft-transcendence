@@ -24,7 +24,7 @@ function ListMessage(value: Message): JSX.Element {
             <div className="messageUserName">{value.senderName}</div>
             <div className="bubble">{value.text}</div>
         </div>
-    )   
+    )
 }
 
 class MessageList extends React.Component<ChatDestination, ChatHistory> {
@@ -116,26 +116,27 @@ class SendMessageForm extends React.Component<ChatDestination, Message> {
 class ChangeDestination extends React.Component<ChatDestination, Message> {
     constructor(props : ChatDestination) {
         super(props);
-        this.state = { text: '' };
+        this.state = {text: ''};
         this.handleDestination = this.handleDestination.bind(this);
         this.changeDestination = this.changeDestination.bind(this);
     }
 
     handleDestination(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ text: event.target.value });
+        this.setState({text: event.target.value});
     }
 
     changeDestination(event: any) {
         event.preventDefault();
         console.log("event target value : " + event.target.value);
-        this.props.action(event.target.value);
+        this.props.action(this.state.text);
     }
 
     render() {
+        const text: string = this.state.text;
         return (
             <div className="changeLocation">
                 <form className="changeLocationForm" onSubmit={this.changeDestination}>
-                    <input type="textarea" placeholder="insert the new destination..." value={this.state.text} onChange={this.handleDestination} />
+                    <input type="textarea" placeholder="insert the new destination..." value={text} onChange={this.handleDestination} />
                     <input type="submit" value="change" />
                 </form>
             </div>
