@@ -44,7 +44,7 @@ class MessageList extends React.Component<{}, ChatHistory> {
     }
 
     render() {
-        const listItems: JSX.Element[] = this.state.messages.map(
+        const listItems: JSX.Element[] = this.state.messages.slice(0).reverse().map(
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
         );
         return (
@@ -87,9 +87,51 @@ class SendMessageForm extends React.Component<{}, Message> {
         return (
             <div className="sendMessage">
                 <form className="sendMessageForm" onSubmit={this.sendMessage}>
-                    <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
+                    <input type="textarea" className="inputMessage" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
                     <input type="submit" value="Send" />
                 </form>
+            </div>
+        )
+    }
+}
+
+class Search extends React.Component<{}, Message> {
+    constructor(props: {}) {
+        super(props);
+        this.state = { text: "" };
+        this.searchSmth = this.searchSmth.bind(this);
+        this.handleMessage = this.handleMessage.bind(this);
+    }
+
+    searchSmth(event: any) {
+        event.preventDefault();
+    }
+
+    handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ text: event.target.value });
+    }
+
+    render() {
+        const text: string = this.state.text;
+        return (
+            <div className="chatSearchHeader">
+                <form onSubmit={this.searchSmth}>
+                    <input type="textarea" className="searchBar" placeholder="Type your message..." value={text} onChange={this.handleMessage} />
+                    <input type="submit" value="Send" />
+                </form>
+            </div>
+        )
+    }
+}
+
+class ChannelList extends React.Component {
+    render() {
+        return (
+            <div className="channelList">
+                <ul>
+                    <li>Channel 1</li>
+                    <li>Channel 2</li>
+                </ul>
             </div>
         )
     }
@@ -99,6 +141,10 @@ export default class ChatModule extends React.Component {
     render() {
         return (
             <div className="chatWrapper">
+                <div className="left">
+                    <Search />
+                    <ChannelList />
+                </div>
                 <div className="chatMessageWrapper">
                     <Header />
                     <MessageList />

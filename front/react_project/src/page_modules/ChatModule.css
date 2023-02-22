@@ -1,11 +1,32 @@
 .chatWrapper {
 	display: flex;
-	padding: 1em;
-	width: 30%;
+	/* padding: 1em; */
+	width: 40%;
 	min-width: 450px;
 	height: 100%;
-	justify-content: flex-end;
-	background-color: rgb(68, 70, 97);
+	justify-content: flex-start;
+	color: black;
+	background-color: aliceblue;
+	overflow: hidden;
+	box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
+}
+
+.left {
+	display: flex;
+	flex-direction: column;
+	width: 30%;
+}
+
+.chatSearchHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: .75rem 1.5rem;
+}
+
+.channelList {
+	display: flex;
+	flex-direction: column;
 }
 
 .chatMessageWrapper {
@@ -13,18 +34,14 @@
 	flex-direction: column;
 	justify-content: space-around;
 	width: 70%;
-	border-radius: .5rem;
-	color: black;
-	background-color: aliceblue;
-	overflow: hidden;
-	box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
+	/* border-radius: .5rem; */
+	border: 1px solid rgb(214, 214, 214);
 }
 
 .chatMessageHeader {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	background: var(--white);
 	padding: .75rem 1.5rem;
 }
 
@@ -37,43 +54,38 @@
 	background: rgb(231, 231, 231);
 	padding: 1.5rem;
 	display: flex;
-	flex-direction: column;
+	flex-direction: column-reverse;
 	grid-row-gap: 1rem;
 	height: 80%;
-	/* max-height: 300px; */
 	overflow-y: auto;
+	/* max-height: 300px; */
 }
 
 .sendMessage {
 	display: flex;
 	justify-content: center;
-	background: var(--white);
-	padding: .75rem 1.5rem;
+	padding: .75rem .75rem;
 }
 
 .sendMessageForm {
 	display: flex;
 	align-self: flex-end;
-	background: var(--grey);
-	border-radius: .5rem;
-	padding: .5rem 1.25rem;
-}
-/* .chat {
-	display: flex;
-	align-items: center;
-	flex-flow: row wrap;
-	justify-content: space-around;
-	color: #000000;
-	background-color: rgb(255, 255, 255);
+	width: 90%;
+	padding: .5rem;
 }
 
-.messageUserName {
-	display: flex;
-	align-items: center;
-	color: #faec28;
-	font-weight: bold;
+.inputMessage {
+	width: 90%;
+	background: rgb(238, 238, 238);
+	color: black;
+	border-radius: .2rem;
+	border-width: 1px;
+	border-color: rgb(194, 194, 194);
+	padding: 1rem;
+	/* border: 2px rgb(0, 0, 0); */
 }
 
+/*
 .bubble {
 	overflow: hidden;
 	animation: MessageIn .3s;
