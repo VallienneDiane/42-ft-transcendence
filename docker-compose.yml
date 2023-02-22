@@ -25,6 +25,8 @@ services:
       - transcendence_network
     volumes:
       - ./back:/usr/src/app
+    env_file:
+      - .env
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################

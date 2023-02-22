@@ -1,25 +1,45 @@
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import Axios from 'axios';
-import * as yup from "yup";
 import './App.css'
-import SignupForm from './page_modules/SignupForm'
-import NavBar from './page_modules/NavBar'
-import LoginForm from './page_modules/LoginForm'
-import PingHandler from './page_modules/SocketHandler'
-import ChatModule from './page_modules/ChatModule';
+import NavBar from './components/Navbar'
+import PingHandler from './components/SocketHandler'
+import ChatModule from './components/ChatModule';
+import SignupForm from './components/SignupForm'
+import LoginForm from './components/LoginForm'
+import Home from './components/Home'
+import { Routes, Route } from "react-router-dom"
+import Profile from './components/Profile';
+import UserProvider from './user/UserProvider';
+import ProtectedRoutes from './components/ProtectedRoutes';
+import Chat from './components/Chat'
+import Layout from './components/Layout'
+import Game from './components/Game'
 
 function App() {
+  let user = {
+    token: "",
+    id: 666,
+    login: "",
+    email: "",
+    password: "",
+  };
 
     return (
       <div className="App">
-          {/* <NavBar/>
-          <SignupForm/>
-          <LoginForm/>
-          <PingHandler/> */}
-          <ChatModule />
-          {/* <ChatHandler /> */}
+        <UserProvider user={user}>
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path='/login' element={<LoginForm />} />
+              <Route path='/signin' element={<SignupForm />} />
+              <Route element={<ProtectedRoutes/>}>
+                <Route path='/game' element={<Game />} />
+                <Route path='/profile' element={<Profile />} />
+                <Route path='/profile/:id' element={<Profile />} />
+                <Route path='/' element={<Home />} />
+                <Route path='/chat' element={<Chat />} />
+              </Route>
+            </Route>
+
+          </Routes>
+        </UserProvider>
       </div>
   )
 }

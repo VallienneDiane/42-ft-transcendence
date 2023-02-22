@@ -2,17 +2,7 @@ import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength } from "class-validato
 
 export class UserDto {
     readonly id: number;
-
-    @IsNotEmpty()
-    @IsString()
-    readonly login: string;
-
-    @IsNotEmpty()
-    @IsEmail()
-    readonly email: string;
-
-    @IsNotEmpty()
-    @IsString()
-    // @MinLength(8)
-    password: string;
+    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsEmail() readonly email: string;
+    @IsNotEmpty() @IsString() @MinLength(8) password: string;
 }
