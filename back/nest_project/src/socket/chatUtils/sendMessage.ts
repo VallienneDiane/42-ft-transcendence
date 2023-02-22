@@ -5,11 +5,17 @@ export function send(dest: string, message: string, server: Server, client: Sock
     {
         server.emit("newMessage", dest, client.id, message);
         client.emit("notice", 'message send');
-        console.log(server.of("/").sockets[client.id]);
     }
     else
     {
-       let friend: Socket = server.of("/").sockets[client.id];
-       friend.emit("newMessage", dest, client.id, message);
+        let friend: Socket = server.of("/").sockets.get(dest);
+        //console.log(friend.id);
+        if (friend != undefined) {
+            friend.emit("newMessage", dest, client.id, message);
+            client.emit("newMessage", dest, client.id, message);
+            client.emit("notice", 'message send');
+        }
+        else
+            client.emit("notice", 'this user doesn\'t exist');
     }
 }
