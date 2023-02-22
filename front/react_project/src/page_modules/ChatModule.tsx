@@ -9,12 +9,9 @@ interface Message {
     senderName?: string;
 }
 
-interface ChatHistory {
-    messages: Message[];
-}
-
-interface ChatDestination {
-    dest: string;
+interface IChat {
+    dest?: string;
+    history?: Message[];
     action?: any;
 }
 
@@ -27,10 +24,9 @@ function ListMessage(value: Message): JSX.Element {
     )
 }
 
-class MessageList extends React.Component<ChatDestination, ChatHistory> {
-    constructor(props: ChatDestination) {
+class MessageList extends React.Component<IChat, {}> {
+    constructor(props: IChat) {
         super(props);
-        this.state = { messages: [] };
     }
 
     componentDidMount(): void {
@@ -38,9 +34,7 @@ class MessageList extends React.Component<ChatDestination, ChatHistory> {
             if (data[0] == this.props.dest) {
                 console.log('message from nest : ' + data);
                 var pouet: Message = {text : data[2], senderName: data[1]};
-                this.setState({
-                    messages: [...this.state.messages, pouet]
-                });
+                this.props.action(pouet);
             }
         });
         
@@ -54,7 +48,7 @@ class MessageList extends React.Component<ChatDestination, ChatHistory> {
     }
 
     render() {
-        const listItems: JSX.Element[] = this.state.messages.map(
+        const listItems: JSX.Element[] = this.props.history!.map(
             (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
         );
         return (
@@ -65,11 +59,11 @@ class MessageList extends React.Component<ChatDestination, ChatHistory> {
     }
 }
 
-function Header(title: ChatDestination) {
+function Header(title: IChat) {
     let location: string;
     console.log(title);
-    if (title.dest[0] == '_') {
-        location = 'Welcome to channel ' + title.dest.substring(1);
+    if (title.dest![0] == '_') {
+        location = 'Welcome to channel ' + title.dest!.substring(1);
     }
     else {
         location = 'Current discussion with ' + title.dest;
@@ -82,8 +76,8 @@ function Header(title: ChatDestination) {
     )
 }
 
-class SendMessageForm extends React.Component<ChatDestination, Message> {
-    constructor(props: ChatDestination) {
+class SendMessageForm extends React.Component<IChat, Message> {
+    constructor(props: IChat) {
         super(props);
         this.state = { text: '' };
         this.handleMessage = this.handleMessage.bind(this);
@@ -113,8 +107,8 @@ class SendMessageForm extends React.Component<ChatDestination, Message> {
     }
 }
 
-class ChangeDestination extends React.Component<ChatDestination, Message> {
-    constructor(props : ChatDestination) {
+class ChangeDestination extends React.Component<IChat, Message> {
+    constructor(props : IChat) {
         super(props);
         this.state = {text: ''};
         this.handleDestination = this.handleDestination.bind(this);
@@ -127,8 +121,8 @@ class ChangeDestination extends React.Component<ChatDestination, Message> {
 
     changeDestination(event: any) {
         event.preventDefault();
-        console.log("event target value : " + event.target.value);
         this.props.action(this.state.text);
+        this.setState({text: ''});
     }
 
     render() {
@@ -144,15 +138,23 @@ class ChangeDestination extends React.Component<ChatDestination, Message> {
     }
 }
 
-export default class ChatModule extends React.Component<{}, ChatDestination> {
+export default class ChatModule extends React.Component<{}, IChat> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: '_general'};
+        this.state = {dest: '_general', history: []};
         this.changeLoc = this.changeLoc.bind(this);
+        this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
     }
 
     changeLoc(newDest: string) {
         this.setState({dest: newDest});
+        this.setState({history: []});
+    }
+
+    handleNewMessageOnHistory(newMessage: Message) {
+        this.setState({
+            history: [...this.state.history!, newMessage]
+        });
     }
 
     render() {
@@ -160,9 +162,9 @@ export default class ChatModule extends React.Component<{}, ChatDestination> {
             <div className="chatWrapper">
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
-                    <MessageList dest={this.state.dest}/>
+                    <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} />
                     <SendMessageForm dest={this.state.dest} />
-                    <ChangeDestination dest={this.state.dest} action={this.changeLoc} />
+                    <ChangeDestination action={this.changeLoc} />
                 </div>
             </div>
         )
