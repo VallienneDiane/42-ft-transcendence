@@ -59,8 +59,8 @@ const SignupForm: React.FC = () => {
           {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
         </div>
         <button type="submit">SIGN UP</button>
+        <a href="/login">Already registered ? Log In</a>
       </form>
-      <a href="/login">Already registered ? Log In</a>
     </div>
   );
 };
