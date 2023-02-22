@@ -3,11 +3,11 @@ import SignInForm from "../models";
 import Axios from "./caller.service";
 
 let signIn = (credentials: SignInForm) => {
-    return Axios.post('/user', credentials);
+    return Axios.post('/user/signup', credentials);
 }
 
 let login = (credentials: LogInForm) => {
-    return Axios.post('/user/login', credentials);
+    return Axios.post('/auth/login', credentials);
 }
 
 let saveToken = (token: string) => {
