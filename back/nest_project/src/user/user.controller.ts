@@ -8,8 +8,7 @@ import { JwtService } from "@nestjs/jwt";
 
 // SIGN UP AND REGISTER USER IN DATABASE
 // GENERATE TOKEN FOR THIS NEW USER
-
-@Controller('user') // localhost:3000/user
+@Controller()
 export class UserController {
     constructor(
         private userService: UserService, 
@@ -17,16 +16,15 @@ export class UserController {
         {}
 
     // CREATE USER ACCOUNT, SEND POST REQUEST AND HASH THE PASSWORD WHEN REGISTER
-    @Post('signup') 
+    @Post('user/signup') 
     async create(@Body() newUser: UserDto) {
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
-        this.userService.create(newUser);
-        const payload = {login: newUser.login, sub: newUser.id};    
-        return {
-          access_token: this.jwtService.sign(payload),
-        };
+        await this.userService.create(newUser);
+        const payload = {login: newUser.login, sub: newUser.id};
+        const access_token = this.jwtService.sign(payload);
+        return (access_token);
     }
     // GET ALL USERS
     @UseGuards(AuthGuard('jwt'))
