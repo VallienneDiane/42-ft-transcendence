@@ -6,7 +6,7 @@
 	height: 100%;
 	justify-content: flex-start;
 	color: black;
-	background-color: aliceblue;
+	background-color: rgb(255, 255, 255);
 	overflow: hidden;
 	box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
 }
@@ -19,14 +19,42 @@
 
 .chatSearchHeader {
 	display: flex;
-	align-items: center;
 	justify-content: space-between;
+	align-items: center;
 	padding: .75rem 1.5rem;
+}
+
+.searchBar {
+	width: 80%;
+	background: rgb(238, 238, 238);
+	color: black;
+	border-radius: 2rem;
+	border-width: 1px;
+	border-color: rgb(194, 194, 194);
+	padding: .5rem;
+	/* border: 2px rgb(0, 0, 0); */
+}
+
+.searchButton {
+	width: 20%;
+	background-color: rgb(160, 160, 160);
+	border-radius: 50%;
+	padding: .2rem;
+	margin: .2rem;
+	cursor: pointer;
 }
 
 .channelList {
 	display: flex;
 	flex-direction: column;
+	/* justify-content: space-around; */
+	/* align-items: center; */
+	width: 100%;
+}
+
+li {
+	padding: 12px 10% 16px;
+	/* cursor: pointer; */
 }
 
 .chatMessageWrapper {
