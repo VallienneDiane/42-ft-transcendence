@@ -7,13 +7,10 @@ const Axios = axios.create({
 
 // Intercepteur pour le token
 // Intercepte la requete lrosqu'elle sort du front, la modifie et la relache vers le back
-
 Axios.interceptors.request.use(request => {
     if (accountService.isLogged()) (
         request.headers.Authorization = 'Bearer ' + accountService.getToken()
     )
-
-
     return request;
 })
 

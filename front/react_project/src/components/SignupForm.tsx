@@ -26,7 +26,6 @@ const SignupForm: React.FC = () => {
     .then(Response => {
       console.log("signupform access_token");
       accountService.saveToken(Response.data.access_token);
-      // accountService.logout(Response.data.access_token);
       // accountService.saveToken("temporarytokenthatitypedmyself18930890246c2e0ce6zcz1rce61");
       user.login = Response.data.login;
       user.email = Response.data.email;

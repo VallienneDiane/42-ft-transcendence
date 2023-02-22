@@ -23,10 +23,10 @@ services:
       - "3000:3000"
     networks:
       - transcendence_network
-    volumes:
-      - ./back:/usr/src/app
     env_file:
       - .env
+    volumes:
+      - back:/usr/src/app
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################
