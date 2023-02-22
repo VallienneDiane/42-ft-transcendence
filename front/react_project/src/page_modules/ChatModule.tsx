@@ -15,7 +15,6 @@ interface ChatHistory {
 
 interface ChatDestination {
     dest: string;
-    newDest?: string;
     action?: any;
 }
 
@@ -113,7 +112,7 @@ class SendMessageForm extends React.Component<ChatDestination, Message> {
         )
     }
 }
-/*
+
 class ChangeDestination extends React.Component<ChatDestination, Message> {
     constructor(props : ChatDestination) {
         super(props);
@@ -129,7 +128,7 @@ class ChangeDestination extends React.Component<ChatDestination, Message> {
     changeDestination(event: any) {
         event.preventDefault();
         console.log("event target value : " + event.target.value);
-        this.props.dest = event.target.value;
+        this.props.action(event.target.value);
     }
 
     render() {
@@ -142,24 +141,17 @@ class ChangeDestination extends React.Component<ChatDestination, Message> {
             </div>
         )
     }
-}*/
+}
 
 export default class ChatModule extends React.Component<{}, ChatDestination> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: '_general', newDest: ''};
+        this.state = {dest: '_general'};
         this.changeLoc = this.changeLoc.bind(this);
-        this.handleNewDest = this.handleNewDest.bind(this);
     }
 
-    changeLoc(event: any) {
-        event.preventDefault();
-        this.setState({dest: event.target.value});
-        this.setState({newDest: ''});
-    }
-
-    handleNewDest(str: any) {
-        this.setState({newDest: str});
+    changeLoc(newDest: string) {
+        this.setState({dest: newDest});
     }
 
     render() {
@@ -169,13 +161,7 @@ export default class ChatModule extends React.Component<{}, ChatDestination> {
                     <Header dest={this.state.dest} />
                     <MessageList dest={this.state.dest}/>
                     <SendMessageForm dest={this.state.dest} />
-                    {/* <ChangeDestination dest={this.state.dest} /> */}
-                    <div>
-                        <form onSubmit={this.changeLoc}>
-                            <input type="textarea" placeholder="insert the new destination..." value={this.state.newDest} onChange={this.handleNewDest} />
-                            <input type="submit" value="change" />
-                        </form>
-                    </div>
+                    <ChangeDestination dest={this.state.dest} action={this.changeLoc} />
                 </div>
             </div>
         )
