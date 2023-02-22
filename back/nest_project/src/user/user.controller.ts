@@ -1,9 +1,9 @@
-import { Controller, Post, Get, Body, Delete, Param, Patch, HttpStatus, HttpException } from "@nestjs/common";
+import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
-import { AuthDto } from "src/auth/auth.dto";
+import { AuthGuard } from "@nestjs/passport";
 
 @Controller('user')
 export class UserController {
@@ -17,12 +17,13 @@ export class UserController {
         newUser.password = hash;
         return this.userService.create(newUser);
     }
-    // POST REQUEST TO LOG IN THE WEBSITE
-    @Post('login') // localhost:3000/user/login
-    async validate(@Body() checkUser: AuthDto) {
-        return this.userService.validateUser(checkUser.login, checkUser.password);
-    }
+    // // POST REQUEST TO LOG IN THE WEBSITE
+    // @Post('login') // localhost:3000/user/login
+    // async validate(@Body() checkUser: UserDto) {
+    //     return this.userService.validateUser(checkUser.login, checkUser.password);
+    // }
     // GET ALL USERS
+    @UseGuards(AuthGuard('jwt'))
     @Get()
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
@@ -30,7 +31,6 @@ export class UserController {
     // GET ONE USER BY LOGIN
     @Get(':login')
     async displayUserByLogin(@Param('login') login: string): Promise<UserEntity> {
-        console.log("coucou");
         return await this.userService.findByLogin(login);
     }
 
