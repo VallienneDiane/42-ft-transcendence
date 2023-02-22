@@ -1,3 +1,4 @@
+import '../styles/Navbar.css'
 import React, { useContext } from "react"
 import { Link, Navigate } from "react-router-dom"
 import { UserContext } from "../user/UserContext";
@@ -18,10 +19,10 @@ const NavBar: React.FC = () => {
     <nav className="navbar">
       <ul>
         <li><Link to="/">Home</Link></li>
-        <li><Link to="/profile">Profil</Link></li>
-        <li><Link to="/">Game</Link></li>
+        <li><Link to="/game">Game</Link></li>
         <li><Link to="/chat">Chat</Link></li>
-        <li><button onClick={logout}>Log Out</button></li>
+        <li><Link to="/profile">Profil</Link></li>
+        { accountService.isLogged() ? (<li><button onClick={logout}>Log Out</button></li>) : null }
       </ul>
     </nav>
   )

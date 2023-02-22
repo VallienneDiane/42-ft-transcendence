@@ -8,6 +8,7 @@ import UserProvider from './user/UserProvider';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
+import Game from './components/Game'
 
 function App() {
   let user = {
@@ -26,6 +27,7 @@ function App() {
               <Route path='/login' element={<LoginForm />} />
               <Route path='/signin' element={<SignupForm />} />
               <Route element={<ProtectedRoutes/>}>
+                <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:id' element={<Profile />} />
                 <Route path='/' element={<Home />} />
