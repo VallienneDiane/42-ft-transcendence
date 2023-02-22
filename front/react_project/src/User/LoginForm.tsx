@@ -10,6 +10,11 @@ const LoginForm: React.FC = () => {
             placeholder="Enter your login ..."
             name="login"
             />
+            <input
+            type="password"
+            placeholder="Enter your password ..."
+            name="password"
+            />
             <button>Submit</button>
         </form>
         </div>
