@@ -12,7 +12,7 @@ import { UserService } from "./user.service";
 @Module({
     imports: [
         TypeOrmModule.forFeature([UserEntity]),
-        PassportModule.register({             
+        PassportModule.register({
             defaultStrategy: 'jwt',
             property: 'user',
             session: false,
