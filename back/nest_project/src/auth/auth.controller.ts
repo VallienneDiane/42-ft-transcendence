@@ -14,8 +14,9 @@ export class AuthController {
   @Post('auth/login')
   async genToken(@Body() user: UserDto) {
     const payload = {login: user.login, sub: user.id};
-    const access_token = this.jwtService.sign(payload);
-    return (access_token);
+    return {
+      access_token: this.jwtService.sign(payload)
+    }
   }
 }
 

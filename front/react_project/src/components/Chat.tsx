@@ -13,10 +13,8 @@ const Chat: React.FC = () => {
     useEffect(() => {
         userService.getAllUsers()
         .then(Response => {
-            console.log(Response.data);
-            // met à jour la variable 'users' grâce a sont setter à qui on envoie 'Response.data.data'
+            // met à jour la variable 'users' grâce a son setter à qui on envoie 'Response.data.data'
             setUsers(Response.data);
-            console.log('users', users);
         })
         .catch(error => console.log(error))
 
