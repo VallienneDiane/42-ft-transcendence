@@ -1,15 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import Axios from 'axios';
 import * as yup from "yup";
-import '../App.css'
-
-type defaultFormData = {
-  login: string,
-  email: string,
-  password: string,
-}
+import { UserContext } from '../user/UserContext';
+import { useNavigate } from 'react-router-dom';
+import SignInForm from '../models'
+import { accountService } from '../services/account.service';
 
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters"),
@@ -18,25 +14,38 @@ const userSchema = yup.object().shape({
 })
 
 const SignupForm: React.FC = () => {
-
-  const { register, handleSubmit, formState: { errors }} = useForm<defaultFormData>({
+  let navigate = useNavigate();
+  let user = useContext(UserContext);
+  
+  const { register, handleSubmit, formState: { errors }} = useForm<SignInForm>({
     resolver: yupResolver(userSchema)
   });
   
-  const onSubmit = (data: defaultFormData) => {
-    Axios.post('http://localhost:3000/user/signup', data);
-    console.log(data);
+  const signIn = (data: SignInForm) => {
+    accountService.signIn(data)
+    .then(Response => {
+      console.log("signupform access_token");
+      accountService.saveToken(Response.data.access_token);
+      // accountService.logout(Response.data.access_token);
+      // accountService.saveToken("temporarytokenthatitypedmyself18930890246c2e0ce6zcz1rce61");
+      user.login = Response.data.login;
+      user.email = Response.data.email;
+      navigate("/");
+    })
+    .catch(error => {
+        console.log(error);
+    });
   }
 
   return (
     <div className="block">
       <h1>SignUp Page</h1>
-      <form className="login" onSubmit={handleSubmit(onSubmit)}>
+      <form className="login" onSubmit={handleSubmit(signIn)}>
         <div>
           <label>Login</label>
           <br/>
           <input type="text" {...register("login")}/>
-          {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}
+          {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
         </div>
         <div>
           <label>Email</label>
@@ -51,6 +60,7 @@ const SignupForm: React.FC = () => {
           {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
         </div>
         <button type="submit">SIGN UP</button>
+        <a href="/login">Already registered ? Log In</a>
       </form>
     </div>
   );
