@@ -23,8 +23,9 @@ export class UserController {
         newUser.password = hash;
         await this.userService.create(newUser);
         const payload = {login: newUser.login, sub: newUser.id};
-        const access_token = this.jwtService.sign(payload);
-        return (access_token);
+        return {
+            access_token: this.jwtService.sign(payload)
+        }
     }
     // GET ALL USERS
     @UseGuards(AuthGuard('jwt'))
