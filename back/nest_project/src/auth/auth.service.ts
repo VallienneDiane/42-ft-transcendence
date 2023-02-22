@@ -20,6 +20,9 @@ export class AuthService {
     }
     const payload = {login: userCheck.login, sub: userCheck.id};    
     return {
+      id: userCheck.id,
+      login: userCheck.login,
+      email: userCheck.email,
       access_token: this.jwtService.sign(payload),
     };
   }

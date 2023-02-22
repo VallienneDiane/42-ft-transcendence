@@ -22,10 +22,13 @@ export class UserController {
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
-        this.userService.create(newUser);
+        await this.userService.create(newUser);
         const payload = {login: newUser.login, sub: newUser.id};    
         return {
-          access_token: this.jwtService.sign(payload),
+            id: newUser.id,
+            login: newUser.login,
+            email: newUser.email,
+            access_token: this.jwtService.sign(payload),
         };
     }
     // GET ALL USERS

@@ -12,27 +12,27 @@ export class UserService {
         private readonly usersRepository: Repository<UserEntity>
     ) {}
     // SIGN UP : CREATE NEW USER AND SAVE IT IN THE DATABASE
-    async create(newUser: UserEntity): Promise<UserEntity> {
-        return await this.usersRepository.save(newUser);
+    public create(newUser: UserEntity): Promise<UserEntity> {
+        return this.usersRepository.save(newUser);
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
-    async findByLogin(login: string): Promise<UserDto> {
-        return await this.usersRepository.findOneBy({login});
+    public findByLogin(login: string): Promise<UserDto> {
+        return  this.usersRepository.findOneBy({login});
     }
-    async findOne(options?: object): Promise<UserDto> {
-        const user =  await this.usersRepository.findOne(options);    
+    public findOne(options?: object): Promise<UserDto> {
+        const user =  this.usersRepository.findOne(options);    
         return (user);  
     }
     // DISPLAY ALL USERS
-    async findAll(): Promise<UserEntity[]> {
-        return await this.usersRepository.find();
+    public findAll(): Promise<UserEntity[]> {
+        return  this.usersRepository.find();
     }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
-        await this.usersRepository.update(login, User);
+        this.usersRepository.update(login, User);
     }
     // DELETE USER ACCOUNT BY ID
     async delete(login: string): Promise<void> {
-        await this.usersRepository.delete(login);
+        this.usersRepository.delete(login);
     }
 }
