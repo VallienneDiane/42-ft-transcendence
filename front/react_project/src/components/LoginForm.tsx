@@ -14,8 +14,9 @@ const LoginForm: React.FC = () => {
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
         .then(Response => {
-            // accountService.logout(Response.data.access_token);
-            accountService.saveToken("temporarytokenthatitypedmyself18930890246c2e0ce6zcz1rce61");
+            console.log("loginform access token");
+            accountService.saveToken(Response.data.access_token);
+            // accountService.saveToken("temporarytokenthatitypedmyself18930890246c2e0ce6zcz1rce61");
             user.login = Response.data.login;
             user.email = Response.data.email;
             navigate("/");

@@ -10,7 +10,6 @@ import { JwtStrategy } from "./jwt.strategy";
     imports: 
     [
         UserModule,
-        PassportModule,
         PassportModule.register({             
             defaultStrategy: 'jwt',
             property: 'user',

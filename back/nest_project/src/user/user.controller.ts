@@ -4,24 +4,30 @@ import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { AuthGuard } from "@nestjs/passport";
+import { JwtService } from "@nestjs/jwt";
 
-@Controller('user')
+// SIGN UP AND REGISTER USER IN DATABASE
+// GENERATE TOKEN FOR THIS NEW USER
+
+@Controller('user') // localhost:3000/user
 export class UserController {
-    constructor(private userService: UserService) {} //instanciate an user service class (dependency injection) ~ to const userService = new userService()
+    constructor(
+        private userService: UserService, 
+        private jwtService: JwtService) 
+        {}
 
-    // POST REQUEST TO CREATE USER ACCOUNT
-    @Post() // localhost:3000/user
+    // CREATE USER ACCOUNT, SEND POST REQUEST AND HASH THE PASSWORD WHEN REGISTER
+    @Post('signup') 
     async create(@Body() newUser: UserDto) {
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
-        return this.userService.create(newUser);
+        this.userService.create(newUser);
+        const payload = {login: newUser.login, sub: newUser.id};    
+        return {
+          access_token: this.jwtService.sign(payload),
+        };
     }
-    // // POST REQUEST TO LOG IN THE WEBSITE
-    // @Post('login') // localhost:3000/user/login
-    // async validate(@Body() checkUser: UserDto) {
-    //     return this.userService.validateUser(checkUser.login, checkUser.password);
-    // }
     // GET ALL USERS
     @UseGuards(AuthGuard('jwt'))
     @Get()
