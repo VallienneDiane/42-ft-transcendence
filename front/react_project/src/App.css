@@ -1,3 +1,4 @@
+
 body {
   background-color: rgb(45, 13, 90);
   margin:0;
@@ -20,7 +21,6 @@ body {
   height:4%;
   display: flex;
   align-items: flex-end;
-  background-color: aqua;
 }
 
 .navbar ul {
@@ -30,11 +30,21 @@ body {
   align-items: center;
   justify-content: space-around;
   font-size: 20px;
-  background-color: rgb(0, 0, 0);
   list-style: none;
 }
 
-.navbar a {
+.navbar a, .navbar button {
+  padding: 5px;
+  margin: 0 5px;
+  border: 1px black solid;
+  border-radius: 5%;
+  background-color: rgb(45, 13, 90);
+  color: white;
+}
+
+.navbar a:hover, .navbar button:hover {
+  border: 1px black solid;
+  background-color: rgb(73, 48, 107);
   color: white;
 }
 

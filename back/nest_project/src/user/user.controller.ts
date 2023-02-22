@@ -17,7 +17,11 @@ export class UserController {
         newUser.password = hash;
         return this.userService.create(newUser);
     }
-    
+    // // POST REQUEST TO LOG IN THE WEBSITE
+    // @Post('login') // localhost:3000/user/login
+    // async validate(@Body() checkUser: UserDto) {
+    //     return this.userService.validateUser(checkUser.login, checkUser.password);
+    // }
     // GET ALL USERS
     @UseGuards(AuthGuard('jwt'))
     @Get()

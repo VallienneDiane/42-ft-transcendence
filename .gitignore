@@ -1,5 +1,5 @@
 pgadmin/
 postgres/
 nodes_modules/
-Makefile
 docker-compose.yml
+Makefile

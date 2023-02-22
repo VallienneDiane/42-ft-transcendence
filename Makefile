@@ -1,3 +1,7 @@
+IMAGES := $(shell docker images --quiet)
+CONTAINERS := $(shell docker ps --quiet)
+VOLUMES := $(shell docker volume ls --quiet)
+
 all : run
 
 run :
@@ -13,11 +17,19 @@ ps :
 	docker ps
 	docker volume ls
 
-clean : prune
-		docker-compose -f docker-compose.yml down
-		docker volume rm -f db back front pgadmin
-		sudo rm -rf ./postgres
-		sudo rm -rf ./pgadmin
+clean : down
+ifneq ($(strip $(CONTAINERS)),)
+docker rm -f $(CONTAINERS)
+endif
+ifneq ($(strip $(IMAGES)),)
+	docker rmi -f $(IMAGES)
+endif
+
+vclean :
+ifneq ($(strip $(VOLUMES)),)
+	docker volume rm $(VOLUMES)
+endif
+	sudo rm -rf ./back/postgres
 
 prune :
 	echo y | docker system prune -a
