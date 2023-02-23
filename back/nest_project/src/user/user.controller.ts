@@ -29,7 +29,7 @@ export class UserController {
     }
     // GET ALL USERS
     @UseGuards(AuthGuard('jwt'))
-    @Get()
+    @Get('/users')
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
     }

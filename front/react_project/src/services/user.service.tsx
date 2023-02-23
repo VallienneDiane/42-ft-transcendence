@@ -1,7 +1,7 @@
 import Axios from "./caller.service"
 
 let getAllUsers = () => {
-    return Axios.get("/user");
+    return Axios.get("/users");
 }
 
 let getUser = (login: string) => {
