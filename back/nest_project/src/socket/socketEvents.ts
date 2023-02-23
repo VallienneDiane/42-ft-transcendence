@@ -4,9 +4,9 @@ import { send } from './chatUtils/sendMessage';
 import { join } from './chatUtils/channels';
 
 
-@WebSocketGateway({transports: ['websocket']})
+@WebSocketGateway({transports: ['websocket']}) // gateway is listening
 export class PingEvent {
-    @WebSocketServer()
+    @WebSocketServer() // create websocket server
     server: Server;
 
     //receive events
