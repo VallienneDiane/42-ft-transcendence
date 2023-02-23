@@ -1,6 +1,7 @@
-import LogInForm from "../models";
-import SignInForm from "../models";
+import { LogInForm, SignInForm, JwtPayload, User} from "../models";
 import Axios from "./caller.service";
+import * as jsrsasign from 'jsrsasign';
+
 
 let signIn = (credentials: SignInForm) => {
     return Axios.post('/user/signup', credentials);
@@ -20,7 +21,6 @@ let logout = () => {
 }
 
 let isLogged = () => {
-    // NEED TO CHECK IF TOKEN IS VALID !! ou pas, sera fait par le back
     let token = localStorage.getItem('token');
     return !!token; // !! return false if token = (null)
 }
@@ -29,6 +29,11 @@ let getToken = () => {
     return localStorage.getItem('token');
 }
 
+let readPayload = () => {
+    console.log('token', getToken());
+    return jsrsasign.KJUR.jws.JWS.parse(getToken()!).payloadObj!;
+}
+
 export const accountService = {
-    signIn, login, saveToken, logout, isLogged, getToken
+    signIn, login, saveToken, logout, isLogged, getToken, readPayload
 }
