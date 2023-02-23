@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
@@ -17,7 +16,7 @@ export class UserService {
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
     public findByLogin(login: string): Promise<UserDto> {
-        return  this.usersRepository.findOneBy({login});
+        return this.usersRepository.findOneBy({login});
     }
     public findOne(options?: object): Promise<UserDto> {
         const user =  this.usersRepository.findOne(options);    
@@ -25,7 +24,7 @@ export class UserService {
     }
     // DISPLAY ALL USERS
     public findAll(): Promise<UserEntity[]> {
-        return  this.usersRepository.find();
+        return this.usersRepository.find();
     }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
