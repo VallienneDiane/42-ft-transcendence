@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
-import './ChatModule.css'
+import '../styles/ChatModule.css'
 
 const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
 
@@ -178,8 +178,8 @@ class ChangeDestination extends React.Component<IChat, Message> {
 class ChannelList extends React.Component {
     render() {
         return (
-            <div className="channelList">
-                <ul>
+            <div>
+                <ul className="channelList">
                     <li>Channel 1</li>
                     <li>Channel 2</li>
                     <li>Channel 3</li>
