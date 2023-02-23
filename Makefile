@@ -19,7 +19,7 @@ ps :
 
 clean : down
 ifneq ($(strip $(CONTAINERS)),)
-docker rm -f $(CONTAINERS)
+	docker rm -f $(CONTAINERS)
 endif
 ifneq ($(strip $(IMAGES)),)
 	docker rmi -f $(IMAGES)
