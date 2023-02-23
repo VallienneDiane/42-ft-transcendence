@@ -1,9 +1,9 @@
-import { LogInForm, SignInForm, JwtPayload, User} from "../models";
+import { LogInForm, SignUpForm, JwtPayload, User} from "../models";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
 
-let signIn = (credentials: SignInForm) => {
+let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
 
@@ -35,5 +35,5 @@ let readPayload = () => {
 }
 
 export const accountService = {
-    signIn, login, saveToken, logout, isLogged, getToken, readPayload
+    signUp, login, saveToken, logout, isLogged, getToken, readPayload
 }

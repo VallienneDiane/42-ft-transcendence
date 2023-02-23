@@ -28,25 +28,25 @@ export class UserController {
     }
     //get all users
     @UseGuards(AuthGuard('jwt'))
-    @Get('/users')
+    @Get('users')
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
     }
     //get profile
     @UseGuards(AuthGuard('jwt'))
-    @Get('/user/:login')
+    @Get('user/:login')
     async displayUserByLogin(@Param('login') login: string): Promise<UserEntity> {
         return await this.userService.findByLogin(login);
     }
     //update account params
     @UseGuards(AuthGuard('jwt'))
-    @Patch('/user/:login')
+    @Patch('user/:login')
     async update(@Param('login') login: string, @Body() user: UserDto): Promise<void> {
         return await this.userService.update(login, user);
     }
     //delete user account
     @UseGuards(AuthGuard('jwt'))
-    @Delete('/user/:login')
+    @Delete('user/:login')
     async delete(@Param('login') login: string) {
         return this.userService.delete(login);
     }

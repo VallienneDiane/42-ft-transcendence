@@ -41,7 +41,7 @@ const LoginForm: React.FC = () => {
             // required
             />
             <button type="submit">Submit</button>
-            <a href="/signin">Not registered ? Sign In !</a>
+            <a href="/signup">Not registered ? Sign Up !</a>
         </form>
         </div>
     )

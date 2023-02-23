@@ -18,10 +18,6 @@ export class UserService {
     public findByLogin(login: string): Promise<UserDto> {
         return this.usersRepository.findOneBy({login});
     }
-    public findOne(options?: object): Promise<UserDto> {
-        const user =  this.usersRepository.findOne(options);    
-        return (user);  
-    }
     // DISPLAY ALL USERS
     public findAll(): Promise<UserEntity[]> {
         return this.usersRepository.find();

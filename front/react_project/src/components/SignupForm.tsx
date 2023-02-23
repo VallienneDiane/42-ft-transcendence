@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useNavigate } from 'react-router-dom';
-import { SignInForm } from '../models'
+import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
 
 const userSchema = yup.object().shape({
@@ -15,12 +15,12 @@ const userSchema = yup.object().shape({
 const SignupForm: React.FC = () => {
   let navigate = useNavigate();
   
-  const { register, handleSubmit, formState: { errors }} = useForm<SignInForm>({
+  const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
   });
   
-  const signIn = (data: SignInForm) => {
-    accountService.signIn(data)
+  const signUp = (data: SignUpForm) => {
+    accountService.signUp(data)
     .then(Response => {
       accountService.saveToken(Response.data.access_token);
       navigate("/");
@@ -33,7 +33,7 @@ const SignupForm: React.FC = () => {
   return (
     <div>
       <h1>SignUp Page</h1>
-      <form className="login" onSubmit={handleSubmit(signIn)}>
+      <form className="login" onSubmit={handleSubmit(signUp)}>
         <div>
           <label>Login</label>
           <br/>
