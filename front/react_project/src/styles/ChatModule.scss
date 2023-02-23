@@ -21,6 +21,7 @@
 	justify-content: space-between;
 	align-items: center;
 	padding: .75rem 1.5rem;
+
 }
 
 .searchBar {
@@ -31,7 +32,12 @@
 	border-width: 1px;
 	border-color: rgb(194, 194, 194);
 	padding: .5rem;
+	color: grey;
+	border: 0px solid transparent;
 	/* border: 2px rgb(0, 0, 0); */
+	&::placeholder {
+		color: #B3B3B3;
+	}
 }
 
 .searchButton {
@@ -43,8 +49,15 @@
 	cursor: pointer;
 }
 
+.channelListWrapper {
+	display: flex;
+	justify-content: space-between;
+	padding: .75rem 1.5rem;
+}
+
 .channelList {
 	display: flex;
+	align-items: flex-end;
 	flex-direction: column;
 }
 

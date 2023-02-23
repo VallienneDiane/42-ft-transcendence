@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
-import '../styles/ChatModule.css'
+import '../styles/ChatModule.scss'
 
 const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket']})
+
+const channels: string[] = [ "general", "events", "meme", "njaros"];
 
 interface Message {
     text: string;
@@ -113,6 +115,10 @@ class SendMessageForm extends React.Component<IChat, Message> {
     }
 }
 
+function matchChannel(channel: string) {
+
+}
+
 class Search extends React.Component<{}, Message> {
     constructor(props: {}) {
         super(props);
@@ -123,6 +129,12 @@ class Search extends React.Component<{}, Message> {
 
     searchSmth(event: any) {
         event.preventDefault();
+        if (this.state.text.length > 0) {
+            return channels.forEach((channel, index) => {
+            if (channel === this.state.text) {
+                matchChannel(this.state.text);
+            }});
+        }
         this.setState({ text: "" });
     }
 
@@ -135,6 +147,7 @@ class Search extends React.Component<{}, Message> {
         return (
             <div>
                 <form className="chatSearchHeader" onSubmit={this.searchSmth}>
+                    <i className="fa fa-search" aria-hidden="true"></i>
                     <input type="textarea" className="searchBar" placeholder="Search" value={text} onChange={this.handleMessage} />
                     <input type="submit" className="searchButton" value="👆" />
                 </form>
@@ -178,12 +191,12 @@ class ChangeDestination extends React.Component<IChat, Message> {
 class ChannelList extends React.Component {
     render() {
         return (
-            <div>
+            <div className="channelListWrapper">
                 <ul className="channelList">
-                    <li>Channel 1</li>
-                    <li>Channel 2</li>
-                    <li>Channel 3</li>
-                    <li>Channel 4</li>
+                    <li>general</li>
+                    <li>events</li>
+                    <li>meme</li>
+                    <li>njaros</li>
                 </ul>
             </div>
         )
