@@ -5,8 +5,6 @@ import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 
-
-
 const NavBar: React.FC = () => {
   let navigate = useNavigate();
 

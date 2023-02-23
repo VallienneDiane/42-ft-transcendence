@@ -1,5 +1,5 @@
 import './App.css'
-import SignupForm from './components/SignupForm'
+import SignUpForm from './components/SignupForm'
 import LoginForm from './components/LoginForm'
 import Home from './components/Home'
 import { Routes, Route } from "react-router-dom"
@@ -25,7 +25,7 @@ function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginForm />} />
-              <Route path='/signin' element={<SignupForm />} />
+              <Route path='/signup' element={<SignUpForm />} />
               <Route element={<ProtectedRoutes/>}>
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
