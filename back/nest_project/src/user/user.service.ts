@@ -19,9 +19,14 @@ export class UserService {
         return this.usersRepository.findOneBy({login});
     }
     // DISPLAY ALL USERS
-    public findAll(): Promise<UserEntity[]> {
-        return this.usersRepository.find();
+    async findAll(): Promise<{ id: number, login: string }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.id', 'user.login'])
+          .getMany();
     }
+    // public findAll(): Promise<UserEntity[]> {
+    //     return this.usersRepository.find();
+    // }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
         this.usersRepository.update(login, User);
