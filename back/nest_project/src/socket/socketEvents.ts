@@ -24,7 +24,7 @@ export class Chat {
     server: Server;
 
     @SubscribeMessage('chat')
-    handleEvent(@MessageBody() data: string[3], @ConnectedSocket() client: Socket) {
+    handleEvent(@MessageBody() data: string[], @ConnectedSocket() client: Socket) {
         console.log(client.id , ...data);
         switch (data[0])
         {

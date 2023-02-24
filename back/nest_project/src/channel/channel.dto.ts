@@ -3,5 +3,6 @@ import { IChannel } from "./channel.interface";
 
 export class ChannelDto {
 	@IsNotEmpty() @IsString() readonly name: string;
-	readonly content: IChannel;
+	readonly content: string[];
+	readonly userList: string[];
 }
