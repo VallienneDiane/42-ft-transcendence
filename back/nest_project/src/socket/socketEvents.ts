@@ -3,21 +3,6 @@ import { Server, Socket } from 'socket.io';
 import { send } from './chatUtils/sendMessage';
 import { join } from './chatUtils/channels';
 
-
-@WebSocketGateway({transports: ['websocket']}) // gateway is listening
-export class PingEvent {
-    @WebSocketServer() // create websocket server
-    server: Server;
-
-    //receive events
-    @SubscribeMessage('ping')
-    handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-        // send an event
-        console.log(client.id + data);
-        this.server.emit('pong', client.id, data);
-    }
-}
-
 @WebSocketGateway({transports: ['websocket']})
 export class Chat {
     @WebSocketServer()
