@@ -116,7 +116,7 @@ class SendMessageForm extends React.Component<IChat, Message> {
 }
 
 function matchChannel(channel: string) {
-
+    console.log(channel);
 }
 
 class Search extends React.Component<{}, Message> {
@@ -155,7 +155,6 @@ class Search extends React.Component<{}, Message> {
         )
     }
 }
-
 
 class ChangeDestination extends React.Component<IChat, Message> {
     constructor(props : IChat) {
