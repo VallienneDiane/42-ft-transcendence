@@ -10,6 +10,15 @@ export class ChannelEntity {
 	})
 	name: string;
 
-	@Column()
-	content: IChannel;
+	@Column('simple-array', {
+		array: true,
+		default: [],
+	})
+	content: string[];
+
+	@Column('simple-array', {
+		array: true,
+		default: [],
+	})
+	userList: string[];
 }
