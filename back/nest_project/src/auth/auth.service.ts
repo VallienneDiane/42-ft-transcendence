@@ -1,8 +1,9 @@
 
-import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import * as speakeasy from "speakeasy";
 
 @Injectable()
 export class AuthService {
@@ -26,6 +27,17 @@ export class AuthService {
     const payload = {login: user.login, sub: user.id};
     return {
       access_token: this.jwtService.sign(payload)
+    }
+  }
+
+  //otp = one time password
+  async genTwoFactorSecretCode() {
+    const secretCode = speakeasy.generateSecret({
+      name: process.env.TWOFACTOR_APP_NAME,
+    });
+    return {
+      otpauthUrl: secretCode.otpauth_url,
+      base32: secretCode.base32,
     }
   }
 }
