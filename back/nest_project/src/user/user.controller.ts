@@ -6,16 +6,15 @@ import * as bcrypt from 'bcrypt';
 import { AuthGuard } from "@nestjs/passport";
 import { JwtService } from "@nestjs/jwt";
 
-// SIGN UP AND REGISTER USER IN DATABASE
-// GENERATE TOKEN FOR THIS NEW USER
+// SIGN UP, REGISTER NEW USER IN DATABASE, NEW TOKEN
 @Controller()
 export class UserController {
     constructor(
-        private userService: UserService, 
-        private jwtService: JwtService) 
+        private userService: UserService,
+        private jwtService: JwtService)
         {}
 
-    // CREATE USER ACCOUNT, SEND POST REQUEST AND HASH THE PASSWORD WHEN REGISTER
+    //create user account in db and generate token
     @Post('user/signup') 
     async create(@Body() newUser: UserDto) {
         const saltOrRounds = 10;
@@ -27,24 +26,27 @@ export class UserController {
             access_token: this.jwtService.sign(payload)
         }
     }
-    // GET ALL USERS
+    //get all users
     @UseGuards(AuthGuard('jwt'))
-    @Get()
+    @Get('/users')
     async findAll(): Promise<UserEntity[]> {
         return await this.userService.findAll();
     }
-    // GET ONE USER BY LOGIN
-    @Get(':login')
+    //get profile
+    @UseGuards(AuthGuard('jwt'))
+    @Get('/user/:login')
     async displayUserByLogin(@Param('login') login: string): Promise<UserEntity> {
         return await this.userService.findByLogin(login);
     }
-
-    @Patch(':login')
+    //update account params
+    @UseGuards(AuthGuard('jwt'))
+    @Patch('/user/:login')
     async update(@Param('login') login: string, @Body() user: UserDto): Promise<void> {
-        return await this.userService.update(login, user); //+id = cast in number or Number(id)
+        return await this.userService.update(login, user);
     }
-
-    @Delete('login')
+    //delete user account
+    @UseGuards(AuthGuard('jwt'))
+    @Delete('/user/:login')
     async delete(@Param('login') login: string) {
         return this.userService.delete(login);
     }

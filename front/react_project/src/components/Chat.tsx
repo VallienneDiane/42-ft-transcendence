@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { userService } from "../services/user.service";
-import UserData from "../models"
+import { UserData } from "../models"
 
 
 const Chat: React.FC = () => {
