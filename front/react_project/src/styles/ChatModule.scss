@@ -34,9 +34,10 @@
 	padding: .5rem;
 	color: grey;
 	border: 0px solid transparent;
-	/* border: 2px rgb(0, 0, 0); */
-	&::placeholder {
-		color: #B3B3B3;
+	transition: all .2s ease;
+	&:focus {
+		outline: none;
+		box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
 	}
 }
 
@@ -116,9 +117,8 @@ li {
 	background: rgb(238, 238, 238);
 	color: black;
 	border-radius: .2rem;
-	border-width: 1px;
-	border-color: rgb(194, 194, 194);
 	padding: 1rem;
+	border: 0px solid transparent;
 	/* border: 2px rgb(0, 0, 0); */
 }
 
