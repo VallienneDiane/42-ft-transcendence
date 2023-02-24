@@ -20,12 +20,12 @@ import { JwtPayload } from "jsonwebtoken";
 // }
 
 const Home: React.FC = () => {
-        let user: JwtPayload = accountService.readPayload();
+        let decodedToken: JwtPayload = accountService.readPayload()!;
 
         return (
             <div>
                 <h1>Home Page</h1>
-                <p>Bonjour {user?.login} !</p>
+                <p>Bonjour {decodedToken?.login} !</p>
                 <p>Ici on aura les boutons pour rejoindre des parties etc</p>
             </div>
         )

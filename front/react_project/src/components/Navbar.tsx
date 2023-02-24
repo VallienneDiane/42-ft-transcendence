@@ -1,6 +1,6 @@
 import '../styles/Navbar.css'
 import React, { useContext } from "react"
-import { Link, Navigate } from "react-router-dom"
+import { Link, Navigate, NavLink } from "react-router-dom"
 import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
@@ -18,10 +18,14 @@ const NavBar: React.FC = () => {
   return (
     <nav className="navbar">
       <ul>
-        <li><Link to="/">Home</Link></li>
-        <li><Link to="/game">Game</Link></li>
-        <li><Link to="/chat">Chat</Link></li>
-        <li><Link to="/profile">Profil</Link></li>
+        <li><NavLink to="/">Home</NavLink></li>
+        <li><NavLink to="/game">Game</NavLink></li>
+        <li><NavLink to="/chat">Chat</NavLink></li>
+        <li><NavLink to="/profile">Profil</NavLink></li>
+        <li><a href="/">Home</a></li>
+        <li><a href="/game">Game</a></li>
+        <li><a href="/chat">Chat</a></li>
+        <li><a href="/profile">Profil</a></li>
         { accountService.isLogged() ? (<li><button onClick={logout}>Log Out</button></li>) : null }
       </ul>
     </nav>
