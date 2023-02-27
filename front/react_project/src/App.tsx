@@ -9,8 +9,10 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
+import Settings from './components/Settings'
 
 function App() {
+
   let user = {
     token: "",
     id: 666,
@@ -32,6 +34,7 @@ function App() {
                 <Route path='/profile/:id' element={<Profile />} />
                 <Route path='/' element={<Home />} />
                 <Route path='/chat' element={<Chat />} />
+                <Route path='/settings' element={<Settings />} />
               </Route>
             </Route>
 

@@ -24,9 +24,6 @@ export class UserService {
           .select(['user.id', 'user.login'])
           .getMany();
     }
-    // public findAll(): Promise<UserEntity[]> {
-    //     return this.usersRepository.find();
-    // }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
         this.usersRepository.update(login, User);
@@ -35,4 +32,19 @@ export class UserService {
     async delete(login: string): Promise<void> {
         this.usersRepository.delete(login);
     }
+
+    //set secret code for 2fa in user entity
+    async setTwoFactorAuthSecret(secret: string, id: number) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.twoFactorSecret = secret;
+        console.log("SET code secret : ", user.twoFactorSecret);
+    }
+    // the user turned on the 2fa
+    async turnOnTwoFactor(id: number) {
+        console.log("turn on two factors to TRUE ");
+        const user = await this.usersRepository.findOneBy({id});
+        user.isTwoFactorEnabled = true;
+        console.log(user.isTwoFactorEnabled);
+    }
+  
 }

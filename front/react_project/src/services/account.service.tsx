@@ -11,6 +11,11 @@ let login = (credentials: LogInForm) => {
     return Axios.post('/auth/login', credentials);
 }
 
+// quand bouton activé, doit récupérer infos du user via token et faire requete post
+let enableTwoFactorAuth = (token: readPayload) => {
+    return Axios.post('/auth/enableTwoFactorAuth', token);
+}
+
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
@@ -35,5 +40,5 @@ let readPayload = () => {
 }
 
 export const accountService = {
-    signUp, login, saveToken, logout, isLogged, getToken, readPayload
+    signUp, login, saveToken, logout, isLogged, getToken, readPayload, enableTwoFactorAuth
 }
