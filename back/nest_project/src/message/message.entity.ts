@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from "typeor
 
 @Entity()
 export class MessageEntity {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id: number;
 
     @Column('string')
@@ -15,6 +15,5 @@ export class MessageEntity {
     content: string
 
     @CreateDateColumn()
-    @Column()
     date: Date
 }

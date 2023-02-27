@@ -1,7 +1,9 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket } from "@nestjs/websockets";
+import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io';
 import { send } from './chatUtils/sendMessage';
 import { join } from './chatUtils/channels';
+import { Base64 } from "js-base64";
+import * as jsrsasign from 'jsrsasign';
 
 
 @WebSocketGateway({transports: ['websocket']}) // gateway is listening
@@ -19,9 +21,17 @@ export class PingEvent {
 }
 
 @WebSocketGateway({transports: ['websocket']})
-export class Chat {
+export class Chat implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
+
+    handleConnection(client: Socket) {
+        console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' is connected to chat');
+    }
+
+    handleDisconnect(client: Socket) {
+        console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' disconnected');
+    }
 
     @SubscribeMessage('chat')
     handleEvent(@MessageBody() data: string[], @ConnectedSocket() client: Socket) {
