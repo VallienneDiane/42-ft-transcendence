@@ -1,10 +1,10 @@
-import { LogInForm, SignInForm, User} from "../models";
+import { LogInForm, SignUpForm, User} from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
 // Requete pour créer un user
-let signIn = (credentials: SignInForm) => {
+let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
 
@@ -14,8 +14,10 @@ let login = (credentials: LogInForm) => {
 }
 
 // quand bouton activé, doit récupérer infos du user via token et faire requete post
-let enableTwoFactorAuth = (token: readPayload) => {
-    return Axios.post('/auth/enableTwoFactorAuth', token);
+let toggleTwoFactorAuth = () => {
+    const payload = readPayload();
+    console.log("PAYLOAD : ", payload);
+    return Axios.post('/auth/enableTwoFactorAuth', payload);
 }
 
 let saveToken = (token: string) => {
@@ -69,5 +71,5 @@ let readPayload = () => {
 }
 
 export const accountService = {
-    signIn, login, saveToken, logout, isLogged, getToken, readPayload, enableTwoFactorAuth
+    signUp, login, saveToken, logout, isLogged, getToken, readPayload, toggleTwoFactorAuth
 }
