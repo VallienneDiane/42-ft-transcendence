@@ -18,12 +18,12 @@ export interface UserData {
     password: string
   }
 
-export interface JwtPayload {
-  login: string,
-  sub: number,
-  iat: number,
-  exp: number
-}
+// export interface JwtPayload {
+//   login: string,
+//   sub: number,
+//   iat: number,
+//   exp: number
+// }
 
 export interface User {
   token: string,
