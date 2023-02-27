@@ -22,10 +22,10 @@ const NavBar: React.FC = () => {
         <li><NavLink to="/game">Game</NavLink></li>
         <li><NavLink to="/chat">Chat</NavLink></li>
         <li><NavLink to="/profile">Profil</NavLink></li>
-        <li><a href="/">Home</a></li>
+        {/* <li><a href="/">Home</a></li>
         <li><a href="/game">Game</a></li>
         <li><a href="/chat">Chat</a></li>
-        <li><a href="/profile">Profil</a></li>
+        <li><a href="/profile">Profil</a></li> */}
         { accountService.isLogged() ? (<li><button onClick={logout}>Log Out</button></li>) : null }
       </ul>
     </nav>
