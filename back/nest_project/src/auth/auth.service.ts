@@ -4,6 +4,9 @@ import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as speakeasy from "speakeasy";
+import * as QRCode from 'qrcode';
+import { UserDto } from 'src/user/user.dto';
+import { authenticator } from 'otplib';
 
 @Injectable()
 export class AuthService {
@@ -30,14 +33,38 @@ export class AuthService {
     }
   }
 
-  //otp = one time password
-  async genTwoFactorSecretCode() {
-    const secretCode = speakeasy.generateSecret({
-      name: process.env.TWOFACTOR_APP_NAME,
-    });
+  // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
+
+  //otp auth = one time password compatible with Google authentificator
+  async genTwoFactorSecret(user: UserDto) {
+    const secret = authenticator.generateSecret();
+    const otpauthUrl = authenticator.keyuri(user.email, 'Transcendence', secret);
+    await this.userService.setTwoFactorAuthSecret(secret, user.id);
+    console.log("secret code : ", secret);
+    console.log("otp url : ", otpauthUrl);
+    user.twoFactorSecret = secret;
     return {
-      otpauthUrl: secretCode.otpauth_url,
-      base32: secretCode.base32,
+      secret,
+      otpauthUrl,
     }
   }
+
+  // generate QR code
+  async generateQrCodeDataURL(otpauthUrl: string) {
+    console.log("GENERATE QR code");
+    return QRCode.toDataURL(otpauthUrl);
+  }
+
+  async isTwoFactorCodeValid(twoFactorSecret: string, user: UserDto) {
+    console.log("VALIDATE TWO FACTOR SECRET");
+    console.log("twofactosecret : ", twoFactorSecret);
+    console.log("secret : ", user.twoFactorSecret);
+    return authenticator.verify({
+      token: twoFactorSecret,
+      secret: user.twoFactorSecret,
+    })
+  }
+
+
+
 }

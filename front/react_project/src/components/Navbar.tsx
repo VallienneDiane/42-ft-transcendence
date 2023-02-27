@@ -20,6 +20,7 @@ const NavBar: React.FC = () => {
         <li><Link to="/game">Game</Link></li>
         <li><Link to="/chat">Chat</Link></li>
         <li><Link to="/profile">Profil</Link></li>
+        <li><Link to="/settings">Settings</Link></li>
         { accountService.isLogged() ? (<li><button onClick={logout}>Log Out</button></li>) : null }
       </ul>
     </nav>
