@@ -1,13 +1,12 @@
-import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../services/account.service";
 
 const Settings: React.FC = () => {
-    let user: JwtPayload = accountService.readPayload();
+
     return (
         <div>
-            <h1>Settings Page of {user.login} </h1>
+            <h1>Settings Page </h1>
 
-            <button className="enableTwoFactor" type="button">
+            <button className="enableTwoFactor" type="button" onClick={accountService.toggleTwoFactorAuth}>
                     Activate Google Authentificator
             </button>
         </div>

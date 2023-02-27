@@ -3,7 +3,6 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import * as speakeasy from "speakeasy";
 import * as QRCode from 'qrcode';
 import { UserDto } from 'src/user/user.dto';
 import { authenticator } from 'otplib';
@@ -38,7 +37,7 @@ export class AuthService {
   //otp auth = one time password compatible with Google authentificator
   async genTwoFactorSecret(user: UserDto) {
     const secret = authenticator.generateSecret();
-    const otpauthUrl = authenticator.keyuri(user.email, 'Transcendence', secret);
+    const otpauthUrl = authenticator.keyuri(user.login, 'Transcendence', secret);
     await this.userService.setTwoFactorAuthSecret(secret, user.id);
     console.log("secret code : ", secret);
     console.log("otp url : ", otpauthUrl);
