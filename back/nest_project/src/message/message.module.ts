@@ -8,7 +8,7 @@ import { MessageGateway } from "./message.gateway"
     imports: [
         TypeOrmModule.forFeature([MessageEntity])
     ],
-    providers: [MessageService, MessageGateway],
-    exports: [MessageService],
+    providers: [MessageGateway, MessageService]
+    // exports: [MessageService],
 })
 export class MessageModule {}
