@@ -16,6 +16,12 @@ if (typeof token === 'string' && token.length > 0) {
     });
     socket.connect();
 }
+import React, { useState, useEffect } from "react";
+import socketIOClient from 'socket.io-client';
+import { accountService } from "../services/account.service";
+import '../styles/ChatModule.scss'
+
+const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket'], auth: { token: localStorage.getItem('token') }})
 
 const channels: string[] = [ "general", "events", "meme" ];
 
