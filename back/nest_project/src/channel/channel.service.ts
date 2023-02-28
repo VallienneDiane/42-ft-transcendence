@@ -43,26 +43,9 @@ export class ChannelService {
 	}
 
 	public getHistory(chanName: string, client: Socket) {
-		this.findByName(chanName)
-		.then(
-			data => {
-				let parsedMessages = separateMessages(data.content);
-				client.emit("initHistory", parsedMessages);
-			}
-		)
-		.catch(
-			() => {
-				client.emit("notice", "an error occured");
-			}
-		);
+		
 	}
 
 	//async addUserInChannel(chanName: string, )
 
-	async addMessage(chanName: string, sender: string, newMessage: string): Promise<void> {
-		let	twoOnOne: string = sender + ':' + newMessage;
-		let MessageTab: string[] = [twoOnOne];
-		let toAdd: ChannelEntity = this.channelRepository.create({name: chanName, content: MessageTab});
-		await this.channelRepository.save(toAdd);
-	}
 }
