@@ -2,25 +2,24 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, Conne
 import { Server, Socket } from 'socket.io';
 import { send } from './chatUtils/sendMessage';
 import { join } from './chatUtils/channels';
+import { UseGuards } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+interface MessageChat {
+    sender?: string;
+    room: string;
+    content: string;
+}
 
 @WebSocketGateway({transports: ['websocket']})
 export class Chat {
     @WebSocketServer()
     server: Server;
 
-    @SubscribeMessage('chat')
-    handleEvent(@MessageBody() data: string[3], @ConnectedSocket() client: Socket) {
-        console.log(client.id , ...data);
-        switch (data[0])
-        {
-            case 'send' :
-                send(data[1], data[2], this.server, client);
-                break;
-            case 'join' :
-                join(data[1], data[2], this.server, client);
-                break;
-            default :
-                client.emit('wrong argument');
-        }
+    @SubscribeMessage('privateMessage')
+    async handlePrivateEvent(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket): Promise<void> {
+        const token = client.handshake.headers.authorization;
+        console.log(client.handshake.headers, client.id, data.room, data.content);
+        client.emit('message', { sender: client.id, room: data.room, content: data.content });          
     }
 }
