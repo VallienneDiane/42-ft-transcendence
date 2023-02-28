@@ -26,6 +26,9 @@ export class AuthController {
         throw new UnauthorizedException('Wrong authentication code');
     }
     await this.userService.turnOnTwoFactor(user.id);
-    this.authService.generateQrCodeDataURL(twoFactorSecret.otpauthUrl);
+    const qrcode = await this.authService.generateQrCodeDataURL(twoFactorSecret.otpauthUrl);
+    return {
+      qrcode,
+    }
   }
 }
