@@ -14,11 +14,5 @@ export class ChannelEntity {
 		array: true,
 		default: [],
 	})
-	content: string[];
-
-	@Column('simple-array', {
-		array: true,
-		default: [],
-	})
 	userList: string[];
 }

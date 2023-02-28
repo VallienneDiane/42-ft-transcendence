@@ -8,6 +8,9 @@ export class MessageEntity {
     @Column('string')
     room: string
 
+    @Column('boolean')
+    isChannel: boolean
+
     @Column('string')
     sender: string
 
