@@ -1,4 +1,4 @@
-import "../styles/LoginForm.css"
+import "../styles/LoginPage.css"
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { UserContext } from "../user/UserContext";
@@ -25,7 +25,7 @@ const LoginForm: React.FC = () => {
     }
     
     return (
-        <div >
+        <div id="login_page">
             <h1>Login page</h1>
             <form className="login" onSubmit={handleSubmit(onSubmit)}> 
             <input

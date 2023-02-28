@@ -1,3 +1,4 @@
+import "../styles/SignupPage.css"
 import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -31,7 +32,7 @@ const SignupForm: React.FC = () => {
   }
 
   return (
-    <div>
+    <div id='signup_page'>
       <h1>SignUp Page</h1>
       <form className="login" onSubmit={handleSubmit(signIn)}>
         <div>
