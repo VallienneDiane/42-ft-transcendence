@@ -5,21 +5,6 @@ import { join } from './chatUtils/channels';
 import { Base64 } from "js-base64";
 import * as jsrsasign from 'jsrsasign';
 
-
-@WebSocketGateway({transports: ['websocket']}) // gateway is listening
-export class PingEvent {
-    @WebSocketServer() // create websocket server
-    server: Server;
-
-    //receive events
-    @SubscribeMessage('ping')
-    handleEvent(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-        // send an event
-        console.log(client.id + data);
-        this.server.emit('pong', client.id, data);
-    }
-}
-
 @WebSocketGateway({transports: ['websocket']})
 export class Chat implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
