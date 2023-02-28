@@ -30,7 +30,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     }
 
     @SubscribeMessage('addMessage')
-    handleNewMessage(@MessageBody() room: string, content: string, @ConnectedSocket() client: Socket) {
+    handleNewMessage(@MessageBody() room: string, isChannel: boolean, content: string, @ConnectedSocket() client: Socket) {
         let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
         let sender: string = client.id;
         this.socketMap.set(pseudo, sender);
@@ -38,12 +38,13 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         let data: MessageEntity = {
             id: undefined,
             room: room,
+            isChannel: isChannel,
             sender: pseudo,
             content: content,
             date: undefined
         }
         this.messageService.create(data);
-        if (room[0] != '_')
+        if (!isChannel)
         {
             client.emit('newMessage', room, pseudo, content);
             let socketDest = this.socketMap.get(room);
