@@ -1,7 +1,0 @@
-{
-  "dependencies": {
-    "@nestjs/passport": "^9.0.3",
-    "@types/passport-local": "^1.0.35",
-    "passport-local": "^1.0.0"
-  }
-}
