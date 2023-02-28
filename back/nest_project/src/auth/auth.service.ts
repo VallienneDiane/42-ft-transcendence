@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import * as QRCode from 'qrcode';
+import * as qrcode from 'qrcode';
 import { UserDto } from 'src/user/user.dto';
 import { authenticator } from 'otplib';
 
@@ -39,8 +39,6 @@ export class AuthService {
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(user.login, 'Transcendence', secret);
     await this.userService.setTwoFactorAuthSecret(secret, user.id);
-    console.log("secret code : ", secret);
-    console.log("otp url : ", otpauthUrl);
     user.twoFactorSecret = secret;
     return {
       secret,
@@ -49,21 +47,16 @@ export class AuthService {
   }
 
   // generate QR code
-  async generateQrCodeDataURL(otpauthUrl: string) {
+  async generateQrCodeDataURL(secret: string) {
+    const qrCode = await qrcode.toDataURL(secret);
     console.log("GENERATE QR code");
-    return QRCode.toDataURL(otpauthUrl);
+    return qrCode;
   }
 
   async isTwoFactorCodeValid(twoFactorSecret: string, user: UserDto) {
-    console.log("VALIDATE TWO FACTOR SECRET");
-    console.log("twofactosecret : ", twoFactorSecret);
-    console.log("secret : ", user.twoFactorSecret);
     return authenticator.verify({
       token: twoFactorSecret,
       secret: user.twoFactorSecret,
     })
   }
-
-
-
 }

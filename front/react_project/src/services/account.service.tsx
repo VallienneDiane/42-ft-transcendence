@@ -13,13 +13,31 @@ let login = (credentials: LogInForm) => {
     return Axios.post('/auth/login', credentials);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// TWO FACTOR AUTHENTIFICATOR
 // quand bouton activé, doit récupérer infos du user via token et faire requete post
-let toggleTwoFactorAuth = () => {
+let enableTwoFactorAuth = () => {
     const payload = readPayload();
-    console.log("PAYLOAD : ", payload);
     return Axios.post('/auth/enableTwoFactorAuth', payload);
 }
 
+let verifyCodeTwoFactorAuth = () => {
+    return Axios.post('/auth/verifyCodeTwoFactorAuth');
+}
+
+let turnOnTwoFactor = () => {
+    return Axios.post('/auth/turOnTwoFactor');
+}
+
+let disableTwoFactorAuth = () => {
+    const payload = readPayload();
+    return Axios.post('/auth/disableTwoFactorAuth', payload);
+}
+
+let turnOffTwoFactor = () => {
+    return Axios.post('/auth/turnOffTwoFactor');
+}
+//////////////////////////////////////////////////////////////////////////////
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
@@ -71,5 +89,6 @@ let readPayload = () => {
 }
 
 export const accountService = {
-    signUp, login, saveToken, logout, isLogged, getToken, readPayload, toggleTwoFactorAuth
+    signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
+    enableTwoFactorAuth, verifyCodeTwoFactorAuth, turnOnTwoFactor, disableTwoFactorAuth, turnOffTwoFactor
 }
