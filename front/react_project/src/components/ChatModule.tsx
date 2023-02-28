@@ -1,5 +1,5 @@
 import React from "react";
-import io from 'socket.io-client';
+import socketIOClient from 'socket.io-client';
 import { userService } from "../services/user.service";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
@@ -8,20 +8,11 @@ import '../styles/ChatModule.scss'
 
 const token: any = localStorage.getItem('token');
 let socket: any = null;
-if (typeof token === 'string' && token.length > 0) {
-    socket = io('127.0.0.1:3000', {
-        transports : ['websocket'], 
-        extraHeaders : {
-            Authorization: `Bearer ${token}` }
-    });
-    socket.connect();
-}
-import React, { useState, useEffect } from "react";
-import socketIOClient from 'socket.io-client';
-import { accountService } from "../services/account.service";
-import '../styles/ChatModule.scss'
-
-const socket = socketIOClient("127.0.0.1:3000", {transports : ['websocket'], auth: { token: localStorage.getItem('token') }})
+socket = socketIOClient('127.0.0.1:3000', {
+    transports : ['websocket'], 
+    auth : { token: token },
+});
+socket.connect();
 
 const channels: string[] = [ "general", "events", "meme" ];
 
@@ -167,7 +158,8 @@ class SendMessageForm extends React.Component<IChat, Message> {
         let room: string = this.props.dest!;
         // socket.emit('chat', 'send', this.props.dest, this.state.text);
         // verifier que le user existe ?
-        socket.emit('privateMessage', { room, content });
+        // socket.emit('addMessage', { room, content });
+        socket.emit('addMessage', { room, isChannel: 0, content });
         this.setState({ text: '' });
     }
 
@@ -186,7 +178,7 @@ class SendMessageForm extends React.Component<IChat, Message> {
 class ChannelList extends React.Component<IChat, Users> {
     constructor(props: IChat) {
         super(props);
-        this.state = {users: [], me: accountService.readPayload()};
+        this.state = {users: [], me: accountService.readPayload()!};
         this.changeChann = this.changeChann.bind(this);
         }
 

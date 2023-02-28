@@ -1,27 +1,34 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
-import { Server, Socket } from 'socket.io';
-import { send } from './chatUtils/sendMessage';
-import { join } from './chatUtils/channels';
-import { UseGuards } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
-import { Base64 } from "js-base64";
-import * as jsrsasign from 'jsrsasign';
+// import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
+// import { Server, Socket } from 'socket.io';
+// import { UseGuards } from "@nestjs/common";
+// import { AuthGuard } from "@nestjs/passport";
 
-interface MessageChat {
-    sender?: string;
-    room: string;
-    content: string;
-}
+// import * as jsrsasign from 'jsrsasign';
 
-@WebSocketGateway({transports: ['websocket']})
-export class Chat implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer()
-    server: Server;
+// interface MessageChat {
+//     sender?: string;
+//     room: string;
+//     content: string;
+// }
 
-    @SubscribeMessage('privateMessage')
-    async handlePrivateEvent(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket): Promise<void> {
-        const token = client.handshake.headers.authorization;
-        console.log(client.handshake.headers, client.id, data.room, data.content);
-        client.emit('message', { sender: client.id, room: data.room, content: data.content });          
-    }
-}
+// @WebSocketGateway({transports: ['websocket']})
+// export class Chat implements OnGatewayConnection, OnGatewayDisconnect {
+//     @WebSocketServer()
+//     server: Server;
+
+//     handleConnection(client: Socket) {
+//         console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' is connected to chat' || "null");
+//     }
+
+//     handleDisconnect(client: Socket) {
+
+//     }
+
+    // @UseGuards(AuthGuard('jwt'))
+//     @SubscribeMessage('privateMessage')
+//     async handlePrivateEvent(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket): Promise<void> {
+//         //let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
+//         console.log((client.handshake), client.id, data.room, data.content);
+//         client.emit('message', { sender: client.id, room: data.room, content: data.content });          
+//     }
+// }
