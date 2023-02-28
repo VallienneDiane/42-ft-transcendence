@@ -1,9 +1,9 @@
-export default interface LogInForm {
+export interface LogInForm {
     login: string,
-    password: string,
+    password: string
 }
 
-export default interface SignInForm { 
+export interface SignInForm { 
     id?: number,
     login: string,
     email: string,
@@ -11,18 +11,26 @@ export default interface SignInForm {
     errors?: string
   }
 
-export default interface UserData { 
+export interface UserData { 
     id?: number,
     login: string,
     email: string,
-    password: string,
+    password: string
   }
 
-export default interface JwtPayload {
-  login: string;
-  sub: number;
-  iat: number;
-  exp: number;
+// export interface JwtPayload {
+//   login: string,
+//   sub: number,
+//   iat: number,
+//   exp: number
+// }
+
+export interface User {
+  token: string,
+  id?: number,
+  login: string,
+  email: string,
+  password: string
 }
 
-// export default LogInForm, SignInForm
+// export LogInForm, SignInForm
