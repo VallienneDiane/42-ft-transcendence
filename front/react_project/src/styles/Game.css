@@ -1,0 +1,11 @@
+#Game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#Game canvas {
+    width: 95%;
+    background-color: rgb(247, 207, 207);
+}
