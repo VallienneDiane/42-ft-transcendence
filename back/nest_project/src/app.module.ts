@@ -5,13 +5,15 @@ import { UserEntity } from './user/user.entity';
 import { SocketModule } from './socket/socket.module';
 // import { AuthModule } from './auth/auth.module';
 import { AuthModule } from './auth/auth.module';
+import { GameUpdateCenterModule } from './game_update_center/game_update_center.module';
 
 @Module({
   imports: [
     AppModule,
-    SocketModule,
+    // SocketModule,
     UserModule,
     AuthModule,
+    GameUpdateCenterModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'db_container',
