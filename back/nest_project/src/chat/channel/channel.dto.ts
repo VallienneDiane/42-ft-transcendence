@@ -1,8 +1,10 @@
-import { IsNotEmpty, IsString } from "class-validator";
-import { IChannel } from "./channel.interface";
+import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
 
 export class ChannelDto {
+	readonly id: number;
+	readonly date: Date;
 	@IsNotEmpty() @IsString() readonly name: string;
-	readonly content: string[];
-	readonly userList: string[];
+	@IsString() readonly pass: string;
+	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
+	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
 }
