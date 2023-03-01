@@ -20,7 +20,9 @@
     "react-hook-form": "^7.43.1",
     "react-js-switch": "^1.1.6",
     "react-router-dom": "^6.8.1",
+    "react-switch": "^7.0.0",
     "react-yup": "^1.20.0",
+    "sass": "^1.58.3",
     "util": "^0.12.5",
     "yup": "^1.0.2"
   },
