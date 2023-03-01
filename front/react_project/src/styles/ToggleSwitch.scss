@@ -1,0 +1,52 @@
+.toggle2fa {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-left: 40px;
+
+    .switch {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-bottom: 20px;
+
+        p {
+            margin-right: 50px;
+        }
+
+    }
+    p {
+        font-size: 0.9em;
+        color: rgb(255, 255, 255);
+    }
+
+    #qrcode {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        max-width: 10em;
+    }
+    
+    input, button {
+        justify-content: center;
+        border-radius: 2%;
+        height: 30px;
+        background-color: rgb(255, 255, 255);
+        color: rgb(0, 0, 0);
+    }
+
+    button {
+        font-size: 0.8em;
+        color: rgb(255, 255, 255);
+        margin-left: 10px;
+        color: white;
+        background-color: rgb(0, 0, 0);
+        height: 30px;
+        width: 60px;
+        margin: 20px;
+
+        &:hover {
+            background-color: rgb(81, 165, 60);
+        }
+    }
+}

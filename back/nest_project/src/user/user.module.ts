@@ -8,15 +8,11 @@ import { UserEntity } from "./user.entity";
 import { UserService } from "./user.service";
 
 //When you create a module, you have to add it in the app.module imports
-// configure user repository l.10
+
 @Module({
     imports: [
         TypeOrmModule.forFeature([UserEntity]),
-        PassportModule.register({
-            defaultStrategy: 'jwt',
-            property: 'user',
-            session: false,
-        }),
+        PassportModule.register({}),
         JwtModule.register({
             secret: process.env.SECRET, 
             signOptions: { expiresIn: '1d' },

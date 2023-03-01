@@ -18,25 +18,18 @@ let login = (credentials: LogInForm) => {
 // quand bouton activé, doit récupérer infos du user via token et faire requete post
 let enableTwoFactorAuth = () => {
     const payload = readPayload();
-    return Axios.post('/auth/enableTwoFactorAuth', payload);
+    return Axios.post('/auth/enable2fa', payload);
 }
 
-let verifyCodeTwoFactorAuth = () => {
-    return Axios.post('/auth/verifyCodeTwoFactorAuth');
-}
-
-let turnOnTwoFactor = () => {
-    return Axios.post('/auth/turOnTwoFactor');
+let verifyCodeTwoFactorAuth = (code: string) => {
+    return Axios.post('/auth/verifyCode2fa', { code: code});
 }
 
 let disableTwoFactorAuth = () => {
     const payload = readPayload();
-    return Axios.post('/auth/disableTwoFactorAuth', payload);
+    return Axios.post('/auth/disable2fa', payload);
 }
 
-let turnOffTwoFactor = () => {
-    return Axios.post('/auth/turnOffTwoFactor');
-}
 //////////////////////////////////////////////////////////////////////////////
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
@@ -90,5 +83,5 @@ let readPayload = () => {
 
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enableTwoFactorAuth, verifyCodeTwoFactorAuth, turnOnTwoFactor, disableTwoFactorAuth, turnOffTwoFactor
+    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth
 }

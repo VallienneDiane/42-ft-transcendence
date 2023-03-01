@@ -11,11 +11,7 @@ import { LocalStrategy } from "./local.strategy";
     imports: 
     [
         UserModule,
-        PassportModule.register({             
-            defaultStrategy: 'jwt',
-            property: 'user',
-            session: false,
-        }),
+        PassportModule.register({}),
         JwtModule.register({
             secret: process.env.SECRET, 
             signOptions: { expiresIn: '1d' },

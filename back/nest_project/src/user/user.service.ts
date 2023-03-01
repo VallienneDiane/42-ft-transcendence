@@ -33,23 +33,19 @@ export class UserService {
         this.usersRepository.delete(login);
     }
     //set secret code for 2fa in user entity
-    async setTwoFactorAuthSecret(secret: string, id: number) {
+    async setTwoFactorSecret(secret: string, id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
-        console.log("SET code secret : ", user.twoFactorSecret);
     }
     //the user turned on the 2fa
     async turnOnTwoFactor(id: number) {
-        console.log("turn ON two factors to TRUE ");
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = true;
-        console.log(user.isTwoFactorEnabled);
     }
     //the user turned off the 2fa
     async turnOffTwoFactor(id: number) {
-        console.log("turn OFF two factors to FALSE ");
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
-        console.log(user.isTwoFactorEnabled);
+        user.twoFactorSecret = "null";
     }
 }

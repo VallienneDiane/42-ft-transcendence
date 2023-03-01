@@ -9,7 +9,7 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
-import Settings from './components/Settings'
+import ToggleSwitch from './components/ToggleSwitch'
 
 function App() {
   // let user = {
@@ -34,7 +34,7 @@ function App() {
                 <Route path='/chat' element={<Chat />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:id' element={<Profile />} />
-                <Route path='/settings' element={<Settings />} />
+                <Route path='/settings' element={<ToggleSwitch />} />
               </Route>
             </Route>
 
