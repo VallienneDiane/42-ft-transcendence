@@ -1,33 +1,49 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
 import './App.css'
+import NavBar from './components/Navbar'
+import PingHandler from './components/SocketHandler'
+import ChatModule from './components/ChatModule';
+import SignupForm from './components/SignupForm'
+import LoginForm from './components/LoginForm'
+import Home from './components/Home'
+import { Routes, Route, BrowserRouter } from "react-router-dom"
+import Profile from './components/Profile';
+import UserProvider from './user/UserProvider';
+import ProtectedRoutes from './components/ProtectedRoutes';
+import Chat from './components/Chat'
+import Layout from './components/Layout'
+import Game from './components/Game'
 
 function App() {
-  const [count, setCount] = useState(0)
+  // let user = {
+  //   token: "",
+  //   id: 666,
+  //   login: "",
+  //   email: "",
+  //   password: "",
+  // };
 
-  return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    return (
+      <div className="App">
+        {/* <UserProvider user={user}> */}
+        <BrowserRouter >
+          <Routes>
+            <Route element={<Layout />}>
+              <Route path='/login' element={<LoginForm />} />
+              <Route path='/signin' element={<SignupForm />} />
+              <Route element={<ProtectedRoutes/>}>
+                <Route path='/' element={<Home />} />
+                <Route path='/game' element={<Game />} />
+                <Route path='/profile' element={<Profile />} />
+                <Route path='/profile/:id' element={<Profile />} />
+                <Route path='/' element={<Home />} />
+                <Route path='/chat' element={<ChatModule />} />
+              </Route>
+            </Route>
+
+          </Routes>
+        </BrowserRouter>
+        {/* </UserProvider> */}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
   )
 }
 

@@ -1,0 +1,141 @@
+.chatWrapper {
+	display: flex;
+	/* padding: 1em; */
+	width: 70%;
+	min-width: 450px;
+	height: 100%;
+	color: black;
+	background-color: rgb(255, 255, 255);
+	overflow: hidden;
+	box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
+}
+
+.left {
+	display: flex;
+	flex-direction: column;
+	width: 20%;
+}
+
+.chatSearchHeader {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: .75rem 1.5rem;
+
+}
+
+.searchBar {
+	width: 80%;
+	background: rgb(238, 238, 238);
+	color: black;
+	border-radius: 2rem;
+	border-width: 1px;
+	border-color: rgb(194, 194, 194);
+	padding: .5rem;
+	color: grey;
+	border: 0px solid transparent;
+	transition: all .2s ease;
+	&:focus {
+		outline: none;
+		box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+	}
+}
+
+.searchButton {
+	width: 20%;
+	background-color: rgb(160, 160, 160);
+	border-radius: 50%;
+	padding: .2rem;
+	margin: .2rem;
+	cursor: pointer;
+}
+
+.channelListWrapper {
+	display: flex;
+	justify-content: space-between;
+	padding: .75rem 1.5rem;
+}
+
+.channelList {
+	display: flex;
+	align-items: flex-end;
+	flex-direction: column;
+}
+
+li {
+	padding: 12px 10% 16px;
+	/* cursor: pointer; */
+}
+
+.chatMessageWrapper {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	width: 80%;
+	/* border-radius: .5rem; */
+	border: 1px solid rgb(214, 214, 214);
+}
+
+.chatMessageHeader {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: .75rem 1.5rem;
+}
+
+.chatMessageHeader h1 {
+	color: black;
+	font-size: 1.125rem;
+}
+
+.messageList {
+	background: rgb(231, 231, 231);
+	padding: 1.5rem;
+	display: flex;
+	flex-direction: column-reverse;
+	grid-row-gap: 1rem;
+	height: 80%;
+	overflow-y: auto;
+	/* max-height: 300px; */
+}
+
+.sendMessage {
+	display: flex;
+	justify-content: center;
+	padding: .75rem .75rem;
+}
+
+.sendMessageForm {
+	display: flex;
+	align-self: flex-end;
+	width: 90%;
+	padding: .5rem;
+}
+
+.inputMessage {
+	width: 90%;
+	background: rgb(238, 238, 238);
+	color: black;
+	border-radius: .2rem;
+	padding: 1rem;
+	border: 0px solid transparent;
+	/* border: 2px rgb(0, 0, 0); */
+}
+
+/*
+.bubble {
+	overflow: hidden;
+	animation: MessageIn .3s;
+	padding: 0.3em;
+	padding-left: 1em;
+	padding-right: 1em;
+	border-radius: 11px;
+	background-color: #ececec;
+}
+
+@keyframes MessageIn {
+	from {transform: translateX(20px); opacity: 0;
+	max-height: 0;}
+	to {transform: translateX(0); opacity: 1;
+	max-height: 400px;}
+} */
