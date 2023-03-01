@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
 import { accountService } from "../services/account.service";
 import '../styles/ChatModule.scss'
+import socket from "../socket";
 
-const socket = socketIOClient("localhost:3000", {transports : ['websocket'], auth: { token: localStorage.getItem('token') }})
+// const socket = socketIOClient("localhost:3000", {transports : ['websocket'], auth: { token: localStorage.getItem('token') }})
+console.log('socket : ', socket);
 
 const channels: string[] = [ "general", "events", "meme", "njaros"];
 

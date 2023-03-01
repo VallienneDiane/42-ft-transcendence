@@ -16,7 +16,7 @@ const NavBar: React.FC = () => {
   }
 
   return (
-    <nav className="navbar">
+    <nav id="navbar">
       <ul>
         <li><NavLink to="/">Home</NavLink></li>
         <li><NavLink to="/game">Game</NavLink></li>
