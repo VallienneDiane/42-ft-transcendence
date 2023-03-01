@@ -46,7 +46,7 @@ let getToken = () => {
     return localStorage.getItem('token');
 }
 
-// Fonction qui decrypt le JWT et retourne un objet contenant les infos crystées dans le JWT (id, login, date expiration du token etc..)
+// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
 let readPayload = () => {
     let token = getToken();
     if (token === null) {

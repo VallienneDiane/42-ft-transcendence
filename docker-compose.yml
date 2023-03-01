@@ -21,10 +21,10 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    networks:
-      - transcendence_network
     env_file:
       - .env
+    networks:
+      - transcendence_network
     volumes:
       - ./back:/usr/src/app
     depends_on:
@@ -56,25 +56,25 @@ services:
   #     - db
   #   restart: always
 ########################################### VOLUMES  #########################################
-# volumes:
-#   db:
-#     driver: local
-#     driver_opts:
-#       type: none 
-#       o: bind
-#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
-#   back:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
-#   front:
-#     driver: local
-#     driver_opts:
-#       type: none 
-#       o: bind
-#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
+  back:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
+  front:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
   # pgadmin:
   #   driver: local
   #   driver_opts:

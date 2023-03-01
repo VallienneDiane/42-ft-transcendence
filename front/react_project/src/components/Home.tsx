@@ -1,3 +1,4 @@
+import "../styles/Home.css"
 import React, { useContext } from "react";
 import { UserContext } from "../user/UserContext";
 import {User} from "../models";
@@ -23,7 +24,7 @@ const Home: React.FC = () => {
         let decodedToken: JwtPayload = accountService.readPayload()!;
 
         return (
-            <div>
+            <div id="Home">
                 <h1>Home Page</h1>
                 <p>Bonjour {decodedToken?.login} !</p>
                 <p>Ici on aura les boutons pour rejoindre des parties etc</p>

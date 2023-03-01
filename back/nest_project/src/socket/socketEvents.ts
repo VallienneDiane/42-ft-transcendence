@@ -11,11 +11,11 @@ export class Chat implements OnGatewayConnection, OnGatewayDisconnect {
     server: Server;
 
     handleConnection(client: Socket) {
-        console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' is connected to chat' || "null");
+        // console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' is connected to chat');
     }
 
     handleDisconnect(client: Socket) {
-        console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' disconnected' || "null");
+        // console.log(jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login + ' disconnected');
     }
 
     @SubscribeMessage('chat')
