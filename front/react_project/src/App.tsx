@@ -2,8 +2,8 @@ import './App.css'
 import NavBar from './components/Navbar'
 import PingHandler from './components/SocketHandler'
 import ChatModule from './components/ChatModule';
-import SignupForm from './components/SignupForm'
-import LoginForm from './components/LoginForm'
+import SignupForm from './components/SignupPage'
+import LoginForm from './components/LoginPage'
 import Home from './components/Home'
 import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Profile from './components/Profile';
@@ -35,7 +35,6 @@ function App() {
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:id' element={<Profile />} />
-                <Route path='/' element={<Home />} />
                 <Route path='/chat' element={<ChatModule />} />
               </Route>
             </Route>

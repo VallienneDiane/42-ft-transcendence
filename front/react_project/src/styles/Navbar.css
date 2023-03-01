@@ -1,4 +1,5 @@
 .navbar {
+    width: 100%;
     border: 2px black solid;
     display: flex;
     flex-direction: row-reverse;

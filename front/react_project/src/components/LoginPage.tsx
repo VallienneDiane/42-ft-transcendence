@@ -1,8 +1,8 @@
-import "../styles/LoginForm.css"
+import "../styles/LoginPage.css"
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { UserContext } from "../user/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 import { LogInForm } from "../models";
 
@@ -10,12 +10,14 @@ const LoginForm: React.FC = () => {
     let navigate = useNavigate();
     let user = useContext(UserContext);
     const { register, handleSubmit } = useForm<LogInForm>();
+    const location = useLocation();
     
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
         .then(Response => {
             accountService.saveToken(Response.data.access_token);
-            navigate("/");
+            const from = (location.state as any)?.from || "/";
+            navigate(from);
         })
         .catch(error => {
             console.log(error);
@@ -23,7 +25,7 @@ const LoginForm: React.FC = () => {
     }
     
     return (
-        <div >
+        <div id="login_page">
             <h1>Login page</h1>
             <form className="login" onSubmit={handleSubmit(onSubmit)}> 
             <input
