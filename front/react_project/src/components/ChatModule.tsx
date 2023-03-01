@@ -8,7 +8,7 @@ import '../styles/ChatModule.scss'
 
 const token: any = localStorage.getItem('token');
 let socket: any = null;
-socket = socketIOClient('127.0.0.1:3000', {
+socket = socketIOClient('127.0.0.1:3000/chat', {
     transports : ['websocket'], 
     auth : { token: token },
 });

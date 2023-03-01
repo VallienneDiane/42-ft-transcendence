@@ -7,22 +7,6 @@ import { IMessage } from "./message.interface";
 import { IChannel } from "./channel.interface";
 import { Socket } from "socket.io";
 
-function separateMessage(str: string): [string, string] {
-	let value: [string, string];
-	let index: number = str.indexOf(':');
-	value[0] = str.substring(0, (index - 1));
-	value[1] = str.substring(index + 1);
-	return value;
-}
-
-function separateMessages(strs: string[]): [string, string][] {
-	let value: [string, string][];
-	for (let str in strs) {
-		value.push(separateMessage(str));
-	}
-	return value;
-}
-
 @Injectable({})
 export class ChannelService {
 	constructor (

@@ -2,10 +2,8 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, Conne
 import { Server, Socket } from 'socket.io';
 import { UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { MessageService } from "./message.service";
-import { MessageEntity } from "./message.entity";
-
-
+import { MessageService } from "./message/message.service";
+import { MessageEntity } from "./message/message.entity";
 import * as jsrsasign from 'jsrsasign';
 
 interface MessageChat {
@@ -14,8 +12,8 @@ interface MessageChat {
     content: string;
 }
 
-@WebSocketGateway({transports: ['websocket']})
-export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WebSocketServer()
     server: Server;
     constructor(
@@ -26,24 +24,31 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     private socketMap: Map<string, string> = new Map<string, string>;
 
     handleConnection(client: Socket) {
-        let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-        this.socketMap.set(pseudo, client.id);
-        console.log(pseudo + ' is connected.');
-        console.log(this.socketMap);
+		if (client.handshake.auth['token'] != null) {
+			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+			this.socketMap.set(pseudo, client.id);
+			console.log(pseudo + ' is connected.');
+			console.log(this.socketMap);
+		}
     }
 
     handleDisconnect(client: Socket) {
-        let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-        this.socketMap.delete(pseudo);
-        console.log(pseudo + ' is disconnected.');
+		if (client.handshake.auth['token'] != null) {
+			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+			this.socketMap.delete(pseudo);
+			console.log(pseudo + ' is disconnected.');
+		}
     }
 
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() blop: MessageChat, @ConnectedSocket() client: Socket) {
-        let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+        let pseudo = "unknown";
+		if (client.handshake.auth['token'] != null) {
+			pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+		}
         let sender: string = client.id;
         this.socketMap.set(pseudo, sender);
-        console.log('MessageGateway::handleNewMessage : ', blop, pseudo);
+        console.log('ChatGateway::handleNewMessage : ', blop, pseudo);
         let data: MessageEntity = {
             id: undefined,
             room: blop.room,
@@ -58,7 +63,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
             client.emit('newMessage', blop.room, pseudo, blop.content);
             let socketDest = this.socketMap.get(blop.room);
             if (socketDest != undefined)
-                this.server.of("/").sockets.get(socketDest).emit("newMessage", blop.room, pseudo, blop.content);
+                this.server.of("/chat").sockets.get(socketDest).emit("newMessage", blop.room, pseudo, blop.content);
         }
         else
         {
