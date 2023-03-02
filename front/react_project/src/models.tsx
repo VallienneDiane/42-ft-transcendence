@@ -3,8 +3,9 @@ export interface LogInForm {
     password: string
 }
 
-export interface ToggleSwitchForm {
-    code: string,
+export interface SettingsForm {
+    code: number,
+    errors?:string,
 }
 
 export interface SignUpForm { 

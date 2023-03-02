@@ -36,16 +36,18 @@ export class UserService {
     async setTwoFactorSecret(secret: string, id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
+        await this.usersRepository.save(user);
     }
     //the user turned on the 2fa
     async turnOnTwoFactor(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = true;
+        await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
     }
     //the user turned off the 2fa
     async turnOffTwoFactor(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
-        user.twoFactorSecret = "null";
+        await this.usersRepository.save(user);
     }
 }

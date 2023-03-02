@@ -9,7 +9,7 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
-import ToggleSwitch from './components/ToggleSwitch'
+import ToggleSwitch from './components/Settings'
 
 function App() {
   // let user = {
