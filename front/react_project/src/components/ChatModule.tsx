@@ -7,8 +7,7 @@ import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 
 const token: any = localStorage.getItem('token');
-let socket: any = null;
-socket = socketIOClient('127.0.0.1:3000/chat', {
+const socket = socketIOClient('127.0.0.1:3000/chat', {
     transports : ['websocket'], 
     auth : { token: token },
     query: {token}
@@ -111,7 +110,8 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentDidMount(): void {
-        socket.on('message', (data: MessageChat) => {
+
+        socket.on('messageChannel', (data: MessageChat) => {
             if (data.room == this.props.dest) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);
@@ -119,6 +119,18 @@ class MessageList extends React.Component<IChat, {}> {
             }
         });
         
+        socket.on('messagePrivate', (data: MessageChat) => {
+            if (data.sender == this.props.dest) {
+                let pouet: Message = {text: data.content, sender: data.sender};
+                this.props.action(pouet);
+            }
+        })
+
+        socket.on('selfMessage', (data: MessageChat) => {
+            let pouet: Message = {text: data.content, sender: data.sender};
+            this.props.action(pouet);
+        })
+
         socket.on('notice', (data: string) => {
             console.log(data);
         })
