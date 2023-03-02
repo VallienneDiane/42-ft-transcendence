@@ -5,13 +5,13 @@ export class MessageEntity {
     @PrimaryGeneratedColumn('uuid')
     id: number;
 
-    @Column('string')
+    @Column()
     room: string
 
     @Column('boolean')
     isChannel: boolean
 
-    @Column('string')
+    @Column()
     sender: string
 
     @Column('text')
