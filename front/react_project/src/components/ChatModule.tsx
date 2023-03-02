@@ -1,15 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import socketIOClient from 'socket.io-client';
+import { userService } from "../services/user.service";
 import { accountService } from "../services/account.service";
-import '../styles/ChatModule.scss'
+import { JwtPayload } from "jsonwebtoken";
+import { UserData } from "../models"
 
-const socket = socketIOClient("localhost:3000", {transports : ['websocket'], auth: { token: localStorage.getItem('token') }})
+const token: any = localStorage.getItem('token');
+let socket: any = null;
+socket = socketIOClient('127.0.0.1:3000/chat', {
+    transports : ['websocket'], 
+    auth : { token: token },
+});
+socket.connect();
 
-const channels: string[] = [ "general", "events", "meme", "njaros"];
+const channels: string[] = [ "general", "events", "meme" ];
 
 interface Message {
     text: string;
-    senderName?: string;
+    sender?: string;
+}
+
+interface MessageChat {
+    sender?: string;
+    room: string;
+    content: string;
 }
 
 interface IChat {
@@ -18,59 +32,13 @@ interface IChat {
     action?: any;
 }
 
-function ListMessage(value: Message): JSX.Element {
-    return (
-        <div className="message">
-            <div className="messageUserName">{value.senderName}</div>
-            <div className="bubble">{value.text}</div>
-        </div>
-    )
-}
-
-class MessageList extends React.Component<IChat, {}> {
-    constructor(props: IChat) {
-        super(props);
-    }
-
-    componentDidMount(): void {
-        socket.on('newMessage', (...data: string[]) => {
-            if (data[0] == this.props.dest) {
-                console.log('message from nest : ' + data);
-                let pouet: Message = {text: data[2], senderName: data[1]};
-                this.props.action(pouet);
-            }
-            else if (data[0][0] != '_')
-            {
-                let pouet: Message = {text: 'private message : ' + data[2], senderName: data[1] }
-                this.props.action(pouet);
-            }
-        });
-        
-        socket.on('notice', (data: string) => {
-            console.log(data);
-        })
-    }
-
-    componentWillUnmount(): void {
-        socket.off('newMessage');
-        socket.off('notice');
-    }
-
-    render() {
-        const listItems: JSX.Element[] = this.props.history!.reverse().map(
-            (message, id) => <ListMessage key={id} text={message.text} senderName={message.senderName} />
-        );
-        return (
-            <div className="messageList">
-                {listItems}
-            </div>
-        );
-    }
+interface Users {
+    users: UserData[];
+    me: JwtPayload;
 }
 
 function Header(title: IChat) {
     let location: string;
-    console.log(title);
     if (title.dest![0] == '_') {
         location = 'Welcome to channel ' + title.dest!.substring(1);
     }
@@ -80,40 +48,8 @@ function Header(title: IChat) {
     return (
         <div className="chatMessageHeader">
             <h1>{location}</h1>
-            First test
         </div>
     )
-}
-
-class SendMessageForm extends React.Component<IChat, Message> {
-    constructor(props: IChat) {
-        super(props);
-        this.state = { text: '' };
-        this.handleMessage = this.handleMessage.bind(this);
-        this.sendMessage = this.sendMessage.bind(this);
-    }
-
-    handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ text: event.target.value });
-    }
-
-    sendMessage(event: any) {
-        event.preventDefault();
-        socket.emit('chat', 'send', this.props.dest, this.state.text);
-        console.log(this.state.text);
-        this.setState({ text: '' });
-    }
-
-    render() {
-        return (
-            <div className="sendMessage">
-                <form className="sendMessageForm" onSubmit={this.sendMessage}>
-                    <input type="textarea" className="inputMessage" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
-                    <input type="submit" value="Send" />
-                </form>
-            </div>
-        )
-    }
 }
 
 function matchChannel(channel: string) {
@@ -157,38 +93,106 @@ class Search extends React.Component<{}, Message> {
     }
 }
 
-class ChangeDestination extends React.Component<IChat, Message> {
-    constructor(props : IChat) {
+function Message(value: Message): JSX.Element {
+    return (
+        <div className="message">
+            <div className="messageUserName">{value.sender}</div>
+            <div className="bubble">{value.text}</div>
+        </div>
+    )
+}
+
+class MessageList extends React.Component<IChat, {}> {
+    constructor(props: IChat) {
         super(props);
-        this.state = {text: ''};
-        this.handleDestination = this.handleDestination.bind(this);
-        this.changeDestination = this.changeDestination.bind(this);
     }
 
-    handleDestination(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({text: event.target.value});
+    componentDidMount(): void {
+        socket.on('message', (data: MessageChat) => {
+            if (data.room == this.props.dest) {
+                let pouet: Message = {text: data.content, sender: data.sender};
+                console.log('message from nest : ' + data.content + ', ' + data.sender);
+                this.props.action(pouet);
+            }
+        });
+        
+        socket.on('notice', (data: string) => {
+            console.log(data);
+        })
     }
 
-    changeDestination(event: any) {
-        event.preventDefault();
-        this.props.action(this.state.text);
-        this.setState({text: ''});
+    componentWillUnmount(): void {
+        socket.off('message');
+        socket.off('notice');
     }
 
     render() {
-        const text: string = this.state.text;
+        const listItems: JSX.Element[] = this.props.history!.reverse().map(
+            (message, id) => <Message key={id} text={message.text} sender={message.sender} />
+        );
         return (
-            <div className="changeLocation">
-                <form className="changeLocationForm" onSubmit={this.changeDestination}>
-                    <input type="textarea" placeholder="insert the new destination..." value={text} onChange={this.handleDestination} />
-                    <input type="submit" value="change" />
+            <div className="messageList">
+                {listItems}
+            </div>
+        );
+    }
+}
+
+
+class SendMessageForm extends React.Component<IChat, Message> {
+    constructor(props: IChat) {
+        super(props);
+        this.state = { text: '' };
+        this.handleMessage = this.handleMessage.bind(this);
+        this.sendMessage = this.sendMessage.bind(this);
+    }
+
+    handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
+        this.setState({ text: event.target.value });
+    }
+
+    sendMessage(event: any) {
+        event.preventDefault();
+        let content: string = this.state.text;
+        let room: string = this.props.dest!;
+        // socket.emit('chat', 'send', this.props.dest, this.state.text);
+        // verifier que le user existe ?
+        // socket.emit('addMessage', { room, content });
+        socket.emit('addMessage', { room, isChannel: 0, content });
+        this.setState({ text: '' });
+    }
+
+    render() {
+        return (
+            <div className="sendMessage">
+                <form className="sendMessageForm" onSubmit={this.sendMessage}>
+                    <input type="textarea" className="inputMessage" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
+                    <input type="submit" value="Send" />
                 </form>
             </div>
         )
     }
 }
 
-class ChannelList extends React.Component {
+class ChannelList extends React.Component<IChat, Users> {
+    constructor(props: IChat) {
+        super(props);
+        this.state = {users: [], me: accountService.readPayload()!};
+        this.changeChann = this.changeChann.bind(this);
+        }
+
+    changeChann(channel: string) {
+        this.props.action(channel);
+    }
+
+    componentDidMount() {
+        userService.getAllUsers()
+        .then((response) => {
+            this.setState({ users: response.data });
+        })
+        .catch((error) => console.log(error));
+    }
+
     render() {
         return (
             <div className="channelListWrapper">
@@ -196,7 +200,10 @@ class ChannelList extends React.Component {
                     <li>general</li>
                     <li>events</li>
                     <li>meme</li>
-                    <li>njaros</li>
+                    { this.state.users.map((user) => { 
+                        if (this.state.me.login !== user.login)
+                        { return ( <li key={user.id} onClick={() => this.changeChann(user.login)}> {user.login}</li> ) }
+                    })}
                 </ul>
             </div>
         )
@@ -227,13 +234,12 @@ export default class ChatModule extends React.Component<{}, IChat> {
             <div className="chatWrapper">
                 <div className="left">
                     <Search />
-                    <ChannelList />
+                    <ChannelList action={this.changeLoc}/>
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
                     <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} />
                     <SendMessageForm dest={this.state.dest} />
-                    <ChangeDestination action={this.changeLoc} />
                 </div>
             </div>
         )
