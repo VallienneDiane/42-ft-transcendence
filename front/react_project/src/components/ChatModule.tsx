@@ -5,16 +5,8 @@ import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { UserData } from "../models"
 import '../styles/ChatModule.scss'
-
-const token: any = localStorage.getItem('token');
-let socket: any = null;
-socket = socketIOClient('127.0.0.1:3000/chat', {
-    transports : ['websocket'], 
-    auth : { token: token },
-    // query: {token}
-});
-// new WebSocket("ws://www.example.com/socketserver", ["access_token", "3gn11Ft0Me8lkqqW2/5uFQ="]);
-socket.connect();
+import SocketContext from "./context";
+import { useContext } from 'react';
 
 const channels: string[] = [ "general", "events", "meme" ];
 
@@ -106,12 +98,14 @@ function Message(value: Message): JSX.Element {
 }
 
 class MessageList extends React.Component<IChat, {}> {
+    static contextType = SocketContext;
     constructor(props: IChat) {
         super(props);
     }
 
     componentDidMount(): void {
-        socket.on('message', (data: MessageChat) => {
+        const socket = this.context;
+        socket!.on('message', (data: MessageChat) => {
             if (data.room == this.props.dest) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);
@@ -119,14 +113,15 @@ class MessageList extends React.Component<IChat, {}> {
             }
         });
         
-        socket.on('notice', (data: string) => {
+        socket!.on('notice', (data: string) => {
             console.log(data);
         })
     }
 
     componentWillUnmount(): void {
-        socket.off('message');
-        socket.off('notice');
+        const socket = this.context;
+        socket!.off('message');
+        socket!.off('notice');
     }
 
     render() {
@@ -143,6 +138,7 @@ class MessageList extends React.Component<IChat, {}> {
 
 
 class SendMessageForm extends React.Component<IChat, Message> {
+    static contextType = SocketContext;
     constructor(props: IChat) {
         super(props);
         this.state = { text: '' };
@@ -151,17 +147,20 @@ class SendMessageForm extends React.Component<IChat, Message> {
     }
 
     handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
+        console.log("Context:");
         this.setState({ text: event.target.value });
     }
 
     sendMessage(event: any) {
+        const socket = this.context;
+        console.log("Context:" + this.context);
         event.preventDefault();
         let content: string = this.state.text;
         let room: string = this.props.dest!;
         // socket.emit('chat', 'send', this.props.dest, this.state.text);
         // verifier que le user existe ?
         // socket.emit('addMessage', { room, content });
-        socket.emit('addMessage', { room, isChannel: 0, content });
+        socket!.emit('addMessage', { room, isChannel: 0, content });
         this.setState({ text: '' });
     }
 

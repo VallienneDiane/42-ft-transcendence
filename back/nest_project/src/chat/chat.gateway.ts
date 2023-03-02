@@ -1,16 +1,14 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect } from "@nestjs/websockets";
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { MessageService } from "./message/message.service";
 import { MessageEntity } from "./message/message.entity";
 import * as jsrsasign from 'jsrsasign';
-import { ExtractJwt, Strategy } from "passport-jwt";
+
 
 interface MessageChat {
     room: string;
     isChannel: boolean;
-    content: string;
+    content?: string;
 }
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -72,6 +70,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             
         }
         this.messageService.findByChannel(blop.room).then((data) => console.log(data));
+    }
+
+    @SubscribeMessage('history')
+    handleHistory(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket) {
+        if (data.isChannel)
+        {
+            this.messageService.findByChannel(data.room).then((data) => client.emit("history", data));
+        }
+        else
+        {
+            let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+            this.messageService.findByPrivate(data.room, pseudo).then((data) => client.emit("history", data));
+        }
     }
     // // @UseGuards(AuthGuard('jwt'))
     // @SubscribeMessage('privateMessage')
