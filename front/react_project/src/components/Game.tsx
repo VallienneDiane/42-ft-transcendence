@@ -36,6 +36,7 @@ const Game: React.FC = () => {
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         // Update the paddle position in the component's state
         console.log(event.key);
+        socket.emit('connection');
         if (event.key === 'ArrowUp') {
             setGameState((prevState) => ({
                 ...prevState,
