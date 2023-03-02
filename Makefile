@@ -42,6 +42,8 @@ endif
 
 fclean : clean vclean prune
 
+fclean : clean vclean prune
+
 prune :
 	docker system prune -a
 
