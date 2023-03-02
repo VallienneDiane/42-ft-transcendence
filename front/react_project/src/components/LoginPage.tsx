@@ -27,7 +27,7 @@ const LoginForm: React.FC = () => {
             navigate(from);
         })
         .catch(error => {
-            console.log(error);
+            console.log('login error', error);
         });
     }
     

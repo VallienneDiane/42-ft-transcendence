@@ -6,6 +6,8 @@ const socket = socketIOClient('localhost:3000', {
     auth: { token: accountService.getToken() }
 });
 
+socket.connect();
+
 console.log('CREATION SOCKET', socket);
 
 export default socket;
