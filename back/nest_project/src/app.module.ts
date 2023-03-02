@@ -7,6 +7,7 @@ import { UserEntity } from './user/user.entity';
 import { AuthModule } from './auth/auth.module';
 import { GameUpdateCenterModule } from './game_update_center/game_update_center.module';
 import { ChatModule } from './chat/chat.module';
+import { GameEngineModule } from './game_engine/game_engine.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { ChatModule } from './chat/chat.module';
       entities: [UserEntity],
       autoLoadEntities: true,
       synchronize: true,
-    })
+    }),
+    GameEngineModule
   ],
 })
 export class AppModule {}
