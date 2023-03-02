@@ -20,31 +20,42 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('auth/enable2fa')
-  async enableTwoFactorAuth(@Body() user: UserDto) {
-    const twoFactorSecret = await this.authService.genTwoFactorSecret(user);
-    await this.userService.turnOnTwoFactor(user.id);
+  async enableTwoFactorAuth(@Headers('Authorization') token: string) {
+    const {id, login} = await this.authService.decodeToken(token);
+    const twoFactorSecret = await this.authService.genTwoFactorSecret(id, login);
+    await this.userService.turnOnTwoFactor(id);
     const qrcode = await this.authService.generateQrCodeDataURL(twoFactorSecret.otpauthUrl);
     return {
       qrcode,
     }
   }
-
+  
   @UseGuards(JwtAuthGuard)
-  @Post('verifyCode2fa')
-  async verifyCode(@Body() data: VerifyCodeDto) {
-    console.log("je suis dans la requete post qui va checher le code ");
-    const isCodeValid = await this.authService.isTwoFactorCodeValid(data.code, data.user.twoFactorSecret);
+  @Post('auth/verifyCode2fa')
+  async verifyCode(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {
+    const infosToken = await this.authService.decodeToken(token);
+    const user = await this.userService.findByLogin(infosToken.login);
+    const isCodeValid = await this.authService.isTwoFactorCodeValid(data.code, user.twoFactorSecret);
     if (!isCodeValid) {
-      console.log("code is false !! ")
+      console.log("Code is false !! ")
       throw new UnauthorizedException('Wrong authentication code');
     }
-    console.log("code is valid :) ")
+    console.log("Code is valid :) ")
     return { message: 'Code verified successfully' };
   }
 
   @UseGuards(JwtAuthGuard)
   @Post('auth/disable2fa')
-  async disableTwoFactorAuth(@Body() user: UserDto) {
+  async disableTwoFactorAuth(@Headers('Authorization') token: string) {
+      const user = await this.authService.decodeToken(token);
       return await this.userService.turnOffTwoFactor(user.id);
+    }
+    
+    @UseGuards(JwtAuthGuard)
+    @Get('auth/is2faActive')
+    async checkStatusGoogleAuth(@Headers('Authorization') token: string) {
+      const infosToken = await this.authService.decodeToken(token);
+      const user = await this.userService.findByLogin(infosToken.login);
+      return user.isTwoFactorEnabled;
   }
 }

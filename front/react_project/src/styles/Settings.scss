@@ -35,6 +35,12 @@
         color: rgb(0, 0, 0);
     }
 
+    .errorsCode {
+        margin-top: 10px;
+        font-size: 12px;
+        color: red;
+    }
+
     button {
         font-size: 0.8em;
         color: rgb(255, 255, 255);
@@ -48,5 +54,9 @@
         &:hover {
             background-color: rgb(81, 165, 60);
         }
+    }
+
+    #codeValid {
+        color: greenyellow;
     }
 }

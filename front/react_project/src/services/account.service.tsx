@@ -1,4 +1,4 @@
-import { LogInForm, SignUpForm, User} from "../models";
+import { LogInForm, SignUpForm, SettingsForm, User} from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -15,19 +15,20 @@ let login = (credentials: LogInForm) => {
 
 ////////////////////////////////////////////////////////////////////////////////
 // TWO FACTOR AUTHENTIFICATOR
-// quand bouton activé, doit récupérer infos du user via token et faire requete post
-let enableTwoFactorAuth = () => {
-    const payload = readPayload();
-    return Axios.post('/auth/enable2fa', payload);
+let isGoogleAuthActivated = () => {
+    return Axios.get('/auth/is2faActive');
 }
 
-let verifyCodeTwoFactorAuth = (code: string) => {
-    return Axios.post('/auth/verifyCode2fa', { code: code});
+let enableTwoFactorAuth = () => {
+    return Axios.post('/auth/enable2fa');
+}
+
+let verifyCodeTwoFactorAuth = (credentials: SettingsForm) => {
+    return Axios.post('/auth/verifyCode2fa', credentials);
 }
 
 let disableTwoFactorAuth = () => {
-    const payload = readPayload();
-    return Axios.post('/auth/disable2fa', payload);
+    return Axios.post('/auth/disable2fa');
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -83,5 +84,5 @@ let readPayload = () => {
 
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth
+    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth, isGoogleAuthActivated
 }
