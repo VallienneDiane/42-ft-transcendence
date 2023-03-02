@@ -12,38 +12,47 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
+import SocketContext from './components/context';
+import { accountService } from "./services/account.service";
+import socketIOClient from 'socket.io-client';
+import { Socket } from 'socket.io-client';
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import React, { useState} from "react";
 
 function App() {
-  // let user = {
-  //   token: "",
-  //   id: 666,
-  //   login: "",
-  //   email: "",
-  //   password: "",
-  // };
+const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
 
-    return (
-      <div className="App">
-        {/* <UserProvider user={user}> */}
-        <BrowserRouter >
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path='/login' element={<LoginForm />} />
-              <Route path='/signin' element={<SignupForm />} />
-              <Route element={<ProtectedRoutes/>}>
-                <Route path='/' element={<Home />} />
-                <Route path='/game' element={<Game />} />
-                <Route path='/profile' element={<Profile />} />
-                <Route path='/profile/:id' element={<Profile />} />
-                <Route path='/' element={<Home />} />
-                <Route path='/chat' element={<ChatModule />} />
-              </Route>
+  function createSocket(token: string) {
+    const newSocket = socketIOClient('127.0.0.1:3000/chat', {
+      transports : ['websocket'], 
+      auth : { token: token },
+      // query: {token} 
+    });
+    newSocket.connect();
+    setSocket(newSocket);
+  }
+
+  return (
+    <div className="App">
+      <BrowserRouter >
+        <SocketContext.Provider value={ socket } >
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path='/login' element={<LoginForm action={createSocket}/>} />
+            <Route path='/signin' element={<SignupForm action={createSocket}/>} />
+            <Route element={<ProtectedRoutes/>}>
+              <Route path='/' element={<Home />} />
+              <Route path='/game' element={<Game />} />
+              <Route path='/profile' element={<Profile />} />
+              <Route path='/profile/:id' element={<Profile />} />
+              <Route path='/' element={<Home />} />
+              <Route path='/chat' element={<ChatModule />} />
             </Route>
-
-          </Routes>
-        </BrowserRouter>
-        {/* </UserProvider> */}
-      </div>
+          </Route>
+        </Routes>
+      </SocketContext.Provider>
+      </BrowserRouter>
+    </div>
   )
 }
 
