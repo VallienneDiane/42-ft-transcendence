@@ -11,7 +11,7 @@ let socket: any = null;
 socket = socketIOClient('127.0.0.1:3000/chat', {
     transports : ['websocket'], 
     auth : { token: token },
-    query: {token}
+    // query: {token}
 });
 // new WebSocket("ws://www.example.com/socketserver", ["access_token", "3gn11Ft0Me8lkqqW2/5uFQ="]);
 socket.connect();

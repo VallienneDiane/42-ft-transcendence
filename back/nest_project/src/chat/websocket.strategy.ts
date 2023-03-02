@@ -8,7 +8,7 @@ export class WsJwtStrategy extends PassportStrategy(Strategy) {
     console.log('SECRET', process.env.SECRET);
         super({
             usernameField: 'login',
-            jwtFromRequest: ExtractJwt.fromUrlQueryParameter('token'),
+            jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("token"),
             ignoreExpiration: false,
             secretOrKey: process.env.SECRET,
         })

@@ -5,6 +5,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { MessageService } from "./message/message.service";
 import { MessageEntity } from "./message/message.entity";
 import * as jsrsasign from 'jsrsasign';
+import { ExtractJwt, Strategy } from "passport-jwt";
 
 interface MessageChat {
     room: string;
@@ -23,7 +24,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     private socketMap: Map<string, string> = new Map<string, string>;
 
-    @UseGuards(AuthGuard('websocket'))
     handleConnection(client: Socket) {
 		if (client.handshake.auth['token'] != null) {
 			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
@@ -44,7 +44,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() blop: MessageChat, @ConnectedSocket() client: Socket) {
         let pseudo = "unknow";
-        let token = client.handshake.query.token;
+        // let token = client.handshake.query.token;
 		if (client.handshake.auth['token'] != null) {
 			pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
 		}
