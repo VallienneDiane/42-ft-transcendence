@@ -6,6 +6,14 @@
 }
 
 #Game canvas {
-    width: 95%;
+    /* width: 95%; */
     background-color: rgb(247, 207, 207);
 }
+
+#Game canvas:focus {
+    outline: none;
+}
+
+/* *:not(canvas) {
+    filter: blur(5px);
+} */
