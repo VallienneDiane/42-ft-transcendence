@@ -71,7 +71,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         {
             
         }
-        this.messageService.findByReceiver(blop.room).then((data) => console.log(data));
+        this.messageService.findByChannel(blop.room).then((data) => console.log(data));
     }
     // // @UseGuards(AuthGuard('jwt'))
     // @SubscribeMessage('privateMessage')
