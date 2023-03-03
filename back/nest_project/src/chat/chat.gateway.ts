@@ -47,7 +47,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 		}
     }
 
-    @UseGuards(AuthGuard('websocket'))
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() blop: MessageChat, @ConnectedSocket() client: Socket) {
         let pseudo = "unknow";
