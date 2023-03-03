@@ -16,6 +16,7 @@ import { GameEngineModule } from './game_engine/game_engine.module';
     UserModule,
     AuthModule,
     GameUpdateCenterModule,
+    GameEngineModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'db_container',
@@ -27,7 +28,6 @@ import { GameEngineModule } from './game_engine/game_engine.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
-    GameEngineModule
   ],
 })
 export class AppModule {}
