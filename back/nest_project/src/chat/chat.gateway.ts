@@ -66,9 +66,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         this.messageService.create(data);
         let toSend : MessageToSend = {sender: pseudo, room: blop.room, content: blop.content};
+        client.emit('selfMessage', toSend);
         if (!blop.isChannel)
         {
-            client.emit('selfMessage', toSend);
             let socketDest = this.socketMap.get(blop.room);
             if (socketDest != undefined)
             {
@@ -79,8 +79,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
         else
         {
-            client.emit('selfMessage', toSend);
             
+
         }
     }
 
