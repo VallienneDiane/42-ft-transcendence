@@ -2,6 +2,6 @@ import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean, IsNumber }
 import { UserDto } from "src/user/user.dto";
 
 export class VerifyCodeDto {
-    @IsNotEmpty() @IsNumber() code: number;
+    @IsNotEmpty() @IsString() code: string
     user: UserDto;
   }
