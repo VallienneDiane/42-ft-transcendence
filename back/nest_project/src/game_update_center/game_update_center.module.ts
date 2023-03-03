@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
-import { GameEngineService } from '../game_engine/game_engine.service';
+import { GameEngineModule } from 'src/game_engine/game_engine.module';
+import { GameUpdateCenterGateway } from './game_update_center.gateway';
 
 @Module({
-    providers: [GameEngineService],
+    providers: [GameUpdateCenterGateway],
+    imports: [GameEngineModule],
 })
 export class GameUpdateCenterModule {}

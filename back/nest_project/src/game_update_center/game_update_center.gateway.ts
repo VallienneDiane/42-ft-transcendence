@@ -3,7 +3,11 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from
 import { Server } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  cors: {
+    origin: '*',
+  },
+})
 export class GameUpdateCenterGateway implements OnModuleInit{
 
 	constructor(private readonly gameEngineService: GameEngineService) {}
@@ -12,6 +16,8 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   server: Server;
 
   onModuleInit() {
+    const io = require('socket.io')(this.server);
+    console.log('test');
     this.server.on('connection', (socket) => {
       console.log(socket.id);
       console.log('Connected');
