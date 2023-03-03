@@ -4,7 +4,7 @@ export interface LogInForm {
 }
 
 export interface SettingsForm {
-    code: number,
+    code: string,
     errors?:string,
 }
 

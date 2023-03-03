@@ -3,10 +3,11 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserDto } from 'src/user/user.dto';
-import { authenticator } from 'otplib';
+import * as otplib from 'otplib';
 import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as qrcode from 'qrcode';
+import * as speakeasy from 'speakeasy';
 
 @Injectable()
 export class AuthService {
@@ -43,26 +44,27 @@ export class AuthService {
     const id = decodedToken.sub;
     return { id, login };
   }
-
   //generate secret use for google authentificator
-  async genTwoFactorSecret(id: number, login: string) {
-    const secret = authenticator.generateSecret();
-    const otpauthUrl = authenticator.keyuri(login, 'Transcendence', secret);
-    await this.userService.setTwoFactorSecret(secret, id);
-    return {
-      secret,
-      otpauthUrl,
-    }
-  }
+  //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
+  async genTwoFactorSecretOtpauthurl(id: number, login: string) {
+    const secret = speakeasy.generateSecret( {
+      name: "App Transcendence"
+    });
+    await this.userService.setTwoFactorSecret(secret.ascii, id);
+    return (secret);
 
+  }
   // generate QR code
-  async generateQrCodeDataURL(secret: string) {
-    const qrCode = await qrcode.toDataURL(secret);
+  async generateQrCode(otpurl: string) {
+    const qrCode = qrcode.toDataURL(otpurl);
     return qrCode;
   }
-
   //check if entered code for google authentificator is valid
-  async isTwoFactorCodeValid(code: number, secret:string) {
-    return authenticator.verify({token: String(code), secret: secret});
+  async isTwoFactorCodeValid(code: string, secret:string) {
+    return speakeasy.totp.verify(
+      { secret: secret,
+        encoding: "ascii",
+        token: code,
+      });
   }
 }
