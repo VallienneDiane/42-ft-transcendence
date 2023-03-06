@@ -12,6 +12,8 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
+import { io, Socket } from 'socket.io-client';
+
 
 function App() {
   // let user = {
