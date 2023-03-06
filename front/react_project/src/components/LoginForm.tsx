@@ -5,22 +5,15 @@ import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 import { LogInForm } from "../models";
-import SocketContext from './context'
 
-interface MyProps {
-    action: any;
-}
-
-function LoginForm(props: MyProps) {
+function LoginForm() {
     let navigate = useNavigate();
-    let socket = useContext(SocketContext);
     const { register, handleSubmit } = useForm<LogInForm>();
     
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
         .then(Response => {
             accountService.saveToken(Response.data.access_token);
-            props.action(accountService.getToken());
             navigate("/");
         })
         .catch(error => {
