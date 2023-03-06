@@ -6,17 +6,13 @@ import { useNavigate } from 'react-router-dom';
 import { SignInForm } from '../models'
 import { accountService } from '../services/account.service';
 
-interface MyProps {
-  action: any;
-}
-
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters"),
   email: yup.string().required("Email is required"),
   password: yup.string().required("Password is required") .min(8, "Password must be at least 8 characters"),
 })
 
-function SignupForm(props: MyProps) {
+function SignupForm() {
   let navigate = useNavigate();
   
   const { register, handleSubmit, formState: { errors }} = useForm<SignInForm>({
@@ -27,7 +23,6 @@ function SignupForm(props: MyProps) {
     accountService.signIn(data)
     .then(Response => {
       accountService.saveToken(Response.data.access_token);
-      props.action(accountService.getToken());
       navigate("/");
     })
     .catch(error => {

@@ -14,19 +14,24 @@ import Layout from './components/Layout'
 import Game from './components/Game'
 import SocketContext from './components/context';
 import { accountService } from "./services/account.service";
-import socketIOClient from 'socket.io-client';
+import io from 'socket.io-client';
 import { Socket } from 'socket.io-client';
-import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import React, { useState} from "react";
 
 function App() {
-const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> | null>(null);
+  const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
+  {
+    autoConnect: false,
+    transports : ['websocket'],
+    auth : { token: undefined },
+  }));
+  // console.log("avant:", socket);
 
-  function createSocket(token: string) {
-    const newSocket = socketIOClient('127.0.0.1:3000/chat', {
-      transports : ['websocket'], 
-      auth : { token: token },
-      // query: {token} 
+  function createSocket() {
+    console.log("blop2");
+    const newSocket = io('127.0.0.1:3000/chat', {
+      transports : ['websocket'],
+      auth : { token: accountService.getToken() },
     });
     newSocket.connect();
     setSocket(newSocket);
@@ -35,11 +40,11 @@ const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> 
   return (
     <div className="App">
       <BrowserRouter >
-        <SocketContext.Provider value={ socket } >
+        <SocketContext.Provider value={{ socket: Socket, createSocket }} >
         <Routes>
           <Route element={<Layout />}>
-            <Route path='/login' element={<LoginForm action={createSocket}/>} />
-            <Route path='/signin' element={<SignupForm action={createSocket}/>} />
+            <Route path='/login' element={<LoginForm />} />
+            <Route path='/signin' element={<SignupForm />} />
             <Route element={<ProtectedRoutes/>}>
               <Route path='/' element={<Home />} />
               <Route path='/game' element={<Game />} />
@@ -50,7 +55,7 @@ const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap> 
             </Route>
           </Route>
         </Routes>
-      </SocketContext.Provider>
+        </SocketContext.Provider>
       </BrowserRouter>
     </div>
   )

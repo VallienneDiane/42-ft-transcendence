@@ -1,4 +1,3 @@
-
 import { HttpException, HttpStatus, Injectable, Res } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import * as bcrypt from 'bcrypt';

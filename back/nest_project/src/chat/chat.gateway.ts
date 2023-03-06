@@ -24,6 +24,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     handleConnection(client: Socket) {
 		if (client.handshake.auth['token'] != null) {
+            const playload = client.handshake.auth['token']
 			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
 			this.socketMap.set(pseudo, client.id);
 			console.log(pseudo + ' is connected.');
