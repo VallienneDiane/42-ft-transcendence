@@ -1,8 +1,10 @@
 import { OnModuleInit } from '@nestjs/common';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
+import * as jsrsasign from 'jsrsasign';
 
-@WebSocketGateway()
+
+@WebSocketGateway({transports: ['websocket'], namespace: '/game'})
 export class GameUpdateCenterGateway implements OnModuleInit{
 
   @WebSocketServer()
@@ -10,9 +12,16 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
   onModuleInit() {
     this.server.on('connection', (socket) => {
-      console.log(socket.id);
+      console.log('ICI', socket.id);
       console.log('Connected');
     })
+  }
+
+  handleConnection(client: Socket) {
+		// if (client.handshake.auth['token'] != null) {
+			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
+			console.log(pseudo + ' is connected to the GAME.');
+		// }
   }
 
   @SubscribeMessage('Game_Input')
