@@ -18,6 +18,10 @@ export class UserService {
     public findByLogin(login: string): Promise<UserDto> {
         return this.usersRepository.findOneBy({login});
     }
+    // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
+    public findById(id: number): Promise<UserDto> {
+        return this.usersRepository.findOneBy({id});
+    }
     // DISPLAY ALL USERS
     async findAll(): Promise<{ id: number, login: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
@@ -38,16 +42,24 @@ export class UserService {
         user.twoFactorSecret = secret;
         await this.usersRepository.save(user);
     }
+    //set secret code for 2fa in user entity
+    async setQrCode(qrcode: string, id: number) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.qrCode = qrcode;
+        await this.usersRepository.save(user);
+    }
     //the user turned on the 2fa
     async turnOnTwoFactor(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = true;
         await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
+        return (user.isTwoFactorEnabled);
     }
     //the user turned off the 2fa
     async turnOffTwoFactor(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
         await this.usersRepository.save(user);
+        return (user.isTwoFactorEnabled);
     }
 }

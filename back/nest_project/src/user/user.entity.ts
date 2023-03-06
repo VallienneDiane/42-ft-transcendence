@@ -23,4 +23,7 @@ export class UserEntity {
 
   @Column({nullable: true})
   isTwoFactorEnabled: boolean;
+
+  @Column({nullable: true})
+  qrCode: string;
 }

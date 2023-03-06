@@ -1,4 +1,4 @@
-import { LogInForm, SignUpForm, SettingsForm, User} from "../models";
+import { LogInForm, SignUpForm, VerifyCodeForm, User} from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -23,8 +23,9 @@ let enableTwoFactorAuth = () => {
     return Axios.post('/auth/enable2fa');
 }
 
-let verifyCodeTwoFactorAuth = (credentials: SettingsForm) => {
-    return Axios.post('/auth/verifyCode2fa', credentials);
+let verifyCodeTwoFactorAuth = (credentials: VerifyCodeForm) => {
+    const iscodevalid = Axios.post('auth/verifyCode', credentials);
+    return iscodevalid;
 }
 
 let disableTwoFactorAuth = () => {

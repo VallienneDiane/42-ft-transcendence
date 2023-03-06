@@ -7,4 +7,5 @@ export class UserDto {
     @IsNotEmpty() @IsString() @MinLength(8) password: string;
     @IsNotEmpty() @IsString() twoFactorSecret: string;
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
+    @IsNotEmpty() @IsString() qrCode: string;
 }
