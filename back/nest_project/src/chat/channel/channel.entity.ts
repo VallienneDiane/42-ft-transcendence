@@ -19,4 +19,10 @@ export class ChannelEntity {
 
 	@Column()
 	persistant: boolean;
+
+	@Column()
+	onlyOpCanTalk: boolean;
+
+	@Column()
+	hidden: boolean;
 }

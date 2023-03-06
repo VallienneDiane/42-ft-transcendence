@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "./channel.entity";
-import { ChannelDto } from "./channel.dto";
 
 @Injectable({})
 export class ChannelService {
@@ -24,11 +23,11 @@ export class ChannelService {
 	}
 
 	async updateByName(channelToUpdate: string, newChannelConfig: ChannelEntity): Promise<void> {
-		this.channelRepository.update(channelToUpdate, newChannelConfig);
+		this.channelRepository.update({name: channelToUpdate}, newChannelConfig);
 	}
 
 	async updateById(channelToUpdate: number, newChannelConfig: ChannelEntity): Promise<void> {
-		this.channelRepository.update(channelToUpdate, newChannelConfig);
+		this.channelRepository.update({id: channelToUpdate}, newChannelConfig);
 	}
 
 	async deleteByName(channelName: string): Promise<void> {

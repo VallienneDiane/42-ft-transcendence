@@ -6,6 +6,7 @@ import { MessageModule } from "./message/message.module";
 import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { WsJwtStrategy } from "./websocket.strategy";
+import { ChatService } from "./chat.service";
 
 @Module({
 	imports: [
@@ -21,7 +22,7 @@ import { WsJwtStrategy } from "./websocket.strategy";
         }),
 		linkUCModule
 	],
-	providers: [ChatGateway, WsJwtStrategy],
-	exports: [PassportModule, JwtModule]
+	providers: [ChatGateway, WsJwtStrategy, ChatService],
+	exports: [PassportModule, JwtModule, ChatService]
 })
 export class ChatModule {}
