@@ -21,42 +21,45 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('auth/enable2fa')
   async enableTwoFactorAuth(@Headers('Authorization') token: string) {
-    const {id, login} = await this.authService.decodeToken(token);
-    const secret = await this.authService.genTwoFactorSecretOtpauthurl(id, login);
-    const qrcode = await this.authService.generateQrCode(secret.otpauth_url);
+    const user = await this.authService.decodeToken(token);
+    const qrcode = await this.authService.generateQRcode(user.id);
     return {
-      qrcode,
+      qrcode
+    }
+  }
+  
+  // @UseGuards(JwtAuthGuard)
+  @Post('auth/verifyCode')
+  async verifyCode(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {
+    const infosToken = await this.authService.decodeToken(token);
+    const user = await this.userService.findByLogin(infosToken.login);
+    console.log("code :", data.code, "user.secret" , user.twoFactorSecret);
+    const isCodeValid = await this.authService.isTwoFactorCodeValid(data.code, user.twoFactorSecret);
+    const isActive = await this.userService.turnOnTwoFactor(user.id);
+    return {
+      isCodeValid,
+      isActive,
     }
   }
   
   @UseGuards(JwtAuthGuard)
-  @Post('auth/verifyCode2fa')
-  async verifyCode(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {
-    const infosToken = await this.authService.decodeToken(token);
-    const user = await this.userService.findByLogin(infosToken.login);
-    const isCodeValid = await this.authService.isTwoFactorCodeValid(data.code, user.twoFactorSecret);
-    if (!isCodeValid) {
-      console.log("code is false")
-      throw new UnauthorizedException('Wrong authentication code');
-    }
-    await this.userService.turnOnTwoFactor(infosToken.id);
-    console.log("code is valid");
-    return (true);
+  @Post('auth/disable2fa')
+  async disableTwoFactorAuth(@Headers('Authorization') token: string) {
+    const user = await this.authService.decodeToken(token);
+    const isActive = await this.userService.turnOffTwoFactor(user.id);
+    return (isActive);
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Get('auth/is2faActive')
   async checkStatusGoogleAuth(@Headers('Authorization') token: string) {
     const infosToken = await this.authService.decodeToken(token);
     const user = await this.userService.findByLogin(infosToken.login);
-    return (user.isTwoFactorEnabled);
-}
-  @UseGuards(JwtAuthGuard)
-  @Post('auth/disable2fa')
-  async disableTwoFactorAuth(@Headers('Authorization') token: string) {
-    const user = await this.authService.decodeToken(token);
-    await this.userService.turnOffTwoFactor(user.id);
-    return { message: 'Google authentificator has been desactivate' };
+    const qrcode = user.qrCode;
+    const isActive = user.isTwoFactorEnabled;
+    return {
+      isActive,
+      qrcode,
     }
-    
+  }
 }

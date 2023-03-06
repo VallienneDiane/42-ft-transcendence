@@ -1,5 +1,5 @@
 
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserDto } from 'src/user/user.dto';
@@ -46,25 +46,34 @@ export class AuthService {
   }
   //generate secret use for google authentificator
   //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
-  async genTwoFactorSecretOtpauthurl(id: number, login: string) {
+  async generateQRcode(id: number) {
     const secret = speakeasy.generateSecret( {
       name: "App Transcendence"
     });
     await this.userService.setTwoFactorSecret(secret.ascii, id);
-    return (secret);
+    const user = await this.userService.findById(id);
+    if(!user.qrCode) {
+      const QRcode = await qrcode.toDataURL(secret.otpauth_url);
+      await this.userService.setQrCode(QRcode, id);
+      return (QRcode);
+    }
+    console.log(user.qrCode, " | secret :", secret);
+    return (user.qrCode);
+  }
 
-  }
-  // generate QR code
-  async generateQrCode(otpurl: string) {
-    const qrCode = qrcode.toDataURL(otpurl);
-    return qrCode;
-  }
   //check if entered code for google authentificator is valid
-  async isTwoFactorCodeValid(code: string, secret:string) {
-    return speakeasy.totp.verify(
-      { secret: secret,
-        encoding: "ascii",
-        token: code,
-      });
+  async isTwoFactorCodeValid(token: string, secret:string) {
+    console.log("secret :", secret);
+    const isCodeValid = speakeasy.totp.verify(
+    { 
+      token,
+      secret,
+    });
+    if (!isCodeValid) {
+      console.log("code is false")
+      throw new UnauthorizedException('Wrong authentication code');
+    }
+    console.log("code is valid");
+    return (true);
   }
 }

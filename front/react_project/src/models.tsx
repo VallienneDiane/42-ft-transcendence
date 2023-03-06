@@ -3,7 +3,7 @@ export interface LogInForm {
     password: string
 }
 
-export interface SettingsForm {
+export interface VerifyCodeForm {
     code: string,
     errors?:string,
 }

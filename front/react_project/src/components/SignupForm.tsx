@@ -23,6 +23,7 @@ const SignupForm: React.FC = () => {
     accountService.signUp(data)
     .then(Response => {
       accountService.saveToken(Response.data.access_token);
+      accountService.enableTwoFactorAuth();
       navigate("/");
     })
     .catch(error => {

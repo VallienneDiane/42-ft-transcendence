@@ -1,6 +1,7 @@
 import "../styles/LoginForm.css"
 import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
@@ -10,15 +11,26 @@ const LoginForm: React.FC = () => {
     let navigate = useNavigate();
     let user = useContext(UserContext);
     const { register, handleSubmit } = useForm<LogInForm>();
-    
+    const [isVerified, setVerifyCode] = useState<boolean>(false);
+    const [is2faActive, setActivate2fa] = useState<boolean>(false);
+
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
         .then(Response => {
             accountService.saveToken(Response.data.access_token);
-            navigate("/");
-        })
-        .catch(error => {
-            console.log(error);
+            accountService.isGoogleAuthActivated()
+            .then(response => {
+                setActivate2fa(response.data.isActive);
+                setVerifyCode(response.data.isCodeValid);
+                if(is2faActive == true) {
+                    console.log("LOGIN, 2fa actif ", response.data.isActive);
+                    navigate("/verifyCode2fa");
+                }
+                navigate("/");
+            })
+            .catch(error => {
+                console.log(error);
+            });
         });
     }
     

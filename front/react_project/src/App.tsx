@@ -9,7 +9,8 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
-import ToggleSwitch from './components/Settings'
+import Settings from './components/Settings'
+import VerifyCode2fa from './components/VerifyCode2fa'
 
 function App() {
   // let user = {
@@ -34,7 +35,8 @@ function App() {
                 <Route path='/chat' element={<Chat />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:id' element={<Profile />} />
-                <Route path='/settings' element={<ToggleSwitch />} />
+                <Route path='/settings' element={<Settings />} />
+                <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
               </Route>
             </Route>
 
