@@ -24,8 +24,6 @@ function App() {
   //   password: "",
   // };
 
-    const socket = io();
-
     return (
       <div className="App">
         {/* <UserProvider user={user}> */}
