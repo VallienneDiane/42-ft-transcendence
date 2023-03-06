@@ -4,6 +4,7 @@ import { userService } from "../services/user.service";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { UserData } from "../models"
+import "../styles/ChatModule.scss"
 
 const token: any = localStorage.getItem('token');
 let socket: any = null;
