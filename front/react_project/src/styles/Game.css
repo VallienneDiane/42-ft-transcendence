@@ -13,7 +13,3 @@
 #Game canvas:focus {
     outline: none;
 }
-
-/* *:not(canvas) {
-    filter: blur(5px);
-} */
