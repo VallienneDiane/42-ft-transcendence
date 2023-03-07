@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Namespace, Server, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import { IChannel, IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
 import { MessageEntity } from "./message/message.entity";
@@ -9,6 +9,7 @@ import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from "../user/user.service";
 
 @Injectable({})
 export class ChatService {
@@ -16,7 +17,8 @@ export class ChatService {
         private messageService: MessageService,
         private channelService: ChannelService,
         private linkUCService: LinkUCService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private userService: UserService
     ) {}
 
     private extractLogin(client: Socket): string {
@@ -123,14 +125,61 @@ export class ChatService {
         }
     }
 
-    public historyEvent(data: IHandle) {
+    public changeLocEvent(data: IHandle) {
+        let login = this.extractLogin(data.client);
         if (data.message.isChannel)
-            this.messageService.findByChannel(data.message.room).then((pouet) => data.client.emit("history", pouet));
-        else {
-            let login = this.extractLogin(data.client);
-            if (!login)
-                return;
-            this.messageService.findByPrivate(data.message.room, login).then((pouet) => data.client.emit("history", pouet));
+        {
+            this.channelService.getOneByName(data.message.room)
+            .then(
+                (loc) => {
+                    if (loc != null)
+                    {
+                        this.linkUCService.findOne(loc.name, login)
+                        .then(
+                            (found) => {
+                                if (found != null)
+                                {
+                                    let currentRoom: string = data.client.rooms.values().next().value;
+                                    if (currentRoom != undefined)
+                                        data.client.leave(currentRoom);
+                                    data.client.join(found.channelName);
+                                    this.messageService.findByChannel(found.channelName)
+                                    .then(
+                                        ( (messages) => {
+                                            data.client.emit('newLocChannel', found.channelName, messages);
+                                        }
+                                    ))
+                                }
+                                else
+                                    data.client.emit('notRegisteredToChannel');
+                            }
+                        )
+                    }
+                    else
+                        data.client.emit('noSuchChannel');
+                }
+            )
+        }
+        else
+        {
+            this.userService.findByLogin(data.message.room)
+            .then (
+                (found) => {
+                    if (found != null) {
+                        this.messageService.findByPrivate(login, found.login)
+                        .then (
+                            (messages) => {
+                                let currentRoom: string = data.client.rooms.values().next().value;
+                                if (currentRoom != undefined)
+                                    data.client.leave(currentRoom);
+                                data.client.emit('newLocPrivate', found.login, messages);
+                            }
+                        )
+                    }
+                    else
+                        data.client.emit('noSuchUser');
+                }
+            )
         }
     }
 
