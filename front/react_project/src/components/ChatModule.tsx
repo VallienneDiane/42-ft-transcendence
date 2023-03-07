@@ -28,7 +28,7 @@ interface IChat {
 }
 
 interface Users {
-    users: UserData[];
+    rooms: string[];
     me: JwtPayload;
 }
 
@@ -182,6 +182,7 @@ class ChannelList extends React.Component<IChat, Users> {
         super(props);
         this.state = {users: [], me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
+        this.props.socket!.emit('listChannel');
     }
 
     changeLoc(channel: string) {
@@ -189,6 +190,7 @@ class ChannelList extends React.Component<IChat, Users> {
     }
 
     componentDidMount() {
+        this.props.socket!.on('listChannel', (channels) => {})
         userService.getAllUsers()
         .then((response) => {
             this.setState({ users: response.data });
@@ -226,23 +228,22 @@ export default class ChatModule extends React.Component<{}, IChat> {
 
     render() {
         return (  
+            <SocketContext.Consumer > 
+            { ({ socket }) => (
+            <React.Fragment>
             <div className="chatWrapper">
                 <div className="left">
                     <Search />
-                    <ChannelList action={this.changeLoc}/>
+                    <ChannelList action={this.changeLoc} socket={socket} />
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
-                    <SocketContext.Consumer > 
-                        { ({ socket }) => (
-                            <React.Fragment>
-                            <MessageList dest={this.state.dest} socket={socket} />
-                            <SendMessageForm dest={this.state.dest} socket={socket}/>
-                            </React.Fragment>
-                        )}
-                    </SocketContext.Consumer>
+                    <MessageList dest={this.state.dest} socket={socket} />
+                    <SendMessageForm dest={this.state.dest} socket={socket}/>
                 </div>
             </div>
+            </React.Fragment> )}
+            </SocketContext.Consumer>
         )
     }
 }
