@@ -5,19 +5,22 @@ import React from "react";
 
 const ProtectedRoutes = () => {
     const location = useLocation();
-    const {socket, createSocket} = React.useContext(SocketContext);
+    const {socket, createSocket, disconnect} = React.useContext(SocketContext);
     const token = accountService.getToken();
-    console.log("Auth:", socket.auth.token);
-    console.log('protected route', location);
+   
     if (token !== null)
     {
-        console.log("blop:" , socket);
         if (token !== socket.auth.token as string)
         {
             console.log("ne doit creer qu'une socket");
+            disconnect();
             createSocket();
         }
     }
+    socket.on("test", () => {
+        console.log("Id", socket.id);
+      });
+
     return accountService.isLogged() ? <Outlet/> : <Navigate to="/login"/>;
 }
 

@@ -1,22 +1,18 @@
 import './App.css'
-import NavBar from './components/Navbar'
-import PingHandler from './components/SocketHandler'
 import ChatModule from './components/ChatModule';
 import SignupForm from './components/SignupForm'
 import LoginForm from './components/LoginForm'
 import Home from './components/Home'
 import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Profile from './components/Profile';
-import UserProvider from './user/UserProvider';
 import ProtectedRoutes from './components/ProtectedRoutes';
-import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
 import SocketContext from './components/context';
 import { accountService } from "./services/account.service";
 import io from 'socket.io-client';
 import { Socket } from 'socket.io-client';
-import React, { useState} from "react";
+import { useState} from "react";
 
 function App() {
   const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
@@ -25,22 +21,32 @@ function App() {
     transports: ['websocket'],
     auth: { token: 'undefined' },
   }));
-  // console.log("avant:", socket);
+  socket!.on("test", () => {
+    console.log("Id1", socket!.id);
+  });
 
   function createSocket() {
-    console.log("blop2");
     const newSocket = io('127.0.0.1:3000/chat', {
       transports : ['websocket'],
       auth : { token: accountService.getToken() },
     });
-    newSocket.connect();
     setSocket(newSocket);
+  }
+
+  function disconnect() {
+    if (socket)
+    {
+      console.log("avant disconnect", socket);
+      socket.disconnect();
+      console.log("apres disconnect", socket);
+      // setSocket(null);
+    }
   }
 
   return (
     <div className="App">
       <BrowserRouter >
-        <SocketContext.Provider value={{ socket, createSocket }} >
+        <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
         <Routes>
           <Route element={<Layout />}>
             <Route path='/login' element={<LoginForm />} />

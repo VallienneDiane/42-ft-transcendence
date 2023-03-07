@@ -1,7 +1,6 @@
 import '../styles/Navbar.css'
-import React, { useContext } from "react"
-import { Link, Navigate, NavLink } from "react-router-dom"
-import { UserContext } from "../user/UserContext";
+import React from "react"
+import { NavLink } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 

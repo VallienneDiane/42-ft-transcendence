@@ -1,7 +1,5 @@
 import "../styles/LoginForm.css"
-import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 import { LogInForm } from "../models";
