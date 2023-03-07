@@ -1,16 +1,20 @@
 import { Injectable } from "@nestjs/common";
 import { Namespace, Server, Socket } from "socket.io";
-import { IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
+import { IChannel, IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
 import { MessageEntity } from "./message/message.entity";
+import { LinkUCEntity } from "./link_users_channels/linkUC.entity";
+import { ChannelEntity } from "./channel/channel.entity";
 import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
+import { LinkUCService } from "./link_users_channels/linkUC.service";
 
 @Injectable({})
 export class ChatService {
     constructor (
         private messageService: MessageService,
-        private channelService: ChannelService
+        private channelService: ChannelService,
+        private linkUCService: LinkUCService
     ) {}
 
     private extractLogin(client: Socket): string {
@@ -34,8 +38,27 @@ export class ChatService {
         };
     }
 
-    private channelEntityfier() {
+    private channelEntityfier(channProperties: IChannel): ChannelEntity {
+        return {
+            id: undefined,
+            date: undefined,
+            name: channProperties.channelName,
+            pass: channProperties.channelPass,
+            inviteOnly: channProperties.inviteOnly,
+            persistant: channProperties.persistant,
+            onlyOpCanTalk: channProperties.onlyOpCanTalk,
+            hidden: channProperties.hidden
+        };
+    }
 
+    private linkUCEntityfier(login: string, channelName: string, op: boolean): LinkUCEntity {
+        return {
+            id: undefined,
+            userName: login,
+            channelName: channelName,
+            date: undefined,
+            isOp: op
+        };
     }
 
     private toSendFormat(login: string, data: IMessageChat): IMessageToSend {
@@ -106,22 +129,41 @@ export class ChatService {
     }
 
     public joinChannelEvent(data: IHandle) {
-        this.channelService.getOneByName(data.channelEntries.channelName)
-        .then(
-            (result) => {
-                if (result) {
-
-                }
-                else
-                    data.client.emit('')
+        let login = this.extractLogin(data.client);
+        this.linkUCService.findOne(data.channelEntries.channelName, login)
+        .then ( (exist) => {
+            if (exist != null)
+                data.client.emit('alreadyInChannel');
+            else {
+                this.channelService.getOneByName(data.channelEntries.channelName)
+                .then ( (chan) => {
+                    if (chan != null) {
+                        if (chan.pass != undefined && data.channelEntries.channelPass! == chan.pass) {
+                            this.linkUCService.create(this.linkUCEntityfier(login, data.channelEntries.channelName, false))
+                            .then( (succeed) => data.client.emit('channelJoined', succeed.channelName));
+                        }
+                        else
+                            data.client.emit('wrongChannelPassword');
+                    }
+                    else
+                        data.client.emit('noSuchChannel');
+                })
             }
-        )
-        .catch(
-
-        )
+        } )
     }
 
     public createChannelEvent(data: IHandle) {
-
+        let login = this.extractLogin(data.client);
+        this.channelService.getOneByName(data.channelEntries.channelName)
+        .then( (exist) => {
+            if (exist != null) {
+                this.channelService.create(this.channelEntityfier(data.channelEntries))
+                .then( (succeed) => {
+                    data.client.emit('channelCreated', succeed.name);
+                    this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
+                    .then( (channLink) => data.client.emit('channelJoined', channLink.channelName));
+                })
+            }
+        })
     }
 }
