@@ -12,6 +12,8 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
 	constructor(private readonly gameEngineService: GameEngineService) {}
 
+  test = new GameEngineService;
+
   @WebSocketServer()
   server: Server;
 
@@ -27,7 +29,17 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   @SubscribeMessage('Game_Input')
   OnGame_Input(@MessageBody() body: any) {
     console.log(body);
-    this.gameEngineService.hello();
+    this.test.hello();
+    this.server.emit('Game_Update', 'game update received')
+  }
+
+  @SubscribeMessage('Game_start')
+  OnGame_start(@MessageBody() body: any) {
+    console.log(body);
+    setInterval(function() {
+      console.log("should work");
+      this.gameEngineService.main_loop();
+    }, 1000/60);
     this.server.emit('Game_Update', 'game update received')
   }
 }
