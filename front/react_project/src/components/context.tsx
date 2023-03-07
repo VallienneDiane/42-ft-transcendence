@@ -10,13 +10,7 @@ const SocketContext = React.createContext ({
 	  transports : ['websocket'],
 	  auth : { token: undefined },
 	}),
-	createSocket: () => {
-		console.log("blop2");
-		const newSocket = io('127.0.0.1:3000/chat', {
-		  transports : ['websocket'],
-		  auth : { token: accountService.getToken() },
-		});
-		newSocket.connect();},
+	createSocket: () => {},
 });
 
 export default SocketContext;
