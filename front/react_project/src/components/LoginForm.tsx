@@ -5,35 +5,61 @@ import { useState } from "react";
 import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
-import { LogInForm } from "../models";
+import { LogInForm, VerifyCodeForm } from "../models";
 
 const LoginForm: React.FC = () => {
-    let navigate = useNavigate();
-    let user = useContext(UserContext);
+    const navigate = useNavigate();
     const { register, handleSubmit } = useForm<LogInForm>();
-    const [isVerified, setVerifyCode] = useState<boolean>(false);
-    const [is2faActive, setActivate2fa] = useState<boolean>(false);
+    // const [is2faActive, setActivate2fa] = useState<boolean>(false);
 
-    const onSubmit = (data: LogInForm) => {
+    const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
-        .then(Response => {
-            accountService.saveToken(Response.data.access_token);
-            accountService.isGoogleAuthActivated()
-            .then(response => {
-                setActivate2fa(response.data.isActive);
-                setVerifyCode(response.data.isCodeValid);
-                if(is2faActive == true) {
-                    console.log("LOGIN, 2fa actif ", response.data.isActive);
-                    navigate("/verifyCode2fa");
-                }
-                navigate("/");
-            })
-            .catch(error => {
-                console.log(error);
-            });
+        .then(response_user => {
+            if(response_user.data == true) {
+                accountService.isGoogleAuthActivated(data.login)
+                .then(response_2fa => {
+                    console.log(response_2fa);
+                    if(response_2fa.data == true) {
+                        navigate("/verifyCode2fa", { state: { login: data.login } });
+                    }
+                    else {
+                        accountService.generateToken(data.login)
+                        .then(response_token => {
+                            console.log(response_token);
+                            accountService.saveToken(response_token.data.access_token);
+                            navigate('/');
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                    }
+                })
+            }
+            
         });
     }
+
     
+    // const onSubmit = (data: LogInForm) => {
+    //     accountService.login(data)
+    //     .then(Response => {
+    //         accountService.saveToken(Response.data.access_token);
+    //     });
+    //     accountService.isGoogleAuthActivated()
+    //     .then(response => {
+    //         setActivate2fa(response.data.is2faActive);
+    //         setVerifyCode(response.data.isCodeValid);
+    //     })
+    //     .catch(error => {
+    //         console.log(error);
+    //     });
+    //     console.log("LOGINFORM : 2fa actif ? ", is2faActive, "code verified ? ", isVerified);
+    //     if(is2faActive == true) {
+    //         navigate("/verifyCode2fa");
+    //     }
+    //     if(is2faActive == false || isVerified == true)
+    //         navigate("/");
+    // }
     return (
         <div >
             <h1>Login page</h1>
