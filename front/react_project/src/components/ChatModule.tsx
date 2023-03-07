@@ -7,7 +7,14 @@ import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 
-const channels: string[] = [ "general", "events", "meme" ];
+interface IMessageEntity {
+    id?: number,
+    room?: string,
+    isChannel?: boolean,
+    sender: string,
+    content: string,
+    date: Date,
+}
 
 interface Message {
     text: string;
@@ -22,8 +29,9 @@ interface MessageChat {
 
 interface IChat {
     dest?: string;
-    history?: Message[];
+    history?: IMessageEntity[];
     action?: any;
+    action2?: any;
     socket?: Socket,
 }
 
@@ -51,7 +59,7 @@ function matchChannel(channel: string) {
     console.log(channel);
 }
 
-class Search extends React.Component<{}, Message> {
+class Search extends React.Component<IChat, Message> {
     constructor(props: {}) {
         super(props);
         this.state = { text: "" };
@@ -62,10 +70,7 @@ class Search extends React.Component<{}, Message> {
     searchSmth(event: any) {
         event.preventDefault();
         if (this.state.text.length > 0) {
-            return channels.forEach((channel, index) => {
-            if (channel === this.state.text) {
-                matchChannel(this.state.text);
-            }});
+            this.props.socket!.emit('createChannel', this.state.text, undefined, false, false, false, false);
         }
         this.setState({ text: "" });
     }
@@ -135,7 +140,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     render() {
         const listItems: JSX.Element[] = this.props.history!.reverse().map(
-            (message, id) => <Message key={id} text={message.text} sender={message.sender} />
+            (message, id) => <Message key={id} text={message.content} sender={message.sender} />
         );
         return (
             <div className="messageList">
@@ -180,34 +185,35 @@ class SendMessageForm extends React.Component<IChat, Message> {
 class ChannelList extends React.Component<IChat, Users> {
     constructor(props: IChat) {
         super(props);
-        this.state = {users: [], me: accountService.readPayload()!};
+        this.state = {rooms: [], me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
         this.props.socket!.emit('listChannel');
     }
 
     changeLoc(channel: string) {
-        this.props.action(channel);
+        this.props.socket!.emit('changeLoc', channel);  
     }
-
+    
     componentDidMount() {
-        this.props.socket!.on('listChannel', (channels) => {})
-        userService.getAllUsers()
-        .then((response) => {
-            this.setState({ users: response.data });
+        this.props.socket!.on('listChannel', (channels: string[]) => { this.setState({ rooms: channels})});
+        this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
+            this.props.action(room);
+            this.props.action2(messages);
         })
-        .catch((error) => console.log(error));
+        // userService.getAllUsers()
+        // .then((response) => {
+        //     this.setState({ users: response.data });
+        // })
+        // .catch((error) => console.log(error));
     }
 
     render() {
         return (
             <div className="channelListWrapper">
                 <ul className="channelList">
-                    <li>general</li>
-                    <li>events</li>
-                    <li>meme</li>
-                    { this.state.users.map((user) => { 
-                        if (this.state.me.login !== user.login)
-                        { return ( <li key={user.id} onClick={() => this.changeLoc(user.login)}> {user.login}</li> ) }
+                    { this.state.rooms.map((room) => { 
+                        if (this.state.me.login !== room)
+                        { return ( <li key={room} onClick={() => this.changeLoc(room)}> {room}</li> ) }
                     })}
                 </ul>
             </div>
@@ -218,13 +224,25 @@ class ChannelList extends React.Component<IChat, Users> {
 export default class ChatModule extends React.Component<{}, IChat> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: 'general'};
+        this.state = {dest: 'general', history: []};
         this.changeLoc = this.changeLoc.bind(this);
+        this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
     }
 
     changeLoc(newDest: string) {
         this.setState({dest: newDest});
     }
+
+    handleNewMessageOnHistory(newMessage: IMessageEntity) {
+        this.setState({
+            history: [...this.state.history!, newMessage]
+        });
+    }
+
+    handleHistory(newHistory: IMessageEntity[]) {
+        this.setState({ history: newHistory });
+    }
+
 
     render() {
         return (  
@@ -233,12 +251,12 @@ export default class ChatModule extends React.Component<{}, IChat> {
             <React.Fragment>
             <div className="chatWrapper">
                 <div className="left">
-                    <Search />
-                    <ChannelList action={this.changeLoc} socket={socket} />
+                    <Search socket={socket} />
+                    <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
-                    <MessageList dest={this.state.dest} socket={socket} />
+                    <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
                     <SendMessageForm dest={this.state.dest} socket={socket}/>
                 </div>
             </div>
