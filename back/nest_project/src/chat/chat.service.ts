@@ -50,12 +50,16 @@ export class ChatService {
         if (data.client.handshake.auth['token'] != null) {
             let login = this.extractLogin(data.client);
             if (!login)
+            {
+                data.logger.log(`undefined token`);
                 return;
+            }
             data.chatNamespace.sockets.set(data.client.id, data.client);
             data.socketMap.set(login, data.client);
             data.client.join("general");
             data.client.emit("getRoom", "general", []);
-            data.logger.log(`${login} is connected`);
+            data.logger.log(`${login} is connected, ${data.client.id}`);
+            data.client.emit("test", "blop");
         }
     }
 

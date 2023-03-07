@@ -33,7 +33,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.chatNamespace = this.io.of('/chat');
     }
 
-    @UseGuards(AuthGuard('websocket'))
+    // @UseGuards(AuthGuard('websocket'))
     handleConnection(client: Socket) {
 		this.chatService.connectEvent(this.iHandlerisator(client));
     }

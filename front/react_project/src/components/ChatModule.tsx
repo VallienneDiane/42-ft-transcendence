@@ -1,5 +1,4 @@
 import React from "react";
-import socketIOClient from 'socket.io-client';
 import { userService } from "../services/user.service";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
@@ -7,7 +6,6 @@ import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
-import { useContext } from 'react';
 
 const channels: string[] = [ "general", "events", "meme" ];
 
@@ -26,6 +24,7 @@ interface IChat {
     dest?: string;
     history?: Message[];
     action?: any;
+    socket?: Socket,
 }
 
 interface Users {
@@ -104,8 +103,7 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentDidMount(): void {
-        const socket = this.context;
-        socket!.on('messageChannel', (data: MessageChat) => {
+        this.props.socket!.on('messageChannel', (data: MessageChat) => {
             if (data.room == this.props.dest) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);
@@ -113,27 +111,26 @@ class MessageList extends React.Component<IChat, {}> {
             }
         });
         
-        socket!.on('messagePrivate', (data: MessageChat) => {
+        this.props.socket!.on('messagePrivate', (data: MessageChat) => {
             if (data.sender == this.props.dest) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 this.props.action(pouet);
             }
         })
 
-        socket!.on('selfMessage', (data: MessageChat) => {
+        this.props.socket!.on('selfMessage', (data: MessageChat) => {
             let pouet: Message = {text: data.content, sender: data.sender};
             this.props.action(pouet);
         })
 
-        socket!.on('notice', (data: string) => {
+        this.props.socket!.on('notice', (data: string) => {
             console.log(data);
         })
     }
 
     componentWillUnmount(): void {
-        const socket = this.context;
-        socket!.off('message');
-        socket!.off('notice');
+        this.props.socket!.off('message');
+        this.props.socket!.off('notice');
     }
 
     render() {
@@ -147,10 +144,8 @@ class MessageList extends React.Component<IChat, {}> {
         );
     }
 }
-MessageList.contextType = SocketContext;
 
 class SendMessageForm extends React.Component<IChat, Message> {
-    static contextType = SocketContext;
     constructor(props: IChat) {
         super(props);
         this.state = { text: '' };
@@ -159,20 +154,14 @@ class SendMessageForm extends React.Component<IChat, Message> {
     }
 
     handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-        console.log("Context:");
         this.setState({ text: event.target.value });
     }
 
     sendMessage(event: any) {
-        const socket = this.context;
-        console.log("Context:" + this.context);
         event.preventDefault();
         let content: string = this.state.text;
         let room: string = this.props.dest!;
-        // socket.emit('chat', 'send', this.props.dest, this.state.text);
-        // verifier que le user existe ?
-        // socket.emit('addMessage', { room, content });
-        socket!.emit('addMessage', { room, isChannel: 0, content });
+        this.props.socket!.emit('addMessage', { room, isChannel: 0, content });
         this.setState({ text: '' });
     }
 
@@ -244,7 +233,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
     }
 
     render() {
-        return (
+        return (  
             <div className="chatWrapper">
                 <div className="left">
                     <Search />
@@ -252,8 +241,14 @@ export default class ChatModule extends React.Component<{}, IChat> {
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
-                    <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} />
-                    <SendMessageForm dest={this.state.dest} />
+                    <SocketContext.Consumer > 
+                        { ({ socket }) => (
+                            <React.Fragment>
+                            <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
+                            <SendMessageForm dest={this.state.dest} socket={socket}/>
+                            </React.Fragment>
+                        )}
+                    </SocketContext.Consumer>
                 </div>
             </div>
         )
