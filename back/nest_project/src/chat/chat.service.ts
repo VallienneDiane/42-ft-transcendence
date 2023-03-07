@@ -9,7 +9,7 @@ import { UserEntity } from "src/user/user.entity";
 import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
-import { UserService } from "src/user/user.service";
+import { UserService } from "../user/user.service";
 
 @Injectable({})
 export class ChatService {
