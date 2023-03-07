@@ -8,6 +8,5 @@ export class GameEngineService {
 
 	main_loop() {
 		console.log("game was updated");
-		setTimeout(this.main_loop, 1000/60);
 	}
 }
