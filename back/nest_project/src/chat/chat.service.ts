@@ -174,6 +174,13 @@ export class ChatService {
         }
     }
 
+    public listChannelEvent(client: Socket) {
+        this.channelService.listChannels()
+        .then (
+            (list) => {client.emit('channelList', list);}
+        )
+    }
+
     public joinChannelEvent(data: IHandle) {
         let login = this.extractLogin(data.client);
         this.linkUCService.findOne(data.channelEntries.channelName, login)
