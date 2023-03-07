@@ -3,6 +3,10 @@ import { ChannelModule } from "./channel/channel.module";
 import { ChatGateway } from "./chat.gateway";
 import { linkUCModule } from "./link_users_channels/linkUC.module";
 import { MessageModule } from "./message/message.module";
+import { PassportModule } from "@nestjs/passport";
+import { JwtModule } from "@nestjs/jwt";
+import { WsJwtStrategy } from "./websocket.strategy";
+import { ChatService } from "./chat.service";
 
 @Module({
 	imports: [
@@ -10,6 +14,7 @@ import { MessageModule } from "./message/message.module";
 		MessageModule,
 		linkUCModule
 	],
-	providers: [ChatGateway]
+	providers: [ChatGateway, WsJwtStrategy, ChatService],
+	exports: [PassportModule, JwtModule, ChatService]
 })
 export class ChatModule {}
