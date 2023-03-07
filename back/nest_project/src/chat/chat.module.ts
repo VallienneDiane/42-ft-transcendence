@@ -7,9 +7,14 @@ import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
 import { WsJwtStrategy } from "./websocket.strategy";
 import { ChatService } from "./chat.service";
+import { UserService } from "src/user/user.service";
+import { UserEntity } from "src/user/user.entity";
+import { AppModule } from "src/app.module";
+import { UserModule } from "src/user/user.module";
 
 @Module({
 	imports: [
+		UserModule,
 		ChannelModule,
 		MessageModule,
 		PassportModule.register({             

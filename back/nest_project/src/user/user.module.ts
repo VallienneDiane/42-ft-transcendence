@@ -3,6 +3,8 @@ import { JwtModule } from "@nestjs/jwt";
 import { PassportModule } from "@nestjs/passport";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { JwtStrategy } from "src/auth/jwt.strategy";
+import { ChatModule } from "src/chat/chat.module";
+import { ChatService } from "src/chat/chat.service";
 import { UserController } from "./user.controller";
 import { UserEntity } from "./user.entity";
 import { UserService } from "./user.service";
