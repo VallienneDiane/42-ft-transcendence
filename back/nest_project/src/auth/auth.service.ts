@@ -2,9 +2,6 @@
 import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserDto } from 'src/user/user.dto';
-import * as otplib from 'otplib';
-import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as qrcode from 'qrcode';
 import * as speakeasy from 'speakeasy';
@@ -25,18 +22,17 @@ export class AuthService {
     }
     return validUser;
   }
-
-  async login(user: any){
-    const validUser = await this.userService.findByLogin(user.login);
+  
+  async genToken(login: string){
+    const validUser = await this.userService.findByLogin(login);
     const payload = {login: validUser.login, sub: validUser.id};
     return {
       access_token: this.jwtService.sign(payload)
     }
   }
-
+  
   // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
   //otp auth = one time password compatible with Google authentificator
-
   async decodeToken(fullToken: string): Promise<{ id: number, login: string }>{
     const token = fullToken.split(' ')[1];
     const decodedToken = await this.jwtService.verifyAsync(token);
@@ -47,33 +43,29 @@ export class AuthService {
   //generate secret use for google authentificator
   //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
   async generateQRcode(id: number) {
+    const user = await this.userService.findById(id);
     const secret = speakeasy.generateSecret( {
       name: "App Transcendence"
     });
     await this.userService.setTwoFactorSecret(secret.ascii, id);
-    const user = await this.userService.findById(id);
-    if(!user.qrCode) {
-      const QRcode = await qrcode.toDataURL(secret.otpauth_url);
-      await this.userService.setQrCode(QRcode, id);
-      return (QRcode);
-    }
-    console.log(user.qrCode, " | secret :", secret);
-    return (user.qrCode);
+    const QRcode = await qrcode.toDataURL(secret.otpauth_url);
+    await this.userService.setQrCode(QRcode, user.id);
+    return (QRcode);
   }
 
   //check if entered code for google authentificator is valid
   async isTwoFactorCodeValid(token: string, secret:string) {
-    console.log("secret :", secret);
+    console.log("AUTH SERVICE SECRET :", secret);
     const isCodeValid = speakeasy.totp.verify(
     { 
       token,
       secret,
     });
     if (!isCodeValid) {
-      console.log("code is false")
+      console.log("Code is false")
       throw new UnauthorizedException('Wrong authentication code');
     }
-    console.log("code is valid");
+    console.log("Code is valid");
     return (true);
   }
 }

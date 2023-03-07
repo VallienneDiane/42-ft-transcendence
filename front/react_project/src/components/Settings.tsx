@@ -23,11 +23,14 @@ export default function Settings() {
     resolver: yupResolver(schema)
   });
 
+  console.log("SETTINGS : checked ", checked, "code verify " , isVerified, "google auth actif ", is2faActive)
   const isGoogleActivate = () => {
     accountService.isGoogleAuthActivated()
     .then(response => {
-      setActivate2fa(response.data.isActive);
-      setchecked(response.data.isActive);
+      setActivate2fa(response.data.is2faActive);
+      setchecked(response.data.is2faActive);
+      setQrcode(response.data.qrcode);
+      setVerifyCode(response.data.is2faActive);
     })
     .catch(error => console.log(error));
   }
@@ -41,7 +44,7 @@ export default function Settings() {
     accountService.verifyCodeTwoFactorAuth(data)
     .then(response => {
       setVerifyCode(response.data.isCodeValid);
-      setActivate2fa(response.data.isActive);
+      setActivate2fa(response.data.is2faActive);
     })
     .catch(error => console.log(error));
   }
@@ -64,18 +67,7 @@ export default function Settings() {
     }
   }
 
-  if(checked == false && is2faActive == false)
-    return (
-      <div className="toggle2fa">
-      <div className="switch">
-        <p>Activate Google Authentificator</p>
-        <ReactSwitch
-          checked={checked}
-          onChange={handleChange}
-        />
-      </div>
-    </div>
-  )
+  if(checked == true && is2faActive== false)
   return (
     <div className="toggle2fa">
       <div className="switch">
@@ -93,5 +85,30 @@ export default function Settings() {
         <button type="submit">Submit</button>
         </form>
     </div>
+  )
+  if(checked == true && is2faActive == true)
+  return (
+    <div className="toggle2fa">
+      <div className="switch">
+        <p>Activate Google Authentificator</p>
+        <ReactSwitch
+          checked={checked}
+          onChange={handleChange}
+        />
+      </div>
+        <img id="qrcode" src={qrcode} alt="" />
+        <p id="AuthActivate">Google Authentificator is activate</p>
+    </div>
+  )
+  return (
+    <div className="toggle2fa">
+    <div className="switch">
+      <p>Activate Google Authentificator</p>
+      <ReactSwitch
+        checked={checked}
+        onChange={handleChange}
+      />
+    </div>
+  </div>
   )
 }

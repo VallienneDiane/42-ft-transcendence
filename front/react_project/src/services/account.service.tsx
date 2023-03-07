@@ -10,17 +10,26 @@ let signUp = (credentials: SignUpForm) => {
 
 // Requete pour se connecter
 let login = (credentials: LogInForm) => {
-    return Axios.post('/auth/login', credentials);
+    const result = Axios.post('auth/login', credentials);
+    console.log("LOGIN RESULT ", result);
+    return result;
+}
+
+let generateToken = (login: string) => {
+    return Axios.post('auth/generateToken', {login});
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // TWO FACTOR AUTHENTIFICATOR
-let isGoogleAuthActivated = () => {
-    return Axios.get('/auth/is2faActive');
+let isGoogleAuthActivated = (login: string) => {
+    return Axios.post('auth/is2faActive', {login});
+    // const result = Axios.get('auth/is2faActive');
+    // console.log("IN ACCOUNT SERVICE : ", result);
+    // return result;
 }
 
 let enableTwoFactorAuth = () => {
-    return Axios.post('/auth/enable2fa');
+    return Axios.post('auth/enable2fa');
 }
 
 let verifyCodeTwoFactorAuth = (credentials: VerifyCodeForm) => {
@@ -29,7 +38,7 @@ let verifyCodeTwoFactorAuth = (credentials: VerifyCodeForm) => {
 }
 
 let disableTwoFactorAuth = () => {
-    return Axios.post('/auth/disable2fa');
+    return Axios.post('auth/disable2fa');
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -85,5 +94,6 @@ let readPayload = () => {
 
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth, isGoogleAuthActivated
+    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth, 
+    isGoogleAuthActivated, generateToken
 }

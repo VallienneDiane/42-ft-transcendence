@@ -29,6 +29,7 @@ function App() {
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginForm />} />
               <Route path='/signup' element={<SignUpForm />} />
+              <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
               <Route element={<ProtectedRoutes/>}>
                 <Route path='/' element={<Home />} />
                 <Route path='/game' element={<Game />} />
@@ -36,7 +37,6 @@ function App() {
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:id' element={<Profile />} />
                 <Route path='/settings' element={<Settings />} />
-                <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
               </Route>
             </Route>
 
