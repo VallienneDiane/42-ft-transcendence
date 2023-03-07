@@ -22,8 +22,8 @@ function App() {
   const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
   {
     autoConnect: false,
-    transports : ['websocket'],
-    auth : { token: undefined },
+    transports: ['websocket'],
+    auth: { token: 'undefined' },
   }));
   // console.log("avant:", socket);
 
@@ -40,7 +40,7 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter >
-        <SocketContext.Provider value={{ socket: Socket, createSocket }} >
+        <SocketContext.Provider value={{ socket, createSocket }} >
         <Routes>
           <Route element={<Layout />}>
             <Route path='/login' element={<LoginForm />} />

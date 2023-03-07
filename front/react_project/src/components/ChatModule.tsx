@@ -6,6 +6,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
+import { Socket } from 'socket.io-client'
 import { useContext } from 'react';
 
 const channels: string[] = [ "general", "events", "meme" ];
@@ -98,7 +99,6 @@ function Message(value: Message): JSX.Element {
 }
 
 class MessageList extends React.Component<IChat, {}> {
-    static contextType = SocketContext;
     constructor(props: IChat) {
         super(props);
     }
@@ -135,7 +135,7 @@ class MessageList extends React.Component<IChat, {}> {
         );
     }
 }
-
+MessageList.contextType = SocketContext;
 
 class SendMessageForm extends React.Component<IChat, Message> {
     static contextType = SocketContext;
