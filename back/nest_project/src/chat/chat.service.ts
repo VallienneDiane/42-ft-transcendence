@@ -8,13 +8,15 @@ import { ChannelEntity } from "./channel/channel.entity";
 import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable({})
 export class ChatService {
     constructor (
         private messageService: MessageService,
         private channelService: ChannelService,
-        private linkUCService: LinkUCService
+        private linkUCService: LinkUCService,
+        private jwtService: JwtService
     ) {}
 
     private extractLogin(client: Socket): string {
@@ -71,6 +73,10 @@ export class ChatService {
 
     public connectEvent(data: IHandle) {
         if (data.client.handshake.auth['token'] != null) {
+            const decoded = this.jwtService.verify(data.client.handshake.auth['token'], {
+                secret: process.env.SECRET,
+            });
+            console.log(decoded);
             let login = this.extractLogin(data.client);
             if (!login)
             {

@@ -36,9 +36,7 @@ function App() {
   function disconnect() {
     if (socket)
     {
-      console.log("avant disconnect", socket);
       socket.disconnect();
-      console.log("apres disconnect", socket);
       // setSocket(null);
     }
   }

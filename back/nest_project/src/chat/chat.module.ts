@@ -5,16 +5,19 @@ import { linkUCModule } from "./link_users_channels/linkUC.module";
 import { MessageModule } from "./message/message.module";
 // import { PassportModule } from "@nestjs/passport";
 import { JwtModule } from "@nestjs/jwt";
-import { WsJwtStrategy } from "./websocket.strategy";
 import { ChatService } from "./chat.service";
 
 @Module({
 	imports: [
 		ChannelModule,
 		MessageModule,
-		linkUCModule
+		linkUCModule,
+		JwtModule.register({
+            secret: process.env.SECRET, 
+            signOptions: { expiresIn: '1d' },
+        }),
 	],
-	providers: [ChatGateway, WsJwtStrategy, ChatService],
-	exports: [ChatService]
+	providers: [ChatGateway, ChatService],
+	exports: [ChatService, JwtModule]
 })
 export class ChatModule {}

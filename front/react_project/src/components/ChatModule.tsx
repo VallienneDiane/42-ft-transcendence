@@ -181,10 +181,10 @@ class ChannelList extends React.Component<IChat, Users> {
     constructor(props: IChat) {
         super(props);
         this.state = {users: [], me: accountService.readPayload()!};
-        this.changeChann = this.changeChann.bind(this);
-        }
+        this.changeLoc = this.changeLoc.bind(this);
+    }
 
-    changeChann(channel: string) {
+    changeLoc(channel: string) {
         this.props.action(channel);
     }
 
@@ -205,7 +205,7 @@ class ChannelList extends React.Component<IChat, Users> {
                     <li>meme</li>
                     { this.state.users.map((user) => { 
                         if (this.state.me.login !== user.login)
-                        { return ( <li key={user.id} onClick={() => this.changeChann(user.login)}> {user.login}</li> ) }
+                        { return ( <li key={user.id} onClick={() => this.changeLoc(user.login)}> {user.login}</li> ) }
                     })}
                 </ul>
             </div>
@@ -216,20 +216,12 @@ class ChannelList extends React.Component<IChat, Users> {
 export default class ChatModule extends React.Component<{}, IChat> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: '_general', history: []};
+        this.state = {dest: 'general'};
         this.changeLoc = this.changeLoc.bind(this);
-        this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
     }
 
     changeLoc(newDest: string) {
         this.setState({dest: newDest});
-        this.setState({history: []});
-    }
-
-    handleNewMessageOnHistory(newMessage: Message) {
-        this.setState({
-            history: [...this.state.history!, newMessage]
-        });
     }
 
     render() {
@@ -244,7 +236,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
                     <SocketContext.Consumer > 
                         { ({ socket }) => (
                             <React.Fragment>
-                            <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
+                            <MessageList dest={this.state.dest} socket={socket} />
                             <SendMessageForm dest={this.state.dest} socket={socket}/>
                             </React.Fragment>
                         )}
