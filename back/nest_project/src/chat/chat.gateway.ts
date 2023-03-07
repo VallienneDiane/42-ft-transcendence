@@ -47,9 +47,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.chatService.newMessageEvent(this.iHandlerisator(client, blop));
     }
 
-    @SubscribeMessage('history')
-    handleHistory(@MessageBody() data: IMessageChat, @ConnectedSocket() client: Socket) {
-        this.chatService.historyEvent(this.iHandlerisator(client, data));
+    @SubscribeMessage('changeLoc')
+    handleChangeLoc(@MessageBody() data: IMessageChat, @ConnectedSocket() client: Socket) {
+        this.chatService.changeLocEvent(this.iHandlerisator(client, data));
     }
     
     @SubscribeMessage('joinChannel')
