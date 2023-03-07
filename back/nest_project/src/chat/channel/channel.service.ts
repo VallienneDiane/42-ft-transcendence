@@ -14,10 +14,12 @@ export class ChannelService {
 		return this.channelRepository.save(newChannel);
 	}
 
+	// Finds first entity by a given channelName. If entity was not found in the database - returns null.
 	public getOneByName(channelName: string): Promise<ChannelEntity> {
 		return this.channelRepository.findOne({where: {name: channelName}})
 	}
 
+	// Finds first entity by a given channelID. If entity was not found in the database - returns null.
 	public getOneById(channelId: number): Promise<ChannelEntity> {
 		return this.channelRepository.findOne({where: {id: channelId}});
 	}
