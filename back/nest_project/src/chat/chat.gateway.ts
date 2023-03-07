@@ -51,6 +51,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleChangeLoc(@MessageBody() data: IMessageChat, @ConnectedSocket() client: Socket) {
         this.chatService.changeLocEvent(this.iHandlerisator(client, data));
     }
+
+    @SubscribeMessage('listChannel')
+    handlelistChannel(@ConnectedSocket() client: Socket) {
+        this.chatService.listChannelEvent(client);
+    }
     
     @SubscribeMessage('joinChannel')
     handleJoinChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {

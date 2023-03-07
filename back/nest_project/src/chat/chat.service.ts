@@ -88,7 +88,7 @@ export class ChatService {
             data.chatNamespace.sockets.set(data.client.id, data.client);
             data.socketMap.set(login, data.client);
             data.client.join("general");
-            data.client.emit("getRoom", "general", []);
+            data.client.emit("changeLocChannel", "general", []);
             data.logger.log(`${login} is connected, ${data.client.id}`);
             data.client.emit("test", "blop");
         }
@@ -129,6 +129,15 @@ export class ChatService {
         let login = this.extractLogin(data.client);
         if (data.message.isChannel)
         {
+            if (data.message.room == 'general')
+            {
+                let currentRoom: string = data.client.rooms.values().next().value;
+                if (currentRoom != undefined)
+                    data.client.leave(currentRoom);
+                data.client.join('general');
+                data.client.emit('newLocChannel', 'general', []);
+                return;
+            }
             this.channelService.getOneByName(data.message.room)
             .then(
                 (loc) => {
@@ -183,6 +192,19 @@ export class ChatService {
         }
     }
 
+    public listChannelEvent(client: Socket) {
+        this.channelService.listChannels()
+        .then (
+            (list) => {
+                let strs: string[];
+                for (let l of list)
+                {
+                    strs.push(l.name);
+                }
+                client.emit('channelList', strs);}
+        )
+    }
+
     public joinChannelEvent(data: IHandle) {
         let login = this.extractLogin(data.client);
         this.linkUCService.findOne(data.channelEntries.channelName, login)
@@ -208,10 +230,11 @@ export class ChatService {
     }
 
     public createChannelEvent(data: IHandle) {
+        data.logger.log('create channel request');
         let login = this.extractLogin(data.client);
         this.channelService.getOneByName(data.channelEntries.channelName)
         .then( (exist) => {
-            if (exist != null) {
+            if (exist == null) {
                 this.channelService.create(this.channelEntityfier(data.channelEntries))
                 .then( (succeed) => {
                     data.client.emit('channelCreated', succeed.name);

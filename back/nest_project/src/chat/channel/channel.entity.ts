@@ -11,7 +11,7 @@ export class ChannelEntity {
 	@Column({unique: true})
 	name: string;
 
-	@Column()
+	@Column({nullable: true})
 	pass: string;
 
 	@Column()
