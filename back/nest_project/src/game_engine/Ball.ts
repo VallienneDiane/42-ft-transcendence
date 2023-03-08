@@ -23,18 +23,18 @@ export class Ball {
 			this.acc.setCoordinates(-1, 0);
 	}
 
-	process_input () {
-		if (UP)
+	process_input (body: any) {
+		if (body === "ArrowUp")
 			this.acc.y = -this.acceleration;
-		if (DOWN)
+		if (body === "ArrowDown")
 			this.acc.y = this.acceleration;
-		if (RIGHT)
+		if (body === "ArrowRight")
 			this.acc.x = this.acceleration;
-		if (LEFT)
+		if (body === "ArrowULeft")
 			this.acc.x = -this.acceleration;
-		if (!UP && !DOWN)
+		if (!(body === "ArrowUp") && !(body === "ArrowDown"))
 			this.acc.y = 0;
-		if (!RIGHT && !LEFT)
+		if (!(body === "ArrowRight") && !(body === "ArrowLeft"))
 			this.acc.x = 0;
 	}
 
