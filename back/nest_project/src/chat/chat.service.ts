@@ -230,7 +230,7 @@ export class ChatService {
     }
 
     public createChannelEvent(data: IHandle) {
-        data.logger.log('create channel request');
+        data.logger.debug('create channel request');
         let login = this.extractLogin(data.client);
         this.channelService.getOneByName(data.channelEntries.channelName)
         .then( (exist) => {
@@ -238,8 +238,15 @@ export class ChatService {
                 this.channelService.create(this.channelEntityfier(data.channelEntries))
                 .then( (succeed) => {
                     data.client.emit('channelCreated', succeed.name);
+                    this.channelService.listChannels().then( (list) => {
+                        data.logger.debug(`list of channel : `);
+                        console.log(list)});
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
-                    .then( (channLink) => data.client.emit('channelJoined', channLink.channelName));
+                    .then( (channLink) => {
+                        this.linkUCService.findAllByUserName(login).then( (result) => {
+                            data.logger.debug(`list of channel joined by ${login} : `);
+                            console.log(result)});
+                        data.client.emit('channelJoined', channLink.channelName)});
                 })
             }
         })
