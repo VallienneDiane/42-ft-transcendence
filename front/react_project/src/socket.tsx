@@ -1,11 +1,11 @@
-import socketIOClient from 'socket.io-client'
-import { accountService } from './services/account.service'
+// import socketIOClient from 'socket.io-client'
+// import { accountService } from './services/account.service'
 
-const socket = socketIOClient('localhost:3000', {
-    transports: ['websocket'],
-    auth: { token: accountService.getToken() }
-});
+// const socket = socketIOClient('localhost:3000', {
+//     transports: ['websocket'],
+//     auth: { token: accountService.getToken() }
+// });
 
-console.log('CREATION SOCKET', socket);
+// console.log('CREATION SOCKET', socket);
 
-export default socket;
+// export default socket;

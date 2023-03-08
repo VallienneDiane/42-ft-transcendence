@@ -3,14 +3,25 @@ import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from
 import { Server } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 
+interface gameState {
+  ballPosition: {x: number, y: number},
+  paddleOne: {x: number, y: number },
+  paddleTwo: {x: number, y:number }
+}
+
 @WebSocketGateway({
   cors: {
     origin: '*',
   },
 })
 export class GameUpdateCenterGateway implements OnModuleInit{
-
 	constructor(private readonly gameEngineService: GameEngineService) {}
+
+  private gamestate: gameState = {
+    ballPosition: {x: 0.5, y: 0.5},
+    paddleOne: {x: 1, y: 0.5 },
+    paddleTwo: {x: 0, y: 0.5 }
+  }
 
   @WebSocketServer()
   server: Server;
@@ -19,8 +30,8 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     const io = require('socket.io')(this.server);
     console.log('test');
     this.server.on('connection', (socket) => {
-      console.log(socket.id);
-      console.log('Connected');
+      console.log("socket ID", socket.id, 'Is connected');
+      // console.log('Connected');
     })
   }
 
