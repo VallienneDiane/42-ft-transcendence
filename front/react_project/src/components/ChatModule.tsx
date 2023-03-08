@@ -6,6 +6,7 @@ import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
+import { StringOptionsWithImporter } from "sass";
 
 interface IMessageEntity {
     id?: number,
@@ -27,8 +28,13 @@ interface MessageChat {
     content: string;
 }
 
+interface IDest {
+    Loc: string;
+    isChannel: boolean;
+};
+
 interface IChat {
-    dest?: string;
+    dest?: IDest;
     history?: IMessageEntity[];
     action?: any;
     action2?: any;
@@ -42,11 +48,11 @@ interface Users {
 
 function Header(title: IChat) {
     let location: string;
-    if (title.dest![0] == '_') {
-        location = 'Welcome to channel ' + title.dest!.substring(1);
+    if (title.dest!.isChannel) {
+        location = 'Welcome to channel ' + title.dest!.Loc;
     }
     else {
-        location = 'Current discussion with ' + title.dest;
+        location = 'Current discussion with ' + title.dest!.Loc;
     }
     return (
         <div className="chatMessageHeader">
@@ -109,7 +115,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentDidMount(): void {
         this.props.socket!.on('messageChannel', (data: MessageChat) => {
-            if (data.room == this.props.dest) {
+            if (data.room == this.props.dest!.Loc) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);
                 this.props.action(pouet);
@@ -117,7 +123,7 @@ class MessageList extends React.Component<IChat, {}> {
         });
         
         this.props.socket!.on('messagePrivate', (data: MessageChat) => {
-            if (data.sender == this.props.dest) {
+            if (data.sender == this.props.dest!.Loc) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 this.props.action(pouet);
             }
@@ -125,6 +131,7 @@ class MessageList extends React.Component<IChat, {}> {
 
         this.props.socket!.on('selfMessage', (data: MessageChat) => {
             let pouet: Message = {text: data.content, sender: data.sender};
+            console.log('selfMessage : ', pouet);
             this.props.action(pouet);
         })
 
@@ -167,8 +174,9 @@ class SendMessageForm extends React.Component<IChat, Message> {
     sendMessage(event: any) {
         event.preventDefault();
         let content: string = this.state.text;
-        let room: string = this.props.dest!;
-        this.props.socket!.emit('addMessage', { room, isChannel: 0, content });
+        let room: string = this.props.dest!.Loc;
+        let isChannel: boolean = this.props.dest!.isChannel;
+        this.props.socket!.emit('addMessage', { room, isChannel: isChannel, content });
         this.setState({ text: '' });
     }
 
@@ -226,12 +234,12 @@ class ChannelList extends React.Component<IChat, Users> {
 export default class ChatModule extends React.Component<{}, IChat> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: 'general', history: []};
+        this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
     }
 
-    changeLoc(newDest: string) {
+    changeLoc(newDest: IDest) {
         this.setState({dest: newDest});
     }
 

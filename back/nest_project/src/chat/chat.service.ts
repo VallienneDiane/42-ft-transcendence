@@ -88,6 +88,13 @@ export class ChatService {
             data.chatNamespace.sockets.set(data.client.id, data.client);
             data.socketMap.set(login, data.client);
             data.client.join("general");
+            data.logger.debug(`list of socket in "general" room`);
+            data.chatNamespace.to("general").fetchSockets().then
+            (
+                (socks) => {
+                    console.log(socks);
+                }
+            );
             data.client.emit("changeLocChannel", "general", []);
             data.logger.log(`${login} is connected, ${data.client.id}`);
             data.client.emit("test", "blop");
@@ -111,11 +118,13 @@ export class ChatService {
         let login = this.extractLogin(data.client);
         if (!login)
             return;
+        data.logger.debug(`${login} send : `);
+        console.log(data.message);
         const toSend: IMessageToSend = this.toSendFormat(login, data.message);
         this.messageService.create(this.messageEntityfier(login, data.message));
-        data.client.emit('selfMessage', toSend);
         if (!data.message.isChannel)
         {
+            data.client.emit('selfMessage', toSend);
             let socketDest = data.socketMap.get(data.message.room);
             if (socketDest != undefined)
                 socketDest.emit("messagePrivate", toSend);
