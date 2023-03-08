@@ -47,25 +47,22 @@ export class AuthService {
     const secret = speakeasy.generateSecret( {
       name: "App Transcendence"
     });
-    await this.userService.setTwoFactorSecret(secret.ascii, id);
+    await this.userService.set2faSecret(secret.ascii, id);
     const QRcode = await qrcode.toDataURL(secret.otpauth_url);
     await this.userService.setQrCode(QRcode, user.id);
     return (QRcode);
   }
 
   //check if entered code for google authentificator is valid
-  async isTwoFactorCodeValid(token: string, secret:string) {
-    console.log("AUTH SERVICE SECRET :", secret);
+  async is2faCodeValid(token: string, secret:string) {
     const isCodeValid = speakeasy.totp.verify(
     { 
       token,
       secret,
     });
     if (!isCodeValid) {
-      console.log("Code is false")
       throw new UnauthorizedException('Wrong authentication code');
     }
-    console.log("Code is valid");
     return (true);
   }
 }

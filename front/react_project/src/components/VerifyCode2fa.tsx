@@ -26,7 +26,7 @@ const VerifyCode2fa:React.FC = () => {
     const verifySubmittedCode = (data: VerifyCodeForm) => {
         data.login = login;
         schema.validate(data);
-        accountService.verifyCodeTwoFactorAuth(data)
+        accountService.verifyCode2fa(data)
         .then(response => {
             if(response.data.isCodeValid == true) {
                 accountService.generateToken(login)

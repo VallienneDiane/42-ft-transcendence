@@ -12,7 +12,7 @@ const LoginForm: React.FC = () => {
         accountService.login(data)
         .then(response_user => {
             if(response_user.data == true) {
-                accountService.isGoogleAuthActivated(data.login)
+                accountService.is2faActive(data.login)
                 .then(response_2fa => {
                     console.log(response_2fa);
                     if(response_2fa.data.is2faActive == true) {
