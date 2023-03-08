@@ -19,9 +19,9 @@ export class Ball {
 		this.acceleration = 0.05;
 		this.friction = 0.1;
 		if (Math.random() * 2 - 1 > 0)
-			this.acc.setCoordinates(1, 0);
+			this.acc.setCoordinates(0.01, 0);
 		else
-			this.acc.setCoordinates(-1, 0);
+			this.acc.setCoordinates(-0.01, 0);
 	}
 
 	process_input (body: any) {

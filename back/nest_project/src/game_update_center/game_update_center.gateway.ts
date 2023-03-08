@@ -37,10 +37,11 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
   @SubscribeMessage('Game_Input')
   OnGame_Input(@MessageBody() body: any) {
+    const test = this.gameEngineService;
     console.log(body);
     this.gameEngineService.ball.process_input(body);
-    console.log("je t'envoye :" + this.gameEngineService.gs);
-    this.server.emit('Game_Update', this.gameEngineService.gs)
+    console.log("je t'envoye :" + test.gs);
+    this.server.emit('Game_Update', test.gs)
   }
 
   @SubscribeMessage('Game_start')
@@ -51,7 +52,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     setInterval(function() {
       console.log("devrait spammer le chat");
       test.main_loop();
-      this.server.emit('Game_Update', this.gameEngineService.gs)
+      tost.server.emit('Game_Update', test.gs)
     }, 1000/60);
   }
 }
