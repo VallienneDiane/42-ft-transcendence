@@ -134,8 +134,10 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('message');
+        this.props.socket!.off('messagePrivate');
         this.props.socket!.off('notice');
+        this.props.socket!.off('selfMessage');
+        this.props.socket!.off('messageChannel');
     }
 
     render() {
