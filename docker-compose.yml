@@ -55,7 +55,7 @@ services:
   #   depends_on:
   #     - db
   #   restart: always
-########################################### VOLUMES  #########################################
+########################################## VOLUMES  #########################################
 # volumes:
 #   db:
 #     driver: local
@@ -63,18 +63,18 @@ services:
 #       type: none 
 #       o: bind
 #       device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
-#   back:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
-#   front:
-#     driver: local
-#     driver_opts:
-#       type: none 
-#       o: bind
-#       device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
+  # back:
+  #   driver: local
+  #   driver_opts:
+  #     type: none
+  #     o: bind
+  #     device: ./back
+  # front:
+  #   driver: local
+  #   driver_opts:
+  #     type: none 
+  #     o: bind
+  #     device: ./front
   # pgadmin:
   #   driver: local
   #   driver_opts:
