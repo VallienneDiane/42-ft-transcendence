@@ -17,11 +17,11 @@ interface gameState {
 export class GameUpdateCenterGateway implements OnModuleInit{
 	constructor(private readonly gameEngineService: GameEngineService) {}
 
-  public gamestate: gameState = {
-    ballPosition: {x: 0.5, y: 0.5},
-    paddleOne: {x: 1, y: 0.5 },
-    paddleTwo: {x: 0, y: 0.5 }
-  }
+  // public gamestate: gameState = {
+  //   ballPosition: {x: 0.5, y: 0.5},
+  //   paddleOne: {x: 1, y: 0.5 },
+  //   paddleTwo: {x: 0, y: 0.5 }
+  // }
 
   @WebSocketServer()
   server: Server;

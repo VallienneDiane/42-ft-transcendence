@@ -17,7 +17,7 @@ export class Ball {
 		this.acc = new Vec2(0, 0);
 		this.colision_number = 0;
 		this.acceleration = 0.001;
-		this.friction = 0.1;
+		this.friction = 0.6;
 		if (Math.random() * 2 - 1 > 0)
 			this.acc.setCoordinates(0.0001, 0);
 		else
@@ -25,19 +25,18 @@ export class Ball {
 	}
 
 	process_input (body: any) {
-		console.log("je passe au bon endroit");
 		if (body === "ArrowUp")
 			this.acc.y = -this.acceleration;
-		if (body === "ArrowDown")
+		else if (body === "ArrowDown")
 			this.acc.y = this.acceleration;
-		if (body === "ArrowRight")
+		else if (body === "ArrowRight")
 			this.acc.x = this.acceleration;
-		if (body === "ArrowULeft")
+		else if (body === "ArrowLeft")
 			this.acc.x = -this.acceleration;
-		if (!(body === "ArrowUp") && !(body === "ArrowDown"))
-			this.acc.y = 0;
-		if (!(body === "ArrowRight") && !(body === "ArrowLeft"))
-			this.acc.x = 0;
+		// if (!(body === "ArrowUp") && !(body === "ArrowDown"))
+		// 	this.acc.y = 0;
+		// if (!(body === "ArrowRight") && !(body === "ArrowLeft"))
+		// 	this.acc.x = 0;
 	}
 
 	update_self_position() {
