@@ -70,7 +70,7 @@ class Search extends React.Component<IChat, Message> {
     searchSmth(event: any) {
         event.preventDefault();
         if (this.state.text.length > 0) {
-            this.props.socket!.emit('createChannel', this.state.text, undefined, false, false, false, false);
+            this.props.socket!.emit('createChannel', {channelName: this.state.text, channelPass: undefined, inviteOnly: false, persistant: false, onlyOpCanTalk: false, hidden: false});
         }
         this.setState({ text: "" });
     }
