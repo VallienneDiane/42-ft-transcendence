@@ -1,7 +1,6 @@
 
 import * as yup from 'yup';
 import "../styles/Settings.scss"
-import { useState } from "react";
 import { VerifyCodeForm } from "../models";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -20,7 +19,6 @@ const VerifyCode2fa:React.FC = () => {
     const location = useLocation();
     const login = location.state?.login;
     let navigate = useNavigate();
-    const [isVerified, setVerifyCode] = useState<boolean>(false);
     const {register, handleSubmit, formState: {errors}} = useForm<VerifyCodeForm>({
         resolver: yupResolver(schema)
     });
@@ -30,11 +28,9 @@ const VerifyCode2fa:React.FC = () => {
         schema.validate(data);
         accountService.verifyCodeTwoFactorAuth(data)
         .then(response => {
-            // setVerifyCode(response.data.isCodeValid);
             if(response.data.isCodeValid == true) {
                 accountService.generateToken(login)
                 .then(response_token => {
-                    console.log(response_token);
                     accountService.saveToken(response_token.data.access_token);
                     navigate('/');
                 })

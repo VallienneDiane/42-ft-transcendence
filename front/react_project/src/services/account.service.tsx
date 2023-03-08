@@ -10,9 +10,7 @@ let signUp = (credentials: SignUpForm) => {
 
 // Requete pour se connecter
 let login = (credentials: LogInForm) => {
-    const result = Axios.post('auth/login', credentials);
-    console.log("LOGIN RESULT ", result);
-    return result;
+    return Axios.post('auth/login', credentials);
 }
 
 let generateToken = (login: string) => {
@@ -23,9 +21,6 @@ let generateToken = (login: string) => {
 // TWO FACTOR AUTHENTIFICATOR
 let isGoogleAuthActivated = (login: string) => {
     return Axios.post('auth/is2faActive', {login});
-    // const result = Axios.get('auth/is2faActive');
-    // console.log("IN ACCOUNT SERVICE : ", result);
-    // return result;
 }
 
 let enableTwoFactorAuth = () => {

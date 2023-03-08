@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { yupResolver } from '@hookform/resolvers/yup';
 import ReactSwitch from 'react-switch';
 import { accountService } from "../services/account.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const schema = yup.object().shape({
   code: yup
@@ -15,22 +16,23 @@ const schema = yup.object().shape({
 });
 
 export default function Settings() {
+
+  let decodedToken: JwtPayload = accountService.readPayload()!;
   const [checked, setchecked] = useState<boolean>(false);
-  const [isVerified, setVerifyCode] = useState<boolean>(false);
   const [qrcode, setQrcode] = useState<string>("null");
   const [is2faActive, setActivate2fa] = useState<boolean>(false);
   const {register, handleSubmit, formState: {errors}} = useForm<VerifyCodeForm>({
     resolver: yupResolver(schema)
   });
 
-  console.log("SETTINGS : checked ", checked, "code verify " , isVerified, "google auth actif ", is2faActive)
+  console.log("SETTINGS PARAMS 1 : checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
   const isGoogleActivate = () => {
-    accountService.isGoogleAuthActivated()
+    accountService.isGoogleAuthActivated(decodedToken.login)
     .then(response => {
       setActivate2fa(response.data.is2faActive);
       setchecked(response.data.is2faActive);
+      console.log("qrcode ? ", qrcode);
       setQrcode(response.data.qrcode);
-      setVerifyCode(response.data.is2faActive);
     })
     .catch(error => console.log(error));
   }
@@ -38,12 +40,12 @@ export default function Settings() {
   useEffect(() => {
     isGoogleActivate();
   }, [])
-
+  
+  console.log("SETTINGS PARAMS 2: checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
   const verifySubmittedCode = (data: VerifyCodeForm) => {
     schema.validate(data);
     accountService.verifyCodeTwoFactorAuth(data)
-    .then(response => {
-      setVerifyCode(response.data.isCodeValid);
+    .then(response => {;
       setActivate2fa(response.data.is2faActive);
     })
     .catch(error => console.log(error));
@@ -61,7 +63,7 @@ export default function Settings() {
     if (value == false) {
       accountService.disableTwoFactorAuth()
       .then(response => {
-        setActivate2fa(response.data);
+        setActivate2fa(response.data.is2faActive);
       })
       .catch(error => console.log(error));
     }

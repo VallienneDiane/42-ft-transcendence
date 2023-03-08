@@ -22,10 +22,9 @@ export class AuthController {
   @Post('auth/generateToken')
   async genToken(@Body() data: UserDto) {
     const token = await this.authService.genToken(data.login);
-    console.log("TOKEN ? ", token);
     return token;
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Post('auth/enable2fa')
   async enableTwoFactorAuth(@Headers('Authorization') token: string) {
@@ -36,12 +35,11 @@ export class AuthController {
     }
   }
   
+  
   // @UseGuards(JwtAuthGuard)
   @Post('auth/verifyCode')
   async verifyCode(@Body() data: VerifyCodeDto) {
-    console.log("REQUEST VERIFY CODE SUBMITTED");
     const user = await this.userService.findByLogin(data.login);
-    console.log("code :", data.code, "user.secret" , user.twoFactorSecret);
     const isCodeValid = await this.authService.isTwoFactorCodeValid(data.code, user.twoFactorSecret);
     const is2faActive = await this.userService.turnOnTwoFactor(user.id);
     return {
@@ -53,19 +51,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Post('auth/disable2fa')
   async disableTwoFactorAuth(@Headers('Authorization') token: string) {
-    console.log("REQUEST DISABLE 2fa");
     const user = await this.authService.decodeToken(token);
     const is2faActive = await this.userService.turnOffTwoFactor(user.id);
-    return (is2faActive);
+    return {is2faActive};
   }
   
   // @UseGuards(JwtAuthGuard)
   @Post('auth/is2faActive')
   async isGoogleAuthActivated(@Body() user: UserDto) {
-    console.log("login ? ", user.login);
     const validUser = await this.userService.findByLogin(user.login);
     const is2faActive = validUser.isTwoFactorEnabled;
-    // console.log("RESULT in controller : is2faActive ? ", is2faActive);
-    return (is2faActive);
+    const qrcode = validUser.qrCode;
+    return {is2faActive, qrcode};
   }
 }

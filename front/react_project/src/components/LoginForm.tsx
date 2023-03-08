@@ -1,16 +1,12 @@
 import "../styles/LoginForm.css"
-import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { UserContext } from "../user/UserContext";
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
-import { LogInForm, VerifyCodeForm } from "../models";
+import { LogInForm } from "../models";
 
 const LoginForm: React.FC = () => {
     const navigate = useNavigate();
     const { register, handleSubmit } = useForm<LogInForm>();
-    // const [is2faActive, setActivate2fa] = useState<boolean>(false);
 
     const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
@@ -19,7 +15,7 @@ const LoginForm: React.FC = () => {
                 accountService.isGoogleAuthActivated(data.login)
                 .then(response_2fa => {
                     console.log(response_2fa);
-                    if(response_2fa.data == true) {
+                    if(response_2fa.data.is2faActive == true) {
                         navigate("/verifyCode2fa", { state: { login: data.login } });
                     }
                     else {
@@ -39,27 +35,6 @@ const LoginForm: React.FC = () => {
         });
     }
 
-    
-    // const onSubmit = (data: LogInForm) => {
-    //     accountService.login(data)
-    //     .then(Response => {
-    //         accountService.saveToken(Response.data.access_token);
-    //     });
-    //     accountService.isGoogleAuthActivated()
-    //     .then(response => {
-    //         setActivate2fa(response.data.is2faActive);
-    //         setVerifyCode(response.data.isCodeValid);
-    //     })
-    //     .catch(error => {
-    //         console.log(error);
-    //     });
-    //     console.log("LOGINFORM : 2fa actif ? ", is2faActive, "code verified ? ", isVerified);
-    //     if(is2faActive == true) {
-    //         navigate("/verifyCode2fa");
-    //     }
-    //     if(is2faActive == false || isVerified == true)
-    //         navigate("/");
-    // }
     return (
         <div >
             <h1>Login page</h1>
