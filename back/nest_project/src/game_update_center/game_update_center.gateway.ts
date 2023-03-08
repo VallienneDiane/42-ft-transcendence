@@ -27,7 +27,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   @SubscribeMessage('Game_Input')
   OnGame_Input(@MessageBody() body: any) {
     console.log(body);
-    this.gameEngineService.hello();
+    this.gameEngineService.ball.process_input(body);
     this.server.emit('Game_Update', 'game update received')
   }
 
@@ -35,7 +35,6 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   OnGame_start(@MessageBody() body: any) {
     const test = this.gameEngineService;
     console.log(body);
-    this.gameEngineService.main_loop();
     setInterval(function() {
       console.log("should work");
       test.main_loop();
