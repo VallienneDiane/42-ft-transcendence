@@ -16,15 +16,16 @@ export class Ball {
 		this.speed = new Vec2(0, 0);
 		this.acc = new Vec2(0, 0);
 		this.colision_number = 0;
-		this.acceleration = 1;
-		this.friction = 0;
+		this.acceleration = 0.001;
+		this.friction = 0.1;
 		if (Math.random() * 2 - 1 > 0)
-			this.acc.setCoordinates(1, 0);
+			this.acc.setCoordinates(0.0001, 0);
 		else
-			this.acc.setCoordinates(-1, 0);
+			this.acc.setCoordinates(-0.0001, 0);
 	}
 
 	process_input (body: any) {
+		console.log("je passe au bon endroit");
 		if (body === "ArrowUp")
 			this.acc.y = -this.acceleration;
 		if (body === "ArrowDown")
