@@ -1,5 +1,5 @@
 import "../styles/LoginPage.css"
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { UserContext } from "../user/UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +11,7 @@ const LoginForm: React.FC = () => {
     let user = useContext(UserContext);
     const { register, handleSubmit } = useForm<LogInForm>();
     const location = useLocation();
+    const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
     
     const onSubmit = (data: LogInForm) => {
         accountService.login(data)
@@ -20,7 +21,8 @@ const LoginForm: React.FC = () => {
             navigate(from);
         })
         .catch(error => {
-            console.log(error);
+            // console.log(error);
+            setIncorrectCredentials(true);
         });
     }
     
@@ -43,6 +45,9 @@ const LoginForm: React.FC = () => {
             // required
             />
             <button type="submit">Submit</button>
+            {incorrectCredentials && (
+                <div className="error">Login or Password incorrect</div>
+            )}
             <a href="/signin">Not registered ? Sign In !</a>
         </form>
         </div>
