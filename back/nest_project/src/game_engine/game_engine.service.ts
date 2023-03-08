@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { Ball } from './Ball';
+import { Vec2 } from "./math/Vec2";
+
 
 @Injectable()
 export class GameEngineService {
 
-	ball: Ball;
+	ball: Ball = new Ball(0.5, 0.5, 2);
 
 	hello() {
 		console.log('heuuu ca marche ?');

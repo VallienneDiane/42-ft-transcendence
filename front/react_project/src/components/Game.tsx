@@ -12,14 +12,20 @@ interface gameState {
     paddleTwo: {x: number, y:number }
   }
 
-const Game: React.FC = () => {
+  const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [startGame, setStartGame] = useState<boolean>(false);
     const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
     if (socket === null) {
         setSocket(io('localhost:3000', {
             transports: ['websocket'],
             auth: {token: accountService.getToken()}
-        }))
+        }));
+    }
+    if (socket !== null && startGame === false) {
+        socket.emit('Game_start');
+        console.log(startGame);
+        setStartGame(true);
     }
     // const socket = io('localhost:3000', {
     //     transports: ['websocket'],

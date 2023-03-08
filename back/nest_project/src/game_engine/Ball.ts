@@ -10,10 +10,11 @@ export class Ball {
 	colision_number;
 	friction;
 
-	constructor (x, y, r, speed: Vec2) {
+	constructor (x, y, r) {
 		this.position = new Vec2(x, y);
 		this.r = r;
 		this.speed = new Vec2(0, 0);
+		this.acc = new Vec2(0, 0);
 		this.colision_number = 0;
 		this.acceleration = 1;
 		this.friction = 0;

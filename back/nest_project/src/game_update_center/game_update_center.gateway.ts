@@ -39,7 +39,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   OnGame_Input(@MessageBody() body: any) {
     console.log(body);
     this.gameEngineService.ball.process_input(body);
-    this.server.emit('Game_Update', 'game update received')
+    this.server.emit('Game_Update', this.gamestate)
   }
 
   @SubscribeMessage('Game_start')
@@ -49,7 +49,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     setInterval(function() {
       console.log("should work");
       test.main_loop();
+      this.server.emit('Game_Update', this.gamestate)
     }, 1000/60);
-    this.server.emit('Game_Update', 'game update received')
   }
 }
