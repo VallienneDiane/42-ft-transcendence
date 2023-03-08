@@ -17,7 +17,7 @@ interface gameState {
 export class GameUpdateCenterGateway implements OnModuleInit{
 	constructor(private readonly gameEngineService: GameEngineService) {}
 
-  private gamestate: gameState = {
+  public gamestate: gameState = {
     ballPosition: {x: 0.5, y: 0.5},
     paddleOne: {x: 1, y: 0.5 },
     paddleTwo: {x: 0, y: 0.5 }
@@ -37,19 +37,22 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
   @SubscribeMessage('Game_Input')
   OnGame_Input(@MessageBody() body: any) {
+    const test = this.gameEngineService;
     console.log(body);
     this.gameEngineService.ball.process_input(body);
-    this.server.emit('Game_Update', this.gamestate)
+    console.log("je t'envoye :" + test.gs);
+    this.server.emit('Game_Update', test.gs)
   }
 
   @SubscribeMessage('Game_start')
   OnGame_start(@MessageBody() body: any) {
     const test = this.gameEngineService;
+    const tost = this;
     console.log(body);
     setInterval(function() {
-      console.log("should work");
+      console.log("devrait spammer le chat");
       test.main_loop();
-      this.server.emit('Game_Update', this.gamestate)
+      tost.server.emit('Game_Update', test.gs)
     }, 1000/60);
   }
 }
