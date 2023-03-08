@@ -3,40 +3,46 @@ import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
-// Requete pour créer un user
+// Request to signup
 let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
-
-// Requete pour se connecter
+// Request to login
 let login = (credentials: LogInForm) => {
     return Axios.post('auth/login', credentials);
 }
-
+// Request to generate token
 let generateToken = (login: string) => {
     return Axios.post('auth/generateToken', {login});
 }
-
-////////////////////////////////////////////////////////////////////////////////
-// TWO FACTOR AUTHENTIFICATOR
-let isGoogleAuthActivated = (login: string) => {
+////////////////// TWO FACTOR AUTHENTIFICATOR /////////////////////////////
+//check if 2fa / google auth is active when login
+let is2faActive = (login: string) => {
     return Axios.post('auth/is2faActive', {login});
 }
-
-let enableTwoFactorAuth = () => {
+//check if 2fa is active in settings to display the right setting and check token
+let is2faActiveSettings = (login: string) => {
+    return Axios.post('auth/is2faActiveSettings', {login});
+}
+//enable 2fa
+let enable2fa = () => {
     return Axios.post('auth/enable2fa');
 }
-
-let verifyCodeTwoFactorAuth = (credentials: VerifyCodeForm) => {
-    const iscodevalid = Axios.post('auth/verifyCode', credentials);
-    return iscodevalid;
+//verify code submitted by the user
+let verifyCode2fa = (credentials: VerifyCodeForm) => {
+    const test = Axios.post('auth/verifyCode', credentials);
+    console.log(test);
+    return test;
 }
-
-let disableTwoFactorAuth = () => {
+//verify code submitted by the user in settings to check token
+let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
+    return Axios.post('auth/verifyCodeSettings', credentials);
+}
+//disable 2fa
+let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
-
-//////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
@@ -89,6 +95,6 @@ let readPayload = () => {
 
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enableTwoFactorAuth, verifyCodeTwoFactorAuth, disableTwoFactorAuth, 
-    isGoogleAuthActivated, generateToken
+    enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
+    is2faActive, generateToken, is2faActiveSettings
 }

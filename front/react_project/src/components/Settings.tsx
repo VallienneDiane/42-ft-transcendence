@@ -27,11 +27,10 @@ export default function Settings() {
 
   console.log("SETTINGS PARAMS 1 : checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
   const isGoogleActivate = () => {
-    accountService.isGoogleAuthActivated(decodedToken.login)
+    accountService.is2faActiveSettings(decodedToken.login)
     .then(response => {
       setActivate2fa(response.data.is2faActive);
       setchecked(response.data.is2faActive);
-      console.log("qrcode ? ", qrcode);
       setQrcode(response.data.qrcode);
     })
     .catch(error => console.log(error));
@@ -44,7 +43,7 @@ export default function Settings() {
   console.log("SETTINGS PARAMS 2: checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
   const verifySubmittedCode = (data: VerifyCodeForm) => {
     schema.validate(data);
-    accountService.verifyCodeTwoFactorAuth(data)
+    accountService.verifyCode2faSettings(data)
     .then(response => {;
       setActivate2fa(response.data.is2faActive);
     })
@@ -54,14 +53,14 @@ export default function Settings() {
   const handleChange = (value: boolean) => {
     setchecked(!checked);
     if(value == true) {
-      accountService.enableTwoFactorAuth()
+      accountService.enable2fa()
       .then(response => {
         setQrcode(response.data.qrcode);
       })
       .catch(error => console.log(error));
     }
     if (value == false) {
-      accountService.disableTwoFactorAuth()
+      accountService.disable2fa()
       .then(response => {
         setActivate2fa(response.data.is2faActive);
       })

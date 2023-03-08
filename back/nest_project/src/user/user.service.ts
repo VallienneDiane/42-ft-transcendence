@@ -37,7 +37,7 @@ export class UserService {
         this.usersRepository.delete(login);
     }
     //set secret code for 2fa in user entity
-    async setTwoFactorSecret(secret: string, id: number) {
+    async set2faSecret(secret: string, id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
         await this.usersRepository.save(user);
@@ -49,14 +49,14 @@ export class UserService {
         await this.usersRepository.save(user);
     }
     //the user turned on the 2fa
-    async turnOnTwoFactor(id: number) {
+    async turnOn2fa(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = true;
         await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
         return (user.isTwoFactorEnabled);
     }
     //the user turned off the 2fa
-    async turnOffTwoFactor(id: number) {
+    async turnOff2fa(id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
         await this.usersRepository.save(user);
