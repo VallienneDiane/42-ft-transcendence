@@ -70,4 +70,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleCreateChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {
         this.chatService.createChannelEvent(this.iHandlerisator(client, undefined, data));
     }
+
+    @SubscribeMessage('myChannels')
+    handleMyChannels(@ConnectedSocket() client: Socket) {
+        
+    }
+
 }
