@@ -16,7 +16,12 @@
 	width: 20%;
 }
 
-.chatSearchHeader {
+.headerLeft {
+	// display: flex;
+	height: 15%;
+}
+
+.chatSearch {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;

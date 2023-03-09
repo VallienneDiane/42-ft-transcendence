@@ -73,6 +73,14 @@ export class ChatService {
         };
     }
 
+    private emitInRoom(socketRoom: Map<string, Socket>, ev: string, ...args: any[]) {
+        socketRoom.forEach(
+            (sock) => {
+                sock.emit(ev, args);
+            }
+        )
+    }
+
     public connectEvent(data: IHandle) {
         if (data.client.handshake.auth['token'] != null) {
             const decoded = this.jwtService.verify(data.client.handshake.auth['token'], {
@@ -85,16 +93,10 @@ export class ChatService {
                 data.logger.log(`undefined token`);
                 return;
             }
-            data.chatNamespace.sockets.set(data.client.id, data.client);
-            data.socketMap.set(login, data.client);
-            data.client.join("general");
-            data.logger.debug(`list of socket in "general" room`);
-            data.chatNamespace.to("general").fetchSockets().then
-            (
-                (socks) => {
-                    console.log(socks);
-                }
-            );
+            data.chatNamespace.sockets.set(login, data.client);
+            data.socketRoomMap.get("general").set(login, data.client);
+            data.loginRoom.set(login, {room: "general", isChannel: true});
+            console.log(login);
             data.client.emit("changeLocChannel", "general", []);
             data.logger.log(`${login} is connected, ${data.client.id}`);
             data.client.emit("test", "blop");
@@ -104,12 +106,15 @@ export class ChatService {
     public disconnectEvent(data: IHandle) {
         if (data.client.handshake.auth['token'] != null) {
             let login = this.extractLogin(data.client);
-            data.chatNamespace.sockets.delete(data.client.id);
             if (!login)
                 return;
-            let room: string = data.client.rooms.values().next().value;
-            data.socketMap.delete(login);
-            data.chatNamespace.to(room).emit("fromServerMessage", login, ' just disconnect');
+            data.chatNamespace.sockets.delete(login);
+            let loc = data.loginRoom.get(login);
+            if (loc.isChannel) {
+                data.socketRoomMap.get(loc.room).delete(login);
+                this.emitInRoom(data.socketRoomMap.get(loc.room), "fromServerMessage", login, ' just disconnect');
+            }
+            data.loginRoom.delete(login);
             data.logger.log(`${login} is disconnected`);
         }
     }
@@ -124,65 +129,92 @@ export class ChatService {
         this.messageService.create(this.messageEntityfier(login, data.message));
         if (!data.message.isChannel)
         {
-            data.client.emit('selfMessage', toSend);
-            let socketDest = data.socketMap.get(data.message.room);
-            if (socketDest != undefined)
-                socketDest.emit("messagePrivate", toSend);
+            this.userService.findByLogin(data.message.room)
+            .then (
+                (found) => {
+                    if (found != null) {
+                        data.client.emit('selfMessage', toSend);
+                        let socketDest = data.chatNamespace.sockets.get(data.message.room);
+                        let otherIsInGoodLocation: {room: string, isChannel: boolean} = {
+                            room: login,
+                            isChannel: false
+                        };
+                        if (socketDest != undefined) {
+                            if (data.loginRoom.get(data.message.room) == otherIsInGoodLocation)
+                                socketDest.emit("messagePrivate", toSend);
+                            else
+                                socketDest.emit("pingedBy", login);
+                        }
+                    }
+                    else
+                        data.client.emit('userNotFound');
+                }
+            )
+        }
+        else if (data.message.room == "general") {
+            this.emitInRoom(data.socketRoomMap.get(data.message.room), "messageChannel", toSend);
         }
         else {
-            data.chatNamespace.to(data.message.room).emit("messageChannel", toSend);
+            this.linkUCService.findOne(data.message.room, login)
+            .then (
+                (result) => {
+                    if (result != null)
+                    {
+                        this.emitInRoom(data.socketRoomMap.get(data.message.room), "messageChannel", toSend);
+                    }
+                    else
+                        data.client.emit('notRegisteredToChannel');
+                }
+            )
         }
     }
-    
-    public changeLocEvent(client: Socket, data: {Loc: string, isChannel: boolean}) {
+
+    public changeLocEvent(client: Socket, data: {Loc: string, isChannel: boolean, loginRoom: Map<string, {room: string, isChannel: boolean}>, socketRoomMap: Map<string, Map<string, Socket> >} ) {
         let login = this.extractLogin(client);
-        //console.log(data, data.message);
         if (data.isChannel)
         {
-            if (data.Loc == 'general')
-            {
-                let currentRoom: string = client.rooms.values().next().value;
-                if (currentRoom != undefined)
-                client.leave(currentRoom);
-                client.join('general');
+            if (data.Loc == 'general') {
+                let currentRoom = data.loginRoom.get(login);
+                if (currentRoom != undefined && currentRoom.isChannel)
+                    data.socketRoomMap.get(currentRoom.room).delete(login);
+                data.socketRoomMap.get("general").set(login, client);
+                data.loginRoom.set(login, {room: "general", isChannel: true});
                 client.emit('newLocChannel', 'general', []);
                 return;
             }
-            this.channelService.getOneByName(data.Loc)
-            .then(
-                (loc) => {
-                    if (loc != null)
-                    {
-                        // console.log(loc.name, login);
-                        // this.linkUCService.findAllByChannelName(loc.name)
-                        // .then (
-                        //     (strs) => {console.log(strs)}
-                        // )
-                        this.linkUCService.findOne(loc.name, login)
-                        .then(
-                            (found) => {
-                                if (found != null)
-                                {
-                                    let currentRoom: string = client.rooms.values().next().value;
-                                    if (currentRoom != undefined)
-                                        client.leave(currentRoom);
-                                    client.join(found.channelName);
-                                    this.messageService.findByChannel(found.channelName)
-                                    .then(
-                                        ( (messages) => {
-                                            client.emit('newLocChannel', found.channelName, messages);
-                                        }
-                                    ))
+            else {
+                this.channelService.getOneByName(data.Loc)
+                .then(
+                    (loc) => {
+                        if (loc != null)
+                        {
+                            this.linkUCService.findOne(loc.name, login)
+                            .then(
+                                (found) => {
+                                    if (found != null)
+                                    {
+                                        let currentRoom = data.loginRoom.get(login);
+                                        if (currentRoom != undefined && currentRoom.isChannel)
+                                            data.socketRoomMap.get(currentRoom.room).delete(login);
+                                        data.socketRoomMap.get(found.channelName).set(login, client);
+                                        data.loginRoom.set(login, {room: found.channelName, isChannel: true});
+                                        this.messageService.findByChannel(found.channelName)
+                                        .then(
+                                            ( (messages) => {
+                                                client.emit('newLocChannel', found.channelName, messages);
+                                            }
+                                        ))
+                                    }
+                                    else
+                                        client.emit('notRegisteredToChannel');
                                 }
-                                else
-                                    client.emit('notRegisteredToChannel');
-                            }
-                        )
+                            )
+                        }
+                        else
+                            client.emit('noSuchChannel');
                     }
-                    else
-                        client.emit('noSuchChannel');
-                }
-            )
+                )
+            }
         }
         else
         {
@@ -193,9 +225,10 @@ export class ChatService {
                         this.messageService.findByPrivate(login, found.login)
                         .then (
                             (messages) => {
-                                let currentRoom: string = client.rooms.values().next().value;
-                                if (currentRoom != undefined)
-                                    client.leave(currentRoom);
+                                let currentRoom = data.loginRoom.get(login);
+                                if (currentRoom != undefined && currentRoom.isChannel)
+                                    data.socketRoomMap.get(currentRoom.room).delete(login);
+                                data.loginRoom.delete(login);
                                 client.emit('newLocPrivate', found.login, messages);
                             }
                         )
@@ -211,7 +244,7 @@ export class ChatService {
         this.channelService.listChannels()
         .then (
             (list) => {
-                let strs: string[] = [];
+                let strs: string[] = ["general"];
                 for (let l of list)
                 {
                     strs.push(l.name);
