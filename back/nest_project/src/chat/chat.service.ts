@@ -118,7 +118,7 @@ export class ChatService {
                 return;
             data.chatNamespace.sockets.delete(login);
             let loc = data.loginRoom.get(login);
-            if (loc.isChannel) {
+            if (loc != undefined && loc.isChannel) {
                 data.socketRoomMap.get(loc.room).delete(login);
                 this.emitInRoom(data.socketRoomMap.get(loc.room), "fromServerMessage", login, ' just disconnect');
             }
@@ -204,6 +204,8 @@ export class ChatService {
                                         let currentRoom = data.loginRoom.get(login);
                                         if (currentRoom != undefined && currentRoom.isChannel)
                                             data.socketRoomMap.get(currentRoom.room).delete(login);
+                                        if (data.socketRoomMap.get(found.channelName) == undefined)
+                                            data.socketRoomMap.set(found.channelName, new Map<string, Socket>())
                                         data.socketRoomMap.get(found.channelName).set(login, client);
                                         data.loginRoom.set(login, {room: found.channelName, isChannel: true});
                                         this.messageService.findByChannel(found.channelName)
