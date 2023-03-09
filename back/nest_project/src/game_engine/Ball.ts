@@ -9,19 +9,28 @@ export class Ball {
 	acceleration;
 	colision_number;
 	friction;
+	elasticity;
+	mass;
+	inv_mass;
 
-	constructor (x, y, r, speed: Vec2) {
-		this.position = new Vec2(x, y);
+	constructor (pos: Vec2, r) {
+		this.position = pos;
 		this.r = r;
 		this.speed = new Vec2(0, 0);
 		this.acc = new Vec2(0, 0);
 		this.colision_number = 0;
-		this.acceleration = 0.05;
+		this.acceleration = 0.005;
 		this.friction = 0.1;
-		if (Math.random() * 2 - 1 > 0)
-			this.acc.setCoordinates(0.01, 0);
+		this.elasticity = 1;
+		this.mass = Math.PI * r * r;
+		if (this.mass === 0)
+			this.inv_mass = 0;
 		else
-			this.acc.setCoordinates(-0.01, 0);
+			this.inv_mass = 1 / this.mass;
+		if (Math.random() * 2 - 1 > 0)
+			this.acc.setCoordinates(0.0001, 0);
+		else
+			this.acc.setCoordinates(-0.0001, 0);
 	}
 
 	process_input (body: any) {
@@ -45,8 +54,25 @@ export class Ball {
 		this.position.add(this.speed);
 	}
 
-	coll_det_bb(b1, b2) {
-		return (b1.r + b1.r >= (b1.pos.subr(b2.pos)).length());
+	coll_det_bb(b1: Ball, b2: Ball) {
+		return (b1.r + b1.r >= (b1.position.subr(b2.position)).length);
+	}
+
+	penetration_resolution_bb(b1: Ball, b2: Ball) {
+		let dist = b1.position.subr(b2.position);
+		let penetration_depth = b1.r + b2.r - dist.Magnitude();
+		let penetration_resolution: Vec2 = dist.normalize().mult(penetration_depth / 2);
+		b1.position = b1.position.addr(penetration_resolution);
+		b2.position = b2.position.addr(penetration_resolution.mult(-1));
+	}
+
+	collision_response_bb(b1: Ball, b2: Ball) {
+		let normal = b1.position.subr(b2.position).normalize();
+		let relative_velocity = b1.speed.subr(b2.speed);
+		let separation_velocity = relative_velocity.dot(normal) * this.elasticity;
+		let separation_velocity_vec = normal.mult(separation_velocity);
+		b1.speed.add(separation_velocity_vec);
+		b2.speed.add(separation_velocity_vec.mult(-1));
 	}
 
 }

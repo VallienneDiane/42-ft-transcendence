@@ -10,7 +10,7 @@ interface gameState {
 
 @Injectable()
 export class GameEngineService {
-	ball: Ball = new Ball(0.5, 0.5, 0.1, new Vec2(0, 0));
+	ball: Ball = new Ball(new Vec2(0, 0), 0.1);
 
 	public gs: gameState;
 
