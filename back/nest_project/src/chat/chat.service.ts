@@ -88,6 +88,13 @@ export class ChatService {
             data.chatNamespace.sockets.set(data.client.id, data.client);
             data.socketMap.set(login, data.client);
             data.client.join("general");
+            data.logger.debug(`list of socket in "general" room`);
+            data.chatNamespace.to("general").fetchSockets().then
+            (
+                (socks) => {
+                    console.log(socks);
+                }
+            );
             data.client.emit("changeLocChannel", "general", []);
             data.logger.log(`${login} is connected, ${data.client.id}`);
             data.client.emit("test", "blop");
@@ -111,11 +118,13 @@ export class ChatService {
         let login = this.extractLogin(data.client);
         if (!login)
             return;
+        data.logger.debug(`${login} send : `);
+        console.log(data.message);
         const toSend: IMessageToSend = this.toSendFormat(login, data.message);
         this.messageService.create(this.messageEntityfier(login, data.message));
-        data.client.emit('selfMessage', toSend);
         if (!data.message.isChannel)
         {
+            data.client.emit('selfMessage', toSend);
             let socketDest = data.socketMap.get(data.message.room);
             if (socketDest != undefined)
                 socketDest.emit("messagePrivate", toSend);
@@ -124,69 +133,75 @@ export class ChatService {
             data.chatNamespace.to(data.message.room).emit("messageChannel", toSend);
         }
     }
-
-    public changeLocEvent(data: IHandle) {
-        let login = this.extractLogin(data.client);
-        if (data.message.isChannel)
+    
+    public changeLocEvent(client: Socket, data: {Loc: string, isChannel: boolean}) {
+        let login = this.extractLogin(client);
+        //console.log(data, data.message);
+        if (data.isChannel)
         {
-            if (data.message.room == 'general')
+            if (data.Loc == 'general')
             {
-                let currentRoom: string = data.client.rooms.values().next().value;
+                let currentRoom: string = client.rooms.values().next().value;
                 if (currentRoom != undefined)
-                    data.client.leave(currentRoom);
-                data.client.join('general');
-                data.client.emit('newLocChannel', 'general', []);
+                client.leave(currentRoom);
+                client.join('general');
+                client.emit('newLocChannel', 'general', []);
                 return;
             }
-            this.channelService.getOneByName(data.message.room)
+            this.channelService.getOneByName(data.Loc)
             .then(
                 (loc) => {
                     if (loc != null)
                     {
+                        // console.log(loc.name, login);
+                        // this.linkUCService.findAllByChannelName(loc.name)
+                        // .then (
+                        //     (strs) => {console.log(strs)}
+                        // )
                         this.linkUCService.findOne(loc.name, login)
                         .then(
                             (found) => {
                                 if (found != null)
                                 {
-                                    let currentRoom: string = data.client.rooms.values().next().value;
+                                    let currentRoom: string = client.rooms.values().next().value;
                                     if (currentRoom != undefined)
-                                        data.client.leave(currentRoom);
-                                    data.client.join(found.channelName);
+                                        client.leave(currentRoom);
+                                    client.join(found.channelName);
                                     this.messageService.findByChannel(found.channelName)
                                     .then(
                                         ( (messages) => {
-                                            data.client.emit('newLocChannel', found.channelName, messages);
+                                            client.emit('newLocChannel', found.channelName, messages);
                                         }
                                     ))
                                 }
                                 else
-                                    data.client.emit('notRegisteredToChannel');
+                                    client.emit('notRegisteredToChannel');
                             }
                         )
                     }
                     else
-                        data.client.emit('noSuchChannel');
+                        client.emit('noSuchChannel');
                 }
             )
         }
         else
         {
-            this.userService.findByLogin(data.message.room)
+            this.userService.findByLogin(data.Loc)
             .then (
                 (found) => {
                     if (found != null) {
                         this.messageService.findByPrivate(login, found.login)
                         .then (
                             (messages) => {
-                                let currentRoom: string = data.client.rooms.values().next().value;
+                                let currentRoom: string = client.rooms.values().next().value;
                                 if (currentRoom != undefined)
-                                    data.client.leave(currentRoom);
-                                data.client.emit('newLocPrivate', found.login, messages);
+                                    client.leave(currentRoom);
+                                client.emit('newLocPrivate', found.login, messages);
                             }
                         )
                     }
                     else
-                        data.client.emit('noSuchUser');
+                        client.emit('noSuchUser');
                 }
             )
         }
@@ -196,12 +211,13 @@ export class ChatService {
         this.channelService.listChannels()
         .then (
             (list) => {
-                let strs: string[];
+                let strs: string[] = [];
                 for (let l of list)
                 {
                     strs.push(l.name);
                 }
-                client.emit('channelList', strs);}
+                console.log(strs);
+                client.emit('listChannel', strs);}
         )
     }
 
@@ -230,7 +246,7 @@ export class ChatService {
     }
 
     public createChannelEvent(data: IHandle) {
-        data.logger.log('create channel request');
+        data.logger.debug('create channel request');
         let login = this.extractLogin(data.client);
         this.channelService.getOneByName(data.channelEntries.channelName)
         .then( (exist) => {
@@ -238,8 +254,19 @@ export class ChatService {
                 this.channelService.create(this.channelEntityfier(data.channelEntries))
                 .then( (succeed) => {
                     data.client.emit('channelCreated', succeed.name);
+                    this.channelService.listChannels().then( (list) => {
+                        let strs: string[] = [];
+                        for (let l of list) {
+                            strs.push(l.name);}
+                        data.chatNamespace.emit('listChannel', strs);
+                        data.logger.debug(`list of channel : `);
+                        console.log(list)});
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
-                    .then( (channLink) => data.client.emit('channelJoined', channLink.channelName));
+                    .then( (channLink) => {
+                        this.linkUCService.findAllByUserName(login).then( (result) => {
+                            data.logger.debug(`list of channel joined by ${login} : `);
+                            console.log(result)});
+                        data.client.emit('channelJoined', channLink.channelName)});
                 })
             }
         })
