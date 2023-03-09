@@ -249,7 +249,8 @@ export class ChatService {
                 {
                     strs.push(l.name);
                 }
-                client.emit('channelList', strs);}
+                console.log(strs);
+                client.emit('listChannel', strs);}
         )
     }
 
@@ -287,6 +288,10 @@ export class ChatService {
                 .then( (succeed) => {
                     data.client.emit('channelCreated', succeed.name);
                     this.channelService.listChannels().then( (list) => {
+                        let strs: string[] = [];
+                        for (let l of list) {
+                            strs.push(l.name);}
+                        data.chatNamespace.emit('listChannel', strs);
                         data.logger.debug(`list of channel : `);
                         console.log(list)});
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
