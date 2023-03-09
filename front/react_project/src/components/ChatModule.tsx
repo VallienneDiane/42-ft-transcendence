@@ -1,11 +1,10 @@
-import React from "react";
-import { userService } from "../services/user.service";
+import React, { useState } from "react";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
+import { useForm } from "react-hook-form";
 
 interface IMessageEntity {
     id?: number,
@@ -221,6 +220,38 @@ class ChannelList extends React.Component<IChat, Users> {
     }
 }
 
+const Popup = (props: any) => {
+    return (
+      <div className="popupBox">
+        <div className="box">
+          <span className="closeIcon" onClick={props.handleClose}>x</span>
+                    <b>Create New Channel</b>
+                    <p>form</p>
+                    <button>Create</button>
+        </div>
+      </div>
+    );
+  };
+
+function CreateChannel() {
+    const [btnState, setBtnState] = useState<boolean>(false);
+
+    const handleBtnClick = () => {
+        setBtnState(!btnState);
+    };
+
+    return (
+        <div className="createChannel">
+            <p className="btn" onClick={() => handleBtnClick()}>
+            + Create New Channel
+            </p>
+            {btnState && <Popup
+                handleClose={handleBtnClick}
+            />}       
+        </div>
+    );
+}
+
 export default class ChatModule extends React.Component<{}, IChat> {
     constructor(props : {}) {
         super(props);
@@ -253,6 +284,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
                 <div className="left">
                     <Search socket={socket} />
                     <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
+                    <CreateChannel />
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
