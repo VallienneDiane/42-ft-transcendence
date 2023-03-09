@@ -36,7 +36,8 @@ export interface IToken {
 export interface IHandle {
     chatNamespace: Namespace;
     client: Socket;
-    socketMap: Map<string, Socket>;
+    socketRoomMap: Map<string, Map<string, Socket> >;
+    loginRoom: Map<string, {room: string, isChannel: boolean}>;
     logger: Logger;
     message?: IMessageChat;
     channelEntries?: IChannel;
