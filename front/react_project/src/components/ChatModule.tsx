@@ -5,7 +5,6 @@ import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
-import { channelService } from "../services/channel.service";
 import { useForm } from "react-hook-form";
 import { StringOptionsWithImporter } from "sass";
 
@@ -114,10 +113,10 @@ function SearchChat() {
     }
 
     return (
-        <div id="searchUserBar">
-            <form action="">
-                <input type="text" onChange={displayList} onClick={displayList} value={value} placeholder="login..."/>
-                <button>Search</button>
+        <div className="headerLeft">
+            <form className="chatSearch" action="">
+                <input type="text" className="searchBar" onChange={displayList} onClick={displayList} value={value} placeholder="Search"/>
+                {/* <button>Search</button> */}
             </form>
             <ul>
                 {filteredUsers.map((user: string) => (
@@ -178,6 +177,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentDidMount(): void {
         this.props.socket!.on('messageChannel', (data: MessageChat) => {
+            console.log(data.room, this.props.dest!.Loc)
             if (data.room == this.props.dest!.Loc) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);
@@ -376,7 +376,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
             <React.Fragment>
             <div className="chatWrapper">
                 <div className="left">
-                    <Search socket={socket} />
+                    <SearchChat />
                     <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
                     <CreateChannel />
                 </div>
