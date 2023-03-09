@@ -73,6 +73,14 @@ export class ChatService {
         };
     }
 
+    private channInUCList(channEnt: ChannelEntity, UCList: LinkUCEntity[]): boolean {
+        for (let l of UCList) {
+            if (l.channelName == channEnt.name)
+                return true;
+        }
+        return false;
+    }
+
     private emitInRoom(socketRoom: Map<string, Socket>, ev: string, ...args: any[]) {
         socketRoom.forEach(
             (sock) => {
@@ -241,16 +249,36 @@ export class ChatService {
     }
 
     public listChannelEvent(client: Socket) {
-        this.channelService.listChannels()
-        .then (
+        let login = this.extractLogin(client);
+        this.linkUCService.findAllByUserName(login)
+        .then(
+            (notToDisplay) => {
+                this.channelService.listChannels()
+                .then (
+                    (list) => {
+                        let strs: string[] = [];
+                        for (let l of list)
+                        {
+                            if (!this.channInUCList(l, notToDisplay))
+                                strs.push(l.name);
+                        }
+                        client.emit('listChannel', strs);
+                    }
+                )
+            }
+        )
+    }
+
+    public listMyChannelEvent(client: Socket) {
+        let login = this.extractLogin(client);
+        this.linkUCService.findAllByUserName(login)
+        .then(
             (list) => {
                 let strs: string[] = ["general"];
                 for (let l of list)
-                {
-                    strs.push(l.name);
-                }
-                console.log(strs);
-                client.emit('listChannel', strs);}
+                    strs.push(l.channelName);
+                client.emit('listMyChannel', strs);
+            }
         )
     }
 
