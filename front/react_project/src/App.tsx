@@ -36,7 +36,7 @@ function App() {
                 <Route path='/' element={<Home />} />
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
-                <Route path='/profile/:id' element={<Profile />} />
+                <Route path='/profile/:login' element={<Profile />} />
                 <Route path='/chat' element={<ChatModule />} />
               </Route>
             </Route>

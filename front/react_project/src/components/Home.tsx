@@ -4,6 +4,7 @@ import { UserContext } from "../user/UserContext";
 import {User} from "../models";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
+import SearchUserBar from "./SearchUserBar";
 
 
 // export default function Home() {
@@ -27,6 +28,7 @@ const Home: React.FC = () => {
             <div id="Home">
                 <h1>Home Page</h1>
                 <p>Bonjour {decodedToken?.login} !</p>
+                <SearchUserBar/>
                 <p>Ici on aura les boutons pour rejoindre des parties etc</p>
             </div>
         )
