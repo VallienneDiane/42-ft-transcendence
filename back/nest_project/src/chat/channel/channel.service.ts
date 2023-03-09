@@ -41,6 +41,15 @@ export class ChannelService {
 	}
 
 	public listChannels(): Promise<ChannelEntity[]> {
-		return this.channelRepository.find();
+		return this.channelRepository.find(
+			{
+				where: {
+					hidden: false,
+				},
+				order: {
+					name: "ASC",
+				}
+			}
+		);
 	}
 }

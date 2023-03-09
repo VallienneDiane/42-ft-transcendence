@@ -115,6 +115,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentDidMount(): void {
         this.props.socket!.on('messageChannel', (data: MessageChat) => {
+            console.log(data.room, this.props.dest!.Loc)
             if (data.room == this.props.dest!.Loc) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 console.log('message from nest : ' + data.content + ', ' + data.sender);

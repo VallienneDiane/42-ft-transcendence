@@ -15,13 +15,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     ) 
     {}
 
-    private socketMap: Map<string, Socket> = new Map<string, Socket>;
+    private socketRoomMap: Map<string, Map<string, Socket> > = new Map<string, Map<string, Socket> >;
+    private loginRoom: Map<string, {room: string, isChannel: boolean}> = new Map<string, {room: string, isChannel: boolean}>();
 
     private iHandlerisator(client: Socket, message?: IMessageChat, channel?: IChannel): IHandle {
         return {
             chatNamespace: this.chatNamespace,
             client: client,
-            socketMap: this.socketMap,
+            socketRoomMap: this.socketRoomMap,
+            loginRoom: this.loginRoom,
             logger: this.logger,
             message: message,
             channelEntries: channel
@@ -31,6 +33,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     afterInit() {
         this.io = new Server();
         this.chatNamespace = this.io.of('/chat');
+        this.socketRoomMap.set("general", new Map<string, Socket>());
     }
 
     // @UseGuards(AuthGuard('websocket'))
@@ -44,12 +47,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() blop: IMessageChat, @ConnectedSocket() client: Socket) {
+        console.log('msg to send : ', blop.content, blop.room, blop.isChannel);
         this.chatService.newMessageEvent(this.iHandlerisator(client, blop));
     }
 
     @SubscribeMessage('changeLoc')
-    handleChangeLoc(@MessageBody() data: IMessageChat, @ConnectedSocket() client: Socket) {
-        this.chatService.changeLocEvent(this.iHandlerisator(client, data));
+    handleChangeLoc(@MessageBody() data: {Loc: string, isChannel: boolean}, @ConnectedSocket() client: Socket) {
+        this.chatService.changeLocEvent(client, {Loc: data.Loc, isChannel: data.isChannel, loginRoom: this.loginRoom, socketRoomMap: this.socketRoomMap});
     }
 
     @SubscribeMessage('listChannel')
