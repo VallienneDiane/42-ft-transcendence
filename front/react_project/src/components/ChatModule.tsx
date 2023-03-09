@@ -1,11 +1,10 @@
-import React from "react";
-import { userService } from "../services/user.service";
+import React, { useState } from "react";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { UserData } from "../models"
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
+import { useForm } from "react-hook-form";
 import { StringOptionsWithImporter } from "sass";
 
 interface IMessageEntity {
@@ -42,7 +41,7 @@ interface IChat {
 }
 
 interface Users {
-    rooms: string[];
+    channels: string[];
     me: JwtPayload;
 }
 
@@ -196,40 +195,92 @@ class SendMessageForm extends React.Component<IChat, Message> {
 class ChannelList extends React.Component<IChat, Users> {
     constructor(props: IChat) {
         super(props);
-        this.state = {rooms: [], me: accountService.readPayload()!};
+        this.state = {channels: [], me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
-        this.props.socket!.emit('listChannel');
+        this.fetchChannels = this.fetchChannels.bind(this);
     }
 
-    changeLoc(channel: string) {
-        this.props.socket!.emit('changeLoc', channel);  
+    fetchChannels() {
+        if (this.state.channels.length === 0)
+        {
+            this.props.socket!.emit('listChannel');
+            this.props.socket!.on('listChannel', (strs: string[]) => { this.setState({ channels: strs }) });
+        }
     }
     
-    componentDidMount() {
-        this.props.socket!.on('listChannel', (channels: string[]) => { this.setState({ rooms: channels})});
+    changeLoc(channel: IDest) {
+        this.props.socket!.emit('changeLoc', channel);  
         this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
-            this.props.action(room);
+            console.log(room)
+            this.props.action({Loc: room, isChannel: true});
             this.props.action2(messages);
         })
+    }
+
+    componentDidMount(): void {
+        this.fetchChannels();
         // userService.getAllUsers()
         // .then((response) => {
-        //     this.setState({ users: response.data });
-        // })
-        // .catch((error) => console.log(error));
+            //     this.setState({ users: response.data });
+            // })
+            // .catch((error) => console.log(error));
+    }
+
+    componentDidUpdate() {
+        this.fetchChannels();
+    }
+
+    componentWillUnmount(): void {
+        this.props.socket!.off('newLocChannel');
+        this.props.socket!.off('listChannel');
     }
 
     render() {
         return (
             <div className="channelListWrapper">
-                <ul className="channelList">
-                    { this.state.rooms.map((room) => { 
-                        if (this.state.me.login !== room)
-                        { return ( <li key={room} onClick={() => this.changeLoc(room)}> {room}</li> ) }
-                    })}
-                </ul>
-            </div>
+            <h2>Channels</h2>
+            <ul className="channelList">
+                { this.state.channels.map((channel) => { 
+                    if (this.state.me.login !== channel)
+                    { return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
+                })}
+            </ul>
+            <h2>DMs</h2>
+        </div>
         )
     }
+}
+
+const Popup = (props: any) => {
+    return (
+      <div className="popupBox">
+        <div className="box">
+          <span className="closeIcon" onClick={props.handleClose}>x</span>
+                    <b>Create New Channel</b>
+                    <p>form</p>
+                    <button>Create</button>
+        </div>
+      </div>
+    );
+  };
+
+function CreateChannel() {
+    const [btnState, setBtnState] = useState<boolean>(false);
+
+    const handleBtnClick = () => {
+        setBtnState(!btnState);
+    };
+
+    return (
+        <div className="createChannel">
+            <p className="btn" onClick={() => handleBtnClick()}>
+            + Create New Channel
+            </p>
+            {btnState && <Popup
+                handleClose={handleBtnClick}
+            />}       
+        </div>
+    );
 }
 
 export default class ChatModule extends React.Component<{}, IChat> {
@@ -238,8 +289,9 @@ export default class ChatModule extends React.Component<{}, IChat> {
         this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
+        this.handleHistory = this.handleHistory.bind(this);
     }
-
+    
     changeLoc(newDest: IDest) {
         this.setState({dest: newDest});
     }
@@ -254,7 +306,6 @@ export default class ChatModule extends React.Component<{}, IChat> {
         this.setState({ history: newHistory });
     }
 
-
     render() {
         return (  
             <SocketContext.Consumer > 
@@ -264,6 +315,7 @@ export default class ChatModule extends React.Component<{}, IChat> {
                 <div className="left">
                     <Search socket={socket} />
                     <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
+                    <CreateChannel />
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />
