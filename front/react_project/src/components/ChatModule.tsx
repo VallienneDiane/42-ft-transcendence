@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
+import { userService } from "../services/user.service";
+import { channelService } from "../services/channel.service";
 import { useForm } from "react-hook-form";
 import { StringOptionsWithImporter } from "sass";
 
@@ -45,6 +47,13 @@ interface Users {
     me: JwtPayload;
 }
 
+interface UserData { 
+    id?: number,
+    login: string,
+    email: string,
+    password: string
+}
+
 function Header(title: IChat) {
     let location: string;
     if (title.dest!.isChannel) {
@@ -62,6 +71,61 @@ function Header(title: IChat) {
 
 function matchChannel(channel: string) {
     console.log(channel);
+}
+
+function SearchChat() {
+    const [value, setValue] = useState<string>("");
+    const [users, setUsers] = useState<string[]>([]);
+    const [channels, setChannels] = useState<string[]>([]);
+    const [filteredUsers, setFilteredUsers] = useState<string[]>([]);
+    const s = useContext(SocketContext);
+
+    useEffect(() => {
+        s.socket.emit('listChannel');
+        s.socket.on('listChannel', (strs: string[]) => { setChannels(strs) });
+        userService.getAllUsers()
+        .then(response => {
+            const users = response.data.map((user: UserData) => user.login);
+            users.sort();
+            setUsers(users);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }, []);
+    
+    const displayList = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.value);
+        if (event.target.value) {
+            setFilteredUsers(users.filter((user: string) => user.startsWith(event.target.value)));
+        }
+        else {
+            setFilteredUsers([]);
+        }
+    }
+    
+    const onHover = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setValue(event.target.innerHTML);
+        // setFilteredUsers(userNames.filter((user: string) => user.startsWith(event.target.value)));
+    }
+
+    const onClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // navigate("/profile/" + event.target.innerHTML);
+    }
+
+    return (
+        <div id="searchUserBar">
+            <form action="">
+                <input type="text" onChange={displayList} onClick={displayList} value={value} placeholder="login..."/>
+                <button>Search</button>
+            </form>
+            <ul>
+                {filteredUsers.map((user: string) => (
+                    <li key={user} onMouseEnter={onHover} onClick={onClick}>{user}</li>
+                ))}
+            </ul>
+        </div>
+    )
 }
 
 class Search extends React.Component<IChat, Message> {
