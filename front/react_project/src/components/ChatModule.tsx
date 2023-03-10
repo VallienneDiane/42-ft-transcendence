@@ -23,8 +23,8 @@ interface Message {
     sender?: string;
 }
 
-interface MessageChat {
-    sender?: string;
+interface IMessageToSend {
+    sender: string;
     room: string;
     content: string;
 }
@@ -36,7 +36,7 @@ interface IDest {
 
 interface IChat {
     dest?: IDest;
-    history?: IMessageEntity[];
+    history?: Message[];
     action?: any;
     action2?: any;
     socket?: Socket,
@@ -189,7 +189,9 @@ class Search extends React.Component<IChat, Message> {
     }
 }
 
-function Message(value: Message): JSX.Element {
+function Message(value: {sender: string, text: string}): JSX.Element {
+    console.log(value);
+    console.log(value.sender, value.text);
     return (
         <div className="message">
             <div className="messageUserName">{value.sender}</div>
@@ -203,24 +205,21 @@ class MessageList extends React.Component<IChat, {}> {
         super(props);
     }
 
-    componentDidMount(): void {
-        this.props.socket!.on('messageChannel', (data: MessageChat) => {
-            console.log(data.room, this.props.dest!.Loc)
-            if (data.room == this.props.dest!.Loc) {
-                let pouet: Message = {text: data.content, sender: data.sender};
-                console.log('message from nest : ' + data.content + ', ' + data.sender);
-                this.props.action(pouet);
-            }
+    componentDidUpdate(): void {
+        this.props.socket!.on("messageChannel", (data: IMessageToSend[]) => {
+            const msg = data[0]
+            console.log('message from nest : ' + msg.content + ', ' + msg.sender);
+            this.props.action({text: msg.content, sender: msg.sender});
         });
         
-        this.props.socket!.on('messagePrivate', (data: MessageChat) => {
+        this.props.socket!.on('messagePrivate', (data: IMessageToSend) => {
             if (data.sender == this.props.dest!.Loc) {
                 let pouet: Message = {text: data.content, sender: data.sender};
                 this.props.action(pouet);
             }
         })
 
-        this.props.socket!.on('selfMessage', (data: MessageChat) => {
+        this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
             let pouet: Message = {text: data.content, sender: data.sender};
             console.log('selfMessage : ', pouet);
             this.props.action(pouet);
@@ -240,7 +239,7 @@ class MessageList extends React.Component<IChat, {}> {
 
     render() {
         const listItems: JSX.Element[] = this.props.history!.reverse().map(
-            (message, id) => <Message key={id} text={message.content} sender={message.sender} />
+            (message, id) => <Message key={id} sender={message.sender!} text={message.text} />
         );
         return (
             <div className="messageList">
@@ -399,13 +398,13 @@ export default class ChatModule extends React.Component<{}, IChat> {
         this.setState({dest: newDest});
     }
 
-    handleNewMessageOnHistory(newMessage: IMessageEntity) {
+    handleNewMessageOnHistory(newMessage: Message) {
         this.setState({
             history: [...this.state.history!, newMessage]
         });
     }
 
-    handleHistory(newHistory: IMessageEntity[]) {
+    handleHistory(newHistory: Message[]) {
         this.setState({ history: newHistory });
     }
 
