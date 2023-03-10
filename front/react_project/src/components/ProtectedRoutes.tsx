@@ -9,17 +9,20 @@ const ProtectedRoutes = () => {
     const token = accountService.getToken();
    
     useEffect(() => {
-        if (token !== null) {
-            if (token !== socket.auth.token as string) {
-            console.log("ne doit creer qu'une socket");
-            disconnect();
-            createSocket();
+        if (token !== null)
+        {
+            if (token !== socket.auth.token as string)
+            {
+                console.log("ne doit creer qu'une socket");
+                disconnect();
+                createSocket();
             }
         }
         socket.on("test", () => {
             console.log("Id", socket.id);
-        });
+          });
     })
+
     return accountService.isLogged() ? <Outlet/> : <Navigate to="/login"/>;
 }
 
