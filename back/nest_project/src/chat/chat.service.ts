@@ -68,6 +68,7 @@ export class ChatService {
 
     private toSendFormat(login: string, data: IMessageChat): IMessageToSend {
         return {
+            date: new Date(),
             sender: login,
             room: data.room,
             content: data.content

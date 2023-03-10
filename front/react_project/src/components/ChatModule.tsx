@@ -19,12 +19,13 @@ interface IMessageEntity {
 }
 
 interface Message {
-    id: number,
+    id: string,
     text: string;
     sender?: string;
 }
 
 interface IMessageToSend {
+    date: Date;
     sender: string;
     room: string;
     content: string;
@@ -102,7 +103,7 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
             const users = response.data.map((user: UserData) => user.login);
             users.sort();
             this.setState({users: users});
-            console.log("Users", users)
+            // console.log("Users", users)
         })
         .catch(error => {
             console.log(error);
@@ -191,8 +192,8 @@ class Search extends React.Component<IChat, Message> {
 }
 
 function Message(value: {sender: string, text: string}): JSX.Element {
-    console.log(value);
-    console.log(value.sender, value.text);
+    // console.log(value);
+    // console.log(value.sender, value.text);
     return (
         <div className="message">
             <div className="messageUserName">{value.sender}</div>
@@ -206,17 +207,17 @@ class MessageList extends React.Component<IChat, {}> {
         super(props);
     }
 
-    componentDidUpdate(): void {
+    componentDidMount(): void {
         this.props.socket!.on("newMessage", (data: IMessageToSend[]) => {
             const msg = data[0]
             console.log('message from nest : ' + msg.content + ', ' + msg.sender);
-            this.props.action({text: msg.content, sender: msg.sender});
+            this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
         });
 
         this.props.socket!.on('selfMessage', (data: IMessageToSend[]) => {
             const msg = data[0]
             console.log('message from nest : ' + msg.content + ', ' + msg.sender);
-            this.props.action({text: msg.content, sender: msg.sender});
+            this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
         })
 
         this.props.socket!.on('notice', (data: string) => {
@@ -231,8 +232,9 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     render() {
-        const listItems: JSX.Element[] = this.props.history!.reverse().map(
-            (message, id) => <Message key={id} sender={message.sender!} text={message.text} />
+        const reverseList: Message[] = this.props.history!.reverse();
+        const listItems: JSX.Element[] = reverseList.map(
+            (message) => <Message key={message.id} sender={message.sender!} text={message.text} />
         );
         return (
             <div className="messageList">
@@ -378,8 +380,8 @@ function CreateChannel() {
     );
 }
 
-export default class ChatModule extends React.Component<{}, IChat> {
-    constructor(props : {}) {
+export default class ChatModule extends React.Component<{ socket: Socket }, IChat> {
+    constructor(props : { socket: Socket }) {
         super(props);
         this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
@@ -392,8 +394,10 @@ export default class ChatModule extends React.Component<{}, IChat> {
     }
 
     handleNewMessageOnHistory(newMessage: Message) {
+        const save: Message[] = this.state.history!;
+        save.push(newMessage);
         this.setState({
-            history: [...this.state.history!, newMessage]
+            history: save,
         });
     }
 
@@ -402,26 +406,27 @@ export default class ChatModule extends React.Component<{}, IChat> {
     }
 
     render() {
-        return (  
-            <SocketContext.Consumer > 
-            { ({ socket }) => (
-            <React.Fragment>
-            <div className="chatWrapper">
-                <div className="left">
-                    <div className="leftHeader">
-                        <SearchChat socket={socket}/>
-                        <CreateChannel />
+        if (this.props.socket.auth.token != "undefined") {
+            return (  
+                <SocketContext.Consumer > 
+                { ({ socket }) => (
+                <React.Fragment>
+                <div className="chatWrapper">
+                    <div className="left">
+                        <div className="leftHeader">
+                            <SearchChat socket={socket}/>
+                            <CreateChannel />
+                        </div>
+                        <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
                     </div>
-                    <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
+                    <div className="chatMessageWrapper">
+                        <Header dest={this.state.dest} />
+                        <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
+                        <SendMessageForm dest={this.state.dest} socket={socket}/>
+                    </div>
                 </div>
-                <div className="chatMessageWrapper">
-                    <Header dest={this.state.dest} />
-                    <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
-                    <SendMessageForm dest={this.state.dest} socket={socket}/>
-                </div>
-            </div>
-            </React.Fragment> )}
-            </SocketContext.Consumer>
-        )
+                </React.Fragment> )}
+                </SocketContext.Consumer>
+            )}
     }
 }
