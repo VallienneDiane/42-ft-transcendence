@@ -4,26 +4,25 @@ import { Logger, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { IChannel, IHandle, IMessageChat } from "./chat.interface";
 import { ChatService } from "./chat.service";
+import { UserRoomHandler } from "./chat.classes";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private logger: Logger = new Logger('ChatGateway');
     private io: Server;
     private chatNamespace: Namespace;
+    private chatRoomHandler: UserRoomHandler;
+
     constructor(
         private chatService: ChatService
     ) 
     {}
 
-    private socketRoomMap: Map<string, Map<string, Socket> > = new Map<string, Map<string, Socket> >;
-    private loginRoom: Map<string, {room: string, isChannel: boolean}> = new Map<string, {room: string, isChannel: boolean}>();
-
     private iHandlerisator(client: Socket, message?: IMessageChat, channel?: IChannel): IHandle {
         return {
             chatNamespace: this.chatNamespace,
             client: client,
-            socketRoomMap: this.socketRoomMap,
-            loginRoom: this.loginRoom,
+            roomHandler: this.chatRoomHandler,
             logger: this.logger,
             message: message,
             channelEntries: channel
@@ -33,7 +32,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     afterInit() {
         this.io = new Server();
         this.chatNamespace = this.io.of('/chat');
-        this.socketRoomMap.set("general", new Map<string, Socket>());
+        this.chatRoomHandler = new UserRoomHandler();
     }
 
     // @UseGuards(AuthGuard('websocket'))
@@ -53,7 +52,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('changeLoc')
     handleChangeLoc(@MessageBody() data: {Loc: string, isChannel: boolean}, @ConnectedSocket() client: Socket) {
-        this.chatService.changeLocEvent(client, {Loc: data.Loc, isChannel: data.isChannel, loginRoom: this.loginRoom, socketRoomMap: this.socketRoomMap});
+        this.chatService.changeLocEvent(client, data.Loc, data.isChannel, this.chatRoomHandler);
     }
 
     @SubscribeMessage('listChannel')
