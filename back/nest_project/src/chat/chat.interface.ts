@@ -1,5 +1,6 @@
 import { Logger } from "@nestjs/common";
 import { Namespace, Socket } from "socket.io";
+import { UserRoomHandler } from "./chat.classes";
 
 export interface IMessageChat {
     room: string;
@@ -36,8 +37,7 @@ export interface IToken {
 export interface IHandle {
     chatNamespace: Namespace;
     client: Socket;
-    socketRoomMap: Map<string, Map<string, Socket> >;
-    loginRoom: Map<string, {room: string, isChannel: boolean}>;
+    roomHandler: UserRoomHandler;
     logger: Logger;
     message?: IMessageChat;
     channelEntries?: IChannel;

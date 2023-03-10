@@ -115,23 +115,16 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentDidUpdate(): void {
-        this.props.socket!.on("messageChannel", (data: IMessageToSend[]) => {
+        this.props.socket!.on("newMessage", (data: IMessageToSend[]) => {
             const msg = data[0]
             console.log('message from nest : ' + msg.content + ', ' + msg.sender);
             this.props.action({text: msg.content, sender: msg.sender});
         });
-        
-        this.props.socket!.on('messagePrivate', (data: IMessageToSend) => {
-            if (data.sender == this.props.dest!.Loc) {
-                let pouet: Message = {text: data.content, sender: data.sender};
-                this.props.action(pouet);
-            }
-        })
 
-        this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
-            let pouet: Message = {text: data.content, sender: data.sender};
-            console.log('selfMessage : ', pouet);
-            this.props.action(pouet);
+        this.props.socket!.on('selfMessage', (data: IMessageToSend[]) => {
+            const msg = data[0]
+            console.log('message from nest : ' + msg.content + ', ' + msg.sender);
+            this.props.action({text: msg.content, sender: msg.sender});
         })
 
         this.props.socket!.on('notice', (data: string) => {
@@ -140,10 +133,9 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('messagePrivate');
+        this.props.socket!.off('newMessage');
         this.props.socket!.off('notice');
-        this.props.socket!.off('selfMessage');
-        this.props.socket!.off('messageChannel');
+        this.props.socket!.off('selfMessage')
     }
 
     render() {
