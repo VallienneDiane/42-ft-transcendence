@@ -11,6 +11,7 @@ export interface IMessageChat {
 //Format to pass at newMessageEvent emits
 export interface IMessageToSend {
     //room can be a channel or an user
+    date: Date;
     sender: string;
     room: string;
     content: string;
