@@ -55,7 +55,7 @@ function App() {
               <Route path='/profile' element={<Profile />} />
               <Route path='/profile/:id' element={<Profile />} />
               <Route path='/' element={<Home />} />
-              <Route path='/chat' element={<ChatModule />} />
+              <Route path='/chat' element={<ChatModule socket={socket}/>} />
             </Route>
           </Route>
         </Routes>
