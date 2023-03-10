@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import '../styles/ChatModule.scss'
@@ -6,6 +6,7 @@ import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
 import { useForm } from "react-hook-form";
+import { NewChannel } from "../models";
 import { StringOptionsWithImporter } from "sass";
 
 interface IMessageEntity {
@@ -72,59 +73,86 @@ function matchChannel(channel: string) {
     console.log(channel);
 }
 
-function SearchChat() {
-    const [value, setValue] = useState<string>("");
-    const [users, setUsers] = useState<string[]>([]);
-    const [channels, setChannels] = useState<string[]>([]);
-    const [filteredUsers, setFilteredUsers] = useState<string[]>([]);
-    const s = useContext(SocketContext);
+class SearchChat extends React.Component<IChat, {text: string, users: string[], channels: string[], filtered: string[]}> {
+    constructor(props: IChat) {
+        super(props);
+        this.state = {
+            text: '',
+            users: [],
+            channels: [],
+            filtered: [],
+        }
+        this.fetchChannels = this.fetchChannels.bind(this);
+        this.onHover = this.onHover.bind(this);
+        this.displayList = this.displayList.bind(this);
+    }
 
-    useEffect(() => {
-        s.socket.emit('listChannel');
-        s.socket.on('listChannel', (strs: string[]) => { setChannels(strs) });
+    fetchChannels() {
+        if (this.state.channels.length === 0) {
+            this.props.socket!.emit('listChannel');
+            this.props.socket!.on('listChannel', (strs: string[]) => {this.setState({channels: strs})});
+        }
+    }
+
+    componentDidMount(): void {
+        this.fetchChannels();
         userService.getAllUsers()
         .then(response => {
             const users = response.data.map((user: UserData) => user.login);
             users.sort();
-            setUsers(users);
+            this.setState({users: users});
+            console.log("Users", users)
         })
         .catch(error => {
             console.log(error);
         })
-    }, []);
-    
-    const displayList = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.value);
+    }
+
+    componentDidUpdate() {
+        this.fetchChannels();
+    }
+
+    componentWillUnmount(): void {
+        this.props.socket!.off('listChannel');
+    }
+
+    displayList(event: any) {
+        this.setState({text: event.target.value});
         if (event.target.value) {
-            setFilteredUsers(users.filter((user: string) => user.startsWith(event.target.value)));
+            this.setState((prevState) => {
+                const filteredUsers = this.state.users.filter((user: string) => user.startsWith(event.target.value));
+                const filteredChannels = this.state.channels.filter((channel: string) => channel.startsWith(event.target.value));
+                const filtered = [...filteredUsers, ...filteredChannels];
+                return { filtered };
+              });
         }
         else {
-            setFilteredUsers([]);
+            this.setState({filtered: []});
         }
     }
     
-    const onHover = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.innerHTML);
-        // setFilteredUsers(userNames.filter((user: string) => user.startsWith(event.target.value)));
+    onHover(event: any) {
+        this.setState({text: event.target.innerHTML});
     }
-
-    const onClick = (event: React.ChangeEvent<HTMLInputElement>) => {
+    
+    onClick(event: any) {
         // navigate("/profile/" + event.target.innerHTML);
     }
-
-    return (
-        <div className="headerLeft">
-            <form className="chatSearch" action="">
-                <input type="text" className="searchBar" onChange={displayList} onClick={displayList} value={value} placeholder="Search"/>
-                {/* <button>Search</button> */}
-            </form>
-            <ul>
-                {filteredUsers.map((user: string) => (
-                    <li key={user} onMouseEnter={onHover} onClick={onClick}>{user}</li>
-                ))}
-            </ul>
-        </div>
-    )
+    
+    render() {
+        return (
+            <div id="searchBar">
+                <form action="">
+                    <input type="text" onChange={this.displayList} onClick={this.displayList} value={this.state.text} placeholder="Search"/>
+                </form>
+                <ul>
+                    {this.state.filtered.map((user: string) => (
+                        <li key={user} onMouseEnter={this.onHover} onClick={this.onClick}>{user}</li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
 }
 
 class Search extends React.Component<IChat, Message> {
@@ -266,8 +294,8 @@ class ChannelList extends React.Component<IChat, Users> {
     fetchChannels() {
         if (this.state.channels.length === 0)
         {
-            this.props.socket!.emit('listChannel');
-            this.props.socket!.on('listChannel', (strs: string[]) => { this.setState({ channels: strs }) });
+            this.props.socket!.emit('myChannels');
+            this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
         }
     }
     
@@ -295,7 +323,7 @@ class ChannelList extends React.Component<IChat, Users> {
 
     componentWillUnmount(): void {
         this.props.socket!.off('newLocChannel');
-        this.props.socket!.off('listChannel');
+        this.props.socket!.off('listMyChannels');
     }
 
     render() {
@@ -315,13 +343,27 @@ class ChannelList extends React.Component<IChat, Users> {
 }
 
 const Popup = (props: any) => {
+    const { register, handleSubmit } = useForm<NewChannel>();
+
+    const onSubmit = (data: NewChannel) => {
+        this.props.socket.emit('createChannel');
+      }; 
+
     return (
       <div className="popupBox">
         <div className="box">
           <span className="closeIcon" onClick={props.handleClose}>x</span>
-                    <b>Create New Channel</b>
-                    <p>form</p>
-                    <button>Create</button>
+            <b>Create New Channel</b>
+            <form onSubmit={handleSubmit(onSubmit)}>
+                <label>Channel Name</label>
+                <input
+                {...register("channelName", {
+                    required: true,
+                    maxLength: 20,
+                    pattern: /^[A-Za-z]+$/i
+                  })} />
+            <input type="submit"/>
+            </form>
         </div>
       </div>
     );
@@ -336,9 +378,7 @@ function CreateChannel() {
 
     return (
         <div className="createChannel">
-            <p className="btn" onClick={() => handleBtnClick()}>
-            + Create New Channel
-            </p>
+            <p className="btn" onClick={() => handleBtnClick()}>+</p>
             {btnState && <Popup
                 handleClose={handleBtnClick}
             />}       
@@ -376,9 +416,11 @@ export default class ChatModule extends React.Component<{}, IChat> {
             <React.Fragment>
             <div className="chatWrapper">
                 <div className="left">
-                    <SearchChat />
+                    <div className="leftHeader">
+                        <SearchChat socket={socket}/>
+                        <CreateChannel />
+                    </div>
                     <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
-                    <CreateChannel />
                 </div>
                 <div className="chatMessageWrapper">
                     <Header dest={this.state.dest} />

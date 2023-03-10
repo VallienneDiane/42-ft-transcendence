@@ -118,7 +118,7 @@ export class ChatService {
                 return;
             data.chatNamespace.sockets.delete(login);
             let loc = data.loginRoom.get(login);
-            if (loc.isChannel) {
+            if (loc != undefined && loc.isChannel) {
                 data.socketRoomMap.get(loc.room).delete(login);
                 this.emitInRoom(data.socketRoomMap.get(loc.room), "fromServerMessage", login, ' just disconnect');
             }
@@ -204,6 +204,9 @@ export class ChatService {
                                         let currentRoom = data.loginRoom.get(login);
                                         if (currentRoom != undefined && currentRoom.isChannel)
                                             data.socketRoomMap.get(currentRoom.room).delete(login);
+                                        let secure = data.socketRoomMap.get(found.channelName);
+                                        if (secure == undefined)
+                                            data.socketRoomMap.set(found.channelName, new Map<string, Socket>())
                                         data.socketRoomMap.get(found.channelName).set(login, client);
                                         data.loginRoom.set(login, {room: found.channelName, isChannel: true});
                                         this.messageService.findByChannel(found.channelName)
@@ -249,6 +252,7 @@ export class ChatService {
     }
 
     public listChannelEvent(client: Socket) {
+        console.log("blop")
         let login = this.extractLogin(client);
         this.linkUCService.findAllByUserName(login)
         .then(
@@ -256,12 +260,13 @@ export class ChatService {
                 this.channelService.listChannels()
                 .then (
                     (list) => {
-                        let strs: string[] = [];
+                        let strs: string[] = ["general"];
                         for (let l of list)
                         {
                             if (!this.channInUCList(l, notToDisplay))
                                 strs.push(l.name);
                         }
+                        console.log(strs)
                         client.emit('listChannel', strs);
                     }
                 )
@@ -277,7 +282,7 @@ export class ChatService {
                 let strs: string[] = ["general"];
                 for (let l of list)
                     strs.push(l.channelName);
-                client.emit('listMyChannel', strs);
+                client.emit('listMyChannels', strs);
             }
         )
     }
