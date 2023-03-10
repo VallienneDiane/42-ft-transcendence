@@ -24,7 +24,7 @@ function App() {
   socket!.on("test", () => {
     console.log("Id1", socket!.id);
   });
-
+  
   function createSocket() {
     const newSocket = io('127.0.0.1:3000/chat', {
       transports : ['websocket'],

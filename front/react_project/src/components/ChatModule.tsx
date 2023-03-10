@@ -175,7 +175,8 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentDidMount(): void {
         this.props.socket!.on("newMessage", (data: IMessageToSend[]) => {
-            const msg = data[0]
+            const msg = data[0];
+            console.log(msg);
             console.log('message from nest : ' + msg.content + ', ' + msg.sender);
             this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
         });

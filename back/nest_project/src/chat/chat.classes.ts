@@ -34,7 +34,7 @@ class Room {
     }
 }
 
-export class RoomMap {
+class RoomMap {
 
     private rooms: Map<string, Room>;
 
@@ -99,7 +99,7 @@ export class RoomMap {
 
 }
 
-export class UserRoomMap {
+class UserRoomMap {
     private users: Map<string, {socket: Socket, room: string, isChannel: boolean}>;
 
     constructor() {
