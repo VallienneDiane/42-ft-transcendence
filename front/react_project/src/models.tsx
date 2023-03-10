@@ -33,4 +33,13 @@ export interface User {
   password: string
 }
 
+export interface NewChannel {
+  channelName: string;
+  channelPass?: string;
+  inviteOnly: boolean;
+  persistant: boolean;
+  onlyOpCanTalk: boolean;
+  hidden: boolean;
+}
+
 // export LogInForm, SignInForm

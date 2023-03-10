@@ -16,14 +16,28 @@
 	width: 20%;
 }
 
-.chatSearchHeader {
+.leftHeader {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: .75rem 1.5rem;
+	justify-content: flex-start;
 }
 
-.searchBar {
+.createChannel {
+	display: flex;
+	// align-items: center;
+	cursor: pointer;
+	padding: .75rem .5rem;
+}	
+
+#searchBar {
+    display: flex;
+    flex-direction: column;
+	// align-items: center;
+	// justify-content: space-between;
+	padding: .75rem 1rem;
+	// height: 15%;
+}
+
+#searchBar input {
 	width: 80%;
 	background: rgb(238, 238, 238);
 	color: black;
@@ -38,15 +52,38 @@
 		outline: none;
 		box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
 	}
+    border: none;
+    outline: none;
 }
 
-.searchButton {
-	width: 20%;
-	background-color: rgb(160, 160, 160);
-	border-radius: 50%;
-	padding: .2rem;
-	margin: .2rem;
-	cursor: pointer;
+#searchBar ul {
+    display: flex;
+	width: 80%;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid black;
+	margin: 0;
+    padding: 0;
+	box-shadow: 0 1px 2px rgb(204, 204, 204);
+    border-radius: 0 1px 2px 2px;
+    overflow: hidden;
+    // display: none;
+    max-height: 144px;
+    overflow-y: auto;
+    z-index: 9
+}
+
+#searchBar ul li {
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    color: rgb(39, 39, 39);
+    transition: all .2s ease-in-out;
+    text-align: left;
+}
+
+#searchBar ul li:hover {
+    background-color: rgb(226, 226, 226);
+    cursor: pointer;
 }
 
 .channelListWrapper {
@@ -62,6 +99,7 @@
 
 .channelListWrapper h2 {
 	align-items: left;
+	font-size: 20px;
 }
 
 .channelList {
@@ -81,13 +119,6 @@
 	align-items: flex-start;
 	cursor: pointer;
 }
-
-.createChannel {
-	display: flex;
-	align-items: center;
-	flex-direction: column;
-	cursor: pointer;
-}	
 
 .chatMessageWrapper {
 	display: flex;

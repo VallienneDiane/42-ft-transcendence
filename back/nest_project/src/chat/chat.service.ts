@@ -233,6 +233,7 @@ export class ChatService {
     }
 
     public listChannelEvent(client: Socket) {
+        console.log("blop")
         let login = this.extractLogin(client);
         this.linkUCService.findAllByUserName(login)
         .then(
@@ -240,12 +241,13 @@ export class ChatService {
                 this.channelService.listChannels()
                 .then (
                     (list) => {
-                        let strs: string[] = [];
+                        let strs: string[] = ["general"];
                         for (let l of list)
                         {
                             if (!this.channInUCList(l, notToDisplay))
                                 strs.push(l.name);
                         }
+                        console.log(strs)
                         client.emit('listChannel', strs);
                     }
                 )
@@ -261,7 +263,7 @@ export class ChatService {
                 let strs: string[] = ["general"];
                 for (let l of list)
                     strs.push(l.channelName);
-                client.emit('listMyChannel', strs);
+                client.emit('listMyChannels', strs);
             }
         )
     }
