@@ -53,6 +53,6 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     setInterval(function() {
       test.main_loop();
       tost.server.emit('Game_Update', test.gs)
-    }, 1000/2);
+    }, 1000/60);
   }
 }
