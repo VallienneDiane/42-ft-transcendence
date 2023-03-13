@@ -34,7 +34,6 @@ export class Ball {
 	}
 
 	process_input (body: any) {
-		console.log("je passe au bon endroit");
 		if (body === "ArrowUp")
 			this.acc.y = -this.acceleration;
 		if (body === "ArrowDown")
