@@ -43,9 +43,10 @@ export class Vec2 {
 		return new Vec2(this.x - v.x, this.y - v.y);
 	}
 
-	mult(x) {
+	mult(x): Vec2 {
 		this.x *= x;
 		this.y *= x;
+		return this;
 	}
 
 	div(x) {
@@ -58,17 +59,13 @@ export class Vec2 {
 		this.mult(m / this.length);
 	}
 
-	normalize() {
+	normalize(): Vec2 {
 		if (this.length === 0) return;
-		this.div(this.length);
+		return (new Vec2(this.x / this.length, this.y / this.length));
 	}
 
 	dot(v: Vec2) {
 		return (this.x * v.x + this.y * v.y);
-	}
-
-	normal() {
-		return new Vec2(-this.y, this.x).normalize();
 	}
 
 }
