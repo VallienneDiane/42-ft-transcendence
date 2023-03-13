@@ -41,6 +41,7 @@ export class GameEngineService {
 			this.gs.ballPosition[index].position = this.ballz[index].position;
 		}
 		console.log("game was updated");
+		console.log("acc : {}, {}", this.ballz[0].acc.x, this.ballz[0].acc.y);
 	}
 
 	game_init() {
