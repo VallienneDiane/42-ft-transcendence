@@ -68,6 +68,7 @@ useEffect(() => {
         console.log('socket', socket);
         socket.on('connect', () => {
             console.log('Connected to server!');
+            socket.emit('Game_start');
         });
         
         socket.on('Game_Update', (gameState: gameState) => {
