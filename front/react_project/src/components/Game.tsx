@@ -7,7 +7,9 @@ import { accountService } from "../services/account.service";
 import {DefaultEventsMap} from "@socket.io/component-emitter";
 
 interface gameState {
-    ballPosition: {x: number, y: number},
+    balls: [
+        {x: number, y: number},
+    ],
     paddleOne: {x: number, y: number },
     paddleTwo: {x: number, y:number }
   }
@@ -33,7 +35,9 @@ interface gameState {
     // });
     
     const [gameState, setGameState] = useState<gameState>({
-        ballPosition: {x: 0, y: 0},
+        balls: [
+            {x: 0, y: 0},
+        ],
         paddleOne: {x: 0, y: 0 },
         paddleTwo: {x: 0, y:0 }
     })
@@ -43,7 +47,10 @@ interface gameState {
         if (canvasRef.current) {
           setGameState((prevState) => ({
                 ...prevState,
-                ballPosition: { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
+                balls: [
+                    { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
+
+                ],
                 paddleOne: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
                 paddleTwo: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
             }));
@@ -61,7 +68,10 @@ interface gameState {
             socket.on('Game_Update', (gameState: gameState) => {
                 setGameState((prevState) => ({
                     ...prevState,
-                    ballPosition: { x: gameState.ballPosition.x * canvasRef.current!.width, y: gameState.ballPosition.y * canvasRef.current!.height },
+                    balls: [
+                        { x: gameState.balls[0].x * canvasRef.current!.width, y: gameState.balls[0].y * canvasRef.current!.height },
+
+                    ],
                     paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
                     paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
                 }));
@@ -108,7 +118,7 @@ interface gameState {
                 context.clearRect(0, 0, canvas.width, canvas.height);
 
                 context.beginPath();
-                context.arc(gameState.ballPosition.x, gameState.ballPosition.y, 5, 0, Math.PI * 2);
+                context.arc(gameState.balls[0].x, gameState.balls[0].y, 5, 0, Math.PI * 2);
                 context.fillStyle = 'black';
                 context.fill();
 
