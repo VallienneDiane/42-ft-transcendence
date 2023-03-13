@@ -75,23 +75,14 @@ useEffect(() => {
             setGameState((prevState) => ({
                 ...prevState,
                 ballPosition: gameState.ballPosition.map((ball) => ({
-                    x: ball.x * canvasRef.current!.width,
-                    y: ball.y * canvasRef.current!.height,
+                    x: ball.x / (16 / 9),
+                    y: ball.y,
                     r: ball.r
                 })),
-                paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
-                paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
+                paddleOne: { x: gameState.paddleOne.x / (16 / 9), y: gameState.paddleOne.y },
+                paddleTwo: { x: gameState.paddleTwo.x / (16 / 9), y: gameState.paddleTwo.y }
             }));
-            // setGameState({
-            //     ballPosition: [
-            //         { x: gameState.ballPosition[0].x * canvasRef.current!.width, y: gameState.ballPosition[0].y * canvasRef.current!.height },
-            //         { x: gameState.ballPosition[1].x * canvasRef.current!.width, y: gameState.ballPosition[1].y * canvasRef.current!.height },
-
-            //     ],
-            //     paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
-            //     paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width - 8, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
-            // });
-            // console.log('gameState after', gameState);
+            console.log('gameUpdate', gameState);
         });
     }
 }, [socket]);
@@ -104,6 +95,8 @@ const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) =
 
 useEffect(() => {
     const canvas = canvasRef.current;
+
+    console.log('canva', gameState);
     if (canvas && gameState) {
         const context = canvas.getContext("2d")!;
         if (context) {
@@ -111,7 +104,7 @@ useEffect(() => {
 
             gameState!.ballPosition.forEach((ball) => {
                 context.beginPath();
-                context.arc(ball.x, ball.y, 20, 0, Math.PI * 2);
+                context.arc(ball.x * canvas.width, ball.y * canvas.height, ball.r * canvas.height, 0, Math.PI * 2);
                 context.fillStyle = 'black';
                 context.fill();
                 context.stroke()
@@ -123,16 +116,18 @@ useEffect(() => {
             // context.arc(gameState.ballPosition[1].x, gameState.ballPosition[1].y, 5, 0, Math.PI * 2);
 
             context.fillStyle = 'grey';
-            context.fillRect(gameState!.paddleOne.x + 8, gameState!.paddleOne.y, 8, 50);
-            context.fillRect(gameState!.paddleTwo.x - 8, gameState!.paddleTwo.y, 8, 50);
+            context.fillRect(gameState!.paddleOne.x * canvas.width, gameState!.paddleOne.y * canvas.height - 25, 8, 50);
+            context.fillRect(gameState!.paddleTwo.x * canvas.width - 8, gameState!.paddleTwo.y * canvas.height - 25, 8, 50);
         }
     }
 }, [gameState]);
 
+const gameWidth = 600;
+
     return (
         <div id='Game' onKeyDown={handleKeyDown}>
             <h1>Game Page</h1>
-            <canvas ref={canvasRef} tabIndex={0} width="640" height="260"></canvas>
+            <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
         </div>
     )
 }
