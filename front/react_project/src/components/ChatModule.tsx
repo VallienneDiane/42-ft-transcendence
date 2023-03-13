@@ -157,40 +157,6 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
     }
 }
 
-class Search extends React.Component<IChat, Message> {
-    constructor(props: {}) {
-        super(props);
-        this.state = { text: "" };
-        this.searchSmth = this.searchSmth.bind(this);
-        this.handleMessage = this.handleMessage.bind(this);
-    }
-
-    searchSmth(event: any) {
-        event.preventDefault();
-        if (this.state.text.length > 0) {
-            this.props.socket!.emit('createChannel', {channelName: this.state.text, channelPass: undefined, inviteOnly: false, persistant: false, onlyOpCanTalk: false, hidden: false});
-        }
-        this.setState({ text: "" });
-    }
-
-    handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ text: event.target.value });
-    }
-
-    render() {
-        const text: string = this.state.text;
-        return (
-            <div>
-                <form className="chatSearchHeader" onSubmit={this.searchSmth}>
-                    <i className="fa fa-search" aria-hidden="true"></i>
-                    <input type="textarea" className="searchBar" placeholder="Search" value={text} onChange={this.handleMessage} />
-                    <input type="submit" className="searchButton" value="👆" />
-                </form>
-            </div>
-        )
-    }
-}
-
 function Message(value: {sender: string, text: string}): JSX.Element {
     // console.log(value);
     // console.log(value.sender, value.text);
@@ -245,7 +211,7 @@ class MessageList extends React.Component<IChat, {}> {
     }
 }
 
-class SendMessageForm extends React.Component<IChat, Message> {
+class SendMessageForm extends React.Component<IChat, {text: string}> {
     constructor(props: IChat) {
         super(props);
         this.state = { text: '' };
@@ -337,12 +303,24 @@ class ChannelList extends React.Component<IChat, Users> {
     }
 }
 
-const Popup = (props: any) => {
+function Popup(props: {handleClose: any, socket: Socket}) {
     const { register, handleSubmit } = useForm<NewChannel>();
+    const [checked, setChecked] = React.useState(false);
 
     const onSubmit = (data: NewChannel) => {
-        this.props.socket.emit('createChannel');
-      }; 
+        props.socket.emit('createChannel', {
+            channelName: data.channelName,
+            channelPass: data.channelPass,
+            inviteOnly: data.inviteOnly,
+            persistant: data.persistant,
+            onlyOpCanTalk: data.onlyOpCanTalk,
+            hidden: data.hidden,
+        });
+    };
+
+    const handleChange = () => {
+        setChecked(!checked);
+    }
 
     return (
       <div className="popupBox">
@@ -357,14 +335,56 @@ const Popup = (props: any) => {
                     maxLength: 20,
                     pattern: /^[A-Za-z]+$/i
                   })} />
+                  <label>
+                      Invite Only
+                  <input 
+                    type="checkbox" 
+                    checked={checked}
+                    onChange={handleChange}
+                    />
+                  </label>
             <input type="submit"/>
             </form>
         </div>
       </div>
     );
   };
+  
+  class Search extends React.Component<IChat, Message> {
+      constructor(props: {}) {
+          super(props);
+          this.state = { text: "" };
+          this.searchSmth = this.searchSmth.bind(this);
+          this.handleMessage = this.handleMessage.bind(this);
+      }
+  
+      searchSmth(event: any) {
+          event.preventDefault();
+          if (this.state.text.length > 0) {
+              this.props.socket!.emit('createChannel', {channelName: this.state.text, channelPass: undefined, inviteOnly: false, persistant: false, onlyOpCanTalk: false, hidden: false});
+          }
+          this.setState({ text: "" });
+      }
+  
+      handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
+          this.setState({ text: event.target.value });
+      }
+  
+      render() {
+          const text: string = this.state.text;
+          return (
+              <div>
+                  <form className="chatSearchHeader" onSubmit={this.searchSmth}>
+                      <i className="fa fa-search" aria-hidden="true"></i>
+                      <input type="textarea" className="searchBar" placeholder="Search" value={text} onChange={this.handleMessage} />
+                      <input type="submit" className="searchButton" value="👆" />
+                  </form>
+              </div>
+          )
+      }
+  }
 
-function CreateChannel() {
+function CreateChannel(props: {socket: Socket}) {
     const [btnState, setBtnState] = useState<boolean>(false);
 
     const handleBtnClick = () => {
@@ -375,11 +395,13 @@ function CreateChannel() {
         <div className="createChannel">
             <p className="btn" onClick={() => handleBtnClick()}>+</p>
             {btnState && <Popup
-                handleClose={handleBtnClick}
+                handleClose={handleBtnClick} socket={props.socket}
             />}       
         </div>
     );
 }
+
+
 
 export default class ChatModule extends React.Component<{ socket: Socket }, IChat> {
     constructor(props : { socket: Socket }) {
@@ -416,7 +438,7 @@ export default class ChatModule extends React.Component<{ socket: Socket }, ICha
                     <div className="left">
                         <div className="leftHeader">
                             <SearchChat socket={socket}/>
-                            <CreateChannel />
+                            <CreateChannel socket={this.props.socket}/>
                         </div>
                         <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
                     </div>
