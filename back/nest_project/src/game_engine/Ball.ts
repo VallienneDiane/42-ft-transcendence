@@ -40,7 +40,7 @@ export class Ball {
 			this.acc.y = this.acceleration;
 		if (body === "ArrowRight")
 			this.acc.x = this.acceleration;
-		if (body === "ArrowULeft")
+		if (body === "ArrowLeft")
 			this.acc.x = -this.acceleration;
 	}
 
