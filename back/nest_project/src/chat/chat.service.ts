@@ -209,6 +209,7 @@ export class ChatService {
                         this.messageService.findByPrivate(login, found.login)
                         .then (
                             (messages) => {
+                                console.log('newlocprivate send');
                                 client.emit('newLocPrivate', found.login, messages);
                             }
                         )

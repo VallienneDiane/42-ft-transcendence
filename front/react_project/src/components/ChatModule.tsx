@@ -92,6 +92,7 @@ class SearchChat extends React.Component<IChat, {
         this.fetchChannels = this.fetchChannels.bind(this);
         this.fetchUsers = this.fetchUsers.bind(this);
         this.displayList = this.displayList.bind(this);
+        this.onClick = this.onClick.bind(this);
     }
 
     fetchChannels() {
@@ -101,9 +102,12 @@ class SearchChat extends React.Component<IChat, {
     fetchUsers() {
         userService.getAllUsers()
         .then(response => {
-            const users: {name:string, isChannel: boolean} = response.data.map((user: UserData) => user.login, false);
-            this.setState({users: users});
-            console.log(" fetchUser : " + this.state.users);
+            const users = response.data.map((user: UserData) => user.login);
+            let newUserList: {name:string, isChannel:boolean}[] = [];
+            users.forEach((user: string) => {
+                newUserList.push({name: user, isChannel: false});
+            })
+            this.setState({users: newUserList});
         })
         .catch(error => {
             console.log(error);
@@ -121,23 +125,52 @@ class SearchChat extends React.Component<IChat, {
             this.fetchUsers()});
         this.fetchChannels();
         this.fetchUsers();
+
+        this.props.socket!.on('newLocChannel', (chanName: string, chanHistory: IMessageEntity[]) => {
+            console.log('socket ON newLocChannel', chanName, chanHistory);
+            let newHistory: Message[] = [];
+            for (let elt of chanHistory) {
+                newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
+            }
+            this.props.action(newHistory);
+            this.props.action2({Loc: chanName, isChannel: true});
+        })
+
+        this.props.socket!.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {
+            console.log('socket ON newLocPrivate', userName, chanHistory);
+            let newHistory: Message[] = [];
+            for (let elt of chanHistory) {
+                newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
+            }
+            this.props.action(newHistory);
+            this.props.action2({Loc: userName, isChannel: false});
+        })
     }
 
     componentWillUnmount(): void {
         this.props.socket!.off('listChannel');
         this.props.socket!.off('newUserConnected');
+        this.props.socket!.off('newLocChannel');
+        this.props.socket!.off('newLocPrivate');
     }
 
-    displayList(event: any) {
+    displayList(event: any) { //Ceci est un frigo
         this.setState({text: event.target.value});
         if (event.target.value) {
             this.setState(() => {
-                const filteredUsers: {name: string, isChannel: boolean}[] = this.state.users.filter((user: string) => user.startsWith(event.target.value));
-                const filteredChannels: {name: string, isChannel: boolean}[] = this.state.channels.filter((channel: string) => channel.startsWith(event.target.value));
+                const filteredUsers: {name: string, isChannel: boolean}[] =
+                this.state.users.filter((user: {name: string, isChannel: boolean}) =>
+                    user.name.startsWith(event.target.value));
+                const filteredChannels: {name: string, isChannel: boolean}[] =
+                this.state.channels.filter((channel: {name: string, isChannel: boolean}) =>
+                    channel.name.startsWith(event.target.value));
                 let toReturn: {name: string, isChannel: boolean}[] = [];
                 if (filteredUsers.length > 0) {
                     if (filteredChannels.length > 0)
-                        toReturn = [{name: "Users : ", isChannel: false}, ...filteredUsers, {name: "Channels : ", isChannel: true}, ...filteredChannels];
+                        toReturn = [{name: "Users : ", isChannel: false},
+                        ...filteredUsers, {name: "Channels : ",
+                        isChannel: true},
+                        ...filteredChannels];
                     else
                         toReturn = [{name: "Users : ", isChannel: false}, ...filteredUsers];
                 }
@@ -155,8 +188,9 @@ class SearchChat extends React.Component<IChat, {
     }
     
     onClick(event: any) {
-        this.setState({text: event.target.innerHTML});
-        this.props.socket?.emit('')
+        let newLocWanted: IDest = {Loc: event.target.innerHTML, isChannel: event.target.value? true : false};
+        this.props.socket?.emit('changeLoc', newLocWanted);
+        this.setState({text: ''});
     }
     
     render() {
@@ -166,8 +200,8 @@ class SearchChat extends React.Component<IChat, {
                     <input type="text" onChange={this.displayList} onClick={this.displayList} value={this.state.text} placeholder="Search"/>
                 </form>
                 <ul>
-                    {this.state.filtered.map((user: string) => (
-                        <li key={user} onClick={this.onClick} >{user}</li>
+                    {this.state.filtered.map((user: {name: string, isChannel: boolean}, id: number) => (
+                        <li key={id} value={user.isChannel? 1 : 0} onClick={this.onClick} >{user.name}</li>
                     ))}
                 </ul>
             </div>
@@ -193,19 +227,19 @@ class MessageList extends React.Component<IChat, {}> {
 
     componentDidMount(): void {
         this.props.socket!.on("newMessage", (data: IMessageToSend[]) => {
+            console.log('pouet', data);
             const msg = data[0];
             console.log(msg);
             console.log('message from nest : ' + msg.content + ', ' + msg.sender);
             this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
         });
 
-        this.props.socket!.on('selfMessage', (data: IMessageToSend[]) => {
-            const msg = data[0]
-            console.log('message from nest : ' + msg.content + ', ' + msg.sender);
-            this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
+        this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
+            console.log('message from nest : ' + data.content + ', ' + data.sender);
+            this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         })
 
-        this.props.socket!.on('notice', (data: string) => {
+        this.props.socket!.on('notice', (data: string[]) => {
             console.log(data);
         })
     }
@@ -455,7 +489,7 @@ export default class ChatModule extends React.Component<{ socket: Socket }, ICha
                 <div className="chatWrapper">
                     <div className="left">
                         <div className="leftHeader">
-                            <SearchChat socket={socket}/>
+                            <SearchChat socket={socket} action={this.handleHistory} action2={this.changeLoc} />
                             <CreateChannel socket={this.props.socket}/>
                         </div>
                         <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
