@@ -3,34 +3,45 @@ import { Ball } from './Ball';
 import { Vec2 } from './math/Vec2';
 
 interface gameState {
-	ballPosition: {x: number, y: number},
+	ballPosition: Ball[],
 	paddleOne: {x: number, y: number },
-	paddleTwo: {x: number, y:number }
+	paddleTwo: {x: number, y:number },
   }
 
 @Injectable()
 export class GameEngineService {
-	ball: Ball = new Ball(0.5, 0.5, 0.1);
+
+	ballz: Ball[];
+	n;
 
 	public gs: gameState;
 
 	constructor() {
+		this.n = 2;
+		this.ballz = [];
+
+		for (let index = 0; index < this.n; index++) {
+			let position = new Vec2(Math.random(), Math.random());
+			let radius = Math.random() * 0.1;
+			this.ballz[index] = new Ball(position, radius);
+		}
+
 		this.gs = {
-			ballPosition: {x: 0.5, y: 0.5},
+			ballPosition: this.ballz,
 			paddleOne: {x: 1, y: 0.5},
 			paddleTwo: {x: 0, y: 0.5}
 		};
 	}
 
-	hello() {
-		console.log('heuuu ca marche ?');
-	}
-
 	main_loop() {
-		this.ball.update_self_position();
-		this.gs.ballPosition.x = this.ball.position.x;
-		this.gs.ballPosition.y = this.ball.position.y;
+		this.ballz.forEach((ball) => {
+			ball.update_self_position();
+		});
+		for (let index = 0; index < this.n; index++) {
+			this.gs.ballPosition[index].position = this.ballz[index].position;
+		}
 		console.log("game was updated");
+		console.log("acc : {}, {}", this.ballz[0].acc.x, this.ballz[0].acc.y);
 	}
 
 	game_init() {
