@@ -57,6 +57,6 @@ export class GameUpdateCenterGateway implements OnModuleInit{
       console.log("devrait spammer le chat");
       test.main_loop();
       tost.server.emit('Game_Update', test.gs)
-    }, 1000);
+    }, 1000/60);
   }
 }

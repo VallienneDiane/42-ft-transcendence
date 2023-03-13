@@ -12,7 +12,7 @@ interface position {
 }
 
 interface gameState {
-    ballz: position[],
+    ballPosition: position[],
     paddleOne: position,
     paddleTwo: position
   }
@@ -39,7 +39,8 @@ if (socket !== null && startGame === false) {
 // });
 
 const [gameState, setGameState] = useState<gameState>({
-    ballz: [
+    ballPosition: [
+        {x: 0, y: 0},
         {x: 0, y: 0},
     ],
     paddleOne: {x: 0, y: 0 },
@@ -51,7 +52,8 @@ useEffect(() => {
     if (canvasRef.current) {
         setGameState((prevState) => ({
             ...prevState,
-            ballz: [
+            ballPosition: [
+                { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
                 { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
             ],
             paddleOne: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
@@ -69,15 +71,28 @@ useEffect(() => {
         });
         
         socket.on('Game_Update', (gameState: gameState) => {
-            setGameState((prevState) => ({
-                ...prevState,
-                ballz: [
-                    { x: gameState.ballz[0].x * canvasRef.current!.width, y: gameState.ballz[0].y * canvasRef.current!.height },
+            console.log('gameState', gameState);
+            // setGameState((prevState) => ({
+            //     ...prevState,
+            //     ballPosition: [
+            //         { x: gameState.ballPosition[0].x * canvasRef.current!.width, y: gameState.ballPosition[0].y * canvasRef.current!.height },
+            //         { x: gameState.ballPosition[1].x * canvasRef.current!.width, y: gameState.ballPosition[1].y * canvasRef.current!.height },
+
+            //     ],
+            //     paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
+            //     paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
+            // }));
+            console.log('gameState before', gameState);
+            setGameState({
+                ballPosition: [
+                    { x: gameState.ballPosition[0].x * canvasRef.current!.width, y: gameState.ballPosition[0].y * canvasRef.current!.height },
+                    { x: gameState.ballPosition[1].x * canvasRef.current!.width, y: gameState.ballPosition[1].y * canvasRef.current!.height },
 
                 ],
-                paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
-                paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
-            }));
+                paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
+                paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width - 8, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
+            });
+            console.log('gameState after', gameState);
         });
     }
 }, [socket]);
@@ -96,7 +111,8 @@ useEffect(() => {
             context.clearRect(0, 0, canvas.width, canvas.height);
 
             context.beginPath();
-            context.arc(gameState.ballz[0].x, gameState.ballz[0].y, 5, 0, Math.PI * 2);
+            context.arc(gameState.ballPosition[0].x, gameState.ballPosition[0].y, 5, 0, Math.PI * 2);
+            context.arc(gameState.ballPosition[1].x, gameState.ballPosition[1].y, 5, 0, Math.PI * 2);
             context.fillStyle = 'black';
             context.fill();
 
