@@ -28,7 +28,7 @@ export default function SearchUserBar() {
         })
     }, []);
     
-    const displayList = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const displayList = (event: any) => {
         setValue(event.target.value);
         if (event.target.value) {
             setFilteredUsers(userNames.filter((user: string) => user.startsWith(event.target.value)));
@@ -38,13 +38,15 @@ export default function SearchUserBar() {
         }
     }
     
-    const onHover = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.innerHTML);
+    const onHover = (event: React.MouseEvent<Element, MouseEvent>) => {
+        const target = event.target as HTMLElement;
+        setValue(target.innerHTML);
         // setFilteredUsers(userNames.filter((user: string) => user.startsWith(event.target.value)));
     }
-
-    const onClick = (event: React.ChangeEvent<HTMLInputElement>) => {
-        navigate("/profile/" + event.target.innerHTML);
+    
+    const onClick = (event: React.MouseEvent<Element, MouseEvent>) => {
+        const target = event.target as HTMLElement;
+        navigate("/profile/" + target.innerHTML);
     }
 
     return (
