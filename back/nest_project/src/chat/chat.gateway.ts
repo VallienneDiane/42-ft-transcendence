@@ -52,6 +52,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('changeLoc')
     handleChangeLoc(@MessageBody() data: {Loc: string, isChannel: boolean}, @ConnectedSocket() client: Socket) {
+        this.logger.debug('changeLoc event : ');
+        console.log(data, data.Loc, data.isChannel);
         this.chatService.changeLocEvent(client, data.Loc, data.isChannel, this.chatRoomHandler);
     }
 
