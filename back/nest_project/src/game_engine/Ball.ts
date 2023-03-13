@@ -19,8 +19,8 @@ export class Ball {
 		this.acc = new Vec2(0, 0);
 		this.r = r;
 		this.colision_number = 0;
-		this.acceleration = 0.0003;
-		this.friction = 0.1;
+		this.acceleration = 0.001;
+		this.friction = 0.00003;
 		this.elasticity = 1;
 		this.mass = Math.PI * r * r;
 		if (this.mass === 0)
@@ -51,7 +51,12 @@ export class Ball {
 	}
 
 	static coll_det_bb(b1: Ball, b2: Ball) {
-		return (b1.r + b1.r >= (b1.position.subr(b2.position)).length);
+		if (b1.r + b1.r >= (b1.position.subr(b2.position)).length)
+		{
+			console.log("collision");
+			return true;
+		}
+		return false;
 	}
 
 	static penetration_resolution_bb(b1: Ball, b2: Ball) {
@@ -64,6 +69,7 @@ export class Ball {
 
 	static collision_response_bb(b1: Ball, b2: Ball) {
 		let normal = b1.position.subr(b2.position).normalize();
+		console.log("NORMAL :", normal);
 		let relative_velocity = b1.speed.subr(b2.speed);
 		let separation_velocity = relative_velocity.dot(normal) * b1.elasticity;
 		let separation_velocity_vec = normal.mult(separation_velocity);
