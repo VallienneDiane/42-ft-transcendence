@@ -56,7 +56,7 @@ export class Ball {
 
 	static penetration_resolution_bb(b1: Ball, b2: Ball) {
 		let dist = b1.position.subr(b2.position);
-		let penetration_depth = b1.r + b2.r - dist.Magnitude();
+		let penetration_depth = b1.r + b2.r - dist.length;
 		let penetration_resolution: Vec2 = dist.normalize().mult(penetration_depth / 2);
 		b1.position = b1.position.addr(penetration_resolution);
 		b2.position = b2.position.addr(penetration_resolution.mult(-1));
@@ -67,8 +67,8 @@ export class Ball {
 		let relative_velocity = b1.speed.subr(b2.speed);
 		let separation_velocity = relative_velocity.dot(normal) * b1.elasticity;
 		let separation_velocity_vec = normal.mult(separation_velocity);
-		b1.speed.add(separation_velocity_vec);
-		b2.speed.add(separation_velocity_vec.mult(-1));
+		b2.speed.add(separation_velocity_vec);
+		b1.speed.add(separation_velocity_vec.mult(-1));
 	}
 
 }

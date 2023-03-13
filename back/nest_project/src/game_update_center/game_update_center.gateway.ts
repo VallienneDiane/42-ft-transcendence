@@ -44,7 +44,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     const test = this.Game;
     console.log(body);
     this.Game.ballz[0].process_input(body);
-    console.log("je t'envoye :" + test.gs);
+    // console.log("je t'envoye :" + test.gs);
     this.server.emit('Game_Update', test.gs)
   }
 

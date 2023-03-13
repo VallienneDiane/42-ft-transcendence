@@ -6,16 +6,17 @@ import { Socket } from 'socket.io-client'
 import { accountService } from "../services/account.service";
 import {DefaultEventsMap} from "@socket.io/component-emitter";
 
-interface position {
+interface ball {
     x: number,
-    y: number
+    y: number,
+    r: number
 }
 
 interface gameState {
-    ballPosition: position[],
-    paddleOne: position,
-    paddleTwo: position
-  }
+    ballPosition: ball[],
+    paddleOne: {x: number, y: number},
+    paddleTwo: {x: number, y: number}
+}
 
 const Game: React.FC = () => {
 const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,62 +39,59 @@ if (socket !== null && startGame === false) {
 //     auth: {token: accountService.getToken()}
 // });
 
-const [gameState, setGameState] = useState<gameState>({
-    ballPosition: [
-        {x: 0, y: 0},
-        {x: 0, y: 0},
-    ],
-    paddleOne: {x: 0, y: 0 },
-    paddleTwo: {x: 0, y: 0 }
-})
+// const [gameState, setGameState] = useState<gameState>({
+//     ballPosition: [
+//         {x: 0, y: 0, r: 5},
+//         {x: 0, y: 0, r: 5},
+//     ],
+//     paddleOne: {x: 0, y: 0 },
+//     paddleTwo: {x: 0, y: 0 }
+// })
+
+const [gameState, setGameState] = useState<gameState>()
 
 useEffect(() => {
     // Set the initial position of elements based on the width and height of the canvas element
     if (canvasRef.current) {
-        setGameState((prevState) => ({
-            ...prevState,
+        setGameState({
             ballPosition: [
-                { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
-                { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0},
+                { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5},
             ],
             paddleOne: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
-            paddleTwo: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
-        }));
+            paddleTwo: {x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
+        });
     }
 }, []);
 
 useEffect(() => {
     // triggered when receiving socket data, update position of elements
     if (socket) {
-        console.log('socket', socket);
         socket.on('connect', () => {
             console.log('Connected to server!');
-            socket.emit('Game_start');
         });
         
         socket.on('Game_Update', (gameState: gameState) => {
-            console.log('gameState', gameState);
-            // setGameState((prevState) => ({
-            //     ...prevState,
+            setGameState(gameState);
+            setGameState((prevState) => ({
+                ...prevState,
+                ballPosition: gameState.ballPosition.map((ball) => ({
+                    x: ball.x * canvasRef.current!.width,
+                    y: ball.y * canvasRef.current!.height,
+                    r: ball.r
+                })),
+                paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
+                paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
+            }));
+            // setGameState({
             //     ballPosition: [
             //         { x: gameState.ballPosition[0].x * canvasRef.current!.width, y: gameState.ballPosition[0].y * canvasRef.current!.height },
             //         { x: gameState.ballPosition[1].x * canvasRef.current!.width, y: gameState.ballPosition[1].y * canvasRef.current!.height },
 
             //     ],
-            //     paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width - 8, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
-            //     paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
-            // }));
-            console.log('gameState before', gameState);
-            setGameState({
-                ballPosition: [
-                    { x: gameState.ballPosition[0].x * canvasRef.current!.width, y: gameState.ballPosition[0].y * canvasRef.current!.height },
-                    { x: gameState.ballPosition[1].x * canvasRef.current!.width, y: gameState.ballPosition[1].y * canvasRef.current!.height },
-
-                ],
-                paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
-                paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width - 8, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
-            });
-            console.log('gameState after', gameState);
+            //     paddleOne: { x: gameState.paddleOne.x * canvasRef.current!.width, y: gameState.paddleOne.y * canvasRef.current!.height - 25 },
+            //     paddleTwo: { x: gameState.paddleTwo.x * canvasRef.current!.width - 8, y: gameState.paddleTwo.y * canvasRef.current!.height - 25 }
+            // });
+            // console.log('gameState after', gameState);
         });
     }
 }, [socket]);
@@ -106,20 +104,27 @@ const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) =
 
 useEffect(() => {
     const canvas = canvasRef.current;
-    if (canvas) {
+    if (canvas && gameState) {
         const context = canvas.getContext("2d")!;
         if (context) {
             context.clearRect(0, 0, canvas.width, canvas.height);
 
-            context.beginPath();
-            context.arc(gameState.ballPosition[0].x, gameState.ballPosition[0].y, 5, 0, Math.PI * 2);
-            context.arc(gameState.ballPosition[1].x, gameState.ballPosition[1].y, 5, 0, Math.PI * 2);
-            context.fillStyle = 'black';
-            context.fill();
+            gameState!.ballPosition.forEach((ball) => {
+                context.beginPath();
+                context.arc(ball.x, ball.y, 20, 0, Math.PI * 2);
+                context.fillStyle = 'black';
+                context.fill();
+                context.stroke()
+            })
+            // context.beginPath();
+            // context.arc(gameState.ballPosition[0].x, gameState.ballPosition[0].y, 5, 0, Math.PI * 2);
+            // context.fillStyle = 'black';
+            // context.fill();
+            // context.arc(gameState.ballPosition[1].x, gameState.ballPosition[1].y, 5, 0, Math.PI * 2);
 
             context.fillStyle = 'grey';
-            context.fillRect(canvas.width - 8, gameState.paddleOne.y, 8, 50);
-            context.fillRect(gameState.paddleTwo.x, gameState.paddleTwo.y, 8, 50);
+            context.fillRect(gameState!.paddleOne.x + 8, gameState!.paddleOne.y, 8, 50);
+            context.fillRect(gameState!.paddleTwo.x - 8, gameState!.paddleTwo.y, 8, 50);
         }
     }
 }, [gameState]);

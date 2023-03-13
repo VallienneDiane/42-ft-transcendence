@@ -49,11 +49,11 @@ export class GameEngineService {
 				x: this.ballz[index].position.x,
 				y: this.ballz[index].position.y,
 			}
-			console.log("test", this.gs.ballPosition[index]);
+			// console.log("test", this.gs.ballPosition[index]);
 			this.gs.ballPosition[index] = bp;
 		}
-		console.log("game was updated");
-		console.log("acc : {}, {}", this.ballz[0].speed.x, this.ballz[0].speed.y);
+		// console.log("game was updated");
+		// console.log("acc : {}, {}", this.ballz[0].speed.x, this.ballz[0].speed.y);
 	}
 
 	game_init() {
