@@ -6,6 +6,7 @@ import { Vec2 } from './math/Vec2';
 interface ballpos {
 	x: number,
 	y: number,
+	r: number,
 }
 
 interface gameState {
@@ -20,14 +21,17 @@ export class GameEngineService {
 	public gs: gameState;
 	ballz: Ball[];
 	n;
+	aspectratio;
 
 	constructor() {
 		this.n = 2;
 		this.ballz = [];
-		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: 1, y: 0.5 } };
+		this.aspectratio = 16/9;
+		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: this.aspectratio, y: 0.5 } };
 
 		for (let index = 0; index < this.n; index++) {
-			let position = new Vec2(Math.random(), Math.random());
+			//let position = new Vec2(Math.random(), Math.random());
+			let position = new Vec2(0.5, 0.5);
 			//let radius = Math.random() * 0.1;
 			let radius = 0.1;
 			this.ballz[index] = new Ball(position, radius);
@@ -49,6 +53,7 @@ export class GameEngineService {
 			bp = {
 				x: this.ballz[index].position.x,
 				y: this.ballz[index].position.y,
+				r: this.ballz[index].r,
 			}
 			console.log(this.gs.ballPosition[index]);
 			this.gs.ballPosition[index] = bp;

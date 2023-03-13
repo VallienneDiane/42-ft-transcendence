@@ -19,8 +19,8 @@ export class Ball {
 		this.acc = new Vec2(0, 0);
 		this.r = r;
 		this.colision_number = 0;
-		this.acceleration = 0.0003;
-		this.friction = 0.1;
+		this.acceleration = 0.001;
+		this.friction = 0.00003;
 		this.elasticity = 1;
 		this.mass = Math.PI * r * r;
 		if (this.mass === 0)
