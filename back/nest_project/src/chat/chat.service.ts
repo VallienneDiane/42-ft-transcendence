@@ -126,28 +126,21 @@ export class ChatService {
         const toSend: IMessageToSend = this.toSendFormat(login, data.message);
         if (!data.message.isChannel)
         {
-            this.userService.findByLogin(data.message.room)
-            .then (
-                (found) => {
-                    if (found != null) {
-                        this.messageService.create(this.messageEntityfier(login, data.message));
-                        data.client.emit('selfMessage', toSend);
-                        let socketDest = data.chatNamespace.sockets.get(data.message.room);
-                        let otherIsInGoodLocation: {room: string, isChannel: boolean} = {
-                            room: login,
-                            isChannel: false
-                        };
-                        if (socketDest != undefined) {
-                            if (data.roomHandler.getRoom(data.message.room) == otherIsInGoodLocation)
-                                socketDest.emit("newMessage", toSend);
-                            else
-                                socketDest.emit("pingedBy", login);
-                        }
-                    }
+            let room = data.roomHandler.userMap.get(login);
+            if (room != undefined && room.room == data.message.room) {
+                this.messageService.create(this.messageEntityfier(login, data.message));
+                data.client.emit('selfMessage', toSend);
+                let dest = data.roomHandler.userMap.get(data.message.room);
+                if (dest != undefined) {
+                    if (!dest.isChannel && dest.room == data.message.room)
+                        dest.socket.emit("newMessage", toSend);
                     else
-                        data.client.emit('userNotFound');
+                        dest.socket.emit("pingedBy", login);
                 }
-            )
+                
+            }
+            else
+                data.client.emit("errMsg", "You're not currently on the user room");
         }
         else if (data.message.room == "general") {
             let found = data.roomHandler.roomMap.of("general");
@@ -155,20 +148,13 @@ export class ChatService {
                 found.emit("newMessage", toSend);
         }
         else {
-            this.linkUCService.findOne(data.message.room, login)
-            .then (
-                (result) => {
-                    if (result != null)
-                    {
-                        this.messageService.create(this.messageEntityfier(login, data.message));
-                        let found = data.roomHandler.roomMap.of(result.channelName);
-                        if (found != undefined)
-                            found.emit("newMessage", toSend);
-                    }
-                    else
-                        data.client.emit('notRegisteredToChannel');
-                }
-            )
+            let room = data.roomHandler.userMap.get(login);
+            if (room != undefined && room.room == data.message.room) {
+                this.messageService.create(this.messageEntityfier(login, data.message));
+                data.roomHandler.roomMap.of(data.message.room).emit("newMessage, toSend");
+            }
+            else
+                data.client.emit("errMsg", "You're not currently on the channel room");
         }
     }
 
@@ -244,7 +230,7 @@ export class ChatService {
                         let strs: string[] = ["general"];
                         for (let l of list)
                         {
-                            if (!this.channInUCList(l, notToDisplay))
+                            if (!l.hidden && !this.channInUCList(l, notToDisplay))
                                 strs.push(l.name);
                         }
                         console.log(strs)
