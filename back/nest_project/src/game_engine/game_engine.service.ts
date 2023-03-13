@@ -34,8 +34,14 @@ export class GameEngineService {
 	}
 
 	main_loop() {
-		this.ballz.forEach((ball) => {
+		this.ballz.forEach((ball, index) => {
 			ball.update_self_position();
+			for (let i = index + 1; i < this.ballz.length; i++) {
+				if (Ball.coll_det_bb(this.ballz[index], this.ballz[i])) {
+					Ball.penetration_resolution_bb(this.ballz[index], this.ballz[i]);
+					Ball.collision_response_bb(this.ballz[index], this.ballz[i]);
+				}
+			}
 		});
 		for (let index = 0; index < this.n; index++) {
 			let bp: ballpos;
