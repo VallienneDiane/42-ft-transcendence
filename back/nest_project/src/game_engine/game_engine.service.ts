@@ -38,7 +38,7 @@ export class GameEngineService {
 			ball.update_self_position();
 			for (let i = index + 1; i < this.ballz.length; i++) {
 				if (Ball.coll_det_bb(this.ballz[index], this.ballz[i])) {
-					Ball.penetration_resolution_bb(this.ballz[index], this.ballz[i]);
+					// Ball.penetration_resolution_bb(this.ballz[index], this.ballz[i]);
 					Ball.collision_response_bb(this.ballz[index], this.ballz[i]);
 				}
 			}
