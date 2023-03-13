@@ -15,11 +15,11 @@ export class Ball {
 
 	constructor (pos: Vec2, r) {
 		this.position = pos;
-		this.r = r;
 		this.speed = new Vec2(0, 0);
 		this.acc = new Vec2(0, 0);
+		this.r = r;
 		this.colision_number = 0;
-		this.acceleration = 0.0001;
+		this.acceleration = 0.0003;
 		this.friction = 0.1;
 		this.elasticity = 1;
 		this.mass = Math.PI * r * r;
@@ -36,21 +36,18 @@ export class Ball {
 	process_input (body: any) {
 		if (body === "ArrowUp")
 			this.acc.y = -this.acceleration;
-		else if (body === "ArrowDown")
+		if (body === "ArrowDown")
 			this.acc.y = this.acceleration;
-		else if (body === "ArrowRight")
+		if (body === "ArrowRight")
 			this.acc.x = this.acceleration;
-		else if (body === "ArrowLeft")
+		if (body === "ArrowULeft")
 			this.acc.x = -this.acceleration;
-		// if (!(body === "ArrowUp") && !(body === "ArrowDown"))
-		// 	this.acc.y = 0;
-		// if (!(body === "ArrowRight") && !(body === "ArrowLeft"))
-		// 	this.acc.x = 0;
 	}
 
 	update_self_position() {
 		this.speed.setCoordinates((this.speed.x + this.acc.x) * (1 - this.friction), (this.speed.y + this.acc.y) * (1 - this.friction));
 		this.position.add(this.speed);
+		this.acc.setCoordinates(0, 0);
 	}
 
 	coll_det_bb(b1: Ball, b2: Ball) {
