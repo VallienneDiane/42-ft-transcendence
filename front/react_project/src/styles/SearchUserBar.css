@@ -1,0 +1,32 @@
+#searchUserBar {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid;
+    padding: 0 10px;
+}
+
+#searchUserBar input {
+    border: none;
+    outline: none;
+}
+
+#searchUserBar ul {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    border: 1px solid black;
+    padding: 0;
+    margin-top: 0;
+}
+
+#searchUserBar ul li {
+    width: 100%;
+    background-color: rgb(255, 255, 255);
+    color: rgb(39, 39, 39);
+    text-align: left;
+}
+
+#searchUserBar ul li:hover {
+    background-color: rgb(226, 226, 226);
+    cursor: pointer;
+}
