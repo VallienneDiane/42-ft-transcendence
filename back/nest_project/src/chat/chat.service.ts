@@ -99,8 +99,10 @@ export class ChatService {
             data.roomHandler.addUser(login, data.client, "general", true);
             console.log(login);
             data.client.emit("changeLocChannel", "general", []);
+            data.chatNamespace.sockets.forEach( (socket) => {
+                socket.emit('newUserConnected');
+            })
             data.logger.log(`${login} is connected, ${data.client.id}`);
-            data.client.emit("test", "blop");
         }
     }
 
@@ -154,7 +156,7 @@ export class ChatService {
                 data.roomHandler.roomMap.of(data.message.room).emit("newMessage, toSend");
             }
             else
-                data.client.emit("errMsg", "You're not currently on the channel room");
+                data.client.emit("notice", "error", "You're not currently on the channel room");
         }
     }
 
@@ -187,12 +189,12 @@ export class ChatService {
                                         ))
                                     }
                                     else
-                                        client.emit('notRegisteredToChannel');
+                                        client.emit('notice', 'error', 'notRegisteredToChannel');
                                 }
                             )
                         }
                         else
-                            client.emit('noSuchChannel');
+                            client.emit('notice', 'error', 'noSuchChannel');
                     }
                 )
             }
@@ -212,7 +214,7 @@ export class ChatService {
                         )
                     }
                     else
-                        client.emit('noSuchUser');
+                        client.emit('notice', 'error', 'noSuchUser');
                 }
             )
         }
@@ -287,13 +289,14 @@ export class ChatService {
                 this.channelService.create(this.channelEntityfier(data.channelEntries))
                 .then( (succeed) => {
                     data.client.emit('channelCreated', succeed.name);
-                    this.channelService.listChannels().then( (list) => {
-                        let strs: string[] = [];
-                        for (let l of list) {
-                            strs.push(l.name);}
-                        data.chatNamespace.emit('listChannel', strs);
-                        data.logger.debug(`list of channel : `);
-                        console.log(list)});
+                    if (!succeed.hidden) {
+                        this.channelService.listChannels().then( (list) => {
+                            let strs: string[] = [];
+                            for (let l of list) {
+                                strs.push(l.name);}
+                            data.chatNamespace.emit('listChannel', strs);
+                        })
+                    }
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
                     .then( (channLink) => {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
