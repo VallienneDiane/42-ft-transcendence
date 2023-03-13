@@ -4,10 +4,15 @@ import { Server } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { Ball } from 'src/game_engine/Ball';
 
+interface ballpos {
+	x: number,
+	y: number,
+}
+
 interface gameState {
-  ballPosition: Ball[],
-  paddleOne: {x: number, y: number },
-  paddleTwo: {x: number, y:number }
+	ballPosition: ballpos[],
+	paddleOne: {x: number, y: number },
+	paddleTwo: {x: number, y:number },
 }
 
 @WebSocketGateway({
