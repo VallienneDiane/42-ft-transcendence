@@ -1,60 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { accountService } from "../services/account.service";
-import { JwtPayload } from "jsonwebtoken";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
-import { useForm } from "react-hook-form";
-import { NewChannel } from "../models";
-import { StringOptionsWithImporter } from "sass";
-
-interface IMessageEntity {
-    id?: number,
-    room?: string,
-    isChannel?: boolean,
-    sender: string,
-    content: string,
-    date: Date,
-}
-
-interface Message {
-    id: string,
-    text: string;
-    sender?: string;
-}
-
-interface IMessageToSend {
-    date: Date;
-    sender: string;
-    room: string;
-    content: string;
-}
-
-interface IDest {
-    Loc: string;
-    isChannel: boolean;
-};
-
-interface IChat {
-    dest?: IDest;
-    history?: Message[];
-    action?: any;
-    action2?: any;
-    socket?: Socket,
-}
-
-interface Users {
-    channels: string[];
-    me: JwtPayload;
-}
-
-interface UserData { 
-    id?: number,
-    login: string,
-    email: string,
-    password: string
-}
+import CreateChannel from "./CreateChannel"
+import { IChat, UserData, IMessageToSend, Message, IDest, Users, IMessageEntity } from "../models";
 
 function Header(title: IChat) {
     let location: string;
@@ -71,10 +22,6 @@ function Header(title: IChat) {
     )
 }
 
-function matchChannel(channel: string) {
-    console.log(channel);
-}
-
 class SearchChat extends React.Component<IChat, {text: string, users: string[], channels: string[], filtered: string[]}> {
     constructor(props: IChat) {
         super(props);
@@ -84,20 +31,15 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
             channels: [],
             filtered: [],
         }
-        this.fetchChannels = this.fetchChannels.bind(this);
         this.onHover = this.onHover.bind(this);
         this.displayList = this.displayList.bind(this);
     }
 
-    fetchChannels() {
+    componentDidMount(): void {
         if (this.state.channels.length === 0) {
             this.props.socket!.emit('listChannel');
             this.props.socket!.on('listChannel', (strs: string[]) => {this.setState({channels: strs})});
         }
-    }
-
-    componentDidMount(): void {
-        this.fetchChannels();
         userService.getAllUsers()
         .then(response => {
             const users = response.data.map((user: UserData) => user.login);
@@ -109,15 +51,11 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
             console.log(error);
         })
     }
-
-    componentDidUpdate() {
-        this.fetchChannels();
-    }
-
+    
     componentWillUnmount(): void {
         this.props.socket!.off('listChannel');
     }
-
+    
     displayList(event: any) {
         this.setState({text: event.target.value});
         if (event.target.value) {
@@ -126,7 +64,7 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
                 const filteredChannels = this.state.channels.filter((channel: string) => channel.startsWith(event.target.value));
                 const filtered = [...filteredUsers, ...filteredChannels];
                 return { filtered };
-              });
+            });
         }
         else {
             this.setState({filtered: []});
@@ -157,7 +95,57 @@ class SearchChat extends React.Component<IChat, {text: string, users: string[], 
     }
 }
 
-function Message(value: {sender: string, text: string}): JSX.Element {
+class ChannelList extends React.Component<IChat, Users> {
+    constructor(props: IChat) {
+        super(props);
+        this.state = {channels: [], me: accountService.readPayload()!};
+        this.changeLoc = this.changeLoc.bind(this);
+    }
+    
+    changeLoc(channel: IDest) {
+        this.props.socket!.emit('changeLoc', channel);  
+        this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
+            console.log(room)
+            this.props.action({Loc: room, isChannel: true});
+            this.props.action2(messages);
+        })
+    }
+
+    componentDidMount(): void {
+        if (this.state.channels.length === 0)
+        {
+            this.props.socket!.emit('myChannels');
+            this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
+        }
+        // userService.getAllUsers()
+        // .then((response) => {
+            //     this.setState({ users: response.data });
+            // })
+            // .catch((error) => console.log(error));
+    }
+
+    componentWillUnmount(): void {
+        this.props.socket!.off('newLocChannel');
+        this.props.socket!.off('listMyChannels');
+    }
+
+    render() {
+        return (
+            <div className="channelListWrapper">
+            <h2>Channels</h2>
+            <ul className="channelList">
+                { this.state.channels.map((channel) => { 
+                    if (this.state.me.login !== channel)
+                    { return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
+                })}
+            </ul>
+            <h2>DMs</h2>
+        </div>
+        )
+    }
+}
+
+function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
     // console.log(value);
     // console.log(value.sender, value.text);
     return (
@@ -201,7 +189,7 @@ class MessageList extends React.Component<IChat, {}> {
     render() {
         const reverseList: Message[] = this.props.history!.reverse();
         const listItems: JSX.Element[] = reverseList.map(
-            (message) => <Message key={message.id} sender={message.sender!} text={message.text} />
+            (message) => <MessageDisplay key={message.id} sender={message.sender!} text={message.text} />
         );
         return (
             <div className="messageList">
@@ -244,167 +232,8 @@ class SendMessageForm extends React.Component<IChat, {text: string}> {
     }
 }
 
-class ChannelList extends React.Component<IChat, Users> {
-    constructor(props: IChat) {
-        super(props);
-        this.state = {channels: [], me: accountService.readPayload()!};
-        this.changeLoc = this.changeLoc.bind(this);
-        this.fetchChannels = this.fetchChannels.bind(this);
-    }
-
-    fetchChannels() {
-        if (this.state.channels.length === 0)
-        {
-            this.props.socket!.emit('myChannels');
-            this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
-        }
-    }
-    
-    changeLoc(channel: IDest) {
-        this.props.socket!.emit('changeLoc', channel);  
-        this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
-            console.log(room)
-            this.props.action({Loc: room, isChannel: true});
-            this.props.action2(messages);
-        })
-    }
-
-    componentDidMount(): void {
-        this.fetchChannels();
-        // userService.getAllUsers()
-        // .then((response) => {
-            //     this.setState({ users: response.data });
-            // })
-            // .catch((error) => console.log(error));
-    }
-
-    componentDidUpdate() {
-        this.fetchChannels();
-    }
-
-    componentWillUnmount(): void {
-        this.props.socket!.off('newLocChannel');
-        this.props.socket!.off('listMyChannels');
-    }
-
-    render() {
-        return (
-            <div className="channelListWrapper">
-            <h2>Channels</h2>
-            <ul className="channelList">
-                { this.state.channels.map((channel) => { 
-                    if (this.state.me.login !== channel)
-                    { return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
-                })}
-            </ul>
-            <h2>DMs</h2>
-        </div>
-        )
-    }
-}
-
-function Popup(props: {handleClose: any, socket: Socket}) {
-    const { register, handleSubmit } = useForm<NewChannel>();
-    const [checked, setChecked] = React.useState(false);
-
-    const onSubmit = (data: NewChannel) => {
-        props.socket.emit('createChannel', {
-            channelName: data.channelName,
-            channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            persistant: data.persistant,
-            onlyOpCanTalk: data.onlyOpCanTalk,
-            hidden: data.hidden,
-        });
-    };
-
-    const handleChange = () => {
-        setChecked(!checked);
-    }
-
-    return (
-      <div className="popupBox">
-        <div className="box">
-          <span className="closeIcon" onClick={props.handleClose}>x</span>
-            <b>Create New Channel</b>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label>Channel Name</label>
-                <input
-                {...register("channelName", {
-                    required: true,
-                    maxLength: 20,
-                    pattern: /^[A-Za-z]+$/i
-                  })} />
-                  <label>
-                      Invite Only
-                  <input 
-                    type="checkbox" 
-                    checked={checked}
-                    onChange={handleChange}
-                    />
-                  </label>
-            <input type="submit"/>
-            </form>
-        </div>
-      </div>
-    );
-  };
-  
-  class Search extends React.Component<IChat, Message> {
-      constructor(props: {}) {
-          super(props);
-          this.state = { text: "" };
-          this.searchSmth = this.searchSmth.bind(this);
-          this.handleMessage = this.handleMessage.bind(this);
-      }
-  
-      searchSmth(event: any) {
-          event.preventDefault();
-          if (this.state.text.length > 0) {
-              this.props.socket!.emit('createChannel', {channelName: this.state.text, channelPass: undefined, inviteOnly: false, persistant: false, onlyOpCanTalk: false, hidden: false});
-          }
-          this.setState({ text: "" });
-      }
-  
-      handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-          this.setState({ text: event.target.value });
-      }
-  
-      render() {
-          const text: string = this.state.text;
-          return (
-              <div>
-                  <form className="chatSearchHeader" onSubmit={this.searchSmth}>
-                      <i className="fa fa-search" aria-hidden="true"></i>
-                      <input type="textarea" className="searchBar" placeholder="Search" value={text} onChange={this.handleMessage} />
-                      <input type="submit" className="searchButton" value="👆" />
-                  </form>
-              </div>
-          )
-      }
-  }
-
-function CreateChannel(props: {socket: Socket}) {
-    const [btnState, setBtnState] = useState<boolean>(false);
-
-    const handleBtnClick = () => {
-        setBtnState(!btnState);
-    };
-
-    return (
-        <div className="createChannel">
-            <p className="btn" onClick={() => handleBtnClick()}>+</p>
-            {btnState && <Popup
-                handleClose={handleBtnClick} socket={props.socket}
-            />}       
-        </div>
-    );
-}
-
-
-
-export default class ChatModule extends React.Component<{ socket: Socket }, IChat> {
-    constructor(props : { socket: Socket }) {
+export default class ChatModule extends React.Component<{}, IChat> {
+    constructor(props : {}) {
         super(props);
         this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
@@ -429,27 +258,28 @@ export default class ChatModule extends React.Component<{ socket: Socket }, ICha
     }
 
     render() {
-        if (this.props.socket.auth.token != "undefined") {
-            return (  
-                <SocketContext.Consumer > 
-                { ({ socket }) => (
-                <React.Fragment>
-                <div className="chatWrapper">
-                    <div className="left">
-                        <div className="leftHeader">
-                            <SearchChat socket={socket}/>
-                            <CreateChannel socket={this.props.socket}/>
-                        </div>
-                        <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
-                    </div>
-                    <div className="chatMessageWrapper">
-                        <Header dest={this.state.dest} />
-                        <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
-                        <SendMessageForm dest={this.state.dest} socket={socket}/>
-                    </div>
-                </div>
-                </React.Fragment> )}
-                </SocketContext.Consumer>
-            )}
-    }
+        return (  
+            <SocketContext.Consumer > 
+                { ({ socket }) => {
+                    if (socket.auth.token != "undefined") {
+                        return (
+                        <div className="chatWrapper">
+                            <div className="left">
+                                <div className="leftHeader">
+                                    <SearchChat socket={socket}/>
+                                    <CreateChannel />
+                                </div>
+                                <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
+                            </div>
+                            <div className="chatMessageWrapper">
+                                <Header dest={this.state.dest} />
+                                <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
+                                <SendMessageForm dest={this.state.dest} socket={socket}/>
+                            </div>
+                        </div>)}
+                    }
+                }
+            </SocketContext.Consumer>
+            )
+        }
 }
