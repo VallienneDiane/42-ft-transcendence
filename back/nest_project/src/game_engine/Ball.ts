@@ -50,11 +50,11 @@ export class Ball {
 		this.acc.setCoordinates(0, 0);
 	}
 
-	coll_det_bb(b1: Ball, b2: Ball) {
+	static coll_det_bb(b1: Ball, b2: Ball) {
 		return (b1.r + b1.r >= (b1.position.subr(b2.position)).length);
 	}
 
-	penetration_resolution_bb(b1: Ball, b2: Ball) {
+	static penetration_resolution_bb(b1: Ball, b2: Ball) {
 		let dist = b1.position.subr(b2.position);
 		let penetration_depth = b1.r + b2.r - dist.Magnitude();
 		let penetration_resolution: Vec2 = dist.normalize().mult(penetration_depth / 2);
@@ -62,10 +62,10 @@ export class Ball {
 		b2.position = b2.position.addr(penetration_resolution.mult(-1));
 	}
 
-	collision_response_bb(b1: Ball, b2: Ball) {
+	static collision_response_bb(b1: Ball, b2: Ball) {
 		let normal = b1.position.subr(b2.position).normalize();
 		let relative_velocity = b1.speed.subr(b2.speed);
-		let separation_velocity = relative_velocity.dot(normal) * this.elasticity;
+		let separation_velocity = relative_velocity.dot(normal) * b1.elasticity;
 		let separation_velocity_vec = normal.mult(separation_velocity);
 		b1.speed.add(separation_velocity_vec);
 		b2.speed.add(separation_velocity_vec.mult(-1));
