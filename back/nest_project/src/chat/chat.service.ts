@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { Socket } from "socket.io";
 import { IChannel, IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
@@ -119,45 +119,31 @@ export class ChatService {
         }
     }
 
-    public newMessageEvent(data: IHandle) {
-        let login = this.extractLogin(data.client);
+    public newMessageEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, message: string) {
+        let login = this.extractLogin(client);
         if (!login)
             return;
-        data.logger.debug(`${login} send : `);
-        console.log(data.message);
-        const toSend: IMessageToSend = this.toSendFormat(login, data.message);
-        if (!data.message.isChannel)
-        {
-            let room = data.roomHandler.userMap.get(login);
-            if (room != undefined && room.room == data.message.room) {
-                this.messageService.create(this.messageEntityfier(login, data.message));
-                data.client.emit('selfMessage', toSend);
-                let dest = data.roomHandler.userMap.get(data.message.room);
+        logger.debug(`${login} send : `);
+        console.log(message);
+        let room = roomHandler.userMap.get(login);
+        let toSend = {date: new Date(), sender: login, content: message};
+        if (room != undefined) {
+            this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
+            if (room.isChannel)
+                roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
+            else {
+                client.emit('selfMessage', toSend);
+                let dest = roomHandler.userMap.get(room.room);
                 if (dest != undefined) {
-                    if (!dest.isChannel && dest.room == data.message.room)
+                    if (!dest.isChannel && dest.room == login)
                         dest.socket.emit("newMessage", toSend);
                     else
                         dest.socket.emit("pingedBy", login);
                 }
-                
             }
-            else
-                data.client.emit("errMsg", "You're not currently on the user room");
         }
-        else if (data.message.room == "general") {
-            let found = data.roomHandler.roomMap.of("general");
-            if (found != undefined)
-                found.emit("newMessage", toSend);
-        }
-        else {
-            let room = data.roomHandler.userMap.get(login);
-            if (room != undefined && room.room == data.message.room) {
-                this.messageService.create(this.messageEntityfier(login, data.message));
-                data.roomHandler.roomMap.of(data.message.room).emit("newMessage, toSend");
-            }
-            else
-                data.client.emit("notice", "error", "You're not currently on the channel room");
-        }
+        else
+            client.emit('notice', 'You are nowhere');
     }
 
     public changeLocEvent(client: Socket, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
@@ -206,6 +192,7 @@ export class ChatService {
                 (found) => {
                     if (found != null) {
                         roomHandler.joinRoom(login, found.login, false);
+                        console.log('user currently in room : ', roomHandler.userMap.get(login).room, roomHandler.userMap.get(login).isChannel)
                         this.messageService.findByPrivate(login, found.login)
                         .then (
                             (messages) => {
