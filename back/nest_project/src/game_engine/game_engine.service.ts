@@ -30,10 +30,10 @@ export class GameEngineService {
 		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: this.aspectratio, y: 0.5 } };
 
 		for (let index = 0; index < this.n; index++) {
-			//let position = new Vec2(Math.random(), Math.random());
-			let position = new Vec2(0.5, 0.5);
-			//let radius = Math.random() * 0.1;
-			let radius = 0.1;
+			let position = new Vec2(Math.random(), Math.random());
+			// let position = new Vec2(0.5, 0.5);
+			let radius = Math.random() * 0.05 + 0.05;
+			//let radius = 0.1;
 			this.ballz[index] = new Ball(position, radius);
 		}
 	}
