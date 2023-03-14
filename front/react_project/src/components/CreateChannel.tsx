@@ -1,15 +1,14 @@
 import React, { useContext, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from 'react-hook-form';
+import { Box, Checkbox, Switch, Button } from '@mui/material';
+import Input from '@mui/material/Input';
 import { NewChannel, IChat, Message } from "../models";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
-import { Socket } from 'socket.io-client'
-import Checkbox from '@mui/material/Checkbox';
 
 function Popup(props: {handleClose: any}) {
-	const {socket} = React.useContext(SocketContext);
-    const { register, handleSubmit } = useForm<NewChannel>();
-    const [checked, setChecked] = React.useState(false);
+	const {socket} = useContext(SocketContext);
+    const { control, formState: { errors }, handleSubmit } = useForm<NewChannel>();
 
     const onSubmit = (data: NewChannel) => {
         socket.emit('createChannel', {
@@ -22,33 +21,91 @@ function Popup(props: {handleClose: any}) {
         });
     };
 
-    const handleChange = () => {
-        setChecked(!checked);
-    }
-
     return (
       <div className="popupBox">
         <div className="box">
           <span className="closeIcon" onClick={props.handleClose}>x</span>
             <b>Create New Channel</b>
-            <form onSubmit={handleSubmit(onSubmit)}>
-                <label>Channel Name</label>
-                <input
-                {...register("channelName", {
-                    required: true,
-                    maxLength: 20,
-                    pattern: /^[A-Za-z]+$/i
-                  })} />
-                  <label>
-                      Invite Only
-                  <input 
-                    type="checkbox" 
-                    checked={checked}
-                    onChange={handleChange}
+
+            <Box component="form" className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>
+                <section>
+                    <label>Channel Name</label>
+                    <Controller
+                        name="channelName"
+                        control={control}
+                        rules={{ required: true, maxLength: 20, pattern: /^[A-Za-z]+$/i }}
+                        render={({ field }) => <Input {...field} />}
+                        defaultValue=""
                     />
-                  </label>
-            <input type="submit"/>
-            </form>
+                    {errors.channelName && "Channel name is required"}
+                </section>
+                <section>
+                    <label>Password</label>
+                    <Controller
+                        name="password"
+                        control={control}
+                        render={({ field }) => (
+                        <Switch
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            checked={field.value}
+                        />
+                        )}
+                    />
+                </section>
+                <section>
+                    <label>Invite Only</label>
+                    <Controller
+                        name="inviteOnly"
+                        control={control}
+                        render={({ field }) => (
+                        <Checkbox
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            checked={field.value}
+                        />
+                        )}
+                    />
+                </section>
+                <section>
+                    <label>Persistant</label>
+                    <Controller
+                        name="persistant"
+                        control={control}
+                        render={({ field }) => (
+                        <Checkbox
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            checked={field.value}
+                        />
+                        )}
+                    />
+                </section>
+                <section>
+                    <label>Only OP can talk</label>
+                    <Controller
+                        name="onlyOpCanTalk"
+                        control={control}
+                        render={({ field }) => (
+                        <Checkbox
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            checked={field.value}
+                        />
+                        )}
+                    />
+                </section>
+                <section>
+                    <label>Hidden</label>
+                    <Controller
+                        name="hidden"
+                        control={control}
+                        render={({ field }) => (
+                        <Checkbox
+                            onChange={(e) => field.onChange(e.target.checked)}
+                            checked={field.value}
+                        />
+                        )}
+                    />
+                </section>
+                <Button type="submit">Create</Button>
+            </Box>
         </div>
       </div>
     );
