@@ -38,6 +38,7 @@ export interface User {
 
 export interface NewChannel {
   channelName: string;
+  password: boolean;
   channelPass?: string;
   inviteOnly: boolean;
   persistant: boolean;

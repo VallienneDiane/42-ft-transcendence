@@ -22,10 +22,6 @@ function Header(title: IChat) {
     )
 }
 
-function matchChannel(channel: string) {
-    console.log(channel);
-}
-
 class SearchChat extends React.Component<IChat, {
     text: string,
     users: {name: string, isChannel: boolean}[],
