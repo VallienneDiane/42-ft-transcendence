@@ -25,11 +25,11 @@ function Popup(props: {handleClose: any}) {
       <div className="popupBox">
         <div className="box">
           <span className="closeIcon" onClick={props.handleClose}>x</span>
-            <b>Create New Channel</b>
+            <h1>Create New Channel</h1>
 
             <Box component="form" className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>
-                <section>
-                    <label>Channel Name</label>
+                <section className="sectionTest">
+                    <label className="labelName">Channel Name</label>
                     <Controller
                         name="channelName"
                         control={control}
@@ -39,8 +39,8 @@ function Popup(props: {handleClose: any}) {
                     />
                     {errors.channelName && "Channel name is required"}
                 </section>
-                <section>
-                    <label>Password</label>
+                <section className="sectionTest">
+                    <label className="labelName">Password</label>
                     <Controller
                         name="password"
                         control={control}
@@ -52,8 +52,8 @@ function Popup(props: {handleClose: any}) {
                         )}
                     />
                 </section>
-                <section>
-                    <label>Invite Only</label>
+                <div className="rawCheckbox">
+                <section className="sectionTest">
                     <Controller
                         name="inviteOnly"
                         control={control}
@@ -64,9 +64,9 @@ function Popup(props: {handleClose: any}) {
                         />
                         )}
                     />
+                    <label className="labelName">Invite Only</label>
                 </section>
-                <section>
-                    <label>Persistant</label>
+                <section className="sectionTest">
                     <Controller
                         name="persistant"
                         control={control}
@@ -77,9 +77,11 @@ function Popup(props: {handleClose: any}) {
                         />
                         )}
                     />
+                    <label className="labelName">Persistant</label>
                 </section>
-                <section>
-                    <label>Only OP can talk</label>
+                </div>
+                <div className="rawCheckbox">
+                <section className="sectionTest">
                     <Controller
                         name="onlyOpCanTalk"
                         control={control}
@@ -90,20 +92,22 @@ function Popup(props: {handleClose: any}) {
                         />
                         )}
                     />
+                    <label className="labelName">Only OP can talk</label>
                 </section>
-                <section>
-                    <label>Hidden</label>
+                <section className="sectionTest">
                     <Controller
                         name="hidden"
                         control={control}
                         render={({ field }) => (
-                        <Checkbox
+                         <Checkbox
                             onChange={(e) => field.onChange(e.target.checked)}
                             checked={field.value}
                         />
                         )}
                     />
+                    <label className="labelName">Hidden</label>
                 </section>
+                </div>
                 <Button type="submit">Create</Button>
             </Box>
         </div>
