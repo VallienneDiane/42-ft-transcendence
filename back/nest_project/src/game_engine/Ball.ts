@@ -13,16 +13,16 @@ export class Ball {
 	mass;
 	inv_mass;
 
-	constructor (pos: Vec2, r, m) {
+	constructor (pos: Vec2, r) {
 		this.position = pos;
 		this.speed = new Vec2(0, 0);
 		this.acc = new Vec2(0, 0);
 		this.r = r;
 		this.colision_number = 0;
 		this.acceleration = 0.001;
-		this.friction = 0.00003;
+		this.friction = 0.0003;
 		this.elasticity = 1;
-		this.mass = m;
+		this.mass = Math.PI * r * r;
 		if (this.mass === 0)
 			this.inv_mass = 0;
 		else
@@ -70,13 +70,13 @@ export class Ball {
 	static collision_response_bb(b1: Ball, b2: Ball) {
 		let normal = b1.position.sub(b2.position).normalize();
 		let relative_velocity = b1.speed.sub(b2.speed);
-		console.log(relative_velocity);
 		let separation_velocity = Vec2.dot(relative_velocity, normal);
 		let new_separation_velocity = separation_velocity * Math.min(b1.elasticity, b2.elasticity);
-
-		let vel_diff = new_separation_velocity - separation_velocity;
+		
+		let vel_diff = new_separation_velocity + separation_velocity;
 		let impulse = vel_diff / (b1.inv_mass + b2.inv_mass);
 		let impulse_vec = normal.mult(impulse);
+		console.log(vel_diff);
 
 		b1.speed = b1.speed.add(impulse_vec.mult(-b1.inv_mass));
 		b2.speed = b2.speed.add(impulse_vec.mult(b2.inv_mass));
