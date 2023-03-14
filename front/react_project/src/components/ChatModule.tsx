@@ -223,16 +223,13 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     componentDidMount(): void {
-        this.props.socket!.on("newMessage", (data: IMessageToSend[]) => {
-            console.log('pouet', data);
-            const msg = data[0];
-            console.log(msg);
-            console.log('message from nest : ' + msg.content + ', ' + msg.sender);
-            this.props.action({id: msg.date.toString(), text: msg.content, sender: msg.sender});
+        this.props.socket!.on("newMessage", (data: IMessageToSend) => {
+            console.log('message from nest newMessage: ' + data.content + ', ' + data.sender);
+            this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         });
 
         this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
-            console.log('message from nest : ' + data.content + ', ' + data.sender);
+            console.log('message from nest selfMessage: ' + data.content + ', ' + data.sender);
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         })
 
@@ -277,7 +274,7 @@ class SendMessageForm extends React.Component<IChat, {text: string}> {
         let content: string = this.state.text;
         let room: string = this.props.dest!.Loc;
         let isChannel: boolean = this.props.dest!.isChannel;
-        this.props.socket!.emit('addMessage', { room, isChannel: isChannel, content });
+        this.props.socket!.emit('addMessage', content);
         this.setState({ text: '' });
     }
 

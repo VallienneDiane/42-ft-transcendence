@@ -11,7 +11,9 @@ export class MessageService {
     ) {}
     // save a new message in database
     public create(newMessage: MessageEntity): Promise<MessageEntity> {
-        return this.messagesRepository.save(newMessage);
+        if (!(newMessage.isChannel && newMessage.room == 'general'))
+            return this.messagesRepository.save(newMessage);
+        return undefined;
     }
     // find all messages send to a receiver ordered by date
     public findByChannel(roomEntry: string): Promise<MessageEntity[]> {

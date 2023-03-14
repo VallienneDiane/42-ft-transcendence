@@ -29,7 +29,7 @@ class Room {
 
     public emit(ev: string, ...args: any[]) {
         this.c.forEach((socket) => {
-            socket.emit(ev, args);
+            socket.emit(ev, ...args);
         })
     }
 }
