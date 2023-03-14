@@ -74,7 +74,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('leaveChannel')
     handleLeaveChannel(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
-
+        this.chatService.leaveChannelEvent(client, this.chatRoomHandler, this.logger, data);
     }
 
     @SubscribeMessage('myChannels')
