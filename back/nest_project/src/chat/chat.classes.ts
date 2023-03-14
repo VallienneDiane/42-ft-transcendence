@@ -135,6 +135,12 @@ class UserRoomMap {
     public delete(userName: string) {
         return this.users.delete(userName);
     }
+
+    public emit(ev: string, ...args: any[]) {
+        this.users.forEach((user) => {
+            user.socket.emit(ev, ...args);
+        });
+    }
 }
 
 export class UserRoomHandler {
