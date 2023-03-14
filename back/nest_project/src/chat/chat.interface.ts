@@ -19,11 +19,11 @@ export interface IMessageToSend {
 
 export interface IChannel {
     channelName: string;
+    inviteOnly: boolean;
+    persistant: boolean;
+    onlyOpCanTalk: boolean;
+    hidden: boolean;
     channelPass?: string;
-    inviteOnly?: boolean;
-    persistant?: boolean;
-    onlyOpCanTalk?: boolean;
-    hidden?: boolean;
 }
 
 //Trick to make typescript agree (typescript sucks a lot)
