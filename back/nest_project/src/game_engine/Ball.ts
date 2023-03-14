@@ -50,36 +50,4 @@ export class Ball {
 		this.acc.setCoordinates(0, 0);
 	}
 
-	static coll_det_bb(b1: Ball, b2: Ball) {
-		if (b1.r + b2.r >= (b1.position.sub(b2.position)).mag())
-		{
-			console.log("collision");
-			return true;
-		}
-		return false;
-	}
-
-	static penetration_resolution_bb(b1: Ball, b2: Ball) {
-		let dist = b1.position.sub(b2.position);
-		let penetration_depth = b1.r + b2.r - dist.mag();
-		let penetration_resolution = dist.normalize().mult(penetration_depth / (b1.inv_mass + b2.inv_mass));
-		b1.position = b1.position.add(penetration_resolution.mult(b1.inv_mass));
-		b2.position = b2.position.add(penetration_resolution.mult(-b2.inv_mass));
-	}
-
-	static collision_response_bb(b1: Ball, b2: Ball) {
-		let normal = b1.position.sub(b2.position).normalize();
-		let relative_velocity = b1.speed.sub(b2.speed);
-		let separation_velocity = Vec2.dot(relative_velocity, normal);
-		let new_separation_velocity = separation_velocity * Math.min(b1.elasticity, b2.elasticity);
-		
-		let vel_diff = new_separation_velocity + separation_velocity;
-		let impulse = vel_diff / (b1.inv_mass + b2.inv_mass);
-		let impulse_vec = normal.mult(impulse);
-		console.log(vel_diff);
-
-		b1.speed = b1.speed.add(impulse_vec.mult(-b1.inv_mass));
-		b2.speed = b2.speed.add(impulse_vec.mult(b2.inv_mass));
-	}
-
 }
