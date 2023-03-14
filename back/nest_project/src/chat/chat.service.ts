@@ -268,31 +268,42 @@ export class ChatService {
         } )
     }
 
-    public createChannelEvent(data: IHandle) {
-        data.logger.debug('create channel request');
-        let login = this.extractLogin(data.client);
-        this.channelService.getOneByName(data.channelEntries.channelName)
+    public createChannelEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, channel: IChannel) {
+        logger.debug('create channel request');
+        let login = this.extractLogin(client);
+        if (!login)
+            return;
+        console.log(channel);
+        if (channel.channelName == undefined || channel.hidden == undefined || channel.inviteOnly == undefined ||
+            channel.onlyOpCanTalk == undefined || channel.persistant == undefined)
+            {
+                client.emit("notice", "wrong arguments");
+                return;
+            }
+        this.channelService.getOneByName(channel.channelName)
         .then( (exist) => {
             if (exist == null) {
-                this.channelService.create(this.channelEntityfier(data.channelEntries))
+                this.channelService.create(this.channelEntityfier(channel))
                 .then( (succeed) => {
-                    data.client.emit('channelCreated', succeed.name);
+                    client.emit('channelCreated', succeed.name);
                     if (!succeed.hidden) {
                         this.channelService.listChannels().then( (list) => {
                             let strs: string[] = [];
                             for (let l of list) {
                                 strs.push(l.name);}
-                            data.chatNamespace.emit('listChannel', strs);
+                            roomHandler.userMap.emit('listChannel', strs)
                         })
                     }
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
                     .then( (channLink) => {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
-                            data.logger.debug(`list of channel joined by ${login} : `);
+                            logger.debug(`list of channel joined by ${login} : `);
                             console.log(result)});
-                        data.client.emit('channelJoined', channLink.channelName)});
+                        client.emit('channelJoined', channLink.channelName)});
                 })
             }
+            else
+                client.emit("notice", "channel already exists");
         })
     }
 }
