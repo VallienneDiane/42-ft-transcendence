@@ -1,13 +1,16 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { channel } from "diagnostics_channel";
 import { Repository } from "typeorm";
+import { ChannelService } from "../channel/channel.service";
 import { LinkUCEntity } from "./linkUC.entity";
 
 @Injectable()
 export class LinkUCService {
 	constructor (
 		@InjectRepository(LinkUCEntity)
-		private readonly linkUCRepository: Repository<LinkUCEntity>
+		private readonly linkUCRepository: Repository<LinkUCEntity>,
+		private channelService: ChannelService
 	) {}
 
 	public create(newLink: LinkUCEntity): Promise<LinkUCEntity> {
@@ -56,11 +59,21 @@ export class LinkUCService {
 	}
 
 	async deleteLink(channelName: string, userName: string): Promise<void> {
-		this.linkUCRepository.delete({channelName: channelName, userName: userName});
+		this.findOne(channelName, userName).then( (found) => {
+			this.linkUCRepository.delete({channelName: channelName, userName: userName});
+			if (found.isOp)
+				this.channelService.downgradeOpByName(channelName);
+		});
 	}
 
 	async deleteUser(userName: string): Promise<void> {
-		this.linkUCRepository.delete({userName: userName});
+		this.findAllByUserName(userName).then( (links) => {
+			links.forEach( (link) => {
+				this.linkUCRepository.delete({channelName: link.channelName, userName: userName})
+				if (link.isOp)
+					this.channelService.downgradeOpByName(link.channelName);
+			})
+		})
 	}
 
 	async deleteChannel(channelName: string): Promise<void> {

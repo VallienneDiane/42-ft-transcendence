@@ -49,6 +49,7 @@ export class ChatService {
             date: undefined,
             name: channProperties.channelName,
             pass: channProperties.channelPass,
+            opNumber: 1,
             inviteOnly: channProperties.inviteOnly,
             persistant: channProperties.persistant,
             onlyOpCanTalk: channProperties.onlyOpCanTalk,
@@ -266,6 +267,26 @@ export class ChatService {
                 })
             }
         } )
+    }
+
+    public leaveChannelEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, channel: string) {
+        logger.debug('leave channel request');
+        let login = this.extractLogin(client);
+        if (!login)
+            return;
+        this.linkUCService.findOne(channel, login)
+        .then( (found) => {
+            if (found != null) {
+                this.linkUCService.deleteLink(channel, login);
+                let room = roomHandler.userMap.get(login);
+                if (room != undefined && room.isChannel && room.room == channel) {
+                    roomHandler.joinRoom(login, 'general', true);
+                    client.emit('newLocChannel', 'general', []);
+                }
+            }
+            else
+                client.emit('notice', 'you are not registered to that channel');
+        })
     }
 
     public createChannelEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, channel: IChannel) {

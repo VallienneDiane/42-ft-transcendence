@@ -15,6 +15,9 @@ export class ChannelEntity {
 	pass: string;
 
 	@Column()
+	opNumber: number;
+
+	@Column()
 	inviteOnly: boolean;
 
 	@Column()

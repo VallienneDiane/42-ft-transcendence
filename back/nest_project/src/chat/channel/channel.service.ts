@@ -1,13 +1,18 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { channel } from "diagnostics_channel";
 import { Repository } from "typeorm";
+import { LinkUCService } from "../link_users_channels/linkUC.service";
+import { MessageService } from "../message/message.service";
 import { ChannelEntity } from "./channel.entity";
 
 @Injectable({})
 export class ChannelService {
 	constructor (
 		@InjectRepository(ChannelEntity)
-		private readonly channelRepository: Repository<ChannelEntity>
+		private readonly channelRepository: Repository<ChannelEntity>,
+		private messageService: MessageService,
+		private linkUCService: LinkUCService
 	) {}
 
 	public create(newChannel: ChannelEntity): Promise<ChannelEntity> {
@@ -32,8 +37,25 @@ export class ChannelService {
 		this.channelRepository.update({id: channelToUpdate}, newChannelConfig);
 	}
 
+	async downgradeOpByName(channelName: string): Promise<void> {
+		this.getOneByName(channelName).then( (found) => {
+			if (found.opNumber == 1 && !found.persistant)
+				this.deleteByName(channelName);
+			else
+				this.channelRepository.update({name: channelName}, {opNumber: found.opNumber - 1});
+		})
+	}
+
+	async upgradeOpByName(channelName: string): Promise<void> {
+		this.getOneByName(channelName).then( (found) => {
+			this.channelRepository.update({name: channelName}, {opNumber: found.opNumber + 1});
+		})
+	}
+
 	async deleteByName(channelName: string): Promise<void> {
 		this.channelRepository.delete(channelName);
+		this.messageService.deleteChannel(channelName);
+		this.linkUCService.deleteChannel(channelName);
 	}
 
 	async deleteById(channelId: number): Promise<void> {
