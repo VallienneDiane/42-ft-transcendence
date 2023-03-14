@@ -45,9 +45,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('addMessage')
-    handleNewMessage(@MessageBody() blop: IMessageChat, @ConnectedSocket() client: Socket) {
-        console.log('msg to send : ', blop.content, blop.room, blop.isChannel);
-        this.chatService.newMessageEvent(this.iHandlerisator(client, blop));
+    handleNewMessage(@MessageBody() blop: string, @ConnectedSocket() client: Socket) {
+        console.log('msg to send : ', blop);
+        this.chatService.newMessageEvent(client, this.chatRoomHandler, this.logger, blop);
     }
 
     @SubscribeMessage('changeLoc')
@@ -71,6 +71,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleCreateChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {
         this.chatService.createChannelEvent(this.iHandlerisator(client, undefined, data));
     }
+
+    @SubscribeMessage('leaveChannel')
+    handleLeaveChannel(@MessageBody() data: )
 
     @SubscribeMessage('myChannels')
     handleMyChannels(@ConnectedSocket() client: Socket) {
