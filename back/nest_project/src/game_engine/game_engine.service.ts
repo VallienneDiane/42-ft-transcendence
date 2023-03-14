@@ -29,13 +29,15 @@ export class GameEngineService {
 		this.aspectratio = 16/9;
 		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: this.aspectratio, y: 0.5 } };
 
-		for (let index = 0; index < this.n; index++) {
-			let position = new Vec2(Math.random(), Math.random());
-			// let position = new Vec2(0.5, 0.5);
-			let radius = Math.random() * 0.05 + 0.05;
-			//let radius = 0.1;
-			this.ballz[index] = new Ball(position, radius);
-		}
+		this.ballz[0] = new Ball(new Vec2(0.3, 0.5), 0.1, 1);
+		this.ballz[1] = new Ball(new Vec2(0.6, 0.5), 0.1, 4);
+		// for (let index = 0; index < this.n; index++) {
+		// 	let position = new Vec2(Math.random(), Math.random());
+		// 	// let position = new Vec2(0.5, 0.5);
+		// 	let radius = Math.random() * 0.05 + 0.05;
+		// 	//let radius = 0.1;
+		// 	this.ballz[index] = new Ball(position, radius);
+		// }
 	}
 
 	main_loop() {
@@ -44,7 +46,7 @@ export class GameEngineService {
 			for (let i = index + 1; i < this.ballz.length; i++) {
 				if (Ball.coll_det_bb(this.ballz[index], this.ballz[i])) {
 					Ball.penetration_resolution_bb(this.ballz[index], this.ballz[i]);
-					//Ball.collision_response_bb(this.ballz[index], this.ballz[i]);
+					Ball.collision_response_bb(this.ballz[index], this.ballz[i]);
 				}
 			}
 		});
