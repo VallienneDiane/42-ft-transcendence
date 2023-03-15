@@ -5,6 +5,7 @@ import { AuthGuard } from "@nestjs/passport";
 import { IChannel, IHandle, IMessageChat } from "./chat.interface";
 import { ChatService } from "./chat.service";
 import { UserRoomHandler } from "./chat.classes";
+import { useContainer } from "class-validator";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -67,6 +68,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.chatService.joinChannelEvent(this.iHandlerisator(client, undefined, data));
     }
 
+    @SubscribeMessage('inviteUser')
+    handleInviteUser(@MessageBody() data: {userToInvite: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.chatService.inviteUserEvent(client, this.chatRoomHandler, this.logger, data.userToInvite, data.channel);
+    }
+
     @SubscribeMessage('createChannel')
     handleCreateChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {
         this.chatService.createChannelEvent(client, this.chatRoomHandler, this.logger, data);
@@ -75,6 +81,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('leaveChannel')
     handleLeaveChannel(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
         this.chatService.leaveChannelEvent(client, this.chatRoomHandler, this.logger, data);
+    }
+
+    @SubscribeMessage('kickUser')
+    handleKickUser(@MessageBody() data: {userToKick: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.chatService.kickUserEvent(client, this.chatRoomHandler, this.logger, data.userToKick, data.channel);
     }
 
     @SubscribeMessage('myChannels')
