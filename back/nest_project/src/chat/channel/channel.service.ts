@@ -11,8 +11,6 @@ export class ChannelService {
 	constructor (
 		@InjectRepository(ChannelEntity)
 		private readonly channelRepository: Repository<ChannelEntity>,
-		private messageService: MessageService,
-		private linkUCService: LinkUCService
 	) {}
 
 	public create(newChannel: ChannelEntity): Promise<ChannelEntity> {
@@ -54,8 +52,6 @@ export class ChannelService {
 
 	async deleteByName(channelName: string): Promise<void> {
 		this.channelRepository.delete(channelName);
-		this.messageService.deleteChannel(channelName);
-		this.linkUCService.deleteChannel(channelName);
 	}
 
 	async deleteById(channelId: number): Promise<void> {

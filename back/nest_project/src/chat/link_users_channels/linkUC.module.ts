@@ -9,8 +9,7 @@ import { LinkUCService } from "./linkUC.service";
 
 @Module({
 	imports: [
-		forwardRef(() => ChannelModule),
-		forwardRef(() => MessageModule),
+		
 		TypeOrmModule.forFeature([LinkUCEntity])
 	],
 	providers: [LinkUCService],
