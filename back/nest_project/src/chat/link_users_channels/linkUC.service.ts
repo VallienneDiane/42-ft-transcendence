@@ -65,13 +65,7 @@ export class LinkUCService {
 	}
 
 	async deleteUser(userName: string): Promise<void> {
-		this.findAllByUserName(userName).then( (links) => {
-			links.forEach( (link) => {
-				this.linkUCRepository.delete({channelName: link.channelName, userName: userName})
-				// if (link.isOp)
-				// 	this.channelService.downgradeOpByName(link.channelName);
-			})
-		})
+		this.linkUCRepository.delete({userName: userName});
 	}
 
 	async deleteChannel(channelName: string): Promise<void> {
