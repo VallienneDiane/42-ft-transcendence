@@ -55,6 +55,7 @@ export class GameEngineService {
 			this.wallz.forEach((w) => {
 				if (Collision.coll_det_bw(ball, w)) {
 					Collision.penetration_resolution_bw(ball, w);
+					Collision.collision_resolution_bw(ball, w);
 				}
 			});
 			for (let i = index + 1; i < this.ballz.length; i++) {
