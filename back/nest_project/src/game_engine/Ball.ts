@@ -20,8 +20,8 @@ export class Ball {
 		this.r = r;
 		this.colision_number = 0;
 		this.acceleration = 0.001;
-		this.friction = 0.0003;
-		this.elasticity = 1;
+		this.friction = 0;
+		this.elasticity = 1.01;
 		this.mass = Math.PI * r * r;
 		if (this.mass === 0)
 			this.inv_mass = 0;

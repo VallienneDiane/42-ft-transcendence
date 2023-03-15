@@ -76,6 +76,11 @@ export class Collision {
         b.position = b.position.add(resolution_vec_normal.mult(resolution_magnitude));
     }
 
-    static collision_resolution_bw(b:Ball, w: Wall) {}
+    static collision_resolution_bw(b:Ball, w: Wall) {
+        let normal = b.position.sub(Collision.closest_point_bw(b, w)).normalize();
+        let normal_velocity = Vec2.dot(normal, b.speed);
+        let new_separation_velocity = -normal_velocity * b.elasticity;
+        b.speed = b.speed.add(normal.mult(-normal_velocity + new_separation_velocity));
+    }
 }
 
