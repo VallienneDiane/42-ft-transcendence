@@ -9,8 +9,6 @@ import { ChannelService } from "./channel.service";
 
 @Module({
 	imports: [
-		forwardRef(() => linkUCModule),
-		forwardRef(() => MessageModule),
 		TypeOrmModule.forFeature([ChannelEntity])
 	],
 	providers: [ChannelService],
