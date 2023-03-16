@@ -1,7 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { Socket } from "socket.io";
+import { Socket, Namespace } from "socket.io";
 import { IChannel, IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
-import * as jsrsasign from 'jsrsasign';
 import { MessageEntity } from "./message/message.entity";
 import { LinkUCEntity } from "./link_users_channels/linkUC.entity";
 import { ChannelEntity } from "./channel/channel.entity";
@@ -22,16 +21,6 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private extractLogin(client: Socket): string {
-        let object: IToken = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
-        if (object == undefined) {
-            client.emit("fromServerMessage", "you're token is invalid");
-            return null;
-        }
-        let pseudo: string = object.login;
-        return pseudo;
-    }
-
     private messageEntityfier(login: string, data: IMessageChat): MessageEntity {
         return {
             id: undefined,
@@ -48,7 +37,8 @@ export class ChatService {
             id: undefined,
             date: undefined,
             name: channProperties.channelName,
-            pass: channProperties.channelPass,
+            password: channProperties.password,
+            channelPass: channProperties.channelPass,
             opNumber: 1,
             inviteOnly: channProperties.inviteOnly,
             persistant: channProperties.persistant,
@@ -91,7 +81,7 @@ export class ChatService {
         this.linkUCService.deleteLink(channel, login);
         let user = roomHandler.userMap.get(login);
         if (user != undefined) {
-            this.listMyChannelEvent(user.socket);
+            this.listMyChannelEvent(user.socket, login);
             if (user.isChannel && user.room == channel) {
                 roomHandler.joinRoom(login, 'general', true, false, false);
                 user.socket.emit('newLocChannel', 'general', []);
@@ -99,59 +89,31 @@ export class ChatService {
         }    
     }
 
-    public connectEvent(data: IHandle) {
-        if (data.client.handshake.auth['token'] != null) {
-            const decoded = this.jwtService.verify(data.client.handshake.auth['token'], {
-                secret: process.env.SECRET,
-            });
-            console.log(decoded);
-            let login = this.extractLogin(data.client);
-            if (!login)
-            {
-                data.logger.log(`undefined token`);
-                return;
-            }
-            this.userService.findByLogin(login)
-            .then( (found) => {
-                if (found != null) {
-                    data.chatNamespace.sockets.set(login, data.client);
-                    data.roomHandler.addUser(login, data.client, "general", true, false, false);
-                    console.log(login);
-                    data.client.emit("changeLocChannel", "general", []);
-                    data.chatNamespace.sockets.forEach( (socket) => {
-                        socket.emit('newUserConnected');
-                    })
-                    data.logger.log(`${login} is connected, ${data.client.id}`);
-                }
-                else {
-                    data.logger.warn(`a socket with login ${login} is not known in database`);
-                }
-            })
-        }
+    public connectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+        chatNamespace.sockets.set(login, client);
+        roomHandler.addUser(login, client, "general", true, false, false);
+        console.log(login);
+        client.emit("changeLocChannel", "general", []);
+        chatNamespace.sockets.forEach( (socket) => {
+            socket.emit('newUserConnected');
+        })
+        logger.log(`${login} is connected, ${client.id}`);
     }
 
-    public disconnectEvent(data: IHandle) {
-        if (data.client.handshake.auth['token'] != null) {
-            let login = this.extractLogin(data.client);
-            if (!login)
-                return;
-            data.chatNamespace.sockets.delete(login);
-            let room = data.roomHandler.delUser(login);
-            if (room != undefined)
-                data.roomHandler.roomMap.of(room).emit('notice', login, " just disconnect");
-            data.logger.log(`${login} is disconnected`);
-        }
+    public disconnectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+        chatNamespace.sockets.delete(login);
+        let room = roomHandler.delUser(login);
+        if (room != undefined)
+            roomHandler.roomMap.of(room).emit('notice', login, " just disconnect");
+        logger.log(`${login} is disconnected`);
     }
 
-    public newMessageEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, message: string) {
-        let login = this.extractLogin(client);
-        if (!login)
-            return;
+    public newMessageEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, message: string) {
         logger.debug(`${login} send : `);
         console.log(message);
         let room = roomHandler.userMap.get(login);
-        let toSend = {date: new Date(), sender: login, content: message};
         if (room != undefined) {
+            let toSend = {date: new Date(), sender: login, content: message};
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
                     this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
@@ -176,8 +138,7 @@ export class ChatService {
             client.emit('notice', 'You are nowhere');
     }
 
-    public changeLocEvent(client: Socket, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
-        let login = this.extractLogin(client);
+    public changeLocEvent(client: Socket, login: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
         {
             if (loc == 'general') {
@@ -238,9 +199,7 @@ export class ChatService {
         }
     }
 
-    public listChannelEvent(client: Socket) {
-        console.log("blop")
-        let login = this.extractLogin(client);
+    public listChannelEvent(client: Socket, login: string) {
         this.linkUCService.findAllByUserName(login)
         .then(
             (notToDisplay) => {
@@ -261,8 +220,7 @@ export class ChatService {
         )
     }
 
-    public listMyChannelEvent(client: Socket) {
-        let login = this.extractLogin(client);
+    public listMyChannelEvent(client: Socket, login: string) {
         this.linkUCService.findAllByUserName(login)
         .then(
             (list) => {
@@ -274,8 +232,7 @@ export class ChatService {
         )
     }
 
-    public joinChannelEvent(client: Socket, data: {channelName: string, channelPass: string}) {
-        let login = this.extractLogin(client);
+    public joinChannelEvent(client: Socket, login: string, data: {channelName: string, channelPass: string}) {
         this.linkUCService.findOne(data.channelName, login)
         .then ( (exist) => {
             if (exist != null)
@@ -285,9 +242,9 @@ export class ChatService {
                 .then ( (chan) => {
                     if (chan != null) {
                         if (!chan.inviteOnly) {
-                            if (chan.pass == undefined || data.channelPass == chan.pass) {
+                            if (!chan.password || data.channelPass == chan.channelPass) {
                                 this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
-                                .then( () => this.listMyChannelEvent(client));
+                                .then( () => this.listMyChannelEvent(client, login));
                             }
                             else
                                 client.emit('notice', 'Wrong channel password');
@@ -302,10 +259,7 @@ export class ChatService {
         })
     }
 
-    public inviteUserEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, userToInvite: string, channel: string) {
-        let login = this.extractLogin(client);
-        if (!login)
-            return;
+    public inviteUserEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToInvite: string, channel: string) {
         this.linkUCService.findOne(channel, login)
         .then( (found) => {
             if (found != null) {
@@ -334,10 +288,10 @@ export class ChatService {
                             .then( (attitude) => {
                                 if (attitude != null) {
                                    this.linkUCService.create(this.linkUCEntityfier(userToInvite, channel, false))
-                                    .then( (succeed) => {
+                                    .then( () => {
                                         let logged = roomHandler.userMap.get(userToInvite);
                                         if (logged != undefined)
-                                            logged.socket.emit('channelJoined', succeed.channelName);
+                                            this.listMyChannelEvent(logged.socket, userToInvite);
                                     });
                                 }
                                 else
@@ -353,11 +307,8 @@ export class ChatService {
         })
     }
 
-    public leaveChannelEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, channel: string) {
+    public leaveChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: string) {
         logger.debug('leave channel request');
-        let login = this.extractLogin(client);
-        if (!login)
-            return;
         this.linkUCService.findOne(channel, login)
         .then( (found) => {
             if (found != null) {
@@ -368,10 +319,7 @@ export class ChatService {
         })
     }
 
-    public kickUserEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
-        let login = this.extractLogin(client);
-        if (!login)
-            return;
+    public kickUserEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
         this.linkUCService.findOne(channel, login)
         .then( (found) => {
             if (found == null || !found.isOp)
@@ -388,18 +336,9 @@ export class ChatService {
         })
     }
 
-    public createChannelEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, channel: IChannel) {
+    public createChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: IChannel) {
         logger.debug('create channel request');
-        let login = this.extractLogin(client);
-        if (!login)
-            return;
         console.log(channel);
-        if (channel.channelName == undefined || channel.hidden == undefined || channel.inviteOnly == undefined ||
-            channel.onlyOpCanTalk == undefined || channel.persistant == undefined)
-            {
-                client.emit("notice", "wrong arguments");
-                return;
-            }
         if (channel.channelName == 'general') {
             client.emit('notice', 'This channel already exists.');
         }
@@ -422,7 +361,7 @@ export class ChatService {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
                             logger.debug(`list of channel joined by ${login} : `);
                             console.log(result)});
-                        this.listMyChannelEvent(client)});
+                        this.listMyChannelEvent(client, login)});
                 })
             }
             else
