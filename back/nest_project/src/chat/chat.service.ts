@@ -232,6 +232,22 @@ export class ChatService {
         )
     }
 
+    public listMyDMEvent(client: Socket, login: string) {
+        this.messageService.findAllDialogByUserName(login)
+        .then((raws) => {
+            let sorted = new Set<string>;
+            for (let raw of raws) {
+                if (raw.room != login || raw.room == raw.sender)
+                    sorted.add(raw.room);
+                else
+                    sorted.add(raw.sender);                        
+            }
+            let arrayDM: string[] = [];
+            sorted.forEach((str) => arrayDM.push(str));
+            client.emit('listMyDM', arrayDM);
+        })
+    }
+
     public joinChannelEvent(client: Socket, login: string, data: {channelName: string, channelPass: string}) {
         this.linkUCService.findOne(data.channelName, login)
         .then ( (exist) => {
