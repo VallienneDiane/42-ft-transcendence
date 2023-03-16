@@ -57,7 +57,7 @@ function Popup(props: {handleClose: any}) {
                     <Controller
                         name="channelName"
                         control={control}
-                        rules={{ required: true, maxLength: 20, pattern: /^[A-Za-z]+$/i }}
+                        rules={{ required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i }}
                         render={({ field }) => <Input {...field} />}
                         defaultValue=""
                     />
