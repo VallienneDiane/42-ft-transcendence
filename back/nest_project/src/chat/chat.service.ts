@@ -89,12 +89,15 @@ export class ChatService {
                 });
         })
         this.linkUCService.deleteLink(channel, login);
-        let room = roomHandler.userMap.get(login);
-        if (room != undefined && room.isChannel && room.room == channel) {
-            roomHandler.joinRoom(login, 'general', true, false, false);
-            room.socket.emit('newLocChannel', 'general', []);
+        let user = roomHandler.userMap.get(login);
+        if (user != undefined) {
+            this.listMyChannelEvent(user.socket);
+            if (user.isChannel && user.room == channel) {
+                roomHandler.joinRoom(login, 'general', true, false, false);
+                user.socket.emit('newLocChannel', 'general', []);
+            }
         }    
-}
+    }
 
     public connectEvent(data: IHandle) {
         if (data.client.handshake.auth['token'] != null) {
@@ -378,8 +381,9 @@ export class ChatService {
                 .then( (kicked) => {
                     if (kicked == null)
                         client.emit('notice', "user not in channel");
-                    else
+                    else {
                         this.delUserFromChannel(userToKick, channel, roomHandler);
+                    }
                 })
         })
     }
