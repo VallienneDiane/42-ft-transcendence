@@ -7,7 +7,6 @@ import { ChannelEntity } from "./channel/channel.entity";
 import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
-import { JwtService } from '@nestjs/jwt';
 import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 
@@ -17,7 +16,6 @@ export class ChatService {
         private messageService: MessageService,
         private channelService: ChannelService,
         private linkUCService: LinkUCService,
-        private jwtService: JwtService,
         private userService: UserService
     ) {}
 

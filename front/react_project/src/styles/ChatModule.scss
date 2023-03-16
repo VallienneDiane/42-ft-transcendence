@@ -129,16 +129,20 @@
 	border: 1px solid rgb(214, 214, 214);
 }
 
-.chatMessageHeader {
+.channelHeader {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: .75rem 1.5rem;
 }
 
-.chatMessageHeader h1 {
+.channelHeader h1 {
 	color: black;
 	font-size: 1.125rem;
+}
+
+.gear {
+	font-size: 30px;
 }
 
 .messageList {

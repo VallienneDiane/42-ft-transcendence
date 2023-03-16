@@ -16,8 +16,9 @@ function Header(title: IChat) {
         location = 'Current discussion with ' + title.dest!.Loc;
     }
     return (
-        <div className="chatMessageHeader">
+        <div className="channelHeader">
             <h1>{location}</h1>
+            <span className="gear">&#9881;</span> 
         </div>
     )
 }
@@ -49,10 +50,12 @@ class SearchChat extends React.Component<IChat, {
     fetchUsers() {
         userService.getAllUsers()
         .then(response => {
+            const playload: JwtPayload = accountService.readPayload()!;
             const users = response.data.map((user: UserData) => user.login);
             let newUserList: {name:string, isChannel:boolean}[] = [];
             users.forEach((user: string) => {
-                newUserList.push({name: user, isChannel: false});
+                if (playload.login !== user)
+                    newUserList.push({name: user, isChannel: false});
             })
             this.setState({users: newUserList});
         })
@@ -136,7 +139,8 @@ class SearchChat extends React.Component<IChat, {
     onClick(event: any) {
         let newLocWanted: IDest = {Loc: event.target.innerHTML, isChannel: event.target.value? true : false};
         this.props.socket?.emit('changeLoc', newLocWanted);
-        this.setState({text: ''});
+        this.setState({text: '', filtered: []});
+
     }
     
     render() {
