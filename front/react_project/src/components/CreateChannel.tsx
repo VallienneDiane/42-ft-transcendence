@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useRef, useEffect, useCallback } from "react";
 import { useForm, Controller } from 'react-hook-form';
 import { Box, Checkbox, Switch, Button } from '@mui/material';
 import Input from '@mui/material/Input';
@@ -8,7 +8,30 @@ import SocketContext from "./context";
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { control, formState: { errors }, handleSubmit } = useForm<NewChannel>();
+    const { control, formState: { errors }, handleSubmit } = useForm<NewChannel>({ 
+        defaultValues: { 
+            channelName: "",
+            password: false,
+            channelPass: "",
+            inviteOnly: false,
+            persistant: false,
+            onlyOpCanTalk: false, 
+            hidden: false } 
+        });
+    const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: any) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                props.handleClose();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [ref]);
 
     const onSubmit = (data: NewChannel) => {
         socket.emit('createChannel', {
@@ -19,11 +42,12 @@ function Popup(props: {handleClose: any}) {
             onlyOpCanTalk: data.onlyOpCanTalk,
             hidden: data.hidden,
         });
+        props.handleClose();
     };
 
     return (
       <div className="popupBox">
-        <div className="box">
+        <div className="box" ref={ref}>
           <span className="closeIcon" onClick={props.handleClose}>x</span>
             <h1>Create New Channel</h1>
 
@@ -46,11 +70,24 @@ function Popup(props: {handleClose: any}) {
                         control={control}
                         render={({ field }) => (
                         <Switch
-                            onChange={(e) => field.onChange(e.target.checked)}
+                            onChange={(e) => {
+                                field.onChange(e.target.checked);
+                                setShowChannelPass(e.target.checked);
+                            }}
                             checked={field.value}
                         />
                         )}
                     />
+                    {showChannelPass && (
+                        <Controller
+                        name="channelPass"
+                        control={control}
+                        rules={{ required: true, maxLength: 20, pattern: /^[A-Za-z]+$/i }}
+                        render={({ field }) => <Input {...field} type="password"/>}
+                        defaultValue=""
+                    />
+                    )}
+                    {showChannelPass && errors.channelPass && "Your password is not valid"}
                 </section>
                 <div className="rawCheckbox">
                 <section className="sectionTest">
@@ -113,53 +150,19 @@ function Popup(props: {handleClose: any}) {
         </div>
       </div>
     );
-  };
+};
   
-  class Search extends React.Component<IChat, Message> {
-      constructor(props: {}) {
-          super(props);
-          this.state = { text: "" };
-          this.searchSmth = this.searchSmth.bind(this);
-          this.handleMessage = this.handleMessage.bind(this);
-      }
-  
-      searchSmth(event: any) {
-          event.preventDefault();
-          if (this.state.text.length > 0) {
-              this.props.socket!.emit('createChannel', {channelName: this.state.text, channelPass: undefined, inviteOnly: false, persistant: false, onlyOpCanTalk: false, hidden: false});
-          }
-          this.setState({ text: "" });
-      }
-  
-      handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
-          this.setState({ text: event.target.value });
-      }
-  
-      render() {
-          const text: string = this.state.text;
-          return (
-              <div>
-                  <form className="chatSearchHeader" onSubmit={this.searchSmth}>
-                      <i className="fa fa-search" aria-hidden="true"></i>
-                      <input type="textarea" className="searchBar" placeholder="Search" value={text} onChange={this.handleMessage} />
-                      <input type="submit" className="searchButton" value="👆" />
-                  </form>
-              </div>
-          )
-      }
-  }
-
 export default function CreateChannel() {
-    const [btnState, setBtnState] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
     const handleBtnClick = () => {
-        setBtnState(!btnState);
+        setIsOpen((prevSate) => !prevSate);
     };
 
     return (
         <div className="createChannel">
-            <p className="btn" onClick={() => handleBtnClick()}>+</p>
-            {btnState && <Popup
+            <p className="btn" onClick={handleBtnClick}>+</p>
+            {isOpen && <Popup
                 handleClose={handleBtnClick}
             />}       
         </div>
