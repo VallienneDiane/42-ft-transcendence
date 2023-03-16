@@ -81,10 +81,4 @@ export interface IChat {
   socket?: Socket,
 }
 
-export interface Users {
-  channels: string[];
-  me: JwtPayload;
-}
-
-
 // export LogInForm, SignInForm
