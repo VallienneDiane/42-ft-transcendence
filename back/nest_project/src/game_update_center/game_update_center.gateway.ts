@@ -2,6 +2,7 @@ import { OnModuleInit } from '@nestjs/common';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
+import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 
 interface ballpos {
 	x: number,

@@ -28,6 +28,20 @@ export class PongEngineService {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
+        this.p2.x_position = this.aspect_ratio - 0.01;
+        this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+        paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
+        paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
     }
     
+    main_loop() {
+        this.ball.update_self_position(this.p1, this.p2);
+        let bp: ballpos;
+        bp = {
+            x: this.ball.x_position,
+            y: this.ball.y_position,
+            r: this.ball.r,
+        };
+        this.gs.ballPosition[0] = bp;
+    }
 }
