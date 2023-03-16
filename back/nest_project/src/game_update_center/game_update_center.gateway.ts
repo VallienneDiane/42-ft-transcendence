@@ -2,7 +2,6 @@ import { OnModuleInit } from '@nestjs/common';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
-import { Ball } from 'src/game_engine/Ball';
 
 interface ballpos {
 	x: number,
@@ -23,9 +22,13 @@ interface gameState {
 export class GameUpdateCenterGateway implements OnModuleInit{
 
   Game: GameEngineService;
+  Pong: PongEngineService;
+  state;
 
-  constructor(game: GameEngineService) {
-    this.Game = game;
+  constructor() {
+    this.Game = new GameEngineService();
+    this.Pong = new PongEngineService();
+    this.state = "game";
   }
 
   @WebSocketServer()
@@ -46,13 +49,29 @@ export class GameUpdateCenterGateway implements OnModuleInit{
     this.server.emit('Game_Update', test.gs)
   }
 
+  @SubscribeMessage('Game_init')
+  OnGame_init(@MessageBody() body: any) {
+    if (body === "simple") {
+      this.state = "pong";
+    }
+  }
+
   @SubscribeMessage('Game_start')
   OnGame_start(@MessageBody() body: any) {
-    const test = this.Game;
-    const tost = this;
-    setInterval(function() {
-      test.main_loop();
-      tost.server.emit('Game_Update', test.gs)
-    }, 1000/60);
+    const game = this.Game;
+    const pong = this.Pong;
+    const thiss = this;
+    if (thiss.state === "game") {
+      setInterval(function() {
+        game.main_loop();
+        thiss.server.emit('Game_Update', game.gs)
+      }, 1000/60);
+    }
+    else {
+      setInterval(function() {
+        pong.main_loop();
+        thiss.server.emit('Game_Update', pong.gs)
+      }, 1000/60);
+    }
   }
 }

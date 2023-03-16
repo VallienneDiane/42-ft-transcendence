@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { GameUpdateCenterModule } from './game_update_center/game_update_center.module';
 import { ChatModule } from './chat/chat.module';
 import { GameEngineModule } from './game_engine/game_engine.module';
+import { PongEngineModule } from './pong_engine/pong_engine.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { GameEngineModule } from './game_engine/game_engine.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    PongEngineModule,
   ],
 })
 export class AppModule {}
