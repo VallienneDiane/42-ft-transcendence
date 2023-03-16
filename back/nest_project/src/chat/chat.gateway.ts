@@ -9,6 +9,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { useContainer } from "class-validator";
 import { UserService } from "src/user/user.service";
 import { UserDto } from "src/user/user.dto";
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -19,12 +20,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     constructor(
         private chatService: ChatService,
-        private userService: UserService
+        private userService: UserService,
+        private jwtService: JwtService
     ) 
     {}
 
     private extractLogin(client: Socket): string {
         let token = client.handshake.auth['token'];
+        if (token != null) {
+            const decoded = this.jwtService.verify(token, {
+                secret: process.env.SECRET,
+        });} // revoir message d'erreur à afficher
         let object : IToken = undefined;
         if (token != null)
             object = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
