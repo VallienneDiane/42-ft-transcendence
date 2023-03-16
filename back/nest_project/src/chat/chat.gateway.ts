@@ -166,6 +166,28 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage('makeHimOp')
+    handleMakeHimOp(@MessageBody() data: {userToOp: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.makeHimOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToOp, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('makeHimNoOp')
+    handleMakeHimNoOp(@MessageBody() data: {userToNoOp: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.makeHimNoOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToNoOp, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
     @SubscribeMessage('myChannels')
     handleMyChannels(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
