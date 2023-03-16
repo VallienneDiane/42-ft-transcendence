@@ -64,8 +64,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
     
     @SubscribeMessage('joinChannel')
-    handleJoinChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {
-        this.chatService.joinChannelEvent(this.iHandlerisator(client, undefined, data));
+    handleJoinChannel(@MessageBody() data: {channelName: string, channelPass: string}, @ConnectedSocket() client: Socket) {
+        this.chatService.joinChannelEvent(client, data);
     }
 
     @SubscribeMessage('inviteUser')
@@ -94,4 +94,3 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
 }
-

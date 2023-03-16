@@ -271,29 +271,29 @@ export class ChatService {
         )
     }
 
-    public joinChannelEvent(data: IHandle) {
-        let login = this.extractLogin(data.client);
-        this.linkUCService.findOne(data.channelEntries.channelName, login)
+    public joinChannelEvent(client: Socket, data: {channelName: string, channelPass: string}) {
+        let login = this.extractLogin(client);
+        this.linkUCService.findOne(data.channelName, login)
         .then ( (exist) => {
             if (exist != null)
-                data.client.emit('alreadyInChannel');
+                client.emit('notice', 'already in channel');
             else {
-                this.channelService.getOneByName(data.channelEntries.channelName)
+                this.channelService.getOneByName(data.channelName)
                 .then ( (chan) => {
                     if (chan != null) {
                         if (!chan.inviteOnly) {
-                            if (chan.pass != undefined && data.channelEntries.channelPass! == chan.pass) {
-                                this.linkUCService.create(this.linkUCEntityfier(login, data.channelEntries.channelName, false))
-                                .then( (succeed) => data.client.emit('channelJoined', succeed.channelName));
+                            if (chan.pass == undefined || data.channelPass == chan.pass) {
+                                this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
+                                .then( (succeed) => client.emit('channelJoined', succeed.channelName));
                             }
                             else
-                                data.client.emit('notice' ,'Wrong channel password');
+                                client.emit('notice' ,'Wrong channel password');
                         }
                         else
-                            data.client.emit('notice', 'this channel is on invite only');
+                            client.emit('notice', 'this channel is on invite only');
                     }
                     else
-                        data.client.emit('noSuchChannel');
+                        client.emit('notice', 'no such channel');
                 })
             }
         } )
