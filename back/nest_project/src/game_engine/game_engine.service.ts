@@ -15,7 +15,7 @@ interface gameState {
 	ballPosition: ballpos[],
 	paddleOne: {x: number, y: number },
 	paddleTwo: {x: number, y:number },
-  }
+}
 
 @Injectable()
 export class GameEngineService {
@@ -47,6 +47,10 @@ export class GameEngineService {
 			//let radius = 0.1;
 			this.ballz[index] = new Ball(position, radius);
 		}
+	}
+
+	main_loop_simplified() {
+
 	}
 
 	main_loop() {
