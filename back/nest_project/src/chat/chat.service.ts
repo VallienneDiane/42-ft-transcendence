@@ -123,8 +123,10 @@ export class ChatService {
             else {
                 this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
                 client.emit('selfMessage', toSend);
+                client.emit('checkNewDM', room.room);
                 let dest = roomHandler.userMap.get(room.room);
                 if (dest != undefined) {
+                    dest.socket.emit('checkNewDM', login);
                     if (!dest.isChannel && dest.room == login)
                         dest.socket.emit("newMessage", toSend);
                     else
@@ -137,7 +139,6 @@ export class ChatService {
     }
 
     public changeLocEvent(client: Socket, login: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
-        this.listMyDMEvent(client, login);
         if (isChannel)
         {
             if (loc == 'general') {
@@ -165,7 +166,7 @@ export class ChatService {
                                         ))
                                     }
                                     else
-                                        client.emit('notice', 'error', 'notRegisteredToChannel');
+                                        client.emit('notice', 'error: you need to join the channel');
                                 }
                             )
                         }

@@ -146,7 +146,6 @@ class SearchChat extends React.Component<IChat, {
         let newLocWanted: IDest = {Loc: event.target.innerHTML, isChannel: event.target.value? true : false};
         this.props.socket?.emit('changeLoc', newLocWanted);
         this.setState({text: '', filtered: []});
-
     }
     
     render() {
@@ -190,6 +189,17 @@ class ChannelList extends React.Component<IChat, {
             this.props.socket!.emit('myDM');
             this.props.socket!.on('listMyDM', (strs: string[]) => { console.log("DM", strs), this.setState({ dms: strs }) });
         }
+
+        this.props.socket!.on('checkNewDM', (login: string) => {
+            let sorted = new Set<string>;
+            for (let elt of this.state.dms) {
+                sorted.add(elt);
+            }
+            sorted.add(login);
+            let nextState: string[] = [];
+            sorted.forEach( (dm) => nextState.push(dm));
+            this.setState({dms: nextState});
+        })
     }
 
     componentWillUnmount(): void {
