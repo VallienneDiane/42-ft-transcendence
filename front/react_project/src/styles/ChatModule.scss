@@ -107,7 +107,7 @@
 	justify-content: flex-start;
 	flex-direction: column;
 	align-items:flex-start;
-	height: 90%;
+	// height: 90%;
 	width: 100%;
 	overflow-y: auto;
 	padding: 0;
@@ -118,6 +118,7 @@
 	display: flex;
 	align-items: flex-start;
 	cursor: pointer;
+	padding: 0.5rem;
 }
 
 .chatMessageWrapper {
@@ -129,16 +130,21 @@
 	border: 1px solid rgb(214, 214, 214);
 }
 
-.chatMessageHeader {
+.channelHeader {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	padding: .75rem 1.5rem;
 }
 
-.chatMessageHeader h1 {
+.channelHeader h1 {
 	color: black;
 	font-size: 1.125rem;
+}
+
+.gear {
+	font-size: 30px;
+	cursor: pointer;
 }
 
 .messageList {
