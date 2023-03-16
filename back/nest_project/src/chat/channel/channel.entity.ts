@@ -11,8 +11,11 @@ export class ChannelEntity {
 	@Column({unique: true})
 	name: string;
 
+	@Column()
+	password: boolean;
+
 	@Column({nullable: true})
-	pass: string;
+	channelPass: string;
 
 	@Column()
 	opNumber: number;

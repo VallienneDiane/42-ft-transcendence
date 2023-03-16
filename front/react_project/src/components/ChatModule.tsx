@@ -228,8 +228,10 @@ class MessageList extends React.Component<IChat, {}> {
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         })
 
-        this.props.socket!.on('notice', (data: string[]) => {
+        this.props.socket!.on('notice', (data: string) => {
             console.log(data);
+            let date = new Date();
+            this.props.action({id: date.toString(), text: data, sender: "Message from server :"});
         })
     }
 

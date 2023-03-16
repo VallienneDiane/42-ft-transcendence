@@ -48,7 +48,8 @@ export class ChatService {
             id: undefined,
             date: undefined,
             name: channProperties.channelName,
-            pass: channProperties.channelPass,
+            password: channProperties.password,
+            channelPass: channProperties.channelPass,
             opNumber: 1,
             inviteOnly: channProperties.inviteOnly,
             persistant: channProperties.persistant,
@@ -150,8 +151,8 @@ export class ChatService {
         logger.debug(`${login} send : `);
         console.log(message);
         let room = roomHandler.userMap.get(login);
-        let toSend = {date: new Date(), sender: login, content: message};
         if (room != undefined) {
+            let toSend = {date: new Date(), sender: login, content: message};
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
                     this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
@@ -285,7 +286,7 @@ export class ChatService {
                 .then ( (chan) => {
                     if (chan != null) {
                         if (!chan.inviteOnly) {
-                            if (chan.pass == undefined || data.channelPass == chan.pass) {
+                            if (!chan.password || data.channelPass == chan.channelPass) {
                                 this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
                                 .then( () => this.listMyChannelEvent(client));
                             }
