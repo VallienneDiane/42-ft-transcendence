@@ -245,8 +245,9 @@ class MessageList extends React.Component<IChat, {}> {
     }
 
     render() {
-        const reverseList: Message[] = this.props.history!.reverse();
-        const listItems: JSX.Element[] = reverseList.map(
+        const tmpList: Message[] = this.props.history!;
+        console.log("tmpList", tmpList)
+        const listItems: JSX.Element[] = tmpList.reverse().map(
             (message) => <MessageDisplay key={message.id} sender={message.sender!} text={message.text} />
         );
         return (
@@ -305,7 +306,9 @@ export default class ChatModule extends React.Component<{}, IChat> {
 
     handleNewMessageOnHistory(newMessage: Message) {
         const save: Message[] = this.state.history!;
+        save.reverse();
         save.push(newMessage);
+        console.log("after push", save);
         this.setState({
             history: save,
         });
@@ -338,6 +341,6 @@ export default class ChatModule extends React.Component<{}, IChat> {
                     }
                 }
             </SocketContext.Consumer>
-            )
-        }
+        )
+    }
 }
