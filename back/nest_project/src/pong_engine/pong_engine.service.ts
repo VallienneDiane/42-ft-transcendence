@@ -14,7 +14,6 @@ interface gameState {
 	paddleTwo: {x: number, y:number },
 }
 
-
 @Injectable()
 export class PongEngineService {
 
@@ -33,7 +32,7 @@ export class PongEngineService {
         paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
         paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
     }
-    
+
     main_loop() {
         this.ball.update_self_position(this.p1, this.p2);
         let bp: ballpos;
