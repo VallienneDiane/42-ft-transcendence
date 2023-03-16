@@ -1,13 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
-import { IChannel, IHandle, IMessageChat, IMessageToSend, IToken } from "./chat.interface";
+import { IChannel, IMessageChat } from "./chat.interface";
 import { MessageEntity } from "./message/message.entity";
 import { LinkUCEntity } from "./link_users_channels/linkUC.entity";
 import { ChannelEntity } from "./channel/channel.entity";
 import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
-import { JwtService } from '@nestjs/jwt';
 import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 
@@ -17,7 +16,6 @@ export class ChatService {
         private messageService: MessageService,
         private channelService: ChannelService,
         private linkUCService: LinkUCService,
-        private jwtService: JwtService,
         private userService: UserService
     ) {}
 
@@ -139,6 +137,7 @@ export class ChatService {
     }
 
     public changeLocEvent(client: Socket, login: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
+        this.listMyDMEvent(client, login);
         if (isChannel)
         {
             if (loc == 'general') {
@@ -284,10 +283,10 @@ export class ChatService {
                     .then( (attitude) => {
                         if (attitude != null) {
                             this.linkUCService.create(this.linkUCEntityfier(userToInvite, channel, false))
-                            .then( (succeed) => {
+                            .then( () => {
                                 let logged = roomHandler.userMap.get(userToInvite);
                                 if (logged != undefined)
-                                    logged.socket.emit('channelJoined', succeed.channelName);
+                                    this.listMyChannelEvent(logged.socket, userToInvite);
                             });
                         }
                         else
@@ -332,6 +331,66 @@ export class ChatService {
             }
             else
                 client.emit('notice', 'you are not registered to that channel');
+        })
+    }
+
+    public makeHimOpEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channel: string) {
+        this.linkUCService.findOne(channel, login)
+        .then((link) => {
+            if (link == null || !link.isOp)
+                client.emit('notice', 'You cannot.');
+            else
+                this.linkUCService.findOne(channel, userToOp)
+                .then((found) => {
+                    if (found == null)
+                        client.emit('notice', "user not in channel");
+                    else if (found.isOp)
+                        client.emit('notice', "this user is already operator to this channel");
+                    else {
+                        this.linkUCService.doUserOp(channel, userToOp);
+                        this.channelService.upgradeOpByName(channel);
+                        roomHandler.userMap.userBecomeOp(userToOp, channel);
+                    }
+                })
+        })
+    }
+
+    public makeHimNoOpEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToNoOp: string, channel: string) {
+        this.linkUCService.findOne(channel, login)
+        .then((link) => {
+            if (link == null || !link.isOp)
+                client.emit('notice', 'You cannot.');
+            else
+                this.linkUCService.findOne(channel, userToNoOp)
+                .then((found) => {
+                    if (found == null)
+                        client.emit('notice', "user not in channel");
+                    else if (!found.isOp)
+                        client.emit('notice', "this user is already not operator to this channel");
+                    else {
+                        this.linkUCService.doUserNoOp(channel, userToNoOp);
+                        this.channelService.downgradeOpByName(channel)
+                        .then(() => {
+                            this.channelService.getOneByName(channel)
+                            .then((exist) => {
+                                if (exist == null) {
+                                    this.linkUCService.deleteChannel(channel);
+                                    this.messageService.deleteChannel(channel);
+                                    let user = roomHandler.userMap.get(userToNoOp);
+                                    if (user != undefined) {
+                                        this.listMyChannelEvent(user.socket, userToNoOp);
+                                        if (user.isChannel && user.room == channel) {
+                                            roomHandler.joinRoom(userToNoOp, 'general', true, false, false);
+                                            user.socket.emit('newLocChannel', 'general', []);
+                                        }
+                                    }
+                                }
+                                else
+                                    roomHandler.userMap.userBecomeNoOp(userToNoOp, channel);
+                            })
+                        });
+                    }
+                })
         })
     }
 

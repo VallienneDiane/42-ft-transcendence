@@ -15,6 +15,7 @@ export class LinkUCService {
 		return this.linkUCRepository.save(newLink);
 	}
 
+	
 	public findAllByChannelName(channelName: string): Promise<LinkUCEntity[]> {
 		return this.linkUCRepository.find({
 			where: {
@@ -46,6 +47,14 @@ export class LinkUCService {
 				channelName: channelName
 			}
 		})
+	}
+
+	async doUserOp(channelName: string, userName: string): Promise<void> {
+		this.linkUCRepository.update({channelName: channelName, userName: userName}, {isOp: true});
+	}
+
+	async doUserNoOp(channelName: string, userName: string): Promise<void> {
+		this.linkUCRepository.update({channelName: channelName, userName: userName}, {isOp: false});
 	}
 
 	async changeChannelName(oldChannelName: string, newChannelName: string): Promise<void> {

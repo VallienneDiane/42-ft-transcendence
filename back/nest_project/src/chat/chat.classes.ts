@@ -130,6 +130,18 @@ class UserRoomMap {
         }
     }
 
+    public userBecomeOp(userName: string, channel: string) {
+        let found = this.users.get(userName);
+        if (found != undefined && found.isChannel && found.room == channel)
+            found.isOP = true;
+    }
+
+    public userBecomeNoOp(userName: string, channel: string) {
+        let found = this.users.get(userName);
+        if (found != undefined && found.isChannel && found.room == channel)
+            found.isOP = false;
+    }
+
     public get(userName: string) {
         return this.users.get(userName);
     }
