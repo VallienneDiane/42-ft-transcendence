@@ -100,13 +100,13 @@ class RoomMap {
 }
 
 class UserRoomMap {
-    private users: Map<string, {socket: Socket, room: string, isChannel: boolean}>;
+    private users: Map<string, {socket: Socket, room: string, isChannel: boolean, isOP: boolean, onlyOpCanTalk: boolean}>;
 
     constructor() {
-        this.users = new Map<string, {socket: Socket, room: string, isChannel: boolean}>();
+        this.users = new Map<string, {socket: Socket, room: string, isChannel: boolean, isOP: boolean, onlyOpCanTalk: boolean}>();
     }
 
-    public set(userName: string, userData: {socket: Socket, room: string, isChannel: boolean}) {
+    public set(userName: string, userData: {socket: Socket, room: string, isChannel: boolean, isOP: boolean, onlyOpCanTalk: boolean}) {
         this.users.set(userName, userData);
     }
 
@@ -120,11 +120,13 @@ class UserRoomMap {
         }
     }
 
-    public userChangeRoom(userName: string, room: string, isChannel: boolean) {
+    public userChangeRoom(userName: string, room: string, isChannel: boolean, isOP: boolean, onlyOpCanTalk: boolean) {
         let found = this.users.get(userName);
         if (found != undefined) {
             found.room = room;
             found.isChannel = isChannel;
+            found.isOP = isOP;
+            found.onlyOpCanTalk = onlyOpCanTalk;
         }
     }
 
@@ -152,19 +154,19 @@ export class UserRoomHandler {
         this.userMap = new UserRoomMap();
     }
 
-    public addUser(userName: string, socket: Socket, roomName: string, isChannel: boolean) {
+    public addUser(userName: string, socket: Socket, roomName: string, isChannel: boolean, isOP: boolean, onlyOpCanTalk: boolean) {
         if (isChannel)
             this.roomMap.addUserInRoom(roomName, userName, socket);
-        this.userMap.set(userName, {socket: socket, room: roomName, isChannel: isChannel});
+        this.userMap.set(userName, {socket: socket, room: roomName, isChannel: isChannel, isOP: isOP, onlyOpCanTalk: onlyOpCanTalk});
     }
 
-    public joinRoom(userName: string, roomName: string, isChannel: boolean) {
+    public joinRoom(userName: string, roomName: string, isChannel: boolean, isOp: boolean, onlyOpCanTalk: boolean) {
         let currentRoom = this.userMap.get(userName);
         if (currentRoom.isChannel)
             this.roomMap.deleteUserInRoom(currentRoom.room, userName);
         if (isChannel)
             this.roomMap.addUserInRoom(roomName, userName, currentRoom.socket);
-        this.userMap.userChangeRoom(userName, roomName, isChannel);
+        this.userMap.userChangeRoom(userName, roomName, isChannel, isOp, onlyOpCanTalk);
     }
 
     //This extract an user from rooms and return the room where he was 

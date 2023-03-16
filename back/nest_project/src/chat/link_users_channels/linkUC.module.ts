@@ -9,7 +9,6 @@ import { LinkUCService } from "./linkUC.service";
 
 @Module({
 	imports: [
-		
 		TypeOrmModule.forFeature([LinkUCEntity])
 	],
 	providers: [LinkUCService],

@@ -1,9 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { channel } from "diagnostics_channel";
 import { Repository } from "typeorm";
-import { LinkUCService } from "../link_users_channels/linkUC.service";
-import { MessageService } from "../message/message.service";
 import { ChannelEntity } from "./channel.entity";
 
 @Injectable({})
@@ -37,8 +34,9 @@ export class ChannelService {
 
 	async downgradeOpByName(channelName: string): Promise<void> {
 		this.getOneByName(channelName).then( (found) => {
-			if (found.opNumber == 1 && !found.persistant)
+			if (found.opNumber == 1 && !found.persistant) {
 				this.deleteByName(channelName);
+			}
 			else
 				this.channelRepository.update({name: channelName}, {opNumber: found.opNumber - 1});
 		})
