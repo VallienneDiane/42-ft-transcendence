@@ -19,6 +19,7 @@ export interface IMessageToSend {
 
 export interface IChannel {
     channelName: string;
+    password: boolean;
     inviteOnly: boolean;
     persistant: boolean;
     onlyOpCanTalk: boolean;
