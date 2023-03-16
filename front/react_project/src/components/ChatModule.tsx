@@ -4,7 +4,7 @@ import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 import { userService } from "../services/user.service";
 import CreateChannel from "./CreateChannel"
-import { IChat, UserData, IMessageToSend, Message, IDest, Users, IMessageEntity } from "../models";
+import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
 function Header(title: IChat) {
@@ -15,10 +15,16 @@ function Header(title: IChat) {
     else {
         location = 'Current discussion with ' + title.dest!.Loc;
     }
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+
+    const onClick = () => {
+        setIsOpen((prevSate) => !prevSate);
+    };
+
     return (
         <div className="channelHeader">
             <h1>{location}</h1>
-            <span className="gear">&#9881;</span> 
+            <button className="gear" onClick={onClick}>&#9881;</button> 
         </div>
     )
 }
@@ -159,10 +165,13 @@ class SearchChat extends React.Component<IChat, {
     }
 }
 
-class ChannelList extends React.Component<IChat, Users> {
+class ChannelList extends React.Component<IChat, {
+    channels: string[],
+    dms: string[],
+    me: JwtPayload}> {
     constructor(props: IChat) {
         super(props);
-        this.state = {channels: [], me: accountService.readPayload()!};
+        this.state = {channels: [], dms: [], me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
     }
     
@@ -175,6 +184,11 @@ class ChannelList extends React.Component<IChat, Users> {
         {
             this.props.socket!.emit('myChannels');
             this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
+        }
+        if (this.state.dms.length === 0)
+        {
+            this.props.socket!.emit('myDM');
+            this.props.socket!.on('listMyDM', (strs: string[]) => { console.log("DM", strs), this.setState({ dms: strs }) });
         }
     }
 
@@ -189,11 +203,20 @@ class ChannelList extends React.Component<IChat, Users> {
             <h2>Channels</h2>
             <ul className="channelList">
                 { this.state.channels.map((channel) => { 
-                    if (this.state.me.login !== channel)
-                    { return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
-                })}
+                   return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
+                )}
             </ul>
-            <h2>DMs</h2>
+            {this.state.dms.length && (
+                <React.Fragment>
+                    <h2>DMs</h2>
+                    <ul className="channelList">
+                        { this.state.dms.map((dm) => { 
+                            if (this.state.me.login !== dm)
+                            { return (<li key={dm} onClick={() => this.changeLoc({Loc: dm, isChannel: false})}> {dm}</li> ) }
+                        })}
+                    </ul>
+                </React.Fragment>
+            )}
         </div>
         )
     }
@@ -206,7 +229,7 @@ function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
     useEffect(() => {
     if (playload.login === value.sender) {
         setMe(true);
-    }}, [])
+    }}, )
 
     return (
         <div className={me ? "bubble sent" : "bubble received"}>

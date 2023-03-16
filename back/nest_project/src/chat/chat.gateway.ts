@@ -181,4 +181,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage('myDM')
+    handleListMyDM(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listMyDMEvent(client, user.login);
+        })
+    }
+
 }
