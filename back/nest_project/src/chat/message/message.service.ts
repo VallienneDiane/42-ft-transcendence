@@ -39,6 +39,15 @@ export class MessageService {
             }
         })
     }
+    
+    public findAllDialogByUserName(userName: string): Promise<MessageEntity[]> {
+        return this.messagesRepository.find({
+            where: [
+                { room: userName, isChannel: false },
+                { sender: userName, isChannel: false },
+            ]
+        })
+    }
     //update all row containing an username when this username is about to change
     async changeUserName(oldUserName: string, newUserName: string): Promise<void> {
         this.messagesRepository.update({sender: oldUserName}, {sender: newUserName});
