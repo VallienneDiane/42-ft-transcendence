@@ -49,10 +49,6 @@ export class GameEngineService {
 		}
 	}
 
-	main_loop_simplified() {
-
-	}
-
 	main_loop() {
 		this.ballz.forEach((ball, index) => {
 			ball.update_self_position();
