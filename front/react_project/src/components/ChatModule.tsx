@@ -165,11 +165,6 @@ class ChannelList extends React.Component<IChat, Users> {
     
     changeLoc(channel: IDest) {
         this.props.socket!.emit('changeLoc', channel);  
-        this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
-            console.log(room)
-            this.props.action({Loc: room, isChannel: true});
-            this.props.action2(messages);
-        })
     }
 
     componentDidMount(): void {
@@ -208,7 +203,7 @@ class ChannelList extends React.Component<IChat, Users> {
 
 function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
     // console.log(value);
-    // console.log(value.sender, value.text);
+    console.log(value.sender, value.text);
     return (
         <div className="message">
             <div className="messageUserName">{value.sender}</div>
@@ -246,7 +241,6 @@ class MessageList extends React.Component<IChat, {}> {
 
     render() {
         const tmpList: Message[] = this.props.history!;
-        console.log("tmpList", tmpList)
         const listItems: JSX.Element[] = tmpList.reverse().map(
             (message) => <MessageDisplay key={message.id} sender={message.sender!} text={message.text} />
         );
