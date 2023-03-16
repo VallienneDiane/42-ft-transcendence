@@ -244,7 +244,7 @@ export class ChatService {
                 this.channelService.listChannels()
                 .then (
                     (list) => {
-                        let strs: string[] = ["general"];
+                        let strs: string[] = [];
                         for (let l of list)
                         {
                             if (!l.hidden && !this.channInUCList(l, notToDisplay))
@@ -284,10 +284,10 @@ export class ChatService {
                         if (!chan.inviteOnly) {
                             if (chan.pass == undefined || data.channelPass == chan.pass) {
                                 this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
-                                .then( (succeed) => client.emit('channelJoined', succeed.channelName));
+                                .then( () => this.listMyChannelEvent(client));
                             }
                             else
-                                client.emit('notice' ,'Wrong channel password');
+                                client.emit('notice', 'Wrong channel password');
                         }
                         else
                             client.emit('notice', 'this channel is on invite only');
@@ -296,7 +296,7 @@ export class ChatService {
                         client.emit('notice', 'no such channel');
                 })
             }
-        } )
+        })
     }
 
     public inviteUserEvent(client: Socket, roomHandler: UserRoomHandler, logger: Logger, userToInvite: string, channel: string) {
@@ -418,7 +418,7 @@ export class ChatService {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
                             logger.debug(`list of channel joined by ${login} : `);
                             console.log(result)});
-                        client.emit('channelJoined', channLink.channelName)});
+                        this.listMyChannelEvent(client)});
                 })
             }
             else
