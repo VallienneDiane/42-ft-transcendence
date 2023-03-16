@@ -36,6 +36,7 @@ function Popup(props: {handleClose: any}) {
     const onSubmit = (data: NewChannel) => {
         socket.emit('createChannel', {
             channelName: data.channelName,
+            password: data.password,
             channelPass: data.channelPass,
             inviteOnly: data.inviteOnly,
             persistant: data.persistant,
