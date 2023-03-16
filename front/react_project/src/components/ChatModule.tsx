@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { accountService } from "../services/account.service";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
-import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
 import CreateChannel from "./CreateChannel"
 import { IChat, UserData, IMessageToSend, Message, IDest, Users, IMessageEntity } from "../models";
+import { JwtPayload } from "jsonwebtoken";
 
 function Header(title: IChat) {
     let location: string;
@@ -68,7 +68,6 @@ class SearchChat extends React.Component<IChat, {
                 newChanList.push({name: str, isChannel: true});
             this.setState({channels: newChanList})});
         this.props.socket!.on('newUserConnected', () => {
-            console.log("script is supposed to fetchUsers");
             this.fetchUsers()});
         this.fetchChannels();
         this.fetchUsers();
@@ -173,11 +172,6 @@ class ChannelList extends React.Component<IChat, Users> {
             this.props.socket!.emit('myChannels');
             this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
         }
-        // userService.getAllUsers()
-        // .then((response) => {
-            //     this.setState({ users: response.data });
-            // })
-            // .catch((error) => console.log(error));
     }
 
     componentWillUnmount(): void {
@@ -202,12 +196,18 @@ class ChannelList extends React.Component<IChat, Users> {
 }
 
 function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
-    // console.log(value);
-    console.log(value.sender, value.text);
+    const [me, setMe] = useState<boolean>(false);
+    const playload: JwtPayload = accountService.readPayload()!;
+
+    useEffect(() => {
+    if (playload.login === value.sender) {
+        setMe(true);
+    }}, [])
+
     return (
-        <div className="message">
+        <div className={me ? "bubble sent" : "bubble received"}>
             <div className="messageUserName">{value.sender}</div>
-            <div className="bubble">{value.text}</div>
+            <div className="messageText">{value.text}</div>
         </div>
     )
 }
@@ -302,7 +302,6 @@ export default class ChatModule extends React.Component<{}, IChat> {
         const save: Message[] = this.state.history!;
         save.reverse();
         save.push(newMessage);
-        console.log("after push", save);
         this.setState({
             history: save,
         });

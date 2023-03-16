@@ -152,6 +152,36 @@
 	/* max-height: 300px; */
 }
 
+.bubble {
+	font-size: 16px;
+     position: relative;
+    // display: inline-block;
+    // clear: both;
+    margin-bottom: 8px;
+    vertical-align: top;
+	animation: MessageIn .3s;
+	padding: 0.3em;
+	padding-left: 1em;
+	padding-right: 1em;
+	&.received {
+        float: left;
+        color: black;
+		background-color: #f7fcff;
+        align-self: flex-start;
+		border-radius: 0 .75rem .75rem .75rem;
+		box-shadow: .25rem .25rem 1.5rem rgba(0, 0, 0, .05);
+        // animation-name: slideFromLeft;
+	}
+	&.sent {
+        float: right;
+        color: white;
+		background-color: rgb(0, 107, 179);
+        align-self: flex-end;
+		border-radius: .75rem 0 .75rem .75rem;
+        // animation-name: slideFromRight;
+	}
+}
+
 .sendMessage {
 	display: flex;
 	justify-content: center;
