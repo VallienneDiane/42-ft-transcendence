@@ -164,8 +164,8 @@ class ChannelList extends React.Component<IChat, Users> {
     }
     
     changeLoc(channel: IDest) {
-        this.props.socket!.emit('changeLoc', channel);  
-        this.props.socket!.on('newLocChannel', (room: string, messages: IMessageEntity[]) => {
+        this.props.socket!.emit('changeLoc', channel);
+        this.props.socket!.on('newLocChannel',   (room: string, messages: IMessageEntity[]) => {
             console.log(room)
             this.props.action({Loc: room, isChannel: true});
             this.props.action2(messages);
