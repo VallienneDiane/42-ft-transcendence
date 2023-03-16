@@ -44,10 +44,16 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   }
 
   @SubscribeMessage('Game_Input')
-  OnGame_Input(@MessageBody() body: any) {
-    const test = this.Game;
-    this.Game.ballz[0].process_input(body);
-    this.server.emit('Game_Update', test.gs)
+  OnGame_Input(@MessageBody() body: any) { // rqjouter dans le message le joueur ou prendre en compte le joueur
+    const game = this.Game;
+    const pong = this.Pong;
+    if (this.state === "game") {
+      game.ballz[0].process_input(body);
+      this.server.emit('Game_Update', game.gs)
+    }
+    else if (this.state === "pong") {
+      pong.p1.process_input(body);
+    }
   }
 
   @SubscribeMessage('Game_init')
