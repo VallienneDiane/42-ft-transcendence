@@ -1,8 +1,11 @@
-body {
-  background-color: #313456ff;
+@import url("styles/Base.css");
+
+* {
+  background-color: var(--prim-color);
   box-sizing: border-box;
   margin:0;
   padding:0;
+  font-family: 'MuseoModerno', cursive;
 }
 
 ul, a, button {
@@ -11,7 +14,7 @@ ul, a, button {
   background: inherit;
   text-decoration: none;
   list-style-type: none;
-  color: inherit;
+  color: var(--text-color);
 }
 
 button:hover {
@@ -28,7 +31,7 @@ button:hover {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
 }
 
 .App > div {
@@ -39,7 +42,7 @@ button:hover {
   align-items: center;
 }
 
-.App > div > .navbar {
+.App > div > #navbar {
   width: 100%;
   height: 10%;
 }
@@ -49,7 +52,7 @@ button:hover {
   height: 90%;
   display: flex;
   justify-content: center;
-  color: white
+  color: var(--text-color)
 }
 
 /* 
