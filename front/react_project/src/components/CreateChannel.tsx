@@ -2,13 +2,13 @@ import React, { useContext, useState, useRef, useEffect, useCallback } from "rea
 import { useForm, Controller } from 'react-hook-form';
 import { Box, Checkbox, Switch, Button } from '@mui/material';
 import Input from '@mui/material/Input';
-import { NewChannel, IChat, Message } from "../models";
+import { IChannel, IChat, Message } from "../models";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { control, formState: { errors }, handleSubmit } = useForm<NewChannel>({ 
+    const { control, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
             channelName: "",
             password: false,
@@ -33,7 +33,7 @@ function Popup(props: {handleClose: any}) {
         }
     }, [ref]);
 
-    const onSubmit = (data: NewChannel) => {
+    const onSubmit = (data: IChannel) => {
         socket.emit('createChannel', {
             channelName: data.channelName,
             password: data.password,

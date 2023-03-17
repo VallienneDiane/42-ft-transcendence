@@ -36,7 +36,7 @@ export interface User {
   password: string
 }
 
-export interface NewChannel {
+export interface IChannel {
   channelName: string;
   password: boolean;
   channelPass?: string;
