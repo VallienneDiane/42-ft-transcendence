@@ -43,7 +43,7 @@ class SearchElement extends React.Component<{socket: Socket, reset: any, name: s
 
     onClickChatting(event: any) {
         this.props.socket!.emit('changeLoc', {Loc: this.props.name, isChannel: false});
-        this.props.reset;
+        this.props.reset();
     }
 
     render() {
@@ -76,6 +76,7 @@ class SearchChat extends React.Component<IChat, {
         this.fetchUsers = this.fetchUsers.bind(this);
         this.displayList = this.displayList.bind(this);
         this.onClick = this.onClick.bind(this);
+        this.resetFiltered = this.resetFiltered.bind(this);
     }
 
     fetchChannels() {
@@ -187,12 +188,12 @@ class SearchChat extends React.Component<IChat, {
                 <form action="">
                     <input type="text" onChange={this.displayList} onClick={this.displayList} value={this.state.text} placeholder="Search"/>
                 </form>
-                <ul>
+                {this.state.filtered.length !=0 && <ul>
                     {this.state.filtered.map((user: {name: string, isChannel: boolean, isClickable: boolean}, id: number) => (
                         //<li key={id} value={user.isChannel? 1 : 0} onClick={this.onClick} >{user.name}</li>
                         <SearchElement key={id} socket={this.props.socket!} reset={this.resetFiltered} name={user.name} isChannel={user.isChannel} isClickable={user.isClickable} />
                     ))}
-                </ul>
+                </ul>}
             </div>
         )
     }
