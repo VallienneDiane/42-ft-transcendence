@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { accountService } from "../services/account.service";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
+import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
 import CreateChannel from "./CreateChannel"
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity } from "../models";
@@ -29,11 +30,39 @@ function Header(title: IChat) {
     )
 }
 
+class SearchElement extends React.Component<{socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}, {}> {
+    constructor(props: {socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}) {
+        super(props);
+        this.onClickChatting = this.onClickChatting.bind(this);
+        this.onClickJoin = this.onClickJoin.bind(this);
+    }
+
+    onClickJoin(event: any) {
+
+    }
+
+    onClickChatting(event: any) {
+        this.props.socket!.emit('changeLoc', {Loc: this.props.name, isChannel: false});
+        this.props.reset;
+    }
+
+    render() {
+        return(
+        <li className="searchElement">
+            {this.props.isClickable && this.props.isChannel
+                && <button className="buttonJoinChannel" onClick={this.onClickJoin}>{this.props.name}</button>}
+            {this.props.isClickable && !this.props.isChannel
+                && <button className="buttonUserChat" onClick={this.onClickChatting}>{this.props.name}</button>}
+            {!this.props.isClickable && <p>{this.props.name}</p>}
+        </li>);
+    }
+}
+
 class SearchChat extends React.Component<IChat, {
     text: string,
-    users: {name: string, isChannel: boolean}[],
-    channels: {name: string, isChannel: boolean}[],
-    filtered: {name: string, isChannel: boolean}[]}
+    users: {name: string, isChannel: boolean, isClickable: boolean}[],
+    channels: {name: string, isChannel: boolean, isClickable: boolean}[],
+    filtered: {name: string, isChannel: boolean, isClickable: boolean}[]}
     > {
     constructor(props: IChat) {
         super(props);
@@ -58,10 +87,10 @@ class SearchChat extends React.Component<IChat, {
         .then(response => {
             const playload: JwtPayload = accountService.readPayload()!;
             const users = response.data.map((user: UserData) => user.login);
-            let newUserList: {name:string, isChannel:boolean}[] = [];
+            let newUserList: {name:string, isChannel:boolean, isClickable: boolean}[] = [];
             users.forEach((user: string) => {
                 if (playload.login !== user)
-                    newUserList.push({name: user, isChannel: false});
+                    newUserList.push({name: user, isChannel: false, isClickable: true});
             })
             this.setState({users: newUserList});
         })
@@ -72,9 +101,9 @@ class SearchChat extends React.Component<IChat, {
 
     componentDidMount(): void {
         this.props.socket!.on('listChannel', (strs: string[]) => {
-            let newChanList: {name: string, isChannel: boolean}[] = [];
+            let newChanList: {name: string, isChannel: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
-                newChanList.push({name: str, isChannel: true});
+                newChanList.push({name: str, isChannel: true, isClickable: true});
             this.setState({channels: newChanList})});
         this.props.socket!.on('newUserConnected', () => {
             this.fetchUsers()});
@@ -113,27 +142,27 @@ class SearchChat extends React.Component<IChat, {
         this.setState({text: event.target.value});
         if (event.target.value) {
             this.setState(() => {
-                const filteredUsers: {name: string, isChannel: boolean}[] =
-                this.state.users.filter((user: {name: string, isChannel: boolean}) =>
+                const filteredUsers: {name: string, isChannel: boolean, isClickable: boolean}[] =
+                this.state.users.filter((user: {name: string, isChannel: boolean, isClickable: boolean}) =>
                     user.name.startsWith(event.target.value));
-                const filteredChannels: {name: string, isChannel: boolean}[] =
-                this.state.channels.filter((channel: {name: string, isChannel: boolean}) =>
+                const filteredChannels: {name: string, isChannel: boolean, isClickable: boolean}[] =
+                this.state.channels.filter((channel: {name: string, isChannel: boolean, isClickable: boolean}) =>
                     channel.name.startsWith(event.target.value));
-                let toReturn: {name: string, isChannel: boolean}[] = [];
+                let toReturn: {name: string, isChannel: boolean, isClickable: boolean}[] = [];
                 if (filteredUsers.length > 0) {
                     if (filteredChannels.length > 0)
-                        toReturn = [{name: "Users : ", isChannel: false},
+                        toReturn = [{name: "Users : ", isChannel: false, isClickable: false},
                         ...filteredUsers, {name: "Channels : ",
-                        isChannel: true},
+                        isChannel: true, isClickable: false},
                         ...filteredChannels];
                     else
-                        toReturn = [{name: "Users : ", isChannel: false}, ...filteredUsers];
+                        toReturn = [{name: "Users : ", isChannel: false, isClickable: false}, ...filteredUsers];
                 }
                 else if (filteredChannels.length > 0)
-                    toReturn = [{name: "Channels : ", isChannel: true}, ...filteredChannels];
+                    toReturn = [{name: "Channels : ", isChannel: true, isClickable: false}, ...filteredChannels];
                 else
                     toReturn = [];
-                const filtered: {name: string, isChannel: boolean}[] = toReturn;
+                const filtered: {name: string, isChannel: boolean, isClickable: boolean}[] = toReturn;
                 return { filtered };
             });
         }
@@ -147,6 +176,10 @@ class SearchChat extends React.Component<IChat, {
         this.props.socket?.emit('changeLoc', newLocWanted);
         this.setState({text: '', filtered: []});
     }
+
+    resetFiltered() {
+        this.setState({filtered: []});
+    }
     
     render() {
         return (
@@ -155,8 +188,9 @@ class SearchChat extends React.Component<IChat, {
                     <input type="text" onChange={this.displayList} onClick={this.displayList} value={this.state.text} placeholder="Search"/>
                 </form>
                 <ul>
-                    {this.state.filtered.map((user: {name: string, isChannel: boolean}, id: number) => (
-                        <li key={id} value={user.isChannel? 1 : 0} onClick={this.onClick} >{user.name}</li>
+                    {this.state.filtered.map((user: {name: string, isChannel: boolean, isClickable: boolean}, id: number) => (
+                        //<li key={id} value={user.isChannel? 1 : 0} onClick={this.onClick} >{user.name}</li>
+                        <SearchElement key={id} socket={this.props.socket!} reset={this.resetFiltered} name={user.name} isChannel={user.isChannel} isClickable={user.isClickable} />
                     ))}
                 </ul>
             </div>
