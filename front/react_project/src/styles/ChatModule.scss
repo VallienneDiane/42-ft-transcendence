@@ -57,6 +57,7 @@
 }
 
 #searchBar ul {
+	// position: absolute;
     display: flex;
 	width: 80%;
     flex-direction: column;
@@ -132,8 +133,8 @@
 
 .channelHeader {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
+	// align-items: right;
+	justify-content: flex-end;
 	padding: .75rem 1.5rem;
 }
 
@@ -143,7 +144,41 @@
 }
 
 .gear {
-	font-size: 30px;
+	font-size: 15px;
+	padding-left: .5rem;
+	cursor: pointer;
+}
+
+.dropdown {
+	position: absolute;
+	margin-top: 25px;
+}
+  
+.paramMenu {
+	display: flex;
+	flex-direction: column;
+    align-items: flex-end;
+	list-style-type: none;
+	padding-right: .5rem;
+	border: 1px solid rgb(219, 219, 219);
+	width: 150px;
+	background-color: white;
+}
+  
+.paramMenu > li:hover {
+	background:#ddd;
+    color:#777;
+}
+  
+.paramMenu > li > button {
+	width: 100%;
+	height: 100%;
+	background: none;
+	color: inherit;
+	border: none;
+	padding: 5px;
+	margin: 0;
+	font: inherit;
 	cursor: pointer;
 }
 
@@ -160,7 +195,7 @@
 
 .bubble {
 	font-size: 16px;
-     position: relative;
+    //  position: relative;
     // display: inline-block;
     // clear: both;
     margin-bottom: 8px;
