@@ -7,24 +7,36 @@ import CreateChannel from "./CreateChannel"
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
-function Header(title: IChat) {
-    let location: string;
-    if (title.dest!.isChannel) {
-        location = 'Welcome to channel ' + title.dest!.Loc;
-    }
-    else {
-        location = 'Current discussion with ' + title.dest!.Loc;
-    }
+function Header(props: IDest) {
+
     const [isOpen, setIsOpen] = useState<boolean>(false);
+    const {socket} = useContext(SocketContext);
 
     const onClick = () => {
         setIsOpen((prevSate) => !prevSate);
     };
 
+    const leaveChannel = () => {
+        socket.emit('leaveChannel', props.Loc);
+    }
+
     return (
         <div className="channelHeader">
-            <h1>{location}</h1>
-            <button className="gear" onClick={onClick}>&#9881;</button> 
+            <h1>{props.Loc}</h1>
+            <button className="gear" onClick={onClick}>&#9881;</button>
+            {isOpen && (
+                <ul className="dropdownParams">
+                    <li className="paramItem">
+                        <button onClick={leaveChannel}>Leave</button>
+                    </li>
+                    {
+
+                    }
+                    <li className="paramItem">
+                        <button>Menu 2</button>
+                    </li>
+                </ul>
+            )}
         </div>
     )
 }
@@ -203,11 +215,16 @@ class ChannelList extends React.Component<IChat, {
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('newLocChannel');
         this.props.socket!.off('listMyChannels');
+        this.props.socket!.off('listMyDM');
+        this.props.socket!.off('checkNewDM');
     }
 
     render() {
+        let displayDM: boolean = false;
+        if (this.state.dms.length !== 0)
+            displayDM = true;
+
         return (
             <div className="channelListWrapper">
             <h2>Channels</h2>
@@ -216,7 +233,7 @@ class ChannelList extends React.Component<IChat, {
                    return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
                 )}
             </ul>
-            {this.state.dms.length && (
+            {displayDM && (
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
