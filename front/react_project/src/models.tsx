@@ -36,7 +36,7 @@ export interface User {
   password: string
 }
 
-export interface NewChannel {
+export interface IChannel {
   channelName: string;
   password: boolean;
   channelPass?: string;
@@ -71,6 +71,8 @@ export interface IMessageToSend {
 export interface IDest {
   Loc: string;
   isChannel: boolean;
+  channel?: IChannel;
+  isOp?: boolean;
 };
 
 export interface IChat {
