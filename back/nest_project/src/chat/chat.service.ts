@@ -161,7 +161,7 @@ export class ChatService {
                                         this.messageService.findByChannel(found.channelName)
                                         .then(
                                             ( (messages) => {
-                                                client.emit('newLocChannel', loc, found, messages);
+                                                client.emit('newLocChannel', loc, found.isOp, messages);
                                             }
                                         ))
                                     }
