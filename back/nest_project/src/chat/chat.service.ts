@@ -63,19 +63,7 @@ export class ChatService {
         return false;
     }
 
-    private delUserFromChannel(login: string, channel: string, roomHandler: UserRoomHandler) {
-        this.linkUCService.findOne(channel, login)
-        .then( (link) => {
-            if (link.isOp)
-                this.channelService.downgradeOpByName(channel)
-                .then(() => {
-                    this.channelService.getOneByName(channel)
-                    .then( (exist) => {
-                        if (exist == null)
-                            this.messageService.deleteChannel(channel);
-                    })
-                });
-        })
+    private delUserFromChannel(login: string, channel: string, roomHandler: UserRoomHandler, link: LinkUCEntity) {
         this.linkUCService.deleteLink(channel, login);
         let user = roomHandler.userMap.get(login);
         if (user != undefined) {
@@ -85,6 +73,18 @@ export class ChatService {
                 user.socket.emit('newLocChannel', 'general', []);
             }
         }    
+        if (link.isOp)
+            this.channelService.downgradeOpByName(channel)
+            .then(() => {
+                this.channelService.getOneByName(channel)
+                .then( (exist) => {
+                    if (exist == null) {
+                        this.messageService.deleteChannel(channel);
+                        this.linkUCService.deleteChannel(channel);
+                        roomHandler.roomKill(channel);
+                    }
+                })
+            });
     }
 
     public connectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
@@ -161,7 +161,7 @@ export class ChatService {
                                         this.messageService.findByChannel(found.channelName)
                                         .then(
                                             ( (messages) => {
-                                                client.emit('newLocChannel', found.channelName, messages);
+                                                client.emit('newLocChannel', loc, found, messages);
                                             }
                                         ))
                                     }
@@ -328,7 +328,7 @@ export class ChatService {
         this.linkUCService.findOne(channel, login)
         .then( (found) => {
             if (found != null) {
-                this.delUserFromChannel(login, channel, roomHandler);
+                this.delUserFromChannel(login, channel, roomHandler, found);
             }
             else
                 client.emit('notice', 'you are not registered to that channel');
@@ -406,7 +406,7 @@ export class ChatService {
                     if (kicked == null)
                         client.emit('notice', "user not in channel");
                     else {
-                        this.delUserFromChannel(userToKick, channel, roomHandler);
+                        this.delUserFromChannel(userToKick, channel, roomHandler, found);
                     }
                 })
         })
