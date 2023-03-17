@@ -224,11 +224,11 @@ export class ChatService {
                 this.channelService.listChannels()
                 .then (
                     (list) => {
-                        let strs: string[] = [];
+                        let strs: {channelName: string, password: boolean}[] = [];
                         for (let l of list)
                         {
                             if (!l.hidden && !this.channInUCList(l, notToDisplay))
-                                strs.push(l.name);
+                                strs.push({channelName: l.name, password: l.password});
                         }
                         console.log(strs)
                         client.emit('listChannel', strs);
@@ -443,16 +443,17 @@ export class ChatService {
         })
     }
 
-    public createChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: IChannel) {
+    public createChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
         logger.debug('create channel request');
         console.log(channel);
-        if (channel.channelName == 'general') {
+        if (channel.name == 'general') {
             client.emit('notice', 'This channel already exists.');
         }
-        this.channelService.getOneByName(channel.channelName)
+        this.channelService.getOneByName(channel.name)
         .then( (exist) => {
             if (exist == null) {
-                this.channelService.create(this.channelEntityfier(channel))
+                channel.opNumber = 1;
+                this.channelService.create(channel)
                 .then( (succeed) => {
                     client.emit('channelCreated', succeed.name);
                     if (!succeed.hidden) {
