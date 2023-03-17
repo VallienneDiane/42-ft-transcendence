@@ -10,7 +10,7 @@ function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
     const { control, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
-            channelName: "",
+            name: "",
             password: false,
             channelPass: "",
             inviteOnly: false,
@@ -35,7 +35,7 @@ function Popup(props: {handleClose: any}) {
 
     const onSubmit = (data: IChannel) => {
         socket.emit('createChannel', {
-            channelName: data.channelName,
+            channelName: data.name,
             password: data.password,
             channelPass: data.channelPass,
             inviteOnly: data.inviteOnly,
@@ -56,13 +56,13 @@ function Popup(props: {handleClose: any}) {
                 <section className="sectionTest">
                     <label className="labelName">Channel Name</label>
                     <Controller
-                        name="channelName"
+                        name="name"
                         control={control}
                         rules={{ required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i }}
                         render={({ field }) => <Input {...field} />}
                         defaultValue=""
                     />
-                    {errors.channelName && "Channel name is required"}
+                    {errors.name && "Channel name is required"}
                 </section>
                 <section className="sectionTest">
                     <label className="labelName">Password</label>
