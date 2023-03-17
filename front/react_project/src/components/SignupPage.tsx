@@ -1,4 +1,4 @@
-import "../styles/SignupPage.css"
+import "../styles/LoginPage.scss"
 import React, { useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -33,29 +33,31 @@ const SignupForm: React.FC = () => {
 
   return (
     <div id='signup_page'>
-      <h1>SignUp Page</h1>
-      <form className="login" onSubmit={handleSubmit(signIn)}>
-        <div>
-          <label>Login</label>
-          <br/>
-          <input type="text" {...register("login")}/>
-          {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
-        </div>
-        <div>
-          <label>Email</label>
-          <br/>
-          <input type="email" {...register("email")}/>
-          {errors.email && <p className='errorsSignup'>{errors.email.message}</p>}
-        </div>
-        <div>
-          <label>Password</label>
-          <br/>
-          <input type="password" {...register("password")}/>
-          {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
-        </div>
-        <button type="submit">SIGN UP</button>
+      <div className="card">
+        <h1>SignUp Page</h1>
+        <form className="login" onSubmit={handleSubmit(signIn)}>
+            <input className="form_element" 
+            {...register("login")}
+            type="text" 
+            placeholder="Login"
+            />
+            {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
+            <input className="form_element" 
+            {...register("email")}
+            type="email" 
+            placeholder="Email"
+            />
+            {errors.email && <p className='errorsSignup'>{errors.email.message}</p>}
+            <input className="form_element" 
+            {...register("password")}
+            type="password" 
+            placeholder="Password"
+            />
+            {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
+          <button className="form_element" type="submit">SIGN UP</button>
+        </form>
         <a href="/login">Already registered ? Log In</a>
-      </form>
+      </div>
     </div>
   );
 };
