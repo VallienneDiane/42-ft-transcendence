@@ -45,6 +45,22 @@ export class ChatService {
         };
     }
 
+    private goBackToGeneral(client: Socket) {
+        let locGeneral: ChannelEntity = {
+            id: -1,
+            name: 'general',
+            date: new Date(),
+            password: false,
+            channelPass: null,
+            opNumber: 0,
+            inviteOnly: false,
+            persistant: true,
+            onlyOpCanTalk: false,
+            hidden: false
+        }
+        client.emit('newLocChannel', locGeneral, false, []);
+    }
+
     private linkUCEntityfier(login: string, channelName: string, op: boolean): LinkUCEntity {
         return {
             id: undefined,
@@ -70,7 +86,7 @@ export class ChatService {
             this.listMyChannelEvent(user.socket, login);
             if (user.isChannel && user.room == channel) {
                 roomHandler.joinRoom(login, 'general', true, false, false);
-                user.socket.emit('newLocChannel', 'general', []);
+                this.goBackToGeneral(user.socket);
             }
         }    
         if (link.isOp)
@@ -149,19 +165,7 @@ export class ChatService {
         {
             if (loc == 'general') {
                 roomHandler.joinRoom(login, loc, true, false, false);
-                let locGeneral: ChannelEntity = {
-                    id: -1,
-                    name: 'general',
-                    date: new Date(),
-                    password: false,
-                    channelPass: null,
-                    opNumber: 0,
-                    inviteOnly: false,
-                    persistant: true,
-                    onlyOpCanTalk: false,
-                    hidden: false
-                }
-                client.emit('newLocChannel', locGeneral, false, []);
+                this.goBackToGeneral(client);
                 return;
             }
             else {
@@ -413,7 +417,7 @@ export class ChatService {
                                         this.listMyChannelEvent(user.socket, userToNoOp);
                                         if (user.isChannel && user.room == channel) {
                                             roomHandler.joinRoom(userToNoOp, 'general', true, false, false);
-                                            user.socket.emit('newLocChannel', 'general', []);
+                                            this.goBackToGeneral(user.socket);
                                         }
                                     }
                                 }
