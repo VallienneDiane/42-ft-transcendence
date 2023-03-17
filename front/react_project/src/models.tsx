@@ -37,7 +37,7 @@ export interface User {
 }
 
 export interface IChannel {
-  channelName: string;
+  name: string;
   password: boolean;
   channelPass?: string;
   inviteOnly: boolean;
