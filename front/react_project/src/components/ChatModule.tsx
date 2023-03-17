@@ -9,7 +9,7 @@ import { Box, Checkbox, Switch, Button } from '@mui/material';
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
-function ParamsChannel() {
+function ParamsChannel(props: {dest: IDest}) {
     const {socket} = useContext(SocketContext);
 
     const leaveChannel = () => {
@@ -109,7 +109,7 @@ function Header(props: {dest: IDest}) {
         <div className="channelHeader">
             <h1>{props.dest.Loc}</h1>
             <button className="gear" onClick={onClick}>&#9881;</button>
-            {isOpen && (isChannel ? <ParamsChannel /> : <ParamsDM handleClose={onClick} />)}
+            {isOpen && (isChannel ? <ParamsChannel dest={props.dest}/> : <ParamsDM handleClose={onClick} />)}
         </div>
     )
 }
@@ -213,7 +213,7 @@ class SearchChat extends React.Component<IChat, {
         this.fetchChannels();
         this.fetchUsers();
 
-        this.props.socket!.on('', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
+        this.props.socket!.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
             console.log('socket ON ', channel, isOp, chanHistory);
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
@@ -237,7 +237,7 @@ class SearchChat extends React.Component<IChat, {
     componentWillUnmount(): void {
         this.props.socket!.off('listChannel');
         this.props.socket!.off('newUserConnected');
-        this.props.socket!.off('');
+        this.props.socket!.off('newLocChannel');
         this.props.socket!.off('newLocPrivate');
     }
 
@@ -477,6 +477,7 @@ export default class ChatModule extends React.Component<{}, {dest: IDest, histor
     }
     
     changeLoc(newDest: IDest) {
+        console.log(newDest)
         this.setState({dest: newDest});
     }
 
