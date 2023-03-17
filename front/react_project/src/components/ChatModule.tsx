@@ -114,9 +114,14 @@ function Header(props: {dest: IDest}) {
     )
 }
 
-class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, close: any, channelName: string}, {}> {
-    constructor(props: {socket: Socket, open: boolean, close: any, channelName: string}) {
+class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, closeAction: any, channelName: string}, {}> {
+    constructor(props: {socket: Socket, open: boolean, closeAction: any, channelName: string}) {
         super(props);
+        this.closeButton = this.closeButton.bind(this);
+    }
+
+    closeButton(event: any) {
+        this.props.closeAction();
     }
 
     render() {
@@ -124,7 +129,7 @@ class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, c
             <div>
                 {this.props.open &&
                     <Box>
-                        
+                        <button onClick={this.closeButton}>X</button>
                     </Box>}
             </div>
         )
@@ -141,6 +146,7 @@ class SearchElement extends React.Component<{socket: Socket, reset: any, name: s
 
     changeStateOpenPopup(event: any) {
         this.setState({openPopup : !this.state.openPopup});
+        this.props.reset();
     }
 
     onClickChatting(event: any) {
@@ -156,6 +162,7 @@ class SearchElement extends React.Component<{socket: Socket, reset: any, name: s
             {this.props.isClickable && !this.props.isChannel
                 && <button className="buttonUserChat" onClick={this.onClickChatting}>{this.props.name}</button>}
             {!this.props.isClickable && <p>{this.props.name}</p>}
+            <JoinChannelPopUp socket={this.props.socket} open={this.state.openPopup} closeAction={this.changeStateOpenPopup} channelName={this.props.name} />
         </li>);
     }
 }
@@ -282,7 +289,7 @@ class SearchChat extends React.Component<IChat, {
     }
 
     resetFiltered() {
-        this.setState({filtered: []});
+        this.setState({text: '', filtered: []});
     }
     
     render() {
