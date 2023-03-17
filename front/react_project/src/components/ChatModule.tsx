@@ -273,7 +273,6 @@ class SearchChat extends React.Component<IChat, {
                 </form>
                 {this.state.filtered.length != 0 && <ul>
                     {this.state.filtered.map((user: {name: string, isChannel: boolean, isClickable: boolean}, id: number) => (
-                        //<li key={id} value={user.isChannel? 1 : 0} onClick={this.onClick} >{user.name}</li>
                         <SearchElement key={id} socket={this.props.socket!} reset={this.resetFiltered} name={user.name} isChannel={user.isChannel} isClickable={user.isClickable} />
                     ))}
                 </ul>}
@@ -475,7 +474,7 @@ export default class ChatModule extends React.Component<{}, {dest: IDest, histor
 
     render() {
         return (  
-            <SocketContext.Consumer > 
+            <SocketContext.Consumer>
                 { ({ socket }) => {
                     if (socket.auth.token != "undefined") {
                         return (
