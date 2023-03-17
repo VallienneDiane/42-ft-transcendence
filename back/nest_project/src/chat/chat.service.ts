@@ -142,8 +142,20 @@ export class ChatService {
         if (isChannel)
         {
             if (loc == 'general') {
-                roomHandler.joinRoom(login, loc, true, false, false)
-                client.emit('newLocChannel', 'general', []);
+                roomHandler.joinRoom(login, loc, true, false, false);
+                let locGeneral: ChannelEntity = {
+                    id: -1,
+                    name: 'general',
+                    date: new Date(),
+                    password: false,
+                    channelPass: null,
+                    opNumber: 0,
+                    inviteOnly: false,
+                    persistant: true,
+                    onlyOpCanTalk: false,
+                    hidden: false
+                }
+                client.emit('newLocChannel', locGeneral, false, []);
                 return;
             }
             else {
