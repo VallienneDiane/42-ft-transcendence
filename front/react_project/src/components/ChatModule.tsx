@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { accountService } from "../services/account.service";
 import '../styles/ChatModule.scss'
 import SocketContext from "./context";
@@ -9,35 +9,107 @@ import { Box, Checkbox, Switch, Button } from '@mui/material';
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
-function Header(props: IDest) {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
+function ParamsChannel() {
     const {socket} = useContext(SocketContext);
+
+    const leaveChannel = () => {
+        socket.emit('leaveChannel', props.dest.Loc);
+    }
+
+    const inviteUser = () => {
+        // coder l'invitation : search user
+        socket.emit('inviteUser', "nami", props.dest.Loc);
+    }
+
+    const kickUser = () => {
+        // search
+        socket.emit('kickUser', "nami", props.dest.Loc);
+    }
+
+    const listMembers = () => {
+        socket.emit('listUsersChann', props.dest.Loc);
+        // afficher liste
+    }
+
+    return (
+        <ul className="dropdownParams">
+            <li className="paramItem">
+                <button onClick={listMembers}>Members</button>
+            </li>
+            {props.dest.channel?.inviteOnly ? (
+                <li className="paramItem">
+                    <button onClick={inviteUser}>Invite</button>
+                </li>
+            ) : null}
+            {props.dest.isOp ? (
+                <li className="paramItem">
+                    <button onClick={kickUser}>Kick</button>
+                </li>
+            ) : null}
+            <li className="paramItem">
+                <button onClick={leaveChannel}>Leave</button>
+            </li>
+        </ul>
+    )
+}
+
+function ParamsDM(props: {handleClose: any}) {
+    const {socket} = useContext(SocketContext);
+    const ref = useRef<HTMLDivElement>(null);
+
+    const addFriend = () => {
+
+    }
+
+    const block = () => {
+
+    }
+
+    useEffect(() => {
+        const handleClickOutside = (e: any) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                props.handleClose();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+    }, [ref]);
+
+    return (
+        <div className="dropdown" ref={ref}>
+            <ul className="paramMenu">
+                <li className="paramItem">
+                    <button>See profile</button>
+                </li>
+                <li className="paramItem">
+                    <button onClick={addFriend}>Add Friend</button>
+                </li>
+                <li className="paramItem">
+                    <button>Propose a game</button>
+                </li>
+                <li className="paramItem">
+                    <button onClick={block}>Block</button>
+                </li>
+            </ul>
+        </div>
+    )
+}
+
+function Header(props: {dest: IDest}) {
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const isChannel: boolean = props.dest.isChannel;
 
     const onClick = () => {
         setIsOpen((prevSate) => !prevSate);
     };
 
-    const leaveChannel = () => {
-        socket.emit('leaveChannel', props.Loc);
-    }
-
     return (
         <div className="channelHeader">
-            <h1>{props.Loc}</h1>
+            <h1>{props.dest.Loc}</h1>
             <button className="gear" onClick={onClick}>&#9881;</button>
-            {isOpen && (
-                <ul className="dropdownParams">
-                    <li className="paramItem">
-                        <button onClick={leaveChannel}>Leave</button>
-                    </li>
-                    {
-
-                    }
-                    <li className="paramItem">
-                        <button>Menu 2</button>
-                    </li>
-                </ul>
-            )}
+            {isOpen && (isChannel ? <ParamsChannel /> : <ParamsDM handleClose={onClick} />)}
         </div>
     )
 }
@@ -141,8 +213,8 @@ class SearchChat extends React.Component<IChat, {
         this.fetchChannels();
         this.fetchUsers();
 
-        this.props.socket!.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
-            console.log('socket ON newLocChannel', channel, isOp, chanHistory);
+        this.props.socket!.on('', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
+            console.log('socket ON ', channel, isOp, chanHistory);
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
@@ -165,7 +237,7 @@ class SearchChat extends React.Component<IChat, {
     componentWillUnmount(): void {
         this.props.socket!.off('listChannel');
         this.props.socket!.off('newUserConnected');
-        this.props.socket!.off('newLocChannel');
+        this.props.socket!.off('');
         this.props.socket!.off('newLocPrivate');
     }
 
@@ -395,7 +467,7 @@ class SendMessageForm extends React.Component<IChat, {text: string}> {
     }
 }
 
-export default class ChatModule extends React.Component<{}, IChat> {
+export default class ChatModule extends React.Component<{}, {dest: IDest, history: Message[]}> {
     constructor(props : {}) {
         super(props);
         this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
