@@ -5,6 +5,7 @@ import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
 import CreateChannel from "./CreateChannel"
+import { Box, Checkbox, Switch, Button } from '@mui/material';
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
@@ -41,15 +42,33 @@ function Header(props: IDest) {
     )
 }
 
-class SearchElement extends React.Component<{socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}, {}> {
-    constructor(props: {socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}) {
+class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, close: any, channelName: string}, {}> {
+    constructor(props: {socket: Socket, open: boolean, close: any, channelName: string}) {
         super(props);
-        this.onClickChatting = this.onClickChatting.bind(this);
-        this.onClickJoin = this.onClickJoin.bind(this);
     }
 
-    onClickJoin(event: any) {
+    render() {
+        return (
+            <div>
+                {this.props.open &&
+                    <Box>
+                        
+                    </Box>}
+            </div>
+        )
+    }
+}
 
+class SearchElement extends React.Component<{socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}, {openPopup: boolean}> {
+    constructor(props: {socket: Socket, reset: any, name: string, isChannel: boolean, isClickable: boolean}) {
+        super(props);
+        this.state = {openPopup : false};
+        this.onClickChatting = this.onClickChatting.bind(this);
+        this.changeStateOpenPopup = this.changeStateOpenPopup.bind(this);
+    }
+
+    changeStateOpenPopup(event: any) {
+        this.setState({openPopup : !this.state.openPopup});
     }
 
     onClickChatting(event: any) {
@@ -61,7 +80,7 @@ class SearchElement extends React.Component<{socket: Socket, reset: any, name: s
         return(
         <li className="searchElement">
             {this.props.isClickable && this.props.isChannel
-                && <button className="buttonJoinChannel" onClick={this.onClickJoin}>{this.props.name}</button>}
+                && <button className="buttonJoinChannel" onClick={this.changeStateOpenPopup}>{this.props.name}</button>}
             {this.props.isClickable && !this.props.isChannel
                 && <button className="buttonUserChat" onClick={this.onClickChatting}>{this.props.name}</button>}
             {!this.props.isClickable && <p>{this.props.name}</p>}
@@ -211,7 +230,7 @@ class SearchChat extends React.Component<IChat, {
 
 class ChannelList extends React.Component<IChat, {
     channels: string[],
-    dms: string[],
+    dms: {login: string, connected: boolean}[],
     me: JwtPayload}> {
     constructor(props: IChat) {
         super(props);
@@ -232,17 +251,19 @@ class ChannelList extends React.Component<IChat, {
         if (this.state.dms.length === 0)
         {
             this.props.socket!.emit('myDM');
-            this.props.socket!.on('listMyDM', (strs: string[]) => { console.log("DM", strs), this.setState({ dms: strs }) });
+            this.props.socket!.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
+                console.log("DM", strs);
+                this.setState({ dms: strs }) });
         }
 
-        this.props.socket!.on('checkNewDM', (login: string) => {
-            let sorted = new Set<string>;
+        this.props.socket!.on('checkNewDM', (login: string, connected: boolean) => {
+            let sorted = new Map<string, boolean>();
             for (let elt of this.state.dms) {
-                sorted.add(elt);
+                sorted.set(elt.login, elt.connected);
             }
-            sorted.add(login);
-            let nextState: string[] = [];
-            sorted.forEach( (dm) => nextState.push(dm));
+            sorted.set(login, connected);
+            let nextState: {login: string, connected: boolean}[] = [];
+            sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
             this.setState({dms: nextState});
         })
     }
@@ -270,9 +291,9 @@ class ChannelList extends React.Component<IChat, {
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
-                        { this.state.dms.map((dm) => { 
-                            if (this.state.me.login !== dm)
-                            { return (<li key={dm} onClick={() => this.changeLoc({Loc: dm, isChannel: false})}> {dm}</li> ) }
+                        { this.state.dms.map((dm, id) => { 
+                            if (this.state.me.login != dm.login)
+                            { return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : ''}</li> ) }
                         })}
                     </ul>
                 </React.Fragment>
