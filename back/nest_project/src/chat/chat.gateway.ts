@@ -116,6 +116,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
                 this.chatService.listChannelEvent(client, user.login);
         })
     }
+
+    @SubscribeMessage('listUsersChann')
+    handlelistUsersChann(@MessageBody() channelName: string, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listUsersInChannel(client, channelName);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
     
     @SubscribeMessage('joinChannel')
     handleJoinChannel(@MessageBody() data: {channelName: string, channelPass: string}, @ConnectedSocket() client: Socket) {
@@ -208,7 +219,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.listMyDMEvent(client, user.login);
+                this.chatService.listMyDMEvent(client, user.login, this.chatRoomHandler);
         })
     }
 

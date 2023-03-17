@@ -93,7 +93,7 @@ export class ChatService {
         console.log(login);
         client.emit("changeLocChannel", "general", []);
         chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('newUserConnected');
+            socket.emit('userConnected', login);
         })
         logger.log(`${login} is connected, ${client.id}`);
     }
@@ -103,6 +103,9 @@ export class ChatService {
         let room = roomHandler.delUser(login);
         if (room != undefined)
             roomHandler.roomMap.of(room).emit('notice', login, " just disconnect");
+        chatNamespace.sockets.forEach( (socket) => {
+            socket.emit('userDisconnected', login);
+        })
         logger.log(`${login} is disconnected`);
     }
 
@@ -123,10 +126,13 @@ export class ChatService {
             else {
                 this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
                 client.emit('selfMessage', toSend);
-                client.emit('checkNewDM', room.room);
+                let connected = false;
                 let dest = roomHandler.userMap.get(room.room);
+                if (dest != undefined)
+                    connected = true;
+                client.emit('checkNewDM', room.room, connected);
                 if (dest != undefined) {
-                    dest.socket.emit('checkNewDM', login);
+                    dest.socket.emit('checkNewDM', login, true);
                     if (!dest.isChannel && dest.room == login)
                         dest.socket.emit("newMessage", toSend);
                     else
@@ -244,19 +250,32 @@ export class ChatService {
         )
     }
 
-    public listMyDMEvent(client: Socket, login: string) {
+    public listMyDMEvent(client: Socket, login: string, roomHandler: UserRoomHandler) {
         this.messageService.findAllDialogByUserName(login)
         .then((raws) => {
-            let sorted = new Set<string>;
+            let sorted = new Map<string, boolean>();
             for (let raw of raws) {
+                let user;
                 if (raw.room != login || raw.room == raw.sender)
-                    sorted.add(raw.room);
+                    user = raw.room;
                 else
-                    sorted.add(raw.sender);                        
+                    user = raw.sender;
+                let connected = roomHandler.userMap.get(user);
+                if (connected != undefined)
+                    sorted.set(user, true);
+                else
+                    sorted.set(user, false);
             }
-            let arrayDM: string[] = [];
-            sorted.forEach((str) => arrayDM.push(str));
+            let arrayDM: {login: string, connected: boolean}[] = [];
+            sorted.forEach((connected, login) => arrayDM.push({login: login, connected: connected}));
             client.emit('listMyDM', arrayDM);
+        })
+    }
+
+    public listUsersInChannel(client: Socket, channel: string) {
+        this.linkUCService.findAllByChannelName(channel)
+        .then((list) => {
+            client.emit('listUsersChann', list);
         })
     }
 
