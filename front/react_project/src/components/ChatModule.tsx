@@ -9,7 +9,6 @@ import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChann
 import { JwtPayload } from "jsonwebtoken";
 
 function Header(props: IDest) {
-
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const {socket} = useContext(SocketContext);
 
@@ -122,14 +121,14 @@ class SearchChat extends React.Component<IChat, {
         this.fetchChannels();
         this.fetchUsers();
 
-        this.props.socket!.on('newLocChannel', (chanName: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
-            console.log('socket ON newLocChannel', chanName, chanHistory);
+        this.props.socket!.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
+            console.log('socket ON newLocChannel', channel, isOp, chanHistory);
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
             this.props.action(newHistory);
-            this.props.action2({Loc: chanName, isChannel: true});
+            this.props.action2({Loc: channel.channelName, isChannel: true, channel: channel, isOp: isOp});
         })
 
         this.props.socket!.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {

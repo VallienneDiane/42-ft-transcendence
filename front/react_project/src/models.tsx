@@ -71,6 +71,8 @@ export interface IMessageToSend {
 export interface IDest {
   Loc: string;
   isChannel: boolean;
+  channel?: IChannel;
+  isOp?: boolean;
 };
 
 export interface IChat {
