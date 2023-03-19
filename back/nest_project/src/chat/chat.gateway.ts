@@ -10,6 +10,7 @@ import { useContainer } from "class-validator";
 import { UserService } from "src/user/user.service";
 import { UserDto } from "src/user/user.dto";
 import { JwtService } from '@nestjs/jwt';
+import { ChannelEntity } from "./channel/channel.entity";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -151,7 +152,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('createChannel')
-    handleCreateChannel(@MessageBody() data: IChannel, @ConnectedSocket() client: Socket) {
+    handleCreateChannel(@MessageBody() data: ChannelEntity, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)

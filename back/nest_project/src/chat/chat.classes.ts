@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { ChannelEntity } from "./channel/channel.entity";
 
 class Room {
     private c: Map<string, Socket>;
@@ -173,9 +174,21 @@ export class UserRoomHandler {
     }
 
     public roomKill(channelName: string) {
+        let locGeneral: ChannelEntity = {
+            id: -1,
+            name: 'general',
+            date: new Date(),
+            password: false,
+            channelPass: null,
+            opNumber: 0,
+            inviteOnly: false,
+            persistant: true,
+            onlyOpCanTalk: false,
+            hidden: false
+        }
         this.roomMap.of(channelName).forEach( (socket, user) => {
             this.userMap.userChangeRoom(user, 'general', true, false, false);
-            socket.emit('newLocChannel', 'general', []);
+            socket.emit('newLocChannel', locGeneral, false, []);
         })
         this.roomMap.movingAway(channelName, 'general');
     }
