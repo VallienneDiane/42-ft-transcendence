@@ -9,11 +9,14 @@ import { Box, Checkbox, Switch, Button } from '@mui/material';
 import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
-function ParamsChannel(props: {dest: IDest}) {
+function ParamsChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
+    const ref = useRef<HTMLDivElement>(null);
+    const [members, setMembers] = useState<string[]>([]);
 
     const leaveChannel = () => {
         socket.emit('leaveChannel', props.dest.Loc);
+        props.handleClose();
     }
 
     const inviteUser = () => {
@@ -26,30 +29,50 @@ function ParamsChannel(props: {dest: IDest}) {
         socket.emit('kickUser', "nami", props.dest.Loc);
     }
 
-    const listMembers = () => {
+    useEffect(() => {
         socket.emit('listUsersChann', props.dest.Loc);
-        // afficher liste
-    }
+        socket.on('listUsersChann', (list: string[]) => {
+            setMembers(list);
+        })
+        const handleClickOutside = (e: any) => {
+            if (ref.current && !ref.current.contains(e.target)) {
+                props.handleClose();
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            socket.off('listUsersChann');
+        }
+    }, [ref]);
 
     return (
-        <ul className="dropdownParams">
-            <li className="paramItem">
-                <button onClick={listMembers}>Members</button>
-            </li>
-            {props.dest.channel?.inviteOnly ? (
-                <li className="paramItem">
-                    <button onClick={inviteUser}>Invite</button>
+        <div className="popupBox">
+        <div className="box" ref={ref}>
+          <span className="closeIcon" onClick={props.handleClose}>x</span>
+            <h1>{props.dest.Loc}</h1>
+            <h2>Members</h2>
+            <ul>{members.map((member) => {return (
+                <li>{member}</li>
+            )})}
+            </ul>
+            <ul>
+                {props.dest.channel?.inviteOnly ? (
+                    <li>
+                        <button onClick={inviteUser}>Invite</button>
+                    </li>
+                ) : null}
+                {props.dest.isOp ? (
+                    <li>
+                        <button onClick={kickUser}>Kick</button>
+                    </li>
+                ) : null}
+                <li>
+                    <button onClick={leaveChannel}>Leave</button>
                 </li>
-            ) : null}
-            {props.dest.isOp ? (
-                <li className="paramItem">
-                    <button onClick={kickUser}>Kick</button>
-                </li>
-            ) : null}
-            <li className="paramItem">
-                <button onClick={leaveChannel}>Leave</button>
-            </li>
-        </ul>
+            </ul>
+        </div>
+      </div>
     )
 }
 
@@ -108,8 +131,8 @@ function Header(props: {dest: IDest}) {
     return (
         <div className="channelHeader">
             <h1>{props.dest.Loc}</h1>
-            <button className="gear" onClick={onClick}>&#9881;</button>
-            {isOpen && (isChannel ? <ParamsChannel dest={props.dest}/> : <ParamsDM handleClose={onClick} />)}
+            <button className="gear" onClick={onClick}>+</button>
+            {isOpen && (isChannel ? <ParamsChannel dest={props.dest} handleClose={onClick}/> : <ParamsDM handleClose={onClick} />)}
         </div>
     )
 }
@@ -190,7 +213,7 @@ class SearchChat extends React.Component<IChat, {
         .then(response => {
             const playload: JwtPayload = accountService.readPayload()!;
             const users = response.data.map((user: UserData) => user.login);
-            let newUserList: {name:string, isChannel:boolean, isClickable: boolean}[] = [];
+            let newUserList: {name: string, isChannel: boolean, isClickable: boolean}[] = [];
             users.forEach((user: string) => {
                 if (playload.login !== user)
                     newUserList.push({name: user, isChannel: false, isClickable: true});
@@ -215,12 +238,13 @@ class SearchChat extends React.Component<IChat, {
 
         this.props.socket!.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
             console.log('socket ON ', channel, isOp, chanHistory);
+            console.log(channel.name, channel.onlyOpCanTalk);
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
             this.props.action(newHistory);
-            this.props.action2({Loc: channel.channelName, isChannel: true, channel: channel, isOp: isOp});
+            this.props.action2({Loc: channel.name, isChannel: true, channel: channel, isOp: isOp});
         })
 
         this.props.socket!.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {

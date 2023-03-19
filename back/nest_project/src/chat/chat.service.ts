@@ -275,7 +275,10 @@ export class ChatService {
     public listUsersInChannel(client: Socket, channel: string) {
         this.linkUCService.findAllByChannelName(channel)
         .then((list) => {
-            client.emit('listUsersChann', list);
+            let users: string[] = [];
+            for (let l of list) {
+                users.push(l.userName);}
+            client.emit('listUsersChann', users);
         })
     }
 
