@@ -17,11 +17,7 @@ const ProtectedRoutes = () => {
                 disconnect();
                 createSocket();
             }
-        }
-        socket.on("test", () => {
-            console.log("Id", socket.id);
-          });
-    })
+        }})
 
     return accountService.isLogged() ? <Outlet/> : <Navigate to="/login"/>;
 }

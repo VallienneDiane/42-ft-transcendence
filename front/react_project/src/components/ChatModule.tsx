@@ -50,27 +50,25 @@ function ParamsChannel(props: {dest: IDest, handleClose: any}) {
         <div className="popupBox">
         <div className="box" ref={ref}>
           <span className="closeIcon" onClick={props.handleClose}>x</span>
+          <div className="bloc1">
             <h1>{props.dest.Loc}</h1>
-            <h2>Members</h2>
-            <ul>{members.map((member) => {return (
-                <li>{member}</li>
-            )})}
-            </ul>
-            <ul>
+            <div className="blocMemberList">
+                <h2>Members</h2>
+                <ul className="memberList">{members.map((member) => {return (
+                    <li>{member}</li>
+                )})}
+                </ul>
+            </div>
+            <div className="bloc2">
                 {props.dest.channel?.inviteOnly ? (
-                    <li>
-                        <button onClick={inviteUser}>Invite</button>
-                    </li>
+                <button onClick={inviteUser}>Invite</button>
                 ) : null}
                 {props.dest.isOp ? (
-                    <li>
-                        <button onClick={kickUser}>Kick</button>
-                    </li>
+                <button onClick={kickUser}>Kick</button>
                 ) : null}
-                <li>
-                    <button onClick={leaveChannel}>Leave</button>
-                </li>
-            </ul>
+            </div>
+          </div>
+            <button onClick={leaveChannel}>Leave</button>
         </div>
       </div>
     )
@@ -234,7 +232,6 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.fetchChannels = this.fetchChannels.bind(this);
         this.fetchUsers = this.fetchUsers.bind(this);
         this.displayList = this.displayList.bind(this);
-        this.onClick = this.onClick.bind(this);
         this.resetFiltered = this.resetFiltered.bind(this);
         this.handlerOpenPassPopup = this.handlerOpenPassPopup.bind(this);
         this.handlerClosePassPopup = this.handlerClosePassPopup.bind(this);
@@ -347,12 +344,6 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         else {
             this.setState({filtered: []});
         }
-    }
-    
-    onClick(event: any) {
-        let newLocWanted: IDest = {Loc: event.target.innerHTML, isChannel: event.target.value? true : false};
-        this.props.socket?.emit('changeLoc', newLocWanted);
-        this.setState({text: '', filtered: []});
     }
 
     resetFiltered() {
