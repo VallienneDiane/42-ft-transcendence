@@ -16,14 +16,6 @@ interface BallProps {
     r: number,
 }
 
-
-const BALL_RADIUS = 15;
-// const CONTAINER_HEIGHT = window.innerHeight;
-// const CONTAINER_WIDTH = window.innerWidth;
-
-
-
-
 const BallContainer = (props) => {
     const Ball = (ball: BallProps) => {
         return (
@@ -46,8 +38,8 @@ const BallContainer = (props) => {
 }
 
 const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WIDTH: number, pageElements: DOMRect[]) => {
-    const G = 0.01;
-    const damping = 0.998;
+    const gravity = 0.01;
+    const frottement = 0.998;
     const restitution = 0.98;
     
     for (let i = 0; i < balls.length; i++) {
@@ -55,17 +47,16 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         const bottom = CONTAINER_HEIGHT - ball.r;
         const left_wall = -CONTAINER_WIDTH / 2 + ball.r;
         const right_wall = CONTAINER_WIDTH / 2 - ball.r;
-        ball.vy += G;// * dt;
-        ball.vx *= damping;
-        ball.vy *= damping;
+        ball.vy += gravity;// * dt;
+        ball.vx *= frottement;
+        ball.vy *= frottement;
         ball.x += ball.vx;// * dt;
         ball.y += ball.vy;// * dt;
         
         ///////// COLLISION WITH ELEMENTS
-        // console.log(pageElements);
         for (let j = 0; j < pageElements.length; j++) {
             /// TOP
-            if ((ball.y > pageElements[j].top - ball.r - 5 && ball.y < pageElements[j].top - ball.r + 15) && (ball.x > pageElements[j].left - CONTAINER_WIDTH / 2 && ball.x < pageElements[j].right - CONTAINER_WIDTH / 2)) {
+            if ((ball.y > pageElements[j].top - ball.r - 5 && ball.y < pageElements[j].top - ball.r + 15) && (ball.x > pageElements[j].left - CONTAINER_WIDTH / 2 - 7 && ball.x < pageElements[j].right - CONTAINER_WIDTH / 2 + 7)) {
                 ball.y = pageElements[j].top - ball.r - 5;
                 ball.vy *= -restitution;
                 ball.y += ball.vy;
@@ -89,11 +80,6 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
                 ball.x += ball.vx;
             }
         }
-        // if ((ball.y < titleBox.bottom && ball.y > titleBox.top - ball.r + 3) && (ball.x - ball.r < titleBox.right - CONTAINER_WIDTH / 2 && ball.x - ball.r > titleBox.right - CONTAINER_WIDTH / 2 - 0.1 * titleBox.width)) {
-        //     ball.x = titleBox.right - CONTAINER_WIDTH / 2 ;
-        //     ball.vx *= -restitution;
-        //     ball.x += ball.vx;
-        // }
         
         ///////// COLLISION WITH BORDER OF SCREEN
         if (ball.x < left_wall) {
@@ -110,7 +96,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         //////// WHEN BALL OUT OF SCREEN, DELETE IT AND RECREATE ANOTHER
         if (ball.y > CONTAINER_HEIGHT + ball.r / 2) {
             balls.splice(i, 1);
-            let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - BALL_RADIUS / 2) + BALL_RADIUS / 2;
+            let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - ball.r / 2) + ball.r / 2;
             let y = Math.random() * -1000;
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
@@ -174,6 +160,8 @@ const Home: React.FC = () => {
     const [linkChatBox, setLinkChatBox] = useState<DOMRect>();
     const [pageElements, setPageElements] = useState<DOMRect[]>([]);
 
+    const [hover, setHover] = useState<number>(1);
+
     useEffect(() => {
         function getElementDim() {
             const element1 = h1_title.current;
@@ -185,13 +173,13 @@ const Home: React.FC = () => {
                 setLinkChatBox(element3.getBoundingClientRect());
             }
         }
-        // getElementDim();
+        getElementDim();
         window.addEventListener('resize', getElementDim);
         
         return () => {
             window.removeEventListener('resize', getElementDim);
         };
-    }, [])
+    }, [hover])
     
     useEffect(() => {
         setPageElements([titleBox!, linkGameBox!, linkChatBox!]);
@@ -217,8 +205,8 @@ const Home: React.FC = () => {
     useEffect(() => {
         const initBalls: BallProps[] = [];
 
-        for (let i = 0; i < 15; i++) {
-            let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - BALL_RADIUS / 2) + BALL_RADIUS / 2;
+        for (let i = 0; i < 20; i++) {
+            let x = (Math.random() - 0.5) * CONTAINER_WIDTH;
             let y = Math.random() * -1000;
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
@@ -252,6 +240,18 @@ const Home: React.FC = () => {
         }
     }, [balls, CONTAINER_HEIGHT, CONTAINER_WIDTH, pageElements]);
 
+    const onHoverGame = () => {
+        pageElements.splice(1, 1);
+    }
+
+    const onHoverChat = () => {
+        pageElements.splice(2, 1);
+    }
+
+    const mouseLeave = () => {
+        setHover(-hover);
+    }
+
     return (
         <div id="Home">
             <BallContainer balls={balls} CONTAINER_HEIGHT={CONTAINER_HEIGHT} CONTAINER_WIDTH={CONTAINER_WIDTH}/>
@@ -266,9 +266,14 @@ const Home: React.FC = () => {
             {/* <SearchUserBar/> */}
             {/* <p>Ici on aura les boutons pour rejoindre des parties etc</p> */}
             <div id="links">
-                
-                <NavLink ref={link_game} className="navLink" to="/game">Affronte tes amis ou regarde une partie en cours !</NavLink>
-                <NavLink ref={link_chat} className="navLink" to="/chat">Viens discuter sur le Chat</NavLink>
+                <div>
+                    <NavLink ref={link_game} onMouseEnter={onHoverGame} onMouseLeave={mouseLeave} className="navLink" to="/game">GAME</NavLink>
+                    <div className="shadow"></div>
+                </div>
+                <div>
+                    <NavLink ref={link_chat} onMouseEnter={onHoverChat} onMouseLeave={mouseLeave} className="navLink" to="/chat">CHAT</NavLink>
+                    <div className="shadow"></div>
+                </div>
             </div>
         </div>
     )
