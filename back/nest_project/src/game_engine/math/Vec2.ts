@@ -1,7 +1,7 @@
 export class Vec2 {
 
-	x;
-	y;
+	x: number;
+	y: number;
 
 	constructor(x, y) {
 		this.x = x;
@@ -17,55 +17,30 @@ export class Vec2 {
 		this.y = y;
 	}
 
-	get length() {
+	mag() {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
 
-	get sqlengh() {
-		return (this.x * this.x + this.y * this.y);
-	}
-
 	add(v: Vec2) {
-		this.x += v.x;
-		this.y += v.y;
-	}
-
-	addr(v: Vec2) {
 		return new Vec2(this.x + v.x, this.y + v.y);
 	}
 
 	sub(v: Vec2) {
-		this.x -= v.x;
-		this.y -= v.y;
-	}
-
-	subr(v: Vec2) {
 		return new Vec2(this.x - v.x, this.y - v.y);
 	}
 
 	mult(x): Vec2 {
-		this.x *= x;
-		this.y *= x;
-		return this;
-	}
-
-	div(x) {
-		this.x /= x;
-		this.y /= x;
-	}
-	
-	set Magnitude(m) {
-		if (this.length === 0) return;
-		this.mult(m / this.length);
+		return new Vec2(this.x * x, this.y * x);
 	}
 
 	normalize(): Vec2 {
-		if (this.length === 0) return;
-		return (new Vec2(this.x / this.length, this.y / this.length));
+		if (this.mag() === 0)
+			return (new Vec2(0, 0))
+		return (new Vec2(this.x / this.mag(), this.y / this.mag()));
 	}
 
-	dot(v: Vec2) {
-		return (this.x * v.x + this.y * v.y);
+	static dot(v1: Vec2, v2: Vec2) {
+		return (v1.x * v2.x + v1.y * v2.y);
 	}
 
 }
