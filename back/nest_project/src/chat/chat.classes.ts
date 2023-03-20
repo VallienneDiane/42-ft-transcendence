@@ -156,6 +156,13 @@ class UserRoomMap {
             user.socket.emit(ev, ...args);
         });
     }
+
+    public emitExcept(ev: string, exceptName: string, ...args: any[]) {
+        this.users.forEach((user, name) => {
+            if (exceptName != name)
+                user.socket.emit(ev, ...args);
+        });
+    }
 }
 
 export class UserRoomHandler {

@@ -465,14 +465,14 @@ export class ChatService {
                     client.emit('channelCreated', succeed.name);
                     if (!succeed.hidden) {
                         this.channelService.listChannels().then( (list) => {
-                            let strs: string[] = [];
+                            let strs: {channelName: string, password: boolean}[] = [];
                             for (let l of list) {
-                                strs.push(l.name);}
-                            roomHandler.userMap.emit('listChannel', strs)
+                                strs.push({channelName: l.name, password: l.password});}
+                            roomHandler.userMap.emitExcept('listChannel', login, strs);
                         })
                     }
                     this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
-                    .then( (channLink) => {
+                    .then( () => {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
                             logger.debug(`list of channel joined by ${login} : `);
                             console.log(result)});
