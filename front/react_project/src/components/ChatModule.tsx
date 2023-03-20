@@ -5,8 +5,8 @@ import SocketContext from "./context";
 import { Socket } from 'socket.io-client'
 import { userService } from "../services/user.service";
 import CreateChannel from "./CreateChannel"
-import { Box, Checkbox, Switch, Button } from '@mui/material';
-import { IChat, UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
+import { Box } from '@mui/material';
+import { UserData, IMessageToSend, Message, IDest, IMessageEntity, IChannel } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 
 function ParamsChannel(props: {dest: IDest, handleClose: any}) {
@@ -131,7 +131,7 @@ function Header(props: {dest: IDest}) {
     return (
         <div className="channelHeader">
             <h1>{props.dest.Loc}</h1>
-            <button className="gear" onClick={onClick}>+</button>
+            {props.dest.Loc !== "general" && <button className="gear" onClick={onClick}>+</button>}
             {isOpen && (isChannel ? <ParamsChannel dest={props.dest} handleClose={onClick}/> : <ParamsDM handleClose={onClick} />)}
         </div>
     )
@@ -213,7 +213,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, r
     }
 }
 
-class SearchChat extends React.Component<IChat, {
+class SearchChat extends React.Component<{action: any, action2: any, socket: Socket}, {
     text: string,
     openPopupEnterPass: boolean,
     channelToUnlock: string,
@@ -221,7 +221,7 @@ class SearchChat extends React.Component<IChat, {
     channels: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
     filtered: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[]}
     > {
-    constructor(props: IChat) {
+    constructor(props:{action: any, action2: any, socket: Socket}) {
         super(props);
         this.state = {
             text: '',
@@ -379,11 +379,11 @@ class SearchChat extends React.Component<IChat, {
     }
 }
 
-class ChannelList extends React.Component<IChat, {
+class ChannelList extends React.Component<{socket: Socket}, {
     channels: string[],
     dms: {login: string, connected: boolean}[],
     me: JwtPayload}> {
-    constructor(props: IChat) {
+    constructor(props: {socket: Socket}) {
         super(props);
         this.state = {channels: [], dms: [], me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
@@ -471,8 +471,8 @@ function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
     )
 }
 
-class MessageList extends React.Component<IChat, {}> {
-    constructor(props: IChat) {
+class MessageList extends React.Component<{history: Message[], action: any, socket: Socket}, {}> {
+    constructor(props: {history: Message[], action: any, socket: Socket}) {
         super(props);
     }
 
@@ -513,8 +513,8 @@ class MessageList extends React.Component<IChat, {}> {
     }
 }
 
-class SendMessageForm extends React.Component<IChat, {text: string}> {
-    constructor(props: IChat) {
+class SendMessageForm extends React.Component<{dest: IDest, socket: Socket}, {text: string}> {
+    constructor(props: {dest: IDest, socket: Socket}) {
         super(props);
         this.state = { text: '' };
         this.handleMessage = this.handleMessage.bind(this);
@@ -585,11 +585,11 @@ export default class ChatModule extends React.Component<{}, {dest: IDest, histor
                                     <SearchChat socket={socket} action={this.handleHistory} action2={this.changeLoc} />
                                     <CreateChannel />
                                 </div>
-                                <ChannelList action={this.changeLoc} action2={this.handleHistory} socket={socket} />
+                                <ChannelList socket={socket} />
                             </div>
                             <div className="chatMessageWrapper">
                                 <Header dest={this.state.dest} />
-                                <MessageList dest={this.state.dest} history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
+                                <MessageList history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
                                 <SendMessageForm dest={this.state.dest} socket={socket}/>
                             </div>
                         </div>)}
