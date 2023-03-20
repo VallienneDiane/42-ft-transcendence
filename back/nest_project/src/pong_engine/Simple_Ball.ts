@@ -13,8 +13,8 @@ export class Simple_ball {
     constructor () {
         this.x_position = 0.5 * this.apesct_ratio;
         this.y_position = 0.5;
-        this.x_speed = (1/60) * this.apesct_ratio;
-        this.y_speed = Math.random()/60;
+        this.x_speed = (1/120) * this.apesct_ratio;
+        this.y_speed = Math.random()/120;
         this.r = 0.06;
         this.state = "alive";
     }
@@ -89,8 +89,8 @@ export class Simple_ball {
             this.y_speed = -this.y_speed;
         }
 
-        /* check collision with paddle one */
-        if (this.x_position - this.r < p1.x_position && this.simple_collide_check(p1)) {
+        /* check collision with paddle one && this.simple_collide_check(p1)*/
+        if (this.x_position - this.r < p1.x_position) {
             let collide_point = this.find_collide_point(p1);
             if (this.x_position < p1.x_position) {
                 this.x_position += (Math.abs(this.x_position - p1.x_position)) * 2;
@@ -100,8 +100,8 @@ export class Simple_ball {
             this.y_speed = ((collide_point - ((p1.y_position + p1.lenght) / 2)) / (p1.lenght / 2)) * 1/60;
         }
 
-        /* check collision with paddle two */
-        if (this.x_position + this.r > p2.x_position && this.simple_collide_check(p2)) {
+        /* check collision with paddle two && this.simple_collide_check(p2)*/
+        if (this.x_position + this.r > p2.x_position) {
             let collide_point = this.find_collide_point(p2);
             if (this.x_position > p1.x_position) {
                 this.x_position -= (Math.abs(this.x_position - p2.x_position)) * 2;
