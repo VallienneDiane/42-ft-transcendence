@@ -53,7 +53,8 @@ const LoginForm: React.FC = () => {
             // name="password"
             // required
             />
-            <button type="submit">Submit</button>
+            <button id="submit" type="submit">Submit</button>
+            <button id="signin42"><a  href="/login42">Sign in with 42 !</a></button>
             <a href="/signup">Not registered ? Sign Up !</a>
         </form>
         </div>
