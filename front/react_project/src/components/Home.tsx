@@ -5,7 +5,7 @@ import { UserContext } from "../user/UserContext";
 import {User} from "../models";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { useSpring, animated } from "react-spring";
+//import { useSpring, animated } from "react-spring";
 import SearchUserBar from "./SearchUserBar";
 
 interface BallProps {
@@ -19,7 +19,7 @@ interface BallProps {
 const BallContainer = (props) => {
     const Ball = (ball: BallProps) => {
         return (
-            <animated.circle className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad)"/> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
+            <circle className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad)"/> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
         );
     }
     return (
