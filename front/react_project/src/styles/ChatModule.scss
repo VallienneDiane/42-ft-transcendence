@@ -268,13 +268,27 @@
 	background: #ffffff;
 	border-radius: 4px;
 	padding: 20px;
-	border: 1px solid #ff0000;
+	border: 1px solid #d8d8d8;
 	overflow: auto;
 	color: black;
 }
 
 .box > h1 {
 	font-size: 30px;
+}
+
+.bloc1 {
+	display: flex;
+	flex-direction: row;
+}
+
+.blocMemberList {
+	display: flex;
+	flex-direction: column;
+}
+
+.memberList {
+	padding: 5px 0;
 }
    
 .close-icon {

@@ -286,7 +286,7 @@ export class ChatService {
         })
     }
 
-    public joinChannelEvent(client: Socket, login: string, data: {channelName: string, channelPass: string}) {
+    public joinChannelEvent(client: Socket, login: string, data: {channelName: string, channelPass: string}, roomHandler: UserRoomHandler) {
         this.linkUCService.findOne(data.channelName, login)
         .then ( (exist) => {
             if (exist != null)
@@ -298,7 +298,9 @@ export class ChatService {
                         if (!chan.inviteOnly) {
                             if (!chan.password || data.channelPass == chan.channelPass) {
                                 this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
-                                .then( () => this.listMyChannelEvent(client, login));
+                                .then( () => { this.listMyChannelEvent(client, login);
+                                    this.changeLocEvent(client, login, data.channelName, true, roomHandler);
+                                });
                             }
                             else
                                 client.emit('notice', 'Wrong channel password');
@@ -476,7 +478,9 @@ export class ChatService {
                         this.linkUCService.findAllByUserName(login).then( (result) => {
                             logger.debug(`list of channel joined by ${login} : `);
                             console.log(result)});
-                        this.listMyChannelEvent(client, login)});
+                        this.listMyChannelEvent(client, login);
+                        this.changeLocEvent(client, login, channel.name, true, roomHandler);
+                        });
                 })
             }
             else
