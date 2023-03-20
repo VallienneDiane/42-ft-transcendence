@@ -43,13 +43,12 @@ export class AuthService {
   //generate secret use for google authentificator
   //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
   async generateQRcode(id: number) {
-    const user = await this.userService.findById(id);
-    const secret = speakeasy.generateSecret( {
+    const secretInfos = speakeasy.generateSecret( {
       name: "App Transcendence"
     });
-    await this.userService.set2faSecret(secret.ascii, id);
-    const QRcode = await qrcode.toDataURL(secret.otpauth_url);
-    await this.userService.setQrCode(QRcode, user.id);
+    await this.userService.set2faSecret(secretInfos.ascii, id);
+    const QRcode = await qrcode.toDataURL(secretInfos.otpauth_url);
+    await this.userService.setQrCode(QRcode, id);
     return (QRcode);
   }
 

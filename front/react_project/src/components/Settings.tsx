@@ -68,7 +68,7 @@ export default function Settings() {
     }
   }
 
-  if(checked == true && is2faActive== false)
+  if(checked == true && (is2faActive == false || is2faActive == null))
   return (
     <div className="toggle2fa">
       <div className="switch">
