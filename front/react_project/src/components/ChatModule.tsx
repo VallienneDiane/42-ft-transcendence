@@ -388,7 +388,9 @@ class ChannelList extends React.Component<{socket: Socket}, {
         if (this.state.channels.length === 0)
         {
             this.props.socket!.emit('myChannels');
-            this.props.socket!.on('listMyChannels', (strs: string[]) => { this.setState({ channels: strs }) });
+            this.props.socket!.on('listMyChannels', (strs: string[]) => { 
+                console.log("new chann list : " , strs);
+                this.setState({ channels: strs }) });
         }
         if (this.state.dms.length === 0)
         {
@@ -407,13 +409,48 @@ class ChannelList extends React.Component<{socket: Socket}, {
             let nextState: {login: string, connected: boolean}[] = [];
             sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
             this.setState({dms: nextState});
+        });
+
+        this.props.socket!.on("userConnected", (login: string) => {
+            let sorted = new Map<string, boolean>();
+            for (let elt of this.state.dms) {
+                sorted.set(elt.login, elt.connected);
+            }
+            sorted.set(login, true);
+            let nextState: {login: string, connected: boolean}[] = [];
+            sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
+            this.setState({dms: nextState});
         })
+
+        this.props.socket!.on("userDisconnected", (login: string) => {
+            let sorted = new Map<string, boolean>();
+            for (let elt of this.state.dms) {
+                sorted.set(elt.login, elt.connected);
+            }
+            sorted.set(login, false);
+            let nextState: {login: string, connected: boolean}[] = [];
+            sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
+            this.setState({dms: nextState});
+        })
+
+        this.props.socket!.on("leaveChannel", (channel: string) => {
+            let sorted = new Set<string>();
+            for (let elt of this.state.channels)
+                sorted.add(elt);
+            sorted.delete(channel);
+            let nextState: string[] = [];
+            sorted.forEach( (chan) => nextState.push(chan));
+            this.setState({channels: nextState});
+        });
     }
 
     componentWillUnmount(): void {
         this.props.socket!.off('listMyChannels');
         this.props.socket!.off('listMyDM');
         this.props.socket!.off('checkNewDM');
+        this.props.socket!.off("leaveChannel");
+        this.props.socket!.off("userConnected");
+        this.props.socket!.off("userDisconnected");
     }
 
     render() {
