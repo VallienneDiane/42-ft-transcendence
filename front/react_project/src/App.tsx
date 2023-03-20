@@ -32,9 +32,9 @@ function App() {
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginForm />} />
               <Route path='/signin' element={<SignupForm />} />
-              <Route path='/' element={<Home />} />
-              <Route path='/game' element={<Game />} />
               <Route element={<ProtectedRoutes/>}>
+                <Route path='/' element={<Home />} />
+                <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:login' element={<Profile />} />
                 <Route path='/chat' element={<ChatModule />} />
