@@ -31,12 +31,12 @@ let enable2fa = () => {
 //verify code submitted by the user
 let verifyCode2fa = (credentials: VerifyCodeForm) => {
     const test = Axios.post('auth/verifyCode', credentials);
-    console.log(test);
     return test;
 }
 //verify code submitted by the user in settings to check token
 let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
-    return Axios.post('auth/verifyCodeSettings', credentials);
+    const result = Axios.post('auth/verifyCodeSettings', credentials);
+    return result;
 }
 //disable 2fa
 let disable2fa = () => {
@@ -75,7 +75,7 @@ let getToken = () => {
     return localStorage.getItem('token');
 }
 
-// Fonction qui decrypt le JWT et retourne un objet contenant les infos crystées dans le JWT (id, login, date expiration du token etc..)
+// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
 let readPayload = () => {
     let token = getToken();
     if (token === null) {

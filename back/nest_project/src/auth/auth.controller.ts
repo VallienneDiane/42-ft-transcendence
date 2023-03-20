@@ -37,10 +37,11 @@ export class AuthController {
   
   @UseGuards(JwtAuthGuard)
   @Post('auth/verifyCodeSettings')
-  async verifyCode2faSettings(@Body() data: VerifyCodeDto) {
-    const user = await this.userService.findByLogin(data.login);
+  async verifyCode2faSettings(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {
+    const userInfos = await this.authService.decodeToken(token);
+    const user = await this.userService.findByLogin(userInfos.login);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
-    const is2faActive = await this.userService.turnOn2fa(user.id);
+    const is2faActive = await this.userService.turnOn2fa(user);
     return {
       is2faActive,
       isCodeValid,
@@ -51,7 +52,7 @@ export class AuthController {
   async verifyCode2fa(@Body() data: VerifyCodeDto) {
     const user = await this.userService.findByLogin(data.login);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
-    const is2faActive = await this.userService.turnOn2fa(user.id);
+    const is2faActive = await this.userService.turnOn2fa(user);
     return {
       is2faActive,
       isCodeValid,

@@ -1,4 +1,5 @@
-* {
+body {
+  background-color: #313456ff;
   box-sizing: border-box;
   margin:0;
   padding:0;
@@ -18,7 +19,8 @@ button:hover {
 }
 
 .App {
-  background-color: rgb(30, 34, 34);
+  display: flex;
+  /* background-color: rgb(75, 29, 138); */
   /* border: 2px black dotted; */
   display:flex;
   align-items: center;
@@ -34,6 +36,7 @@ button:hover {
   height: 100%;
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .App > div > .navbar {
@@ -44,8 +47,9 @@ button:hover {
 .App > div > div {
   width: 100%;
   height: 90%;
-  background-color: rgb(30, 34, 34);
-  color: rgb(114, 211, 179);
+  display: flex;
+  justify-content: center;
+  color: white
 }
 
 /* 
@@ -64,6 +68,7 @@ button:hover {
   align-items: center;
   justify-content: space-around;
   font-size: 20px;
+  background-color: #CDC4E0ff;
   list-style: none;
 }
 
@@ -83,12 +88,14 @@ button:hover {
 }
 
 .login, .signup {
+  background-color: #CDC4E0ff;
   width:100%;
   height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 30px;
 }
 
 .login input, .signup input {
@@ -105,12 +112,12 @@ button:hover {
 .login button {
   width: 200px;
   color:rgb(255, 255, 255);
-  background-color: rgb(0, 0, 0);
+  background-color: #A88FEAff;
 }
 
 .login button:hover {
-  background-color: rgb(155, 205, 219);
-  color: black;
+  background-color: #352A98ff;
+  color: white;
 }
 
 label {

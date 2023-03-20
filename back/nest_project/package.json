@@ -26,7 +26,9 @@
         "@nestjs/jwt": "^10.0.2",
         "@nestjs/passport": "^9.0.3",
         "@nestjs/platform-express": "^9.0.0",
+        "@nestjs/platform-socket.io": "9.1.6",
         "@nestjs/typeorm": "^9.0.1",
+        "@nestjs/websockets": "9.1.6",
         "@types/passport-jwt": "^3.0.8",
         "@types/passport-local": "^1.0.35",
         "@types/qrcode": "^1.5.0",
@@ -35,6 +37,8 @@
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.0",
         "otplib": "^12.0.1",
+        "js-base64": "^3.7.5",
+        "jsrsasign": "^10.6.1",
         "passport-jwt": "^4.0.1",
         "passport-local": "^1.0.0",
         "pg": "^8.9.0",
@@ -43,6 +47,7 @@
         "reflect-metadata": "^0.1.13",
         "rxjs": "^7.2.0",
         "speakeasy": "^2.0.0",
+        "socket.io": "^4.6.1",
         "typeorm": "^0.3.12"
     },
     "devDependencies": {

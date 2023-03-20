@@ -4,6 +4,15 @@ import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
+interface User {
+    id: number,
+    login: string,
+    email: string,
+    twoFactorSecret: string,
+    isTwoFactorEnabled: boolean,
+    qrCode: string,
+}
+
 @Injectable({})
 export class UserService {
     constructor (
@@ -41,16 +50,17 @@ export class UserService {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
         await this.usersRepository.save(user);
+        return (user.twoFactorSecret);
     }
     //set secret code for 2fa in user entity
     async setQrCode(qrcode: string, id: number) {
         const user = await this.usersRepository.findOneBy({id});
         user.qrCode = qrcode;
         await this.usersRepository.save(user);
+        return (user.qrCode);
     }
     //the user turned on the 2fa
-    async turnOn2fa(id: number) {
-        const user = await this.usersRepository.findOneBy({id});
+    async turnOn2fa(user: User) {
         user.isTwoFactorEnabled = true;
         await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
         return (user.isTwoFactorEnabled);
