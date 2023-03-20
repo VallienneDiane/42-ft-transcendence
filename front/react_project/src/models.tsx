@@ -75,12 +75,4 @@ export interface IDest {
   isOp?: boolean;
 };
 
-export interface IChat {
-  dest?: IDest;
-  history?: Message[];
-  action?: any;
-  action2?: any;
-  socket?: Socket,
-}
-
 // export LogInForm, SignInForm
