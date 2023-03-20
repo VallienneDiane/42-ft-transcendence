@@ -90,16 +90,29 @@ export class ChatService {
             }
         }    
         if (link.isOp)
-            this.channelService.downgradeOpByName(channel)
-            .then(() => {
-                this.channelService.getOneByName(channel)
-                .then( (exist) => {
-                    if (exist == null) {
-                        this.messageService.deleteChannel(channel);
-                        this.linkUCService.deleteChannel(channel);
-                        roomHandler.roomKill(channel);
-                    }
-                })
+            // this.channelService.downgradeOpByName(channel)
+            // .then(() => {
+            //     this.channelService.getOneByName(channel)
+            //     .then( (exist) => {
+            //         console.log(exist);
+            //         if (exist == null) {
+            //             this.messageService.deleteChannel(channel);
+            //             this.linkUCService.deleteChannel(channel);
+            //             roomHandler.roomKill(channel);
+            //         }
+            //     })
+            // });
+            this.channelService.getOneByName(channel)
+            .then( (chan) => {
+                let toDel = false;
+                if (chan.opNumber <= 1)
+                    toDel = true;
+                this.channelService.downgradeOpByName(channel);
+                if (toDel) {
+                    this.messageService.deleteChannel(channel);
+                    this.linkUCService.deleteChannel(channel);
+                    roomHandler.roomKill(channel);
+                }
             });
     }
 
