@@ -29,7 +29,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   constructor() {
     this.Game = new GameEngineService();
     this.Pong = new PongEngineService();
-    this.state = "pong";
+    this.state = "game";
   }
 
   @WebSocketServer()
