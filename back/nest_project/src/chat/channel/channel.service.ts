@@ -35,10 +35,20 @@ export class ChannelService {
 	async downgradeOpByName(channelName: string): Promise<void> {
 		this.getOneByName(channelName).then( (found) => {
 			if (found.opNumber == 1 && !found.persistant) {
-				this.deleteByName(channelName);
+				this.deleteById(found.id);
 			}
 			else
 				this.channelRepository.update({name: channelName}, {opNumber: found.opNumber - 1});
+		})
+	}
+
+	async downgradeOpById(id: number): Promise<void> {
+		this.getOneById(id).then( (found) => {
+			if (found.opNumber == 1 && !found.persistant) {
+				this.deleteById(found.id);
+			}
+			else
+				this.channelRepository.update({name: found.name}, {opNumber: found.opNumber - 1});
 		})
 	}
 

@@ -83,23 +83,24 @@ export class ChatService {
         this.linkUCService.deleteLink(channel, login);
         let user = roomHandler.userMap.get(login);
         if (user != undefined) {
-            this.listMyChannelEvent(user.socket, login);
+            user.socket.emit("leaveChannel", channel);
             if (user.isChannel && user.room == channel) {
                 roomHandler.joinRoom(login, 'general', true, false, false);
                 this.goBackToGeneral(user.socket);
             }
         }    
         if (link.isOp)
-            this.channelService.downgradeOpByName(channel)
-            .then(() => {
-                this.channelService.getOneByName(channel)
-                .then( (exist) => {
-                    if (exist == null) {
-                        this.messageService.deleteChannel(channel);
-                        this.linkUCService.deleteChannel(channel);
-                        roomHandler.roomKill(channel);
-                    }
-                })
+            this.channelService.getOneByName(channel)
+            .then( (chan) => {
+                let toDel = false;
+                if (chan.opNumber <= 1)
+                    toDel = true;
+                this.channelService.downgradeOpByName(channel);
+                if (toDel) {
+                    this.messageService.deleteChannel(channel);
+                    this.linkUCService.deleteChannel(channel);
+                    roomHandler.roomKill(channel);
+                }
             });
     }
 
@@ -436,6 +437,11 @@ export class ChatService {
     }
 
     public kickUserEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
+        if (userToKick == undefined || channel == undefined)
+        {
+            client.emit('notice', "no comprendo the requete");
+            return;
+        }
         this.linkUCService.findOne(channel, login)
         .then( (found) => {
             if (found == null || !found.isOp)
@@ -446,7 +452,7 @@ export class ChatService {
                     if (kicked == null)
                         client.emit('notice', "user not in channel");
                     else {
-                        this.delUserFromChannel(userToKick, channel, roomHandler, found);
+                        this.delUserFromChannel(userToKick, channel, roomHandler, kicked);
                     }
                 })
         })

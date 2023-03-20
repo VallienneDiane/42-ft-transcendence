@@ -193,11 +193,15 @@ export class UserRoomHandler {
             onlyOpCanTalk: false,
             hidden: false
         }
-        this.roomMap.of(channelName).forEach( (socket, user) => {
-            this.userMap.userChangeRoom(user, 'general', true, false, false);
-            socket.emit('newLocChannel', locGeneral, false, []);
-        })
-        this.roomMap.movingAway(channelName, 'general');
+        let room = this.roomMap.of(channelName);
+        if (room != undefined) {
+            room.forEach( (socket, user) => {
+                this.userMap.userChangeRoom(user, 'general', true, false, false);
+                socket.emit('newLocChannel', locGeneral, false, []);
+                socket.emit('leaveChannel', channelName);
+            })
+            this.roomMap.movingAway(channelName, 'general');
+        }
     }
 
     public joinRoom(userName: string, roomName: string, isChannel: boolean, isOp: boolean, onlyOpCanTalk: boolean) {
