@@ -13,8 +13,9 @@ export class Simple_ball {
     constructor () {
         this.x_position = 0.5 * this.apesct_ratio;
         this.y_position = 0.5;
-        this.x_speed = (1/120) * this.apesct_ratio;
-        this.y_speed = Math.random()/120;
+        let signe = (Math.random() - 0.5) > 0 ? 1 : -1;
+        this.x_speed = (signe/120) * this.apesct_ratio;
+        this.y_speed = (Math.random() - 0.5) * Math.random()/120;
         this.r = 0.06;
         this.state = "alive";
     }
