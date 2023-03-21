@@ -20,7 +20,7 @@ export class ChannelService {
 	}
 
 	// Finds first entity by a given channelID. If entity was not found in the database - returns null.
-	public getOneById(channelId: number): Promise<ChannelEntity> {
+	public getOneById(channelId: string): Promise<ChannelEntity> {
 		return this.channelRepository.findOne({where: {id: channelId}});
 	}
 
@@ -28,7 +28,7 @@ export class ChannelService {
 		this.channelRepository.update({name: channelToUpdate}, newChannelConfig);
 	}
 
-	async updateById(channelToUpdate: number, newChannelConfig: ChannelEntity): Promise<void> {
+	async updateById(channelToUpdate: string, newChannelConfig: ChannelEntity): Promise<void> {
 		this.channelRepository.update({id: channelToUpdate}, newChannelConfig);
 	}
 
@@ -42,7 +42,7 @@ export class ChannelService {
 		})
 	}
 
-	async downgradeOpById(id: number): Promise<void> {
+	async downgradeOpById(id: string): Promise<void> {
 		this.getOneById(id).then( (found) => {
 			if (found.opNumber == 1 && !found.persistant) {
 				this.deleteById(found.id);
@@ -62,8 +62,8 @@ export class ChannelService {
 		this.channelRepository.delete(channelName);
 	}
 
-	async deleteById(channelId: number): Promise<void> {
-		this.channelRepository.delete(channelId);
+	async deleteById(channelId: string): Promise<void> {
+		this.channelRepository.delete({id: channelId});
 	}
 
 	public listChannels(): Promise<ChannelEntity[]> {

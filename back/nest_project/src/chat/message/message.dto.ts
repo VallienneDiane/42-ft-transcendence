@@ -2,10 +2,10 @@ import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsString } from "class-validat
 
 
 export class MessageDto {
-    readonly id: number;
-    @IsNotEmpty() @IsString() readonly room: string;
+    readonly id: string;
+    @IsNotEmpty() @IsString() readonly roomId: string;
     @IsNotEmpty() @IsBoolean() readonly isChannel: boolean;
-    @IsNotEmpty() @IsString() readonly sender: string;
+    @IsNotEmpty() @IsString() readonly senderId: string;
     @IsNotEmpty() @IsString() readonly content: string;
     readonly date: Date;
 }

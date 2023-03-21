@@ -3,16 +3,16 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from "typeor
 @Entity()
 export class MessageEntity {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column()
-    room: string
+    roomId: string
 
     @Column('boolean')
     isChannel: boolean
 
     @Column()
-    sender: string
+    senderId: string
 
     @Column('text')
     content: string

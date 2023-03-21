@@ -3,7 +3,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from "typeor
 @Entity()
 export class ChannelEntity {
 	@PrimaryGeneratedColumn('uuid')
-	id: number;
+	id: string;
 
 	@CreateDateColumn()
 	date: Date;

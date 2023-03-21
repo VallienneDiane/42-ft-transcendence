@@ -11,15 +11,13 @@ export class MessageService {
     ) {}
     // save a new message in database
     public create(newMessage: MessageEntity): Promise<MessageEntity> {
-        if (!(newMessage.isChannel && newMessage.room == 'general'))
-            return this.messagesRepository.save(newMessage);
-        return undefined;
+        return this.messagesRepository.save(newMessage);
     }
     // find all messages send to a receiver ordered by date
-    public findByChannel(roomEntry: string): Promise<MessageEntity[]> {
+    public findByChannelId(channelId: string): Promise<MessageEntity[]> {
         return this.messagesRepository.find({
             where: {
-                room: roomEntry,
+                roomId: channelId,
                 isChannel: true,
             },
             order: {
@@ -31,8 +29,8 @@ export class MessageService {
     public findByPrivate(personA: string, personB: string): Promise<MessageEntity[]> {
         return this.messagesRepository.find({
             where: [
-                { room: personA, sender: personB, isChannel: false },
-                { room: personB, sender: personA, isChannel: false },
+                { roomId: personA, senderId: personB, isChannel: false },
+                { roomId: personB, senderId: personA, isChannel: false },
             ],
             order: {
                 date: "ASC",
@@ -40,31 +38,22 @@ export class MessageService {
         })
     }
     
-    public findAllDialogByUserName(userName: string): Promise<MessageEntity[]> {
+    public findAllDialogByUserName(userId: string): Promise<MessageEntity[]> {
         return this.messagesRepository.find({
             where: [
-                { room: userName, isChannel: false },
-                { sender: userName, isChannel: false },
+                { roomId: userId, isChannel: false },
+                { senderId: userId, isChannel: false },
             ]
         })
     }
-    //update all row containing an username when this username is about to change
-    async changeUserName(oldUserName: string, newUserName: string): Promise<void> {
-        this.messagesRepository.update({sender: oldUserName}, {sender: newUserName});
-        this.messagesRepository.update({room: oldUserName, isChannel: false}, {room: newUserName});
-    }
-    //update all row containing an channel name when this channel name is about to change
-    async changeChannelName(oldChannelName: string, newChannelName: string): Promise<void> {
-        this.messagesRepository.update({room: oldChannelName, isChannel: true}, {room: newChannelName});
-    }
     //delete all rows containing a given channel name
-    async deleteChannel(channelName: string): Promise<void> {
-        this.messagesRepository.delete({room: channelName, isChannel: true});
+    async deleteChannel(channelId: string): Promise<void> {
+        this.messagesRepository.delete({roomId: channelId, isChannel: true});
     }
     //delete all rows containing a given username
-    async deleteUser(userName: string): Promise<void> {
-        this.messagesRepository.delete({room: userName, isChannel: false});
-        this.messagesRepository.delete({sender: userName});
+    async deleteUser(userId: string): Promise<void> {
+        this.messagesRepository.delete({roomId: userId, isChannel: false});
+        this.messagesRepository.delete({senderId: userId});
     }
 
 }

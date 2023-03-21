@@ -16,69 +16,59 @@ export class LinkUCService {
 	}
 
 	
-	public findAllByChannelName(channelName: string): Promise<LinkUCEntity[]> {
+	public findAllByChannelId(channelId: string): Promise<LinkUCEntity[]> {
 		return this.linkUCRepository.find({
 			where: {
-				channelName: channelName
+				channelId: channelId
 			},
 			order: {
 				isOp: "ASC",
-				userName: "ASC"
+				userId: "ASC"
 			}
 			})
 	}
 
-	public findAllByUserName(userName: string): Promise<LinkUCEntity[]> {
+	public findAllByUserId(userId: string): Promise<LinkUCEntity[]> {
 		return this.linkUCRepository.find({
 			where: {
-				userName: userName
+				userId: userId
 			},
 			order: {
 				isOp: "ASC",
-				channelName: "ASC"
+				channelId: "ASC"
 			}
 		})
 	}
 
-	public findOne(channelName: string, userName: string): Promise<LinkUCEntity> {
+	public findOne(channelId: string, userId: string): Promise<LinkUCEntity> {
 		return this.linkUCRepository.findOne({
 			where: {
-				userName: userName,
-				channelName: channelName
+				userId: userId,
+				channelId: channelId
 			}
 		})
 	}
 
-	async doUserOp(channelName: string, userName: string): Promise<void> {
-		this.linkUCRepository.update({channelName: channelName, userName: userName}, {isOp: true});
+	async doUserOp(channelId: string, userId: string): Promise<void> {
+		this.linkUCRepository.update({channelId: channelId, userId: userId}, {isOp: true});
 	}
 
-	async doUserNoOp(channelName: string, userName: string): Promise<void> {
-		this.linkUCRepository.update({channelName: channelName, userName: userName}, {isOp: false});
+	async doUserNoOp(channelId: string, userId: string): Promise<void> {
+		this.linkUCRepository.update({channelId: channelId, userId: userId}, {isOp: false});
 	}
 
-	async changeChannelName(oldChannelName: string, newChannelName: string): Promise<void> {
-		this.linkUCRepository.update({channelName: oldChannelName}, {channelName: newChannelName});
-	}
-
-	async changeUserName(oldUserName: string, newUserName: string): Promise<void> {
-		this.linkUCRepository.update({userName: oldUserName}, {userName: newUserName});
-	}
-
-	async deleteLink(channelName: string, userName: string): Promise<void> {
-		this.findOne(channelName, userName).then( (found) => {
-			this.linkUCRepository.delete({channelName: channelName, userName: userName});
-			// if (found.isOp)
-			// 	this.channelService.downgradeOpByName(channelName);
+	async deleteLink(channelId: string, userId: string): Promise<void> {
+		this.findOne(channelId, userId).then( (found) => {
+			this.linkUCRepository.delete({channelId: channelId, userId: userId});
 		});
 	}
 
-	async deleteUser(userName: string): Promise<void> {
-		this.linkUCRepository.delete({userName: userName});
+	async deleteUser(userId: string): Promise<void> {
+		this.linkUCRepository.delete({userId: userId});
 	}
 
-	async deleteChannel(channelName: string): Promise<void> {
-		this.linkUCRepository.delete({channelName: channelName});
+	async deleteChannel(channelId: string): Promise<void> {
+		this.linkUCRepository.delete({channelId: channelId});
 	}
 
 }
