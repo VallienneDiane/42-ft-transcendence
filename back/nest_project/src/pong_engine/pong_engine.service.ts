@@ -35,6 +35,9 @@ export class PongEngineService {
 
     main_loop() {
         this.ball.update_self_position(this.p1, this.p2);
+        if (this.ball.state === "dead") {
+            this.ball = new Simple_ball();
+        }
         let bp: ballpos;
         bp = {
             x: this.ball.x_position,
@@ -45,6 +48,11 @@ export class PongEngineService {
         this.gs.paddleOne = {
             x: this.p1.x_position,
             y: this.p1.y_position + this.p1.lenght/2
+        };
+
+        this.gs.paddleTwo = {
+            x: this.p2.x_position,
+            y: this.p2.y_position + this.p2.lenght/2
         };
     }
 }
