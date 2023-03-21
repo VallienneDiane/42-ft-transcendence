@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { ChannelEntity } from "../chat/channel/channel.entity";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
@@ -34,4 +35,31 @@ export class UserService {
     async delete(login: string): Promise<void> {
         this.usersRepository.delete(login);
     }
+    // REGISTER CLIENT TO A CHANNEL AS NORMAL USER IN DATABASE
+    async addChannelAsNormalUser(userId: string, channel: ChannelEntity) {
+        let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsNormal;
+        channels.push(channel);
+        await this.usersRepository.update({id: userId}, {channelsAsNormal: channels});
+    }
+    // REGISTER CLIENT TO A CHANNEL AS OP USER IN DATABASE
+    async addChannelAsOpUser(userId: string, channel: ChannelEntity) {
+        let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsOp;
+        channels.push(channel);
+        await this.usersRepository.update({id: userId}, {channelsAsOp: channels});
+    }
+    // UNREGISTER CLIENT TO A CHANNEL AS NORMAL USER IN DATABASE
+    async deleteChannelAsNormalUser(userId: string, channelId: string) {
+        let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsNormal;
+        channels = channels.filter((channel) => {
+            return channel.id !== channelId;
+        })
+        await this.usersRepository.update({id: userId}, {channelsAsNormal: channels});
+    }
+    // UNREGISTER CLIENT TO A CHANNEL AS OP USER IN DATABASE
+    async deleteChannelAsOpUser(userId: string, channel: ChannelEntity) {
+        let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsOp;
+        channels.push(channel);
+        await this.usersRepository.update({id: userId}, {channelsAsOp: channels});
+    }
+
 }
