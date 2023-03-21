@@ -17,6 +17,11 @@ export class AuthController {
   async isValidUser() {
     return (true);
   }
+
+  // @Get("auth/authorize42")
+  // async auth42(@Body() data) {
+  //   return data;
+  // }
   
   //generate token when register or login
   @Post('auth/generateToken')

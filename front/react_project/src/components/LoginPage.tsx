@@ -9,8 +9,8 @@ import { LogInForm } from "../models";
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
     const { register, handleSubmit } = useForm<LogInForm>();
-    // const location = useLocation();
-    // const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
+    const location = useLocation();
+    const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
 
     const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
@@ -27,9 +27,8 @@ const LoginPage: React.FC = () => {
                         .then(response_token => {
                             console.log(response_token);
                             accountService.saveToken(response_token.data.access_token);
-                            // const from = (location.state as any)?.from || "/";
-                            // navigate(from);
-                            navigate('/');
+                            const from = (location.state as any)?.from || "/";
+                            navigate(from);
                         })
                         .catch(error => {
                             console.log(error);
@@ -43,7 +42,7 @@ const LoginPage: React.FC = () => {
         })
         .catch(error => {
             console.log(error);
-            // setIncorrectCredentials(true);
+            setIncorrectCredentials(true);
         });
 
     }
@@ -66,10 +65,13 @@ const LoginPage: React.FC = () => {
             // required
             />
             <button id="submit" type="submit">Submit</button>
-            {/* {incorrectCredentials && (
+            {incorrectCredentials && (
                 <div className="error">Login or Password incorrect</div>
-            )} */}
-            <button id="signin42"><a  href="/login42">Sign in with 42 !</a></button>
+            )}
+            <button id="signin42">
+                <a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-1a615688dd073d243be0d59bf7ff2953367300048cd88c855c08d4f2dd0efe4c&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code">
+                Sign in with 42 ! </a>
+            </button>
             <a href="/signup">Not registered ? Sign Up !</a>
         </form>
         </div>
