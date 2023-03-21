@@ -11,6 +11,8 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
+import { io, Socket } from 'socket.io-client';
+
 import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 
@@ -36,7 +38,7 @@ function App() {
                 <Route path='/' element={<Home />} />
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
-                <Route path='/profile/:id' element={<Profile />} />
+                <Route path='/profile/:login' element={<Profile />} />
                 <Route path='/settings' element={<Settings />} />
                 <Route path='/chat' element={<ChatModule />} />
               </Route>

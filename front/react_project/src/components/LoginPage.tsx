@@ -1,5 +1,5 @@
-import "../styles/LoginPage.css"
-import React, { useContext, useState } from "react";
+import "../styles/LoginPage.scss"
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { UserContext } from "../user/UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -11,6 +11,14 @@ const LoginPage: React.FC = () => {
     const { register, handleSubmit } = useForm<LogInForm>();
     const location = useLocation();
     const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
+
+    const loginInput = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (loginInput.current) {
+            loginInput.current.focus();
+        }
+    }, [])
 
     const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
@@ -48,32 +56,30 @@ const LoginPage: React.FC = () => {
     }
     return (
         <div id="login_page">
-            <h1>Login page</h1>
-            <form className="login" onSubmit={handleSubmit(onSubmit)}> 
-            <input
-            {...register("login", {required: true})}
-            type="text"
-            placeholder="Enter your login ..."
-            // name="login"
-            // required
-            />
-            <input
-            {...register("password", {required: true})}
-            type="password"
-            placeholder="Enter your password ..."
-            // name="password"
-            // required
-            />
-            <button id="submit" type="submit">Submit</button>
-            {incorrectCredentials && (
-                <div className="error">Login or Password incorrect</div>
-            )}
-            <button id="signin42">
-                <a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-1a615688dd073d243be0d59bf7ff2953367300048cd88c855c08d4f2dd0efe4c&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code">
-                Sign in with 42 ! </a>
-            </button>
-            <a href="/signup">Not registered ? Sign Up !</a>
-        </form>
+            <div className="card">
+                <h1>Login page</h1>
+                <form className="login" onSubmit={handleSubmit(onSubmit)}> 
+                    <input className="form_element"
+                    {...register("login", {required: true})}
+                    type="text"
+                    placeholder="Enter your login ..."
+                    />
+                    {/* {errors.login && <span>Login is required</span>} */}
+                    <input className="form_element"
+                    {...register("password", {required: true})}
+                    type="password"
+                    placeholder="Enter your password ..."
+                    />
+                    {/* {errors.password && <span>Password is required</span>} */}
+                    { incorrectCredentials && <div className="logError">Wrong user or password</div>}
+                    <button className="form_element" type="submit">Submit</button>
+                </form>
+                <button id="signin42">
+                    <a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-1a615688dd073d243be0d59bf7ff2953367300048cd88c855c08d4f2dd0efe4c&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code">
+                    Sign in with 42 ! </a>
+                </button>
+                <a href="/signup">Not registered ? Sign In !</a>
+            </div>
         </div>
     )
 }
