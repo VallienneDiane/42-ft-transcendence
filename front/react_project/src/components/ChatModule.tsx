@@ -47,24 +47,27 @@ function ParamsChannel(props: {dest: IDest, handleClose: any}) {
     }, [ref]);
 
     return (
-        <div className="popupBox">
-        <div className="box" ref={ref}>
+        <div className="sidebar">
+        <div className="sidebarContent" ref={ref}>
           <span className="closeIcon" onClick={props.handleClose}>x</span>
-          <div className="bloc1">
+          <div className="navRight">
             <h1>{props.dest.Loc}</h1>
-            <div className="blocMemberList">
+            {/* <div className="blocMemberList">
                 <h2>Members</h2>
                 <ul className="memberList">{members.map((member) => {return (
                     <li>{member}</li>
                 )})}
                 </ul>
-            </div>
+            </div> */}
             <div className="bloc2">
                 {props.dest.channel?.inviteOnly ? (
                 <button onClick={inviteUser}>Invite</button>
                 ) : null}
                 {props.dest.isOp ? (
-                <button onClick={kickUser}>Kick</button>
+                    <React.Fragment>
+                        <button onClick={kickUser}>Kick</button>
+                        <button>Settings</button>
+                    </React.Fragment>
                 ) : null}
             </div>
           </div>
@@ -128,8 +131,12 @@ function Header(props: {dest: IDest}) {
 
     return (
         <div className="channelHeader">
-            <h1>{props.dest.Loc}</h1>
-            {props.dest.Loc !== "general" && <button className="gear" onClick={onClick}>+</button>}
+            <h1>  
+            {isChannel ? <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
+            : <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg> }
+                {props.dest.Loc}
+            </h1>
+            {props.dest.Loc !== "general" && <button onClick={onClick}><svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M56 472a56 56 0 1 1 0-112 56 56 0 1 1 0 112zm0-160a56 56 0 1 1 0-112 56 56 0 1 1 0 112zM0 96a56 56 0 1 1 112 0A56 56 0 1 1 0 96z"/></svg></button>}
             {isOpen && (isChannel ? <ParamsChannel dest={props.dest} handleClose={onClick}/> : <ParamsDM handleClose={onClick} />)}
         </div>
     )
@@ -356,6 +363,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 <form action="">
                     <input type="text" onChange={this.displayList} onClick={this.displayList} value={this.state.text} placeholder="Search"/>
                 </form>
+                {/* <svg className="searchIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg> */}
                 {this.state.filtered.length != 0 && <ul>
                     {this.state.filtered.map((user: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}, id: number) => (
                         <SearchElement  key={id} socket={this.props.socket!} reset={this.resetFiltered}
@@ -472,7 +480,7 @@ class ChannelList extends React.Component<{socket: Socket}, {
                     <ul className="channelList">
                         { this.state.dms.map((dm, id) => { 
                             if (this.state.me.login != dm.login)
-                            { return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : ''}</li> ) }
+                            { return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : null}</li> ) }
                         })}
                     </ul>
                 </React.Fragment>
