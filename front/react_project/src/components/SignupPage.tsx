@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
 import { useNavigate } from 'react-router-dom';
-import { SignInForm } from '../models'
+import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
 
 const userSchema = yup.object().shape({
@@ -13,17 +13,18 @@ const userSchema = yup.object().shape({
   password: yup.string().required("Password is required") .min(8, "Password must be at least 8 characters"),
 })
 
-const SignupForm: React.FC = () => {
+const SignupPage: React.FC = () => {
   let navigate = useNavigate();
   
-  const { register, handleSubmit, formState: { errors }} = useForm<SignInForm>({
+  const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
   });
   
-  const signIn = (data: SignInForm) => {
-    accountService.signIn(data)
+  const signUp = (data: SignUpForm) => {
+    accountService.signUp(data)
     .then(Response => {
       accountService.saveToken(Response.data.access_token);
+      // accountService.enable2fa();
       navigate("/");
     })
     .catch(error => {
@@ -35,7 +36,7 @@ const SignupForm: React.FC = () => {
     <div id='signup_page'>
       <div className="card">
         <h1>SignUp Page</h1>
-        <form className="login" onSubmit={handleSubmit(signIn)}>
+        <form className="login" onSubmit={handleSubmit(signUp)}>
             <input className="form_element" 
             {...register("login")}
             type="text" 
@@ -62,4 +63,4 @@ const SignupForm: React.FC = () => {
   );
 };
 
-export default SignupForm;
+export default SignupPage;

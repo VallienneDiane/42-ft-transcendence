@@ -1,6 +1,6 @@
 @import url("styles/Base.css");
 
-* {
+*:not(.react-switch-bg > div, .react-switch-bg > div > svg) {
   background-color: var(--prim-color);
   box-sizing: border-box;
   margin:0;
