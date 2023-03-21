@@ -9,7 +9,6 @@ import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Profile from './components/Profile';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
-import Login42 from './components/Login42'
 import Layout from './components/Layout'
 import Game from './components/Game'
 import Settings from './components/Settings'
@@ -31,7 +30,6 @@ function App() {
           <Routes>
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
-              {/* <Route path='/login42' element={<Login42 />} /> */}
               <Route path='/signup' element={<SignupPage />} />
               <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
               <Route element={<ProtectedRoutes/>}>

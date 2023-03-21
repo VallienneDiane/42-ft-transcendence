@@ -30,19 +30,28 @@ let enable2fa = () => {
 }
 //verify code submitted by the user
 let verifyCode2fa = (credentials: VerifyCodeForm) => {
-    const test = Axios.post('auth/verifyCode', credentials);
-    return test;
+    return Axios.post('auth/verifyCode', credentials);
 }
 //verify code submitted by the user in settings to check token
 let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
-    const result = Axios.post('auth/verifyCodeSettings', credentials);
-    return result;
+    return Axios.post('auth/verifyCodeSettings', credentials);
 }
 //disable 2fa
 let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
 ///////////////////////////////////////////////////////////////////////////
+////////////////////          LOGIN WITH 42 API       ////////////////////
+// let authorize42 = () => {
+//     const auth = Axios.get('auth/authorize42');
+//     console.log("REQUEST GET RESPONSE auth42", auth);
+//     return auth;
+// }
+
+
+
+///////////////////////////////////////////////////////////////////////////
+
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
