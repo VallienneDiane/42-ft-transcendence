@@ -1,4 +1,5 @@
 .chatWrapper {
+	position: static;
 	display: flex;
 	/* padding: 1em; */
 	width: 70%;
@@ -93,6 +94,7 @@
 }
 
 .channelListWrapper {
+	position: relative;
 	display: flex;
 	width: 100%;
 	align-items: left;
@@ -128,6 +130,7 @@
 }
 
 .chatMessageWrapper {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-around;
@@ -152,39 +155,7 @@
 	height: 15px;
 	opacity: 50%;
 	padding: 0 0.7rem;
-}
-
-.dropdown {
-	position: absolute;
-	margin-top: 25px;
-}
-  
-.paramMenu {
-	display: flex;
-	flex-direction: column;
-    align-items: flex-end;
-	list-style-type: none;
-	padding-right: .5rem;
-	border: 1px solid rgb(219, 219, 219);
-	width: 150px;
-	background-color: white;
-}
-  
-.paramMenu > li:hover {
-	background:#ddd;
-    color:#777;
-}
-  
-.paramMenu > li > button {
-	width: 100%;
-	height: 100%;
-	background: none;
-	color: inherit;
-	border: none;
-	padding: 5px;
-	margin: 0;
-	font: inherit;
-	cursor: pointer;
+	position: relative;
 }
 
 .messageList {
@@ -253,6 +224,7 @@
 
 .popupBox {
 	position: fixed;
+	z-index: 9999;
 	// background: #00000050;
 	width: 100%;
 	height: 100vh;
@@ -282,20 +254,6 @@
 	font-size: 30px;
 }
 
-.bloc1 {
-	display: flex;
-	flex-direction: row;
-}
-
-.blocMemberList {
-	display: flex;
-	flex-direction: column;
-}
-
-.memberList {
-	padding: 5px 0;
-}
-
 .formNewChannel {
 	display: flex;
 	flex-direction: column;
@@ -318,10 +276,33 @@
 
 .sidebar {
 	position: absolute;
-	width: 250px;
+	display: flex;
+	justify-content: flex-end;
+	z-index: 9999;
+	top: 0;
+	right: 0;
+	width: 190px;
+	height: 100%;
 	background: rgb(231, 231, 231);
-	transition: all .3s ease-in-out 0s;
+	transition: transform 0.5s ease-in-out;
 	box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+	transform: translateX(100%);
+	&.show {
+		transform: translateX(0%);
+	}
+}
+
+.sidebarContent {
+	// padding: 0.3rem;
+	width: 100%;
+}
+
+.iconSidebar {
+	top: 0;
+	right: 0;
+	padding: 1rem;
+	height: 15px;
+	opacity: 50%;
 }
 
 .navRight {
@@ -329,9 +310,56 @@
 	display: flex;
 	flex-direction: column;
 	font-size: 16px;
-	padding: 10px 0;
-	line-height: 24px;
 }
+
+.navRight > h1 {
+	font-size: 20px;
+	text-align: end;
+	padding-right: 1rem;
+}
+
+.paramMenu {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 0;
+	text-align: right;
+	float: right;
+}
+
+.paramMenu li {
+	width: 100%;
+	align-items: right;
+}
+  
+.paramMenu > li:hover {
+	width: 100%;
+	background:#ddd;
+    color:#777;
+	cursor: pointer;
+}
+
+.memberList {
+	display: flex;
+	flex-direction: column;
+	// justify-content: flex-end;
+	// align-items:flex-end;
+	// overflow-y: auto;
+	background-color: #b9d7db;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+.memberList li {
+	color: black;
+	align-items: right;
+}
+
+// .paramItem {
+// 	border-top: 1px;
+// 	border-bottom: 1px;
+// }
 
 /*
 .bubble {

@@ -1,5 +1,5 @@
 import './App.css'
-import ChatModule from './components/ChatModule';
+import ChatModule from './components/ChatModule/ChatModule';
 import SignupForm from './components/SignupForm'
 import LoginForm from './components/LoginForm'
 import Home from './components/Home'

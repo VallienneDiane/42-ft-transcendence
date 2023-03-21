@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Socket } from 'socket.io-client';
 import { JwtPayload } from "jsonwebtoken";
-import { accountService } from "../services/account.service";
-import { IMessageToSend, Message, IDest } from "../models";
+import { accountService } from "../../services/account.service";
+import { IMessageToSend, Message, IDest } from "../../models";
 
 function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
     const [me, setMe] = useState<boolean>(false);
