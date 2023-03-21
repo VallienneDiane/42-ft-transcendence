@@ -1,0 +1,72 @@
+.toggle2fa {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-left: 40px;
+
+    .switch {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-bottom: 20px;
+
+        p {
+            margin-right: 50px;
+        }
+
+        .react-switch-bg > div{
+            // border: 5px solid red;
+            // background-color: red;
+        }
+
+    }
+    p {
+        font-size: 0.9em;
+    }
+
+    #qrcode {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        max-width: 10em;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    input, button {
+        border-radius: 2%;
+        height: 30px;
+        background-color: rgb(255, 255, 255);
+        color: rgb(0, 0, 0);
+    }
+
+    .errorsCode {
+        margin-top: 10px;
+        font-size: 12px;
+        color: red;
+    }
+
+    button {
+        font-size: 0.8em;
+        color: rgb(255, 255, 255);
+        margin-left: 10px;
+        color: white;
+        background-color: rgb(60, 67, 203);
+        height: 30px;
+        width: 180px;
+        margin: 20px;
+
+        &:hover {
+            background-color: rgb(81, 165, 60);
+        }
+    }
+
+    #AuthActivate {
+        color: rgb(52, 211, 52);
+    }
+}
