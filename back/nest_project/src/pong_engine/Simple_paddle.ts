@@ -8,7 +8,7 @@ export class Simple_paddle {
     speed;
 
     constructor () {
-        this.x_position = 0.01;
+        this.x_position = 0.025;
         this.lenght = 0.17;
         this.y_position = 0.5 - (this.lenght / 2);
         this.speed = 3/60;
