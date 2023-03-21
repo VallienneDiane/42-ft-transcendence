@@ -154,12 +154,6 @@
 	padding: 0 0.7rem;
 }
 
-.icon {
-	font-size: 25px;
-	padding-left: .5rem;
-	cursor: pointer;
-}
-
 .dropdown {
 	position: absolute;
 	margin-top: 25px;
@@ -300,22 +294,6 @@
 
 .memberList {
 	padding: 5px 0;
-}
-   
-.close-icon {
-	content: 'x';
-	cursor: pointer;
-	position: fixed;
-	right: calc(15% - 30px);
-	top: calc(100vh - 85vh - 33px);
-	// background: #ededed;
-	width: 25px;
-	height: 25px;
-	border-radius: 50%;
-	line-height: 20px;
-	text-align: center;
-	border: 1px solid #999;
-	font-size: 20px;
 }
 
 .formNewChannel {

@@ -1,10 +1,10 @@
 import { useContext, useState, useRef, useEffect } from "react";
+import SocketContext from "./context";
 import { useForm, Controller } from 'react-hook-form';
-import { Box, Checkbox, Switch, Button } from '@mui/material';
-import Input from '@mui/material/Input';
 import { IChannel } from "../models";
 import '../styles/ChatModule.scss'
-import SocketContext from "./context";
+import { Box, Checkbox, Switch, Button } from '@mui/material';
+import Input from '@mui/material/Input';
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
