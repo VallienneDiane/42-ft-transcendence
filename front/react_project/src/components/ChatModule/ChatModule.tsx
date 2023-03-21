@@ -1,14 +1,14 @@
 import React from "react";
-import SocketContext from "./context";
+import SocketContext from "../context";
 import { Socket } from 'socket.io-client'
 import { JwtPayload } from "jsonwebtoken";
-import { accountService } from "../services/account.service";
-import { userService } from "../services/user.service";
-import { UserData, Message, IDest, IMessageEntity, IChannel } from "../models";
-import CreateChannel from "./ChatNewChannel";
-import Header from "./ChatSidebar";
+import { accountService } from "../../services/account.service";
+import { userService } from "../../services/user.service";
+import { UserData, Message, IDest, IMessageEntity, IChannel } from "../../models";
+import { CreateChannel, Popup } from "./ChatNewChannel";
+import { Header, SidebarUser, SidebarChannel } from "./ChatSidebar";
 import { SendMessageForm, MessageList } from "./ChatMessages";
-import '../styles/ChatModule.scss'
+import '../../styles/ChatModule.scss'
 import { Box } from '@mui/material';
 
 class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, closeAction: any, channelName: string}, {pass: string}> {
@@ -249,11 +249,10 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
 class ChannelList extends React.Component<{socket: Socket}, {
     channels: string[],
-    dms: {login: string, connected: boolean}[],
-    me: JwtPayload}> {
+    dms: {login: string, connected: boolean}[]}> {
     constructor(props: {socket: Socket}) {
         super(props);
-        this.state = {channels: [], dms: [], me: accountService.readPayload()!};
+        this.state = {channels: [], dms: []};
         this.changeLoc = this.changeLoc.bind(this);
     }
     
@@ -348,8 +347,7 @@ class ChannelList extends React.Component<{socket: Socket}, {
                     <h2>DMs</h2>
                     <ul className="channelList">
                         { this.state.dms.map((dm, id) => { 
-                            if (this.state.me.login != dm.login)
-                            { return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : null}</li> ) }
+                           return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : null}</li> )
                         })}
                     </ul>
                 </React.Fragment>
@@ -359,18 +357,24 @@ class ChannelList extends React.Component<{socket: Socket}, {
     }
 }
 
-export default class ChatModule extends React.Component<{}, {dest: IDest, history: Message[]}> {
+export default class ChatModule extends React.Component<{}, {
+    dest: IDest,
+    history: Message[],
+    sidebarIsOpen: boolean,
+    popupIsOpen: boolean}> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
+        this.state = {dest: {Loc: 'general', isChannel: true}, history: [], sidebarIsOpen: false, popupIsOpen: false};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);
+        this.onClickSidebar = this.onClickSidebar.bind(this);
+        this.onClickPopup = this.onClickPopup.bind(this);
     }
     
     changeLoc(newDest: IDest) {
         console.log(newDest)
-        this.setState({dest: newDest});
+        this.setState({ dest: newDest });
     }
 
     handleNewMessageOnHistory(newMessage: Message) {
@@ -386,6 +390,14 @@ export default class ChatModule extends React.Component<{}, {dest: IDest, histor
         this.setState({ history: newHistory });
     }
 
+    onClickSidebar() {
+        this.setState({ sidebarIsOpen: !this.state.sidebarIsOpen });
+    }
+
+    onClickPopup() {
+        this.setState({ popupIsOpen: !this.state.popupIsOpen });
+    }
+
     render() {
         return (  
             <SocketContext.Consumer>
@@ -393,15 +405,19 @@ export default class ChatModule extends React.Component<{}, {dest: IDest, histor
                     if (socket.auth.token != "undefined") {
                         return (
                         <div className="chatWrapper">
+                            {this.state.popupIsOpen && <Popup handleClose={this.onClickPopup} />}
                             <div className="left">
                                 <div className="leftHeader">
                                     <SearchChat socket={socket} action={this.handleHistory} action2={this.changeLoc} />
-                                    <CreateChannel />
+                                    <CreateChannel onClick={this.onClickPopup} />
                                 </div>
                                 <ChannelList socket={socket} />
                             </div>
                             <div className="chatMessageWrapper">
-                                <Header dest={this.state.dest} />
+                                <div className={this.state.sidebarIsOpen ? "sidebar show" : "sidebar"}>
+                                {this.state.sidebarIsOpen && (this.state.dest.isChannel ? <SidebarChannel dest={this.state.dest} handleClose={this.onClickSidebar}/> : <SidebarUser handleClose={this.onClickSidebar} dest={this.state.dest}/>)}
+                                </div>
+                                <Header dest={this.state.dest} onClick={this.onClickSidebar}/>
                                 <MessageList history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
                                 <SendMessageForm dest={this.state.dest} socket={socket}/>
                             </div>

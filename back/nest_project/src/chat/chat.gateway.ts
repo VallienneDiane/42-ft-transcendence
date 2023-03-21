@@ -29,9 +29,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private extractLogin(client: Socket): string {
         let token = client.handshake.auth['token'];
         if (token != null) {
-            const decoded = this.jwtService.verify(token, {
-                secret: process.env.SECRET,
-        });} // revoir message d'erreur à afficher
+            try {
+                const decoded = this.jwtService.verify(token, {
+                    secret: process.env.SECRET,
+            });
+            }
+            catch (error) {
+                return (null);
+            }
+        }
         let object : IToken = undefined;
         if (token != null)
             object = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;

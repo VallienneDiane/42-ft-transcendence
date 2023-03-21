@@ -1,12 +1,11 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import SocketContext from "./context";
+import SocketContext from "../context";
 import { useForm, Controller } from 'react-hook-form';
-import { IChannel } from "../models";
-import '../styles/ChatModule.scss'
+import { IChannel } from "../../models";
 import { Box, Checkbox, Switch, Button } from '@mui/material';
 import Input from '@mui/material/Input';
 
-function Popup(props: {handleClose: any}) {
+export function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
     const { control, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
@@ -153,19 +152,11 @@ function Popup(props: {handleClose: any}) {
     );
 };
   
-export default function CreateChannel() {
-    const [isOpen, setIsOpen] = useState<boolean>(false);
-
-    const handleBtnClick = () => {
-        setIsOpen((prevSate) => !prevSate);
-    };
+export function CreateChannel(props: {onClick: any}) {
 
     return (
         <div className="createChannel">
-            <p className="btn" onClick={handleBtnClick}>+</p>
-            {isOpen && <Popup
-                handleClose={handleBtnClick}
-            />}       
+            <p className="btn" onClick={props.onClick}>+</p>    
         </div>
     );
 }
