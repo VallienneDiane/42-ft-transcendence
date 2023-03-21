@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect, useRef } from "react";
+import ReactDOM from 'react-dom'
 import SocketContext from "../context";
 import { accountService } from "../../services/account.service";
 import { IDest } from "../../models";
@@ -23,6 +24,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
 
     const listMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
+    }
+
+    const showUserParam = () => {
+        console.log("blop");
     }
     
     useEffect(() => {
@@ -51,8 +56,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                 <li onClick={listMembers}>Members</li>
                 {onClickMembers && (
                     <ul className="memberList">{members.map(
-                        (member) => {return (
-                        (member !== me.login) ? <li>{member}</li>: null)}
+                        (member, id) => {
+                            if (member !== me.login)
+                                return (<li key={id} onClick={showUserParam}>{member}</li>)
+                            else
+                                return (<li key={id}>{member}</li>)
+                        }
                         )}
                     </ul>
                 )}
@@ -87,6 +96,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     }
 
     useEffect(() => {
+        console.log("blop2");
         const handleClickOutside = (e: any) => {
             if (ref.current && !ref.current.contains(e.target)) {
                 props.handleClose();
@@ -108,7 +118,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game</li>
                     <li onClick={blockUser}>Block</li>
-                    {props.dest.isChannel && props.dest.isOp && <li onClick={kickUser}>Kick</li>}
+                    {/* {props.dest.isChannel && props.dest.isOp && <li onClick={kickUser}>Kick</li>} */}
                 </ul>
             </div>
         </div>
