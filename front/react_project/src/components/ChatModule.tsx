@@ -4,7 +4,7 @@ import { userService } from "../services/user.service";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { UserData } from "../models"
-import '../styles/ChatModule.scss'
+import "../styles/ChatModule.scss"
 
 const token: any = localStorage.getItem('token');
 const socket = socketIOClient('127.0.0.1:3000/chat', {

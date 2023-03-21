@@ -1,17 +1,21 @@
-import { JwtPayload } from "jsonwebtoken";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
-import { accountService } from "../services/account.service";
+import SearchUserBar from "./SearchUserBar";
+import "../styles/Profile.css"
 
 export default function Profile() {
+    const [user, setUser] = useState<string>("");
+    const currentUser = useParams().login;
+
+    useEffect(() => {
+        if (currentUser !== undefined){
+            setUser(currentUser)
+        }
+    }, [currentUser])
     
-    // const params = useParams();
-    // console.log(params);
-    let user: JwtPayload = accountService.readPayload();
     return (
-        <div>
-            <h1>Votre profil</h1>
-            <p>{user?.login} !</p>
+        <div id="profilePage">
+            <h1>Profil de {user}</h1>
         </div>
     )
 }

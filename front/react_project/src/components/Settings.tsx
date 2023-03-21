@@ -74,6 +74,7 @@ export default function Settings() {
       <div className="switch">
         <p>Activate Google Authentificator</p>
         <ReactSwitch
+          className="checkBox"
           checked={checked}
           onChange={handleChange}
         />
@@ -93,6 +94,7 @@ export default function Settings() {
       <div className="switch">
         <p>Activate Google Authentificator</p>
         <ReactSwitch
+          className="checkBox"
           checked={checked}
           onChange={handleChange}
         />
