@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable } from "typeorm";
+import { UserEntity } from "src/user/user.entity";
 
 @Entity()
 export class ChannelEntity {
@@ -31,4 +32,12 @@ export class ChannelEntity {
 
 	@Column()
 	hidden: boolean;
+
+	@ManyToMany(() => UserEntity, (user) => user.channelsAsNormal)
+	@JoinTable()
+	normalUsers?: UserEntity[];
+
+	@ManyToMany(() => UserEntity, (user) => user.channelsAsOp)
+	@JoinTable()
+	opUsers?: UserEntity[];
 }

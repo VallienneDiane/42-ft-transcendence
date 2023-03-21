@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { UserEntity } from "src/user/user.entity";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "./channel.entity";
 
@@ -77,5 +78,25 @@ export class ChannelService {
 				}
 			}
 		);
+	}
+
+	async addNormalUser(user: UserEntity, channelId: string) {
+		let	users = (await this.getOneById(channelId)).normalUsers;
+		users.push(user);
+		await this.channelRepository.update({id: channelId}, {normalUsers: users});
+	}
+
+	async addOpUser(user: UserEntity, channelId: string) {
+		let	users = (await this.getOneById(channelId)).opUsers;
+		users.push(user);
+		await this.channelRepository.update({id: channelId}, {opUsers: users});
+	}
+
+	async delNormalUser(userId: string, channelId: string) {
+		let users = (await this.getOneById(channelId)).normalUsers;
+		users = users.filter((user) => {
+			return user.id !== userId;
+		})
+		await this.channelRepository.update({id : channelId}, {normalUsers: users});
 	}
 }
