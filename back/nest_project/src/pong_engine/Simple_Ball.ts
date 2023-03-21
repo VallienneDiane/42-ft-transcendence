@@ -42,19 +42,13 @@ export class Simple_ball {
 
         /* check collision with upper wall */
         if (this.y_position - this.r < 0) {
-            if (this.y_position < 0) {
-                this.y_position = -this.y_position;
-            }
-            this.y_position += this.r * (1 + Math.abs(this.y_speed/(2 * this.x_speed)));
+            this.y_position = this.r;
             this.y_speed = -this.y_speed;
         }
 
         /* check collision with lower wall */
         if (this.y_position + this.r > 1) {
-            if (this.y_position > 1) {
-                this.y_position -= (this.y_position - 1) * 2;
-            }
-            this.y_position -= this.r * (1 + Math.abs(this.y_speed/(2 * this.x_speed)));
+            this.y_position = 1 - this.r;
             this.y_speed = -this.y_speed;
         }
 
