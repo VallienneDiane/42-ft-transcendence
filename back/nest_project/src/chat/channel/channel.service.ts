@@ -99,4 +99,12 @@ export class ChannelService {
 		})
 		await this.channelRepository.update({id : channelId}, {normalUsers: users});
 	}
+
+	async delOpUser(userId: string, channelId: string) {
+		let users = (await this.getOneById(channelId)).opUsers;
+		users = users.filter((user) => {
+			return user.id !== userId;
+		})
+		await this.channelRepository.update({id : channelId}, {opUsers: users});
+	}
 }
