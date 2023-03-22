@@ -1,5 +1,5 @@
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class UserEntity {
@@ -29,4 +29,8 @@ export class UserEntity {
   })
   channelsAsOp?: ChannelEntity[];
 
+  @OneToMany(() => ChannelEntity, (channel) => channel.godUser, {
+    eager: true
+  })
+  channelsAsGod?: ChannelEntity[];
 }
