@@ -19,12 +19,12 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private messageEntityfier(login: string, data: IMessageChat): MessageEntity {
+    private messageEntityfier(loginId: string, data: IMessageChat): MessageEntity {
         return {
             id: undefined,
-            room: data.room,
+            roomId: data.room,
             isChannel: data.isChannel,
-            sender: login,
+            senderId: loginId,
             content: data.content,
             date: undefined
         };
@@ -47,8 +47,8 @@ export class ChatService {
 
     private goBackToGeneral(client: Socket) {
         let locGeneral: ChannelEntity = {
-            id: -1,
-            name: 'general',
+            id: "general",
+            name: "general",
             date: new Date(),
             password: false,
             channelPass: null,
@@ -61,11 +61,11 @@ export class ChatService {
         client.emit('newLocChannel', locGeneral, false, []);
     }
 
-    private linkUCEntityfier(login: string, channelName: string, op: boolean): LinkUCEntity {
+    private linkUCEntityfier(loginId: string, channelId: string, op: boolean): LinkUCEntity {
         return {
             id: undefined,
-            userName: login,
-            channelName: channelName,
+            userId: loginId,
+            channelId: channelId,
             date: undefined,
             isOp: op
         };
@@ -73,35 +73,25 @@ export class ChatService {
 
     private channInUCList(channEnt: ChannelEntity, UCList: LinkUCEntity[]): boolean {
         for (let l of UCList) {
-            if (l.channelName == channEnt.name)
+            if (l.channelId == channEnt.id)
                 return true;
         }
         return false;
     }
 
-    private delUserFromChannel(login: string, channel: string, roomHandler: UserRoomHandler, link: LinkUCEntity) {
-        this.linkUCService.deleteLink(channel, login);
-        let user = roomHandler.userMap.get(login);
+    private async delUserFromChannel(userId: string, channelId: string, roomHandler: UserRoomHandler) {
+        this.channelService.delUser(userId, channelId);
+        let user = roomHandler.userMap.get(userId);
         if (user != undefined) {
-            user.socket.emit("leaveChannel", channel);
-            if (user.isChannel && user.room == channel) {
-                roomHandler.joinRoom(login, 'general', true, false, false);
+            user.socket.emit("leaveChannel", channelId);
+            if (user.isChannel && user.room == channelId) {
+                roomHandler.joinRoom(userId, 'general', true, false, false, false);
                 this.goBackToGeneral(user.socket);
             }
-        }    
-        if (link.isOp)
-            this.channelService.getOneByName(channel)
-            .then( (chan) => {
-                let toDel = false;
-                if (chan.opNumber <= 1)
-                    toDel = true;
-                this.channelService.downgradeOpByName(channel);
-                if (toDel) {
-                    this.messageService.deleteChannel(channel);
-                    this.linkUCService.deleteChannel(channel);
-                    roomHandler.roomKill(channel);
-                }
-            });
+        }
+        let chan: ChannelEntity = await this.channelService.getOneById(channelId);
+        if (chan == null)
+            roomHandler.roomKill(channelId);
     }
 
     public connectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {

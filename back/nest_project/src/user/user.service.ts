@@ -56,9 +56,11 @@ export class UserService {
         await this.usersRepository.update({id: userId}, {channelsAsNormal: channels});
     }
     // UNREGISTER CLIENT TO A CHANNEL AS OP USER IN DATABASE
-    async deleteChannelAsOpUser(userId: string, channel: ChannelEntity) {
+    async deleteChannelAsOpUser(userId: string, channelId: string) {
         let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsOp;
-        channels.push(channel);
+        channels = channels.filter((channel) => {
+            return channel.id !== channelId;
+        })
         await this.usersRepository.update({id: userId}, {channelsAsOp: channels});
     }
 

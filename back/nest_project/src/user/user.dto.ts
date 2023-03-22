@@ -1,8 +1,12 @@
 import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength } from "class-validator";
+import { ChannelDto } from "src/chat/channel/channel.dto";
 
 export class UserDto {
-    readonly id: string;
+    @IsString() readonly id: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(8) password: string;
+    readonly channelsAsNormal?: ChannelDto[];
+    readonly channelsAsOp?: ChannelDto[];
+    readonly channelsAsGod?: ChannelDto[];
 }
