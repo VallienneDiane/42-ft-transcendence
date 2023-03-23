@@ -2,7 +2,7 @@ import { useContext, useState, useRef, useEffect } from "react";
 import SocketContext from "../context";
 import { useForm, Controller } from 'react-hook-form';
 import { IChannel } from "../../models";
-import { Box, Checkbox, Switch, Button } from '@mui/material';
+import { Box, Checkbox, Switch } from '@mui/material';
 import Input from '@mui/material/Input';
 
 export function Popup(props: {handleClose: any}) {
@@ -46,7 +46,7 @@ export function Popup(props: {handleClose: any}) {
     };
 
     return (
-      <div className="popupBox">
+      <div id="popup">
         <div className="box" ref={ref}>
           <span className="closeIcon" onClick={props.handleClose}>x</span>
             <h1>Create New Channel</h1>
@@ -145,7 +145,7 @@ export function Popup(props: {handleClose: any}) {
                     <label className="labelName">Hidden</label>
                 </section>
                 </div>
-                <Button type="submit">Create</Button>
+                <button className="button" type="submit">Create</button>
             </Box>
         </div>
       </div>
@@ -155,8 +155,8 @@ export function Popup(props: {handleClose: any}) {
 export function CreateChannel(props: {onClick: any}) {
 
     return (
-        <div className="createChannel">
-            <p className="btn" onClick={props.onClick}>+</p>    
+        <div id="createChannel">
+            <p className="btn" onClick={props.onClick}>Create new channel</p>    
         </div>
     );
 }

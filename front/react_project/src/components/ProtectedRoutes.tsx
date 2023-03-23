@@ -18,8 +18,8 @@ const ProtectedRoutes = () => {
                 createSocket();
             }
         }})
-
-    return accountService.isLogged() ? <Outlet/> : <Navigate to="/login"/>;
+        
+    return accountService.isLogged() ? <Outlet/> : <Navigate to="/login" replace state={{ from: location }}/>;
 }
 
 export default ProtectedRoutes;
