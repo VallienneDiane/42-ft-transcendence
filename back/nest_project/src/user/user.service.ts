@@ -89,7 +89,10 @@ export class UserService {
         await this.usersRepository.update({id: meId}, {messagesSend: messages});
     }
     // GET ALL PRIVATE MESSAGES ORDERED BY DATE
-    public getPrivateMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
-        
+    async getPrivateMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
+        let me = await this.findById(meId);
+        let messages: MessagePrivateEntity[] = await this.usersRepository
+            .createQueryBuilder("MessagePrivateEntity")
+            .leftJoinAndSelect()
     }
 }
