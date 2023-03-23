@@ -82,9 +82,9 @@ export default function Settings() {
         <p>Scan the QRCode in your application </p>
         <img id="qrcode" src={qrcode} alt="" />
         <form onSubmit={handleSubmit(verifySubmittedCode)}>
-        <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
-        {errors.code && <p className="errorsCode">{errors.code.message}</p>}
-        <button type="submit">Submit</button>
+          <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
+          {errors.code && <p className="errorsCode">{errors.code.message}</p>}
+          <button type="submit">Submit</button>
         </form>
     </div>
   )
@@ -99,8 +99,8 @@ export default function Settings() {
           onChange={handleChange}
         />
       </div>
-        <img id="qrcode" src={qrcode} alt="" />
-        <p id="AuthActivate">Google Authentificator is activate</p>
+      <img id="qrcode" src={qrcode} alt="" />
+      <p id="AuthActivate">Google Authentificator is activate</p>
     </div>
   )
   return (
@@ -108,6 +108,7 @@ export default function Settings() {
     <div className="switch">
       <p>Activate Google Authentificator</p>
       <ReactSwitch
+        className="checkBox"
         checked={checked}
         onChange={handleChange}
       />
