@@ -26,7 +26,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     ) 
     {}
 
-    private extractLogin(client: Socket): string {
+    private extractUserId(client: Socket): string {
         let token = client.handshake.auth['token'];
         if (token != null) {
             const decoded = this.jwtService.verify(token, {
@@ -39,24 +39,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             client.emit("fromServerMessage", "you're token is invalid");
             return null;
         }
-        let pseudo: string = object.login;
-        return pseudo;
+        let id: string = object.sub;
+        return id;
     }
 
     private tokenChecker(client: Socket): Promise<UserDto> {
-        let login = this.extractLogin(client);
-        return this.userService.findByLogin(login);    
-    }
-
-    private iHandlerisator(client: Socket, message?: IMessageChat, channel?: IChannel): IHandle {
-        return {
-            chatNamespace: this.chatNamespace,
-            client: client,
-            roomHandler: this.chatRoomHandler,
-            logger: this.logger,
-            message: message,
-            channelEntries: channel
-        };
+        let id = this.extractUserId(client);
+        return this.userService.findById(id);    
     }
 
     afterInit() {
@@ -65,12 +54,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.chatRoomHandler = new UserRoomHandler();
     }
 
-    // @UseGuards(AuthGuard('websocket'))
     handleConnection(client: Socket) {
         this.tokenChecker(client)
         .then( (user) => {
             if (user != null)
-                this.chatService.connectEvent(client, user.login, this.chatNamespace, this.chatRoomHandler, this.logger);
+                this.chatService.connectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
