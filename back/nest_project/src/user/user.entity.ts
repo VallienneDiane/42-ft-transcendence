@@ -18,4 +18,15 @@ export class UserEntity {
   @Column()
   password: string;
 
+  @Column({nullable: true})
+  twoFactorSecret: string;
+
+  @Column({nullable: true})
+  isTwoFactorEnabled: boolean;
+
+  @Column({nullable: true})
+  qrCode: string;
+
+  @Column({nullable: true})
+  avatarSvg: string;
 }

@@ -11,7 +11,7 @@ export class Simple_paddle {
         this.x_position = 0.01;
         this.lenght = 0.17;
         this.y_position = 0.5 - (this.lenght / 2);
-        this.speed = 1/60;
+        this.speed = 2/60;
     }
 
     /**
@@ -19,6 +19,7 @@ export class Simple_paddle {
      * @param body the key pressed in string format
      */
     process_input (body: any) {
+        console.log("process input");
         if (body === "ArrowUp") {
 			this.y_position -= this.speed;
             if (this.y_position < 0) {

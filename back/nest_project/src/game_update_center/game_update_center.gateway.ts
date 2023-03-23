@@ -44,7 +44,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   }
 
   @SubscribeMessage('Game_Input')
-  OnGame_Input(@MessageBody() body: any) { // rqjouter dans le message le joueur ou prendre en compte le joueur
+  OnGame_Input(@MessageBody() body: any) { // rajouter dans le message le joueur ou prendre en compte le joueur
     const game = this.Game;
     const pong = this.Pong;
     if (this.state === "game") {
@@ -58,8 +58,8 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
   @SubscribeMessage('Game_init')
   OnGame_init(@MessageBody() body: any) {
-    if (body === "simple") {
-      this.state = "pong";
+    if (body === "complex") {
+      this.state = "game";
     }
   }
 

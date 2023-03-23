@@ -42,5 +42,9 @@ export class PongEngineService {
             r: this.ball.r,
         };
         this.gs.ballPosition[0] = bp;
+        this.gs.paddleOne = {
+            x: this.p1.x_position,
+            y: this.p1.y_position + this.p1.lenght/2
+        };
     }
 }
