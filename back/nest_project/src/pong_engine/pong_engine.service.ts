@@ -22,19 +22,26 @@ export class PongEngineService {
     p1: Simple_paddle;
     p2: Simple_paddle;
     aspect_ratio = 16/9;
+    cooldown = 60;
+    cooldown_start;
 
     constructor () {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
-        this.p2.x_position = this.aspect_ratio - 0.01;
+        this.cooldown_start = 0;
+        this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
         paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
     }
 
     main_loop() {
-        this.ball.update_self_position(this.p1, this.p2);
+        this.cooldown_start++;
+        if (this.ball.state === "dead") {
+            this.ball = new Simple_ball();
+            this.cooldown_start = 0;
+        }
         let bp: ballpos;
         bp = {
             x: this.ball.x_position,
@@ -43,8 +50,16 @@ export class PongEngineService {
         };
         this.gs.ballPosition[0] = bp;
         this.gs.paddleOne = {
-            x: this.p1.x_position,
+            x: this.p1.x_position - 0.015,
             y: this.p1.y_position + this.p1.lenght/2
         };
+
+        this.gs.paddleTwo = {
+            x: this.p2.x_position + 0.015,
+            y: this.p2.y_position + this.p2.lenght/2
+        };
+        if (this.cooldown_start - this.cooldown < 0)
+            return;
+        this.ball.update_self_position(this.p1, this.p2);
     }
 }
