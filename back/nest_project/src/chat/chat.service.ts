@@ -9,6 +9,7 @@ import { ChannelService } from "./channel/channel.service";
 import { LinkUCService } from "./link_users_channels/linkUC.service";
 import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
+import { UserDto } from "src/user/user.dto";
 
 @Injectable({})
 export class ChatService {
@@ -19,12 +20,12 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private messageEntityfier(loginId: string, data: IMessageChat): MessageEntity {
+    private messageEntityfier(userIdId: string, data: IMessageChat): MessageEntity {
         return {
             id: undefined,
             roomId: data.room,
             isChannel: data.isChannel,
-            senderId: loginId,
+            senderId: userIdId,
             content: data.content,
             date: undefined
         };
@@ -61,10 +62,10 @@ export class ChatService {
         client.emit('newLocChannel', locGeneral, false, []);
     }
 
-    private linkUCEntityfier(loginId: string, channelId: string, op: boolean): LinkUCEntity {
+    private linkUCEntityfier(userId: string, channelId: string, op: boolean): LinkUCEntity {
         return {
             id: undefined,
-            userId: loginId,
+            userId: userId,
             channelId: channelId,
             date: undefined,
             isOp: op
@@ -94,44 +95,43 @@ export class ChatService {
             roomHandler.roomKill(channelId);
     }
 
-    public connectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
-        chatNamespace.sockets.set(login, client);
-        roomHandler.addUser(login, client, "general", true, false, false);
-        console.log(login);
+    public connectEvent(client: Socket, user: UserDto, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+        chatNamespace.sockets.set(user.id, client);
+        roomHandler.addUser(user.id, client, "general", false, true, false, false);
         client.emit("changeLocChannel", "general", []);
         chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userConnected', login);
+            socket.emit('userConnected', {userId: user.id, userLogin: user.login});
         })
-        logger.log(`${login} is connected, ${client.id}`);
+        logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
     }
 
-    public disconnectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
-        chatNamespace.sockets.delete(login);
-        let room = roomHandler.delUser(login);
+    public disconnectEvent(client: Socket, userId: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+        chatNamespace.sockets.delete(userId);
+        let room = roomHandler.delUser(userId);
         if (room != undefined)
-            roomHandler.roomMap.of(room).emit('notice', login, " just disconnect");
+            roomHandler.roomMap.of(room).emit('notice', userId, " just disconnect");
         chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userDisconnected', login);
+            socket.emit('userDisconnected', userId);
         })
-        logger.log(`${login} is disconnected`);
+        logger.log(`${userId} is disconnected`);
     }
 
-    public newMessageEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, message: string) {
-        logger.debug(`${login} send : `);
+    public newMessageEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, message: string) {
+        logger.debug(`${userId} send : `);
         console.log(message);
-        let room = roomHandler.userMap.get(login);
+        let room = roomHandler.userMap.get(userId);
         if (room != undefined) {
-            let toSend = {date: new Date(), sender: login, content: message};
+            let toSend = {date: new Date(), sender: userId, content: message};
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
-                    this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
+                    this.messageService.create(this.messageEntityfier(userId, {room: room.room, isChannel: room.isChannel, content: message}));
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
                 }
                 else
                     client.emit('notice', 'only channel operator can talk in this channel');
             }
             else {
-                this.messageService.create(this.messageEntityfier(login, {room: room.room, isChannel: room.isChannel, content: message}));
+                this.messageService.create(this.messageEntityfier(userId, {room: room.room, isChannel: room.isChannel, content: message}));
                 client.emit('selfMessage', toSend);
                 let connected = false;
                 let dest = roomHandler.userMap.get(room.room);
@@ -139,11 +139,11 @@ export class ChatService {
                     connected = true;
                 client.emit('checkNewDM', room.room, connected);
                 if (dest != undefined) {
-                    dest.socket.emit('checkNewDM', login, true);
-                    if (!dest.isChannel && dest.room == login)
+                    dest.socket.emit('checkNewDM', userId, true);
+                    if (!dest.isChannel && dest.room == userId)
                         dest.socket.emit("newMessage", toSend);
                     else
-                        dest.socket.emit("pingedBy", login);
+                        dest.socket.emit("pingedBy", userId);
                 }
             }
         }
@@ -151,11 +151,11 @@ export class ChatService {
             client.emit('notice', 'You are nowhere');
     }
 
-    public changeLocEvent(client: Socket, login: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
+    public changeLocEvent(client: Socket, userId: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
         {
             if (loc == 'general') {
-                roomHandler.joinRoom(login, loc, true, false, false);
+                roomHandler.joinRoom(userId, loc, true, false, false);
                 this.goBackToGeneral(client);
                 return;
             }
@@ -165,12 +165,12 @@ export class ChatService {
                     (loc) => {
                         if (loc != null)
                         {
-                            this.linkUCService.findOne(loc.name, login)
+                            this.linkUCService.findOne(loc.name, userId)
                             .then(
                                 (found) => {
                                     if (found != null)
                                     {
-                                        roomHandler.joinRoom(login, found.channelName, true, found.isOp, loc.onlyOpCanTalk);
+                                        roomHandler.joinRoom(userId, found.channelName, true, found.isOp, loc.onlyOpCanTalk);
                                         this.messageService.findByChannel(found.channelName)
                                         .then(
                                             ( (messages) => {
@@ -191,17 +191,17 @@ export class ChatService {
         }
         else
         {
-            this.userService.findByLogin(loc)
+            this.userService.findByuserId(loc)
             .then (
                 (found) => {
                     if (found != null) {
-                        roomHandler.joinRoom(login, found.login, false, false, false);
-                        console.log('user currently in room : ', roomHandler.userMap.get(login).room, roomHandler.userMap.get(login).isChannel)
-                        this.messageService.findByPrivate(login, found.login)
+                        roomHandler.joinRoom(userId, found.userId, false, false, false);
+                        console.log('user currently in room : ', roomHandler.userMap.get(userId).room, roomHandler.userMap.get(userId).isChannel)
+                        this.messageService.findByPrivate(userId, found.userId)
                         .then (
                             (messages) => {
                                 console.log('newlocprivate send');
-                                client.emit('newLocPrivate', found.login, messages);
+                                client.emit('newLocPrivate', found.userId, messages);
                             }
                         )
                     }
@@ -212,8 +212,8 @@ export class ChatService {
         }
     }
 
-    public listChannelEvent(client: Socket, login: string) {
-        this.linkUCService.findAllByUserName(login)
+    public listChannelEvent(client: Socket, userId: string) {
+        this.linkUCService.findAllByUserName(userId)
         .then(
             (notToDisplay) => {
                 this.channelService.listChannels()
@@ -233,8 +233,8 @@ export class ChatService {
         )
     }
 
-    public listMyChannelEvent(client: Socket, login: string) {
-        this.linkUCService.findAllByUserName(login)
+    public listMyChannelEvent(client: Socket, userId: string) {
+        this.linkUCService.findAllByUserName(userId)
         .then(
             (list) => {
                 let strs: string[] = ["general"];
@@ -245,13 +245,13 @@ export class ChatService {
         )
     }
 
-    public listMyDMEvent(client: Socket, login: string, roomHandler: UserRoomHandler) {
-        this.messageService.findAllDialogByUserName(login)
+    public listMyDMEvent(client: Socket, userId: string, roomHandler: UserRoomHandler) {
+        this.messageService.findAllDialogByUserName(userId)
         .then((raws) => {
             let sorted = new Map<string, boolean>();
             for (let raw of raws) {
                 let user;
-                if (raw.room != login || raw.room == raw.sender)
+                if (raw.room != userId || raw.room == raw.sender)
                     user = raw.room;
                 else
                     user = raw.sender;
@@ -261,8 +261,8 @@ export class ChatService {
                 else
                     sorted.set(user, false);
             }
-            let arrayDM: {login: string, connected: boolean}[] = [];
-            sorted.forEach((connected, login) => arrayDM.push({login: login, connected: connected}));
+            let arrayDM: {userId: string, connected: boolean}[] = [];
+            sorted.forEach((connected, userId) => arrayDM.push({userId: userId, connected: connected}));
             client.emit('listMyDM', arrayDM);
         })
     }
@@ -277,8 +277,8 @@ export class ChatService {
         })
     }
 
-    public joinChannelEvent(client: Socket, login: string, data: {channelName: string, channelPass: string}, roomHandler: UserRoomHandler) {
-        this.linkUCService.findOne(data.channelName, login)
+    public joinChannelEvent(client: Socket, userId: string, data: {channelName: string, channelPass: string}, roomHandler: UserRoomHandler) {
+        this.linkUCService.findOne(data.channelName, userId)
         .then ( (exist) => {
             if (exist != null)
                 client.emit('notice', 'already in channel');
@@ -288,9 +288,9 @@ export class ChatService {
                     if (chan != null) {
                         if (!chan.inviteOnly) {
                             if (!chan.password || data.channelPass == chan.channelPass) {
-                                this.linkUCService.create(this.linkUCEntityfier(login, data.channelName, false))
-                                .then( () => { this.listMyChannelEvent(client, login);
-                                    this.changeLocEvent(client, login, data.channelName, true, roomHandler);
+                                this.linkUCService.create(this.linkUCEntityfier(userId, data.channelName, false))
+                                .then( () => { this.listMyChannelEvent(client, userId);
+                                    this.changeLocEvent(client, userId, data.channelName, true, roomHandler);
                                 });
                             }
                             else
@@ -306,12 +306,12 @@ export class ChatService {
         })
     }
 
-    public inviteUserEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToInvite: string, channel: string) {
-        this.linkUCService.findOne(channel, login)
+    public inviteUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToInvite: string, channel: string) {
+        this.linkUCService.findOne(channel, userId)
         .then( (found) => {
             if (found != null) {
                 if (found.isOp) {
-                    this.userService.findByLogin(userToInvite)
+                    this.userService.findByuserId(userToInvite)
                     .then( (attitude) => {
                         if (attitude != null) {
                             this.linkUCService.create(this.linkUCEntityfier(userToInvite, channel, false))
@@ -331,7 +331,7 @@ export class ChatService {
                         if (chanOpts.inviteOnly)
                             client.emit('notice', 'only channel operators can invite to this channel');
                         else {
-                            this.userService.findByLogin(userToInvite)
+                            this.userService.findByuserId(userToInvite)
                             .then( (attitude) => {
                                 if (attitude != null) {
                                    this.linkUCService.create(this.linkUCEntityfier(userToInvite, channel, false))
@@ -354,20 +354,20 @@ export class ChatService {
         })
     }
 
-    public leaveChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: string) {
+    public leaveChannelEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, channel: string) {
         logger.debug('leave channel request');
-        this.linkUCService.findOne(channel, login)
+        this.linkUCService.findOne(channel, userId)
         .then( (found) => {
             if (found != null) {
-                this.delUserFromChannel(login, channel, roomHandler, found);
+                this.delUserFromChannel(userId, channel, roomHandler, found);
             }
             else
                 client.emit('notice', 'you are not registered to that channel');
         })
     }
 
-    public makeHimOpEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channel: string) {
-        this.linkUCService.findOne(channel, login)
+    public makeHimOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channel: string) {
+        this.linkUCService.findOne(channel, userId)
         .then((link) => {
             if (link == null || !link.isOp)
                 client.emit('notice', 'You cannot.');
@@ -387,8 +387,8 @@ export class ChatService {
         })
     }
 
-    public makeHimNoOpEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToNoOp: string, channel: string) {
-        this.linkUCService.findOne(channel, login)
+    public makeHimNoOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToNoOp: string, channel: string) {
+        this.linkUCService.findOne(channel, userId)
         .then((link) => {
             if (link == null || !link.isOp)
                 client.emit('notice', 'You cannot.');
@@ -426,13 +426,13 @@ export class ChatService {
         })
     }
 
-    public kickUserEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
+    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
         if (userToKick == undefined || channel == undefined)
         {
             client.emit('notice', "no comprendo the requete");
             return;
         }
-        this.linkUCService.findOne(channel, login)
+        this.linkUCService.findOne(channel, userId)
         .then( (found) => {
             if (found == null || !found.isOp)
                 client.emit('notice', "You can't do that.");
@@ -448,7 +448,7 @@ export class ChatService {
         })
     }
 
-    public createChannelEvent(client: Socket, login: string, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
+    public createChannelEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
         logger.debug('create channel request');
         console.log(channel);
         if (channel.name == 'general') {
@@ -466,16 +466,16 @@ export class ChatService {
                             let strs: {channelName: string, password: boolean}[] = [];
                             for (let l of list) {
                                 strs.push({channelName: l.name, password: l.password});}
-                            roomHandler.userMap.emitExcept('listChannel', login, strs);
+                            roomHandler.userMap.emitExcept('listChannel', userId, strs);
                         })
                     }
-                    this.linkUCService.create(this.linkUCEntityfier(login, succeed.name, true))
+                    this.linkUCService.create(this.linkUCEntityfier(userId, succeed.name, true))
                     .then( () => {
-                        this.linkUCService.findAllByUserName(login).then( (result) => {
-                            logger.debug(`list of channel joined by ${login} : `);
+                        this.linkUCService.findAllByUserName(userId).then( (result) => {
+                            logger.debug(`list of channel joined by ${userId} : `);
                             console.log(result)});
-                        this.listMyChannelEvent(client, login);
-                        this.changeLocEvent(client, login, channel.name, true, roomHandler);
+                        this.listMyChannelEvent(client, userId);
+                        this.changeLocEvent(client, userId, channel.name, true, roomHandler);
                         });
                 })
             }

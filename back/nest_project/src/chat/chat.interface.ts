@@ -30,7 +30,7 @@ export interface IChannel {
 //Trick to make typescript agree (typescript sucks a lot)
 export interface IToken {
     login?: string;
-    sub?: number;
+    sub?: string;
     iat?: number;
     exp?: number;
 }
