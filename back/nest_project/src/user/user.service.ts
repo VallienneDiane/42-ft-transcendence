@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { Repository } from "typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { UserDto } from "./user.dto";
@@ -68,5 +69,27 @@ export class UserService {
         })
         await this.usersRepository.update({id: userId}, {channelsAsOp: channels});
     }
-
+    // SEND A PRIVATE MESSAGE TO ANOTHER PERSON
+    async sendPrivateMessage(meId: string, himId: string, content: string) {
+        let me = await this.findById(meId);
+        if (me == null)
+            return;
+        let him = await this.findById(himId);
+        if (him == null)
+            return;
+        let message: MessagePrivateEntity = {
+            id: undefined,
+            sender: me,
+            receiver: him,
+            content: content,
+            date: undefined
+        };
+        let messages = me.messagesSend;
+        messages.push(message);
+        await this.usersRepository.update({id: meId}, {messagesSend: messages});
+    }
+    // GET ALL PRIVATE MESSAGES ORDERED BY DATE
+    public getPrivateMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
+        
+    }
 }

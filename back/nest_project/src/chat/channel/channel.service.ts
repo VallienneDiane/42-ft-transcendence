@@ -3,6 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { Repository } from "typeorm";
+import { MessageChannelDto } from "../messageChannel/messageChannel.dto";
+import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
 
@@ -165,5 +167,35 @@ export class ChannelService {
 		this.delGodUser(userId, channelId);
 		this.delOpUser(userId, channelId);
 		this.delNormalUser(userId, channelId);
+	}
+
+	async addMessage(userId: string, content: string, channelId: string) {
+		let channel = await this.getOneById(channelId);
+		let message: MessageChannelEntity = {
+			id: undefined,
+			content: content,
+			date: undefined,
+			userId: userId,
+			channel: channel
+		}
+		let messages = channel.messages;
+		messages.push(message);
+		this.channelRepository.update(
+			{id : channelId},
+			{messages: messages}
+		);
+	}
+
+	async delUserMessages(userId: string, channelId: string) {
+		let channel = await this.getOneById(channelId);
+		if (channel == null)
+			return;
+		let messages = channel.messages.filter(message => {
+			return message.userId !== userId;
+		});
+		this.channelRepository.update(
+			{id: channelId},
+			{messages: messages}
+		);
 	}
 }

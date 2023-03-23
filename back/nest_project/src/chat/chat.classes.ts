@@ -175,7 +175,10 @@ export class UserRoomHandler {
             inviteOnly: false,
             persistant: true,
             onlyOpCanTalk: false,
-            hidden: false
+            hidden: false,
+            normalUsers: [],
+            opUsers: [],
+            messages: []
         }
         let room = this.roomMap.of(channelId);
         if (room != undefined) {

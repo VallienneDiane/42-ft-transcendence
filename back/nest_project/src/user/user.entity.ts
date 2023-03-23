@@ -1,4 +1,5 @@
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
+import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
@@ -22,15 +23,22 @@ export class UserEntity {
   @ManyToMany(() => ChannelEntity, (channel) => channel.normalUsers, {
     eager: true,
   })
-  channelsAsNormal?: ChannelEntity[];
+  channelsAsNormal: ChannelEntity[];
 
   @ManyToMany(() => ChannelEntity, (channel) => channel.opUsers, {
     eager: true,
   })
-  channelsAsOp?: ChannelEntity[];
+  channelsAsOp: ChannelEntity[];
 
   @OneToMany(() => ChannelEntity, (channel) => channel.godUser, {
     eager: true
   })
-  channelsAsGod?: ChannelEntity[];
+  channelsAsGod: ChannelEntity[];
+
+  @OneToMany(() => MessagePrivateEntity, (message) => message.receiver)
+  messagesReceived: MessagePrivateEntity[];
+
+  @OneToMany(() => MessagePrivateEntity, (message) => message.sender)
+  messagesSend: MessagePrivateEntity[];
+
 }
