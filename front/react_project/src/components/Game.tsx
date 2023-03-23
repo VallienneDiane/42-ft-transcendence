@@ -82,7 +82,8 @@ useEffect(() => {
 const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault();
     console.log(event.key);
-    socket.emit('Game_Input_Down', event.key);
+    socket.emit('Game_Input', event.key);
+    // socket.emit('Game_Input_Down', event.key);
 }, [socket]);
 
 const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
