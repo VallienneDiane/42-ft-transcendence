@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Simple_ball } from './Simple_Ball';
 import { Simple_paddle } from './Simple_paddle';
+import { Socket } from 'socket.io';
 
 interface ballpos {
 	x: number,
@@ -21,11 +22,13 @@ export class PongEngineService {
     ball: Simple_ball;
     p1: Simple_paddle;
     p2: Simple_paddle;
+    pl1: Socket;
+    pl2: Socket;
     aspect_ratio = 16/9;
     cooldown = 60;
     cooldown_start;
 
-    constructor () {
+    constructor (pl1, pl2) {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
@@ -34,6 +37,7 @@ export class PongEngineService {
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
         paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
+        //console.log("from pong engine service ;y player are :" + pl1 + "and" + pl2);
     }
 
     main_loop() {
