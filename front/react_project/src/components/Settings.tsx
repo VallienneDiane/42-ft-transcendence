@@ -104,7 +104,7 @@ export default function Settings() {
     </div>
   )
   return (
-    <div className="toggle2fa">
+  <div className="toggle2fa">
     <div className="switch">
       <p>Activate Google Authentificator</p>
       <ReactSwitch

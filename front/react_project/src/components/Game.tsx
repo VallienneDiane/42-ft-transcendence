@@ -82,7 +82,13 @@ useEffect(() => {
 const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
     event.preventDefault();
     console.log(event.key);
-    socket.emit('Game_Input', event.key);
+    socket.emit('Game_Input_Down', event.key);
+}, [socket]);
+
+const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    console.log(event.key);
+    socket.emit('Game_Input_Up', event.key);
 }, [socket]);
 
 // Get css colors variables to use it in the canva
@@ -122,7 +128,7 @@ useEffect(() => {
 const gameWidth = 600;
 
     return (
-        <div id='Game' onKeyDown={handleKeyDown}>
+        <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <h1>Game Page</h1>
             <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
             <button id="startButton" onClick={launchGame}>START !</button>
