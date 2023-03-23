@@ -6,7 +6,13 @@ export interface LogInForm {
     password: string
 }
 
-export interface SignInForm { 
+export interface VerifyCodeForm {
+    login?: string,
+    code: string,
+    errors?:string,
+}
+
+export interface SignUpForm { 
     id?: number,
     login: string,
     email: string,

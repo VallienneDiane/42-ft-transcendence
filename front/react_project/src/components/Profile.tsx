@@ -1,14 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
+import SearchUserBar from "./SearchUserBar";
+import "../styles/Profile.css"
 
 export default function Profile() {
-    
-    // const params = useParams();
-    // console.log(params);
+    const [user, setUser] = useState<string>("");
+    const currentUser = useParams().login;
+
+    useEffect(() => {
+        if (currentUser !== undefined){
+            setUser(currentUser)
+        }
+    }, [currentUser])
     
     return (
-        <div>
-            <h1>Votre profil</h1>
+        <div id="profilePage">
+            <h1>Profil de {user}</h1>
         </div>
     )
 }
