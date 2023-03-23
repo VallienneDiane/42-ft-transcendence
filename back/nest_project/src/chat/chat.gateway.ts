@@ -68,16 +68,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.disconnectEvent(client, user.login, this.chatNamespace, this.chatRoomHandler, this.logger)
+                this.chatService.disconnectEvent(user, this.chatNamespace, this.chatRoomHandler, this.logger)
         })
     }
 
     @SubscribeMessage('addMessage')
-    handleNewMessage(@MessageBody() blop: string, @ConnectedSocket() client: Socket) {
+    handleNewMessage(@MessageBody() message: string, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.newMessageEvent(client, user.login, this.chatRoomHandler, this.logger, blop);
+                this.chatService.newMessageEvent(client, user, this.chatRoomHandler, this.logger, message);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

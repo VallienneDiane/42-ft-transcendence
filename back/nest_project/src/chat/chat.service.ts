@@ -1,37 +1,38 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
 import { IChannel, IMessageChat } from "./chat.interface";
-import { MessageEntity } from "./message/message.entity";
-import { LinkUCEntity } from "./link_users_channels/linkUC.entity";
+import { MessageChannelEntity } from "./messageChannel/messageChannel.entity";
+import { MessageChannelService } from "./messageChannel/messageChannel.service";
+import { MessagePrivateEntity } from "./messagePrivate/messagePrivate.entity";
+import { MessagePrivateService } from "./messagePrivate/messagePrivate.service";
 import { ChannelEntity } from "./channel/channel.entity";
-import { MessageService } from "./message/message.service";
 import { ChannelService } from "./channel/channel.service";
-import { LinkUCService } from "./link_users_channels/linkUC.service";
 import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 import { UserDto } from "src/user/user.dto";
+import { UserEntity } from "src/user/user.entity";
 
 @Injectable({})
 export class ChatService {
     constructor (
-        private messageService: MessageService,
+        private messageChannelService: MessageChannelService,
+        private messagePrivateService: MessagePrivateService,
         private channelService: ChannelService,
-        private linkUCService: LinkUCService,
         private userService: UserService
     ) {}
 
-    private messageEntityfier(userIdId: string, data: IMessageChat): MessageEntity {
+    private async messageChannelEntityfier(userId: string, data: IMessageChat): Promise<MessageChannelEntity> {
+        let channel = await this.channelService.getOneById(data.room);
         return {
             id: undefined,
-            roomId: data.room,
-            isChannel: data.isChannel,
-            senderId: userIdId,
             content: data.content,
-            date: undefined
+            date: undefined,
+            userId: userId,
+            channel: channel
         };
     }
 
-    private channelEntityfier(channProperties: IChannel): ChannelEntity {
+    private channelEntityfier(channProperties: IChannel, founder: UserEntity): ChannelEntity {
         return {
             id: undefined,
             date: undefined,
@@ -42,7 +43,11 @@ export class ChatService {
             inviteOnly: channProperties.inviteOnly,
             persistant: channProperties.persistant,
             onlyOpCanTalk: channProperties.onlyOpCanTalk,
-            hidden: channProperties.hidden
+            hidden: channProperties.hidden,
+            normalUsers: [],
+            opUsers: [],
+            godUser: founder,
+            messages: []
         };
     }
 
@@ -57,27 +62,12 @@ export class ChatService {
             inviteOnly: false,
             persistant: true,
             onlyOpCanTalk: false,
-            hidden: false
+            hidden: false,
+            normalUsers: [],
+            opUsers: [],
+            messages: []
         }
         client.emit('newLocChannel', locGeneral, false, []);
-    }
-
-    private linkUCEntityfier(userId: string, channelId: string, op: boolean): LinkUCEntity {
-        return {
-            id: undefined,
-            userId: userId,
-            channelId: channelId,
-            date: undefined,
-            isOp: op
-        };
-    }
-
-    private channInUCList(channEnt: ChannelEntity, UCList: LinkUCEntity[]): boolean {
-        for (let l of UCList) {
-            if (l.channelId == channEnt.id)
-                return true;
-        }
-        return false;
     }
 
     private async delUserFromChannel(userId: string, channelId: string, roomHandler: UserRoomHandler) {
@@ -105,26 +95,26 @@ export class ChatService {
         logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
     }
 
-    public disconnectEvent(client: Socket, userId: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
-        chatNamespace.sockets.delete(userId);
-        let room = roomHandler.delUser(userId);
-        if (room != undefined)
-            roomHandler.roomMap.of(room).emit('notice', userId, " just disconnect");
+    public disconnectEvent(user: UserDto, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+        chatNamespace.sockets.delete(user.id);
+        let roomId = roomHandler.delUser(user.id);
+        if (roomId != undefined)
+            roomHandler.roomMap.of(roomId).emit('notice', user.login, " just disconnect");
         chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userDisconnected', userId);
+            socket.emit('userDisconnected', user.id);
         })
-        logger.log(`${userId} is disconnected`);
+        logger.log(`${user.login} as id ${user.id} is disconnected`);
     }
 
-    public newMessageEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, message: string) {
-        logger.debug(`${userId} send : `);
+    public newMessageEvent(client: Socket, user: UserDto, roomHandler: UserRoomHandler, logger: Logger, message: string) {
+        logger.debug(`${user.login} send : `);
         console.log(message);
-        let room = roomHandler.userMap.get(userId);
+        let room = roomHandler.userMap.get(user.id);
         if (room != undefined) {
-            let toSend = {date: new Date(), sender: userId, content: message};
+            let toSend = {date: new Date(), sender: user.login, content: message};
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
-                    this.messageService.create(this.messageEntityfier(userId, {room: room.room, isChannel: room.isChannel, content: message}));
+                    this.channelService.addMessage(user.id, message, room.room);
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
                 }
                 else

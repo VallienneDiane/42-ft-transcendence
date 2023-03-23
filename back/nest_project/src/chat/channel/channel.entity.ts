@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from "typeorm";
 import { UserEntity } from "src/user/user.entity";
+import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 
 @Entity()
 export class ChannelEntity {
@@ -35,13 +36,19 @@ export class ChannelEntity {
 
 	@ManyToMany(() => UserEntity, (user) => user.channelsAsNormal)
 	@JoinTable()
-	normalUsers?: UserEntity[];
+	normalUsers: UserEntity[];
 
 	@ManyToMany(() => UserEntity, (user) => user.channelsAsOp)
 	@JoinTable()
-	opUsers?: UserEntity[];
+	opUsers: UserEntity[];
 
 	@ManyToOne(() => UserEntity, (user) => user.channelsAsGod)
 	@JoinTable()
 	godUser?: UserEntity;
+
+	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
+		eager: true,
+	})
+	messages: MessageChannelEntity[];
+
 }
