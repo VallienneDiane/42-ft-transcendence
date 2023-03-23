@@ -3,6 +3,6 @@ import { PongEngineService } from './pong_engine.service';
 
 @Module({
   providers: [PongEngineService],
-  exports: [PongEngineService]
+  exports: [PongEngineService],
 })
 export class PongEngineModule {}
