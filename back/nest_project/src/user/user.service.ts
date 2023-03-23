@@ -11,6 +11,7 @@ interface User {
     twoFactorSecret: string,
     isTwoFactorEnabled: boolean,
     qrCode: string,
+    avatarSvg: string
 }
 
 @Injectable({})

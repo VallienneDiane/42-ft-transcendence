@@ -97,7 +97,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         if (ball.y > CONTAINER_HEIGHT + ball.r / 2) {
             balls.splice(i, 1);
             let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - ball.r / 2) + ball.r / 2;
-            let y = Math.random() * -1000;
+            let y = Math.random() * -500;
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
             let r = (Math.random() * 10) + 15;
@@ -183,13 +183,11 @@ const Home: React.FC = () => {
     
     useEffect(() => {
         setPageElements([titleBox!, linkGameBox!, linkChatBox!]);
-        console.log('after set', pageElements);
 
     }, [titleBox, linkGameBox, linkChatBox])
     
     useEffect(() => {
         function handleResize() {
-            console.log('win resize');
             setContainerHeight(window.innerHeight);
             setContainerWidth(window.innerWidth);
         }
