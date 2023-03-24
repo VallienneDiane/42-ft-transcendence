@@ -22,9 +22,21 @@ export class Waiting_socket {
   login;
 }
 
-export class Pong {
+export class Pong_instance {
   game_engine;
-  room_id;
+  player: Socket[];
+  spectator: Socket[];
+}
+
+export class Game_instance {
+  game_engine;
+  player: Socket[];
+  spectator: Socket[];
+}
+
+export class Players {
+  l1: string;
+  l2: string;
 }
 
 @WebSocketGateway({
@@ -34,20 +46,20 @@ export class Pong {
 })
 export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 
-  Game: GameEngineService[];
-  Pong: Pong[];
-  room_id;
+  game_instance: Game_instance[];
+  pong_instance: Pong_instance[];
   logger: Logger = new Logger("GameGateway");
   state;
   pong_public_space: Socket[];
   game_public_space: Socket[];
   private_space: Waiting_socket[];
+  socket_login: Map<string, string>;
 
   constructor() {
-    this.Game = [];
-    this.Pong = [];
+    this.game_instance = [];
+    this.pong_instance = [];
+    this.pong_public_space = [];
     this.state = "pong";
-    this.room_id = 0;
   }
 
   @WebSocketServer()
@@ -59,9 +71,26 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.game_public_space.push(client);
       console.log("socket :" + client + "has been added to game public space");
       if (this.game_public_space.length > 1) {
-        this.game_public_space[0].join(this.room_id);
-        this.game_public_space[1].join(this.room_id);
-        this.room_id++;
+        let player1 = this.game_public_space[0];
+        let player2 = this.game_public_space[1];
+
+        player1.join(player1.id);
+        player2.join(player1.id);
+
+        let p = new Game_instance();
+        p.game_engine = new GameEngineService();
+        p.game_engine.set_player(player1, player2);
+        p.player.push(player1);
+        p.player.push(player2);
+        this.game_instance.push(p);
+
+        let players = new Players();
+        players.l1 = this.socket_login[player1.id];
+        players.l2 = this.socket_login[player2.id];
+        this.server.to(player1.id).emit('players', players);
+
+        console.log(player1.id + " and : " +player2.id + "where moved in the game room : " + player1.id);
+
         this.game_public_space.pop();
         this.game_public_space.pop();
       }
@@ -70,21 +99,47 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.pong_public_space.push(client);
       console.log("socket :" + client + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
-        this.pong_public_space[0].join(this.room_id);
-        this.pong_public_space[1].join(this.room_id);
-        this.Pong[this.room_id].room_id = this.room_id;
-        this.Pong[this.room_id].game_engine = new PongEngineService(this.pong_public_space[0], this.pong_public_space[1]);
+        let player1 = this.pong_public_space[0];
+        let player2 = this.pong_public_space[1];
 
-        this.room_id++;
+        player1.join(player1.id);
+        player2.join(player1.id);
+
+        let p = new Pong_instance();
+        p.game_engine = new PongEngineService();
+        p.game_engine.set_player(player1, player2);
+        p.player.push(player1);
+        p.player.push(player2);
+        this.pong_instance.push(p);
+
+        let players = new Players();
+        players.l1 = this.socket_login[player1.id];
+        players.l2 = this.socket_login[player2.id];
+        this.server.to(player1.id).emit('players', players);
+
+        console.log(player1.id + " and : " +player2.id + "where moved in the pong room : " + player1.id);
+
         this.pong_public_space.pop();
         this.pong_public_space.pop();
       }
     }
   }
 
-  @SubscribeMessage('public matchmaking')
+  @SubscribeMessage('handshake')
+  handlehandsshake(@MessageBody() body: string, client: Socket) {
+    this.socket_login[client.id] = body;
+  }
+
+  // @SubscribeMessage('ready')
+  // handleReady(client: Socket) {
+  //   this.game_instance.forEach(element => {
+  //     if (element.player.forEach);
+  //   });
+  // }
+
+  @SubscribeMessage('private matchmaking')
   handlePrivateMatchmaking(@MessageBody() body: any, client: Socket) {
-    client.join("public matchmaking");
+    client.join("private matchmaking");
   }
 
   afterInit(server: Server) { // log module initialization
