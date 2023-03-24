@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { Simple_ball } from './Simple_Ball';
 import { Simple_paddle } from './Simple_paddle';
 import { Socket } from 'socket.io';
@@ -24,14 +24,18 @@ export class PongEngineService {
     p2: Simple_paddle;
     pl1: Socket;
     pl2: Socket;
+    spectator: Socket[];
     aspect_ratio = 16/9;
     cooldown = 60;
     cooldown_start;
+    game_is_ready: boolean;
 
-    constructor (pl1, pl2) {
+    constructor () {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
+        this.spectator = [];
+        this.game_is_ready = false;
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
@@ -40,7 +44,16 @@ export class PongEngineService {
         //console.log("from pong engine service ;y player are :" + pl1 + "and" + pl2);
     }
 
+    set_player(player1: Socket, player2: Socket) {
+        this.pl1 = player1;
+        this.pl2 = player2;
+        console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
+    }
+
     main_loop() {
+        if (!this.game_is_ready) {
+            return;
+        }
         this.cooldown_start++;
         if (this.ball.state === "dead") {
             this.ball = new Simple_ball();
