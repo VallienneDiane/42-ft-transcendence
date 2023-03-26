@@ -37,7 +37,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
 
   onModuleInit() {
     const io = require('socket.io')(this.server);
-    console.log('game server starting');
+    // console.log('game server starting');
     this.server.on('connection', (socket) => {
       console.log("socket ID", socket.id, 'Is connected');
     })

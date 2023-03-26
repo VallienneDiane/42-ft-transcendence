@@ -41,7 +41,6 @@ export class AuthService {
     return { id, login };
   }
   //generate secret use for google authentificator
-  //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
   async generateQRcode(id: number) {
     const secretInfos = speakeasy.generateSecret( {
       name: "App Transcendence"

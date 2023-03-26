@@ -25,7 +25,7 @@ export default function Settings() {
     resolver: yupResolver(schema)
   });
 
-  console.log("SETTINGS PARAMS 1 : checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
+  // console.log("SETTINGS PARAMS 1 : checked ", checked, "is2faactive ", is2faActive, " & qrcode", qrcode);
   const isGoogleActivate = () => {
     accountService.is2faActiveSettings(decodedToken.login)
     .then(response => {
