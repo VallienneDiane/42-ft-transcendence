@@ -34,8 +34,8 @@ function App() {
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />
               <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
-              <Route element={<ProtectedRoutes/>}>
                 <Route path='/' element={<Home />} />
+              <Route element={<ProtectedRoutes/>}>
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:login' element={<Profile />} />

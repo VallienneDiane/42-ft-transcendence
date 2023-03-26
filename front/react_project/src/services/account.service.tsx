@@ -40,22 +40,15 @@ let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
 let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
-///////////////////////////////////////////////////////////////////////////
-////////////////////          LOGIN WITH 42 API       ////////////////////
-// let authorize42 = () => {
-//     const auth = Axios.get('auth/authorize42');
-//     console.log("REQUEST GET RESPONSE auth42", auth);
-//     return auth;
-// }
-
-
-
-///////////////////////////////////////////////////////////////////////////
 
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
 
+////////////////// API 42 /////////////////////////////
+let url42 = () => {
+    return Axios.get('/url')
+}
 // Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
 let logout = () => {
     Axios.post('/auth/logout');
@@ -105,5 +98,5 @@ let readPayload = () => {
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
     enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings
+    is2faActive, generateToken, is2faActiveSettings, url42
 }

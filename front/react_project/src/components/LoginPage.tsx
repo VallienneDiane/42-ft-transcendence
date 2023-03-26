@@ -1,17 +1,15 @@
 import "../styles/LoginPage.scss"
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { UserContext } from "../user/UserContext";
 import { useLocation, useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 import { LogInForm } from "../models";
 
 const LoginPage: React.FC = () => {
     const navigate = useNavigate();
-    const { register, handleSubmit } = useForm<LogInForm>();
     const location = useLocation();
+    const { register, handleSubmit } = useForm<LogInForm>();
     const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
-
     const loginInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -52,8 +50,17 @@ const LoginPage: React.FC = () => {
             console.log(error);
             setIncorrectCredentials(true);
         });
-
     }
+
+    const redirectToApi42 = async () => {
+        console.log("redirect to api after click");
+        await accountService.url42()
+        .then(response_url => {
+            console.log("window locatin avec url : ", response_url.data);
+            window.location.href = (response_url.data);
+        })
+    }
+
     return (
         <div id="login_page">
             <div className="card">
@@ -74,9 +81,8 @@ const LoginPage: React.FC = () => {
                     { incorrectCredentials && <div className="logError">Wrong user or password</div>}
                     <button className="form_element" type="submit">Submit</button>
                 </form>
-                <button id="signin42">
-                    <a href="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-1a615688dd073d243be0d59bf7ff2953367300048cd88c855c08d4f2dd0efe4c&redirect_uri=http%3A%2F%2Flocalhost%3A8000%2F&response_type=code">
-                    Sign in with 42 ! </a>
+                <button id="signin42" onClick={redirectToApi42}>
+                    Sign in with 42 !
                 </button>
                 <a href="/signup">Not registered ? Sign In !</a>
             </div>

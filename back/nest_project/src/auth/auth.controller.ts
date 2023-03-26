@@ -1,16 +1,43 @@
-import { Controller, Body, Request, Post, Get, UseGuards, UnauthorizedException, Req, Headers } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/user/jwt-auth.guard';
+import { Controller, Body, Request, Post, Get, UseGuards, UnauthorizedException, Req, Headers, Res, Query, Redirect } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
 import { UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
+import { FortyTwoGuard } from '../auth_strategies/42-auth.guard';
+import { Response } from 'express';
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
 export class AuthController {
   constructor(private authService: AuthService, private userService: UserService) {}
+
+  // @UseGuards(FortyTwoGuard)
+  @Get('/url')
+  async getUrl42() {
+    const api_callback_url = encodeURIComponent(process.env.API_CALLBACK_URL);
+    const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.API_UID + "&redirect_uri=" + api_callback_url + "&response_type=code";
+    console.log("url ", url);
+    return url;
+  }
   
+  @UseGuards(FortyTwoGuard)
+  @Get('/callback')
+  async callback(@Query('code') code: string, @Req() req: any, @Res() res: Response) {
+    console.log("dans callback", req.user.access_token);
+    if (code) {
+      console.log("code : ", code);
+      // const token = await req.access_token;
+      // console.log("token dans controller " , token);
+      // res.redirect('http://localhost/auth?token=' + token.access_token);
+      // res.redirect("http://localhost:8000/home");
+    }
+    else {
+      throw ("Unauthorized");
+    }
+  }
+
   //check login and password with stratgey local of passport and generate token
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
@@ -18,11 +45,6 @@ export class AuthController {
     return (true);
   }
 
-  // @Get("auth/authorize42")
-  // async auth42(@Body() data) {
-  //   return data;
-  // }
-  
   //generate token when register or login
   @Post('auth/generateToken')
   async generateToken(@Body() data: UserDto) {

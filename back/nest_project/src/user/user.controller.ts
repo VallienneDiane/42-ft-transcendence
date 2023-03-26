@@ -4,7 +4,7 @@ import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { JwtAuthGuard } from "../auth_strategies/jwt-auth.guard";
 
 // SIGN UP, REGISTER NEW USER IN DATABASE, NEW TOKEN
 @Controller()
