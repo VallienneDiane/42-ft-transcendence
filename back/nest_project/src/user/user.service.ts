@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
@@ -89,10 +89,23 @@ export class UserService {
         await this.usersRepository.update({id: meId}, {messagesSend: messages});
     }
     // GET ALL PRIVATE MESSAGES ORDERED BY DATE
-    async getPrivateMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
+    async getMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
         let me = await this.findById(meId);
+        let him = await this.findById(himId);
         let messages: MessagePrivateEntity[] = await this.usersRepository
-            .createQueryBuilder("MessagePrivateEntity")
-            .leftJoinAndSelect()
+            .createQueryBuilder("userEntity")
+            .leftJoinAndSelect(
+                "user.messagesSend",
+                "send",
+                "send.receiver = :receiver",
+                { receiver: him })
+            .leftJoinAndSelect(
+                "user.messagesReceived",
+                "received",
+                "received.sender = :sender",
+                { sender: me })
+            .select
+            .where("user.id = :id", { id: meId })
+
     }
 }
