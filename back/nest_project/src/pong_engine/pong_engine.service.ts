@@ -18,36 +18,48 @@ interface gameState {
 @Injectable()
 export class PongEngineService {
 
-    public gs: gameState;
+    gs: gameState;
     ball: Simple_ball;
     p1: Simple_paddle;
     p2: Simple_paddle;
+
     pl1: Socket;
     pl2: Socket;
     pl1_ready: boolean;
     pl2_ready: boolean;
     spectator: Socket[];
+
     aspect_ratio = 16/9;
-    cooldown = 60;
+    cooldown = 90;
     cooldown_start;
     game_is_ready: boolean;
+    game_must_stop: boolean;
+    loop;
 
     constructor () {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
+
         this.pl1_ready = false;
         this.pl2_ready = false;
         this.game_is_ready = false;
+        this.game_must_stop = false;
         this.spectator = [];
+
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
         paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
-        //console.log("from pong engine service ;y player are :" + pl1 + "and" + pl2);
+        console.log("from pong engine service ;y player are :" + this.pl1 + "and" + this.pl2);
     }
 
+    /**
+     * set who are the two socket the input must be taken into acount
+     * @param player1 
+     * @param player2 
+     */
     set_player(player1: Socket, player2: Socket) {
         this.pl1 = player1;
         this.pl2 = player2;
@@ -55,25 +67,35 @@ export class PongEngineService {
     }
     
     /**
-     * check if both player are readym if so set the corresponding flag to true
+     * check if both player are ready and start the game loop
      * @param player the socket of the ready player
      */
-    set_player_ready(player: Socket) {
+    set_player_ready(player: Socket, room) {
         if (player === this.pl1) {
-            this.pl1_ready = true;
+            this.pl1_ready = !this.pl1_ready;
         }
         else if (player === this.pl2) {
-            this.pl2_ready = true;
+            this.pl2_ready = !this.pl2_ready;
         }
         if (this.pl1_ready && this.pl2_ready) {
             this.game_is_ready = true;
+            this.loop = setInterval(function() {
+                if (this.game_most_stop) {
+                    clearInterval(this.loop);
+                    this.pl1_ready = false;
+                    this.pl2_ready = false;
+                }
+                this.main_loop();
+                room.emit('Game_Update', this.gs)
+            }, 1000/60);
         }
     }
 
+    /**
+     * main loopm update ball position and game state
+     * @returns nothing
+     */
     main_loop() {
-        if (!this.game_is_ready) {
-            return;
-        }
         this.cooldown_start++;
         if (this.ball.state === "dead") {
             this.ball = new Simple_ball();

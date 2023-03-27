@@ -187,19 +187,24 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.socket_login[client.id] = body; // map the socket to a login
   }
 
+  /**
+   * check witch game instance the player ready is in, and set the engin state accordingly,
+   * launching the engin loop automaticaly if both player are ready
+   * @param client the client clicking on the ready button (Socket from socket.io)
+   */
   @SubscribeMessage('ready')
   handleReady(client: Socket) {
     this.game_instance.forEach(element => {
       element.player.forEach(player => {
         if (client === player) {
-          element.game_engine.set_player_ready(player);
+          element.game_engine.set_player_ready(player, this.server.to(element.player[0].id));
         }
       });
     });
     this.pong_instance.forEach(element => {
       element.player.forEach(player => {
         if (client === player) {
-          element.game_engine.set_player_ready(player);
+          element.game_engine.set_player_ready(player, this.server.to(element.player[0].id));
         }
       });
     });
