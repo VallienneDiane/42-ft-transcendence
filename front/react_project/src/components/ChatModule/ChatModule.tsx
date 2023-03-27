@@ -29,14 +29,13 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         {
             this.props.socket!.emit('myChannels');
             this.props.socket!.on('listMyChannels', (strs: string[]) => { 
-                console.log("new chann list : " , strs);
                 this.setState({ channels: strs }) });
         }
         if (this.state.dms.length === 0)
         {
             this.props.socket!.emit('myDM');
             this.props.socket!.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
-                console.log("DM", strs);
+                console.log("DMs", strs);
                 this.setState({ dms: strs }) });
         }
 
@@ -56,7 +55,10 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             for (let elt of this.state.dms) {
                 sorted.set(elt.login, elt.connected);
             }
-            sorted.set(login, true);
+            if (sorted.get(login) != undefined)
+                sorted.set(login, true);
+            else
+                return;
             let nextState: {login: string, connected: boolean}[] = [];
             sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
             this.setState({dms: nextState});
@@ -67,7 +69,10 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             for (let elt of this.state.dms) {
                 sorted.set(elt.login, elt.connected);
             }
-            sorted.set(login, false);
+            if (sorted.get(login) != undefined)
+                sorted.set(login, false);
+            else
+                return;
             let nextState: {login: string, connected: boolean}[] = [];
             sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
             this.setState({dms: nextState});
@@ -103,7 +108,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             <h2>Channels</h2>
             <ul className="channelList">
                 { this.state.channels.map((channel) => { 
-                   return (<li key={channel} onClick={() => this.changeLoc({Loc: channel, isChannel: true})}> {channel}</li> ) }
+                   return (<li key={channel}><button onClick={() => this.changeLoc({Loc: channel, isChannel: true})}>{channel}</button></li> ) }
                 )}
             </ul>
             {displayDM && (
@@ -112,7 +117,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
                     <ul className="channelList">
                         { this.state.dms.map((dm, id) => { 
                            if (this.state.me.login != dm.login)
-                           { return (<li key={id} onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}> {dm.login} {dm.connected? 'o' : null}</li> ) }
+                           { return (<li key={id}><button onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}>{dm.login} {dm.connected? 'o' : null}</button></li> ) }
                         })}
                     </ul>
                 </React.Fragment>
@@ -138,7 +143,6 @@ export default class ChatModule extends React.Component<{}, {
     }
     
     changeLoc(newDest: IDest) {
-        console.log(newDest)
         this.setState({ dest: newDest });
     }
 

@@ -7,32 +7,46 @@ import Input from '@mui/material/Input';
 
 export function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { control, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
+    const { register, formState: { errors, values }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
-            name: "",
-            password: false,
-            channelPass: "",
-            inviteOnly: false,
-            persistant: false,
-            onlyOpCanTalk: false, 
-            hidden: false } 
-        });
+        name: "",
+        password: false,
+        channelPass: "",
+        inviteOnly: false,
+        persistant: false,
+        onlyOpCanTalk: false, 
+        hidden: false } 
+    });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
     const ref = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-        const handleClickOutside = (e: any) => {
-            if (ref.current && !ref.current.contains(e.target)) {
-                props.handleClose();
-            }
+    const handleClickOutside = (e: any) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+            props.handleClose();
         }
+    }
+
+    useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", onKeyPress);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", onKeyPress);
         }
     }, [ref]);
 
+    const onKeyPress = (event: any) => {
+        if (event.keyCode === 27) {
+            props.handleClose();
+        }
+    }
+
+    const changeState = (event: any) => {
+        setShowChannelPass(event.target.checked);
+    }
+
     const onSubmit = (data: IChannel) => {
+        console.log(data)
         socket.emit('createChannel', {
             name: data.name,
             password: data.password,
@@ -48,105 +62,49 @@ export function Popup(props: {handleClose: any}) {
     return (
       <div id="popup">
         <div className="box" ref={ref}>
-          <span className="closeIcon" onClick={props.handleClose}>x</span>
             <h1>Create New Channel</h1>
-
-            <Box component="form" className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>
-                <section className="sectionTest">
+            <form className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>
+                <section>
                     <label className="labelName">Channel Name</label>
-                    <Controller
-                        name="name"
-                        control={control}
-                        rules={{ required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i }}
-                        render={({ field }) => <Input {...field} />}
-                        defaultValue=""
+                    <input {...register("name", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
+                    type="text"
+                    placeholder=""
                     />
-                    {errors.name && "Channel name is required"}
+                    {errors.name && <div className="logError">Channel name is required</div>}
                 </section>
-                <section className="sectionTest">
+                <section>
                     <label className="labelName">Password</label>
-                    <Controller
-                        name="password"
-                        control={control}
-                        render={({ field }) => (
-                        <Switch
-                            onChange={(e) => {
-                                field.onChange(e.target.checked);
-                                setShowChannelPass(e.target.checked);
-                            }}
-                            checked={field.value}
-                        />
-                        )}
-                    />
+                    <input type="checkbox" {...register("password")} onChange={changeState}/>
                     {showChannelPass && (
-                        <Controller
-                        name="channelPass"
-                        control={control}
-                        rules={{ required: true, maxLength: 20, pattern: /^[A-Za-z]+$/i }}
-                        render={({ field }) => <Input {...field} type="password"/>}
-                        defaultValue=""
-                    />
+                        <input {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
+                        type="password"
+                        placeholder=""
+                        />
                     )}
-                    {showChannelPass && errors.channelPass && "Your password is not valid"}
+                    {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
                 </section>
                 <div className="rawCheckbox">
-                <section className="sectionTest">
-                    <Controller
-                        name="inviteOnly"
-                        control={control}
-                        render={({ field }) => (
-                        <Checkbox
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            checked={field.value}
-                        />
-                        )}
-                    />
-                    <label className="labelName">Invite Only</label>
-                </section>
-                <section className="sectionTest">
-                    <Controller
-                        name="persistant"
-                        control={control}
-                        render={({ field }) => (
-                        <Checkbox
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            checked={field.value}
-                        />
-                        )}
-                    />
-                    <label className="labelName">Persistant</label>
-                </section>
+                    <section>
+                        <input type="checkbox" {...register("inviteOnly")}/>
+                        <label className="labelName">Invite Only</label>
+                    </section>
+                    <section>
+                        <input type="checkbox" {...register("persistant")}/>
+                        <label className="labelName">Persistant</label>
+                    </section>
                 </div>
                 <div className="rawCheckbox">
-                <section className="sectionTest">
-                    <Controller
-                        name="onlyOpCanTalk"
-                        control={control}
-                        render={({ field }) => (
-                        <Checkbox
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            checked={field.value}
-                        />
-                        )}
-                    />
-                    <label className="labelName">Only OP can talk</label>
-                </section>
-                <section className="sectionTest">
-                    <Controller
-                        name="hidden"
-                        control={control}
-                        render={({ field }) => (
-                         <Checkbox
-                            onChange={(e) => field.onChange(e.target.checked)}
-                            checked={field.value}
-                        />
-                        )}
-                    />
-                    <label className="labelName">Hidden</label>
-                </section>
+                    <section>
+                        <input type="checkbox" {...register("onlyOpCanTalk")}/>
+                        <label className="labelName">Only OP can talk</label>
+                    </section>
+                    <section>
+                        <input type="checkbox" {...register("hidden")}/>
+                        <label className="labelName">Hidden</label>
+                    </section>
                 </div>
                 <button className="button" type="submit">Create</button>
-            </Box>
+            </form>
         </div>
       </div>
     );

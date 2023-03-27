@@ -34,14 +34,6 @@ export interface UserData {
 //   exp: number
 // }
 
-export interface User {
-  token: string,
-  id?: number,
-  login: string,
-  email: string,
-  password: string
-}
-
 export interface IChannel {
   name: string;
   password: boolean;

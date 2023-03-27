@@ -30,16 +30,17 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         console.log("blop");
     }
     
+    const handleClickOutside = (e: any) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+            props.handleClose();
+        }
+    }
+    
     useEffect(() => {
         socket.emit('listUsersChann', props.dest.Loc); 
         socket.on('listUsersChann', (list: string[]) => {
             setMembers(list);
         })
-        const handleClickOutside = (e: any) => {
-            if (ref.current && !ref.current.contains(e.target)) {
-                props.handleClose();
-            }
-        }
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
