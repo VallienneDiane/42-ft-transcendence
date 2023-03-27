@@ -25,6 +25,7 @@ export class GameEngineService {
 	wallz: Wall[];
 	n;
 	aspectratio;
+	game_must_stop;
 
 	constructor() {
 		this.n = 2;
@@ -38,6 +39,7 @@ export class GameEngineService {
 		this.wallz[2] = new Wall(new Vec2(this.aspectratio, 1), new Vec2(0, 1));
 		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(0, 0));
 		console.log(this.wallz);
+		this.game_must_stop = false;
 
 		//this.ballz[0] = new Ball(new Vec2(0.2,0.2), 0.1);
 		for (let index = 0; index < this.n; index++) {
@@ -47,6 +49,10 @@ export class GameEngineService {
 			//let radius = 0.1;
 			this.ballz[index] = new Ball(position, radius);
 		}
+	}
+
+	stop_game() {
+		this.game_must_stop = true;
 	}
 
 	main_loop() {

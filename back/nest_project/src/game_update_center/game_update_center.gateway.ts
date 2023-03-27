@@ -4,6 +4,7 @@ import { Server, Socket } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 import { OnGatewayInit } from '@nestjs/websockets';
+import { match } from 'assert';
 
 /**
  * struct use to share the ball position
@@ -26,7 +27,7 @@ interface gameState {
  * use in the waiting room for private matchmaking store
  */
 export class Waiting_socket {
-  socket_id: Socket;
+  socket: Socket;
   target;
   game;
   login;
@@ -210,11 +211,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     });
   }
 
-  @SubscribeMessage('private matchmaking')
-  handlePrivateMatchmaking(@MessageBody() body: any, client: Socket) {
-    client.join("private matchmaking");
-  }
-
+  
   afterInit(server: Server) { // log module initialization
     this.logger.log("Initialized");
   }
@@ -223,10 +220,122 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.log('client Connected: ' + client.id);
   }
 
+  /**
+   * find and remove the disconnected client from relevante struc,
+   * stop the current match if necessary, and remove the client from known loggin
+   * @param client the client disconnected
+   */
   handleDisconnect(client: Socket) { // log client disconnection
     this.logger.log('client Disconnected: ' + client.id);
-    
+    this.find_and_remove(client);
+    this.socket_login.delete(client.id);
   }
+
+  /**
+   * 
+   * @param client find the client and do the necessary clean-up
+   * @returns 
+   */
+  find_and_remove(client: Socket) {
+
+    // if the client is in a game
+    this.game_instance.forEach(element => {
+      element.spectator.forEach(spec => {
+        if (client === spec) {
+          this.disconnect_from_game(client);
+        }
+      });
+      element.player.forEach(player => {
+        if (client === player) {
+          this.disconnect_from_game(client);
+        }
+      });
+    });
+
+    // if the client is in a pong
+    this.pong_instance.forEach(element => {
+      element.spectator.forEach(spec => {
+        if (client === spec) {
+          this.disconnect_from_pong(client);
+        }
+      });
+      element.player.forEach(player => {
+        if (client === player) {
+          this.disconnect_from_pong(client);
+        }
+      });
+    });
+
+    // if the client was in pong_public_space
+    this.pong_public_space.forEach((player, index) => {
+      if (player === client) {
+        delete this.pong_public_space[index];
+      }
+    });
+
+    // if the client was in game_public_space
+    this.game_public_space.forEach((player, index) => {
+      if (player === client) {
+        delete this.game_public_space[index];
+      }
+    });
+
+    // if the client was waiting for a private match
+    this.private_space.forEach((element, index) => {
+      if (element.socket === client) {
+        delete this.private_space[index];
+      }
+    });
+  }
+
+  /**
+   * handle the case of a disconnection mid match
+   * @param client the client to be disconnected
+   */
+  disconnect_from_pong(client: Socket) {
+    this.pong_instance.forEach((element, big_index) => { // look through the instance to find if the client is a spectator or player
+      element.spectator.forEach((spec, index) => { // if spectator just remove it and update the front ui
+        if (spec === client) {
+          this.server.to(element.player[0].id).emit('spectateur disconnected');
+          delete element.spectator[index];
+        }
+      });
+      element.player.forEach(Players => { // if player alert the front, stop the game and delete the game instance
+        if (Players === client) {
+          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(Players.id));
+          element.game_engine.stop_game();
+          delete this.pong_instance[big_index];
+        }
+      });
+    });
+  }
+
+  /**
+   * handle the case of a disconnection mid match
+   * @param client the client to be disconnected
+   */
+  disconnect_from_game(client: Socket) {
+    this.game_instance.forEach((element, big_index) => { // look through the instance to find if the client is a spectator or player
+      element.spectator.forEach((spec, index) => { // if spectator just remove it and update the front ui
+        if (spec === client) {
+          this.server.to(element.player[0].id).emit('spectateur disconnected');
+          delete element.spectator[index];
+        }
+      });
+      element.player.forEach(Players => { // if player alert the front, stop the game and delete the game instance
+        if (Players === client) {
+          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(Players.id));
+          element.game_engine.stop_game();
+          delete this.game_instance[big_index];
+        }
+      });
+    });
+  }
+
+  // @SubscribeMessage('private matchmaking')
+  // handlePrivateMatchmaking(@MessageBody() body: any, client: Socket) {
+  //   client.join("private matchmaking");
+  // }
   
   onModuleInit() { // output a ;essage on connection and when the programme start
     const io = require('socket.io')(this.server);
