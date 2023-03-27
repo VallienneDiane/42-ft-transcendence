@@ -66,6 +66,10 @@ export class PongEngineService {
         console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
     }
     
+    stop_game() {
+        this.game_must_stop = true;
+    }
+
     /**
      * check if both player are ready and start the game loop
      * @param player the socket of the ready player
