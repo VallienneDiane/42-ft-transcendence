@@ -24,6 +24,8 @@ export class PongEngineService {
     p2: Simple_paddle;
     pl1: Socket;
     pl2: Socket;
+    pl1_ready: boolean;
+    pl2_ready: boolean;
     spectator: Socket[];
     aspect_ratio = 16/9;
     cooldown = 60;
@@ -34,8 +36,10 @@ export class PongEngineService {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
-        this.spectator = [];
+        this.pl1_ready = false;
+        this.pl2_ready = false;
         this.game_is_ready = false;
+        this.spectator = [];
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
@@ -48,6 +52,22 @@ export class PongEngineService {
         this.pl1 = player1;
         this.pl2 = player2;
         console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
+    }
+    
+    /**
+     * check if both player are readym if so set the corresponding flag to true
+     * @param player the socket of the ready player
+     */
+    set_player_ready(player: Socket) {
+        if (player === this.pl1) {
+            this.pl1_ready = true;
+        }
+        else if (player === this.pl2) {
+            this.pl2_ready = true;
+        }
+        if (this.pl1_ready && this.pl2_ready) {
+            this.game_is_ready = true;
+        }
     }
 
     main_loop() {
