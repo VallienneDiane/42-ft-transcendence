@@ -11,6 +11,11 @@ let signUp = (credentials: SignUpForm) => {
 let login = (credentials: LogInForm) => {
     return Axios.post('auth/login', credentials);
 }
+// Upload Avatar picture
+let uploadAvatar = (file: string) => {
+    return Axios.patch('user/uploadAvatar', file);
+}
+
 // Request to generate token
 let generateToken = (login: string) => {
     return Axios.post('auth/generateToken', {login});
@@ -96,5 +101,5 @@ let readPayload = () => {
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
     enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings
+    is2faActive, generateToken, is2faActiveSettings, uploadAvatar
 }

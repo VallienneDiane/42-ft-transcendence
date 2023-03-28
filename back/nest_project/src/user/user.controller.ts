@@ -17,6 +17,8 @@ export class UserController {
     //Create user account in db, hash password with bcrypt and generate token with jwtservice
     @Post('user/signup') 
     async create(@Body() newUser: UserDto) {
+        console.log('ICI', newUser);
+        console.log('ICI avatar', newUser.avatarSvg);
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
@@ -52,5 +54,12 @@ export class UserController {
     @Delete('user/:login')
     async delete(@Param('login') login: string) {
         return this.userService.delete(login);
+    }
+
+    //update avatar picture
+    @UseGuards(JwtAuthGuard)
+    @Patch('user/uploadAvatar')
+    async uploadAvatar(@Body() file: string) {
+        console.log(file);
     }
 }

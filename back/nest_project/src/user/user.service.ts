@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";

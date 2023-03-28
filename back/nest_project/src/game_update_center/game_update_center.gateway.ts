@@ -29,7 +29,7 @@ export class GameUpdateCenterGateway implements OnModuleInit{
   constructor() {
     this.Game = new GameEngineService();
     this.Pong = new PongEngineService();
-    this.state = "game";
+    this.state = "pong";
   }
 
   @WebSocketServer()
@@ -52,7 +52,12 @@ export class GameUpdateCenterGateway implements OnModuleInit{
       this.server.emit('Game_Update', game.gs)
     }
     else if (this.state === "pong") {
-      pong.p1.process_input(body);
+      if (body === "ArrowUp" || body === "ArrowDown") {
+          pong.p2.process_input(body);
+      }
+      else {
+        pong.p1.process_input(body);
+      }
     }
   }
 
