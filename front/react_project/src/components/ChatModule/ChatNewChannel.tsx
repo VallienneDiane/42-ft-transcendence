@@ -1,13 +1,11 @@
 import { useContext, useState, useRef, useEffect } from "react";
 import SocketContext from "../context";
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { IChannel } from "../../models";
-import { Box, Checkbox, Switch } from '@mui/material';
-import Input from '@mui/material/Input';
 
 export function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { register, formState: { errors, values }, handleSubmit } = useForm<IChannel>({ 
+    const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
         name: "",
         password: false,
@@ -26,6 +24,12 @@ export function Popup(props: {handleClose: any}) {
         }
     }
 
+    const onKeyPress = (event: any) => {
+        if (event.keyCode === 27) {
+            props.handleClose();
+        }
+    }
+
     useEffect(() => {
         document.addEventListener("mousedown", handleClickOutside);
         document.addEventListener("keydown", onKeyPress);
@@ -34,12 +38,6 @@ export function Popup(props: {handleClose: any}) {
             document.removeEventListener("keydown", onKeyPress);
         }
     }, [ref]);
-
-    const onKeyPress = (event: any) => {
-        if (event.keyCode === 27) {
-            props.handleClose();
-        }
-    }
 
     const changeState = (event: any) => {
         setShowChannelPass(event.target.checked);
@@ -60,7 +58,7 @@ export function Popup(props: {handleClose: any}) {
     };
 
     return (
-      <div id="popup">
+      <div className="popup">
         <div className="box" ref={ref}>
             <h1>Create New Channel</h1>
             <form className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>

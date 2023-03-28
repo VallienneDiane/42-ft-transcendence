@@ -1,55 +1,63 @@
-import React, { createRef } from "react";
+import React, { createRef, useContext, useState, useRef, useEffect } from "react";
 import { Socket } from 'socket.io-client'
+import SocketContext from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
 import { UserData, Message, IMessageEntity, IChannel } from "../../models";
-import { Box } from '@mui/material';
 
-class JoinChannelPopUp extends React.Component<{socket: Socket, open: boolean, closeAction: any, channelName: string}, {pass: string}> {
-    constructor(props: {socket: Socket, open: boolean, closeAction: any, channelName: string}) {
-        super(props);
-        this.state = {
-            pass: ''
+function JoinChannelPopUp(props: {handleClose: any, channelName: string}) {
+    const {socket} = useContext(SocketContext);
+    const [pass, setPass] = useState<string>('');
+    const ref = useRef<HTMLDivElement>(null);
+
+    const handleClickOutside = (e: any) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+            props.handleClose('');
         }
-        this.closeButton = this.closeButton.bind(this);
-        this.handlePass = this.handlePass.bind(this);
-        this.handlerJoinPass = this.handlerJoinPass.bind(this);
     }
 
-    closeButton(event: any) {
-        this.props.closeAction();
+    const onKeyPress = (event: any) => {
+        if (event.keyCode === 27) {
+            props.handleClose('');
+        }
     }
 
-    handlePass(event: React.ChangeEvent<HTMLInputElement>) {
-        this.setState({ pass: event.target.value });
+    useEffect(() => {
+        document.addEventListener("mousedown", handleClickOutside);
+        document.addEventListener("keydown", onKeyPress);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("keydown", onKeyPress);
+        }
+    }, [ref]);
+
+    const handlePass = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setPass(event.target.value);
     }
 
-    handlerJoinPass(event: any) {
+    const handlerJoinPass = (event: any) => {
         event.preventDefault();
-        this.props.socket!.emit('joinChannel', {channelName: this.props.channelName, channelPass: this.state.pass});
-        this.setState({ pass: '' });
-        this.props.closeAction();
+        socket.emit('joinChannel', {channelName: props.channelName, channelPass: pass});
+        setPass('');
+        props.handleClose('');
     }
 
-    render() {
-        return (
-            <div>
-                {this.props.open &&
-                    <Box>
-                        <button onClick={this.closeButton}>X</button>
-                        <form className="sendJoinWithPass" onSubmit={this.handlerJoinPass}>
-                        <input type="textarea" className="inputPass" placeholder="Enter channel pass here..." value={this.state.pass} onChange={this.handlePass} />
-                        <input type="submit" value="Send" />
+    return (
+        <div className="popup">
+            <div className="box" ref={ref}>
+                <h1>{props.channelName}</h1>
+                <form onSubmit={handlerJoinPass}>
+                    <input type="password" placeholder="Enter channel pass here..." value={pass} onChange={handlePass} />
+                    <button type="submit">Enter</button>
                 </form>
-                    </Box>}
             </div>
-        )
-    }
+        </div>
+    )
 }
 
-class SearchElement extends React.Component<{socket: Socket, popupAction: any, reset: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}, {openPopup: boolean}> {
-    constructor(props: {socket: Socket, popupAction: any, reset: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}) {
+class SearchElement extends React.Component<{socket: Socket, popupAction: any, handleClose: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}, {openPopup: boolean}> {
+    constructor(props: {socket: Socket, popupAction: any, handleClose: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}) {
         super(props);
         this.onClickChatting = this.onClickChatting.bind(this);
         this.handlerJoinChannel = this.handlerJoinChannel.bind(this);
@@ -58,16 +66,17 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, r
     handlerJoinChannel() {
         if (!this.props.password) {
             this.props.socket!.emit('joinChannel', {channelName: this.props.name, channelPass: null});
-            this.props.reset();
+            this.props.handleClose();
         }
         else {
+            this.props.handleClose();
             this.props.popupAction(this.props.name);
         }
     }
 
     onClickChatting() {
         this.props.socket!.emit('changeLoc', {Loc: this.props.name, isChannel: false});
-        this.props.reset();
+        this.props.handleClose();
     }
 
     render() {
@@ -84,7 +93,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, r
 
 class SearchChat extends React.Component<{action: any, action2: any, socket: Socket}, {
     text: string,
-    openPopupEnterPass: boolean,
+    popupIsOpen: boolean,
     channelToUnlock: string,
     users: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
     channels: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
@@ -95,41 +104,28 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         super(props);
         this.state = {
             text: '',
-            openPopupEnterPass: false,
+            popupIsOpen: false,
             channelToUnlock: '',
             users: [],
             channels: [],
             filtered: [],
             isDropdown: false,
         }
-        this.handlerOpenPassPopup = this.handlerOpenPassPopup.bind(this);
-        this.handlerClosePassPopup = this.handlerClosePassPopup.bind(this);
-        this.handleClickOutside = this.handleClickOutside.bind(this);
+        this.closeSearchList = this.closeSearchList.bind(this);
         this.fetchUsers = this.fetchUsers.bind(this);
         this.showSearchList = this.showSearchList.bind(this);
         this.displayList = this.displayList.bind(this);
         this.resetFiltered = this.resetFiltered.bind(this);
+        this.onClickPopup = this.onClickPopup.bind(this);
     }
     ref = createRef<HTMLUListElement>();
 
-    handlerOpenPassPopup(chanName: string) {
-        this.setState({ 
-            text: '',
-            openPopupEnterPass: true,
-            channelToUnlock: chanName,
-            filtered: []});
-    }
-
-    handlerClosePassPopup() {
-        this.setState({
-            openPopupEnterPass: false,
-            channelToUnlock: ''
-        });
+    onClickPopup(chanName: string) {
+        this.setState({ popupIsOpen: !this.state.popupIsOpen, channelToUnlock: chanName });
     }
     
-    handleClickOutside(e: any) {
+    closeSearchList(e: any) {
         if (this.ref.current && !this.ref.current.contains(e.target)) {
-            console.log("outside");
             this.setState({ isDropdown: !this.state.isDropdown });
         }
     }
@@ -203,10 +199,11 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
     resetFiltered() {
         this.setState({text: '', filtered: []});
+        this.setState({ isDropdown: !this.state.isDropdown });
     }
 
     componentDidMount(): void {
-        document.addEventListener("mousedown", this.handleClickOutside);
+        document.addEventListener("mousedown", this.closeDropdown);
         this.fetchUsers();
 
         this.props.socket!.emit('listChannel');
@@ -240,14 +237,13 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     }
 
     componentWillUnmount(): void {
-        document.removeEventListener("mousedown", this.handleClickOutside);
+        document.removeEventListener("mousedown", this.closeDropdown);
         this.props.socket!.off('listChannel');
         this.props.socket!.off('newUserConnected');
         this.props.socket!.off('newLocChannel');
         this.props.socket!.off('newLocPrivate');
     }
 
-    
     render() {
         // console.log(this.state.filtered);
         return (
@@ -259,13 +255,12 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 </div>
                 {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
                     {this.state.filtered.map((user: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}, id: number) => (
-                        <SearchElement  key={id} socket={this.props.socket!} reset={this.resetFiltered}
-                                        popupAction={this.handlerOpenPassPopup} name={user.name} isChannel={user.isChannel}
+                        <SearchElement  key={id} socket={this.props.socket!} handleClose={this.resetFiltered}
+                                        popupAction={this.onClickPopup} name={user.name} isChannel={user.isChannel}
                                         password={user.password} isClickable={user.isClickable} />
                     ))}
                 </ul>}
-                <JoinChannelPopUp socket={this.props.socket!} open={this.state.openPopupEnterPass}
-                    closeAction={this.handlerClosePassPopup} channelName={this.state.channelToUnlock} />
+                {this.state.popupIsOpen && <JoinChannelPopUp handleClose={this.onClickPopup} channelName={this.state.channelToUnlock} />}
             </div>
         )
     }
