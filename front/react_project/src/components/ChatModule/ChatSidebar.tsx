@@ -1,5 +1,4 @@
 import { useState, useContext, useEffect, useRef } from "react";
-import ReactDOM from 'react-dom'
 import SocketContext from "../context";
 import { accountService } from "../../services/account.service";
 import { IDest } from "../../models";
@@ -35,7 +34,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
             props.handleClose();
         }
     }
-    
+
     useEffect(() => {
         socket.emit('listUsersChann', props.dest.Loc); 
         socket.on('listUsersChann', (list: string[]) => {

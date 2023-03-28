@@ -4,23 +4,29 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { IMessageToSend, Message, IDest } from "../../models";
 
-function MessageDisplay(value: {sender: string, text: string}): JSX.Element {
-    const [me, setMe] = useState<boolean>(false);
-    const playload: JwtPayload = accountService.readPayload()!;
+class MessageDisplay extends React.Component<{sender: string, text: string}, {
+    playload: JwtPayload, me: boolean}> {
+    constructor(props: {sender: string, text: string}) {
+        super(props);
+        this.state = { playload: accountService.readPayload()!, 
+        me: false };
+    }
 
-    useEffect(() => {
-    if (playload.login === value.sender) {
-        setMe(true);
-    }}, [])
+    componentDidMount(): void {
+        if (this.state.playload.login === this.props.sender)
+            this.setState({me: true});
+    }
 
-    return (
-        <div className={me ? "message sent" : "message received"}>
-            <div className="messageUserName">{value.sender}</div>
-            <div className="bubble">
-                <div className="messageText">{value.text}</div>
+    render() {
+        return (
+            <div className={this.state.me ? "message sent" : "message received"}>
+                <div className="messageUserName">{this.props.sender}</div>
+                <div className="bubble">
+                    <div className="messageText">{this.props.text}</div>
+                </div>
             </div>
-        </div>
-    )
+        )
+    }
 }
 
 export class MessageList extends React.Component<{history: Message[], action: any, socket: Socket}, {}> {
@@ -79,11 +85,13 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
 
     sendMessage(event: any) {
         event.preventDefault();
-        let content: string = this.state.text;
-        let room: string = this.props.dest!.Loc;
-        let isChannel: boolean = this.props.dest!.isChannel;
-        this.props.socket!.emit('addMessage', content);
-        this.setState({ text: '' });
+        if (this.state.text.trim() !== '') {
+            let content: string = this.state.text;
+            let room: string = this.props.dest!.Loc;
+            let isChannel: boolean = this.props.dest!.isChannel;
+            this.props.socket!.emit('addMessage', content);
+            this.setState({ text: '' });
+        }
     }
 
     render() {
