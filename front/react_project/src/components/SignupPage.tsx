@@ -1,6 +1,8 @@
 import "../styles/LoginPage.scss"
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ReactDOM from 'react-dom';
+import ReactDOMServer from 'react-dom/server';
+import domToImage from 'dom-to-image';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -18,6 +20,7 @@ const userSchema = yup.object().shape({
 })
 
 const SignupPage: React.FC = () => {
+  const [svgUrl, setSvgUrl] = useState<string>();
   let navigate = useNavigate();
   
   const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
@@ -26,29 +29,48 @@ const SignupPage: React.FC = () => {
   
   const signUp = (data: SignUpForm) => {
     const avatarElement = document.createElement('div');
-    ReactDOM.render(
+    const svg = ReactDOMServer.renderToString(
       <Avatar
         style={{ width: '100px', height: '100px' }}
         avatarStyle='Circle'
         {...generateRandomAvatarOptions()}
-        />,
-        avatarElement
+        />
     )
-    console.log('avatarElement', avatarElement.innerHTML);
-    data.avatarSvg = avatarElement.innerHTML;
-    accountService.signUp(data)
-    .then(Response => {
-      accountService.saveToken(Response.data.access_token);
-      // accountService.enable2fa();
-      navigate("/");
-    })
-    .catch(error => {
-        console.log(error);
-    });
+
+    const svgBlob = new Blob([svg], {type: 'image/svg+xml'});
+    console.log('url', svgBlob);
+    const newUrl = URL.createObjectURL(svgBlob);
+    console.log('url', newUrl);
+    setSvgUrl(newUrl);
+    
+    // domToImage.toPng(avatarElement)
+    // .then(dataUrl => {
+    //   var img = new Image();
+    //     img.src = dataUrl;
+    //     document.body.appendChild(img);
+    //   // const file = new File([blob], data.login + "_avatar.png", { type: "image/png"});
+    //   // const url = URL.createObjectURL(file);
+    //   // data.avatarSvg = url;
+    //   // console.log("user in front", data);
+    //   // accountService.signUp(data)
+    //   // .then(Response => {
+    //   //   accountService.saveToken(Response.data.access_token);
+    //   //   // accountService.enable2fa();
+    //   //   navigate("/");
+    //   // })
+    //   // .catch(error => {
+    //   //     console.log(error);
+    //   // });
+    // })
+    // .catch(error => {
+    //   console.log(error);
+    // })
   }
+
 
   return (
     <div id='signup_page'>
+      <img src={svgUrl} alt="SVG" />
       <div className="card">
         <h1>SignUp Page</h1>
         <form className="login" onSubmit={handleSubmit(signUp)}>

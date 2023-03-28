@@ -8,5 +8,5 @@ export class UserDto {
     @IsNotEmpty() @IsString() twoFactorSecret: string;
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
     @IsNotEmpty() @IsString() qrCode: string;
-    @IsNotEmpty() @IsString() avatarSvg: string;
+    @IsNotEmpty() avatarSvg: string;
 }

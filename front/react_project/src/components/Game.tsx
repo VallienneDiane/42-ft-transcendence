@@ -98,7 +98,6 @@ const Game: React.FC = () => {
     
     const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
-        console.log(event.key);
         if (event.key === "ArrowUp") {
             setInputState((prevState) => ({
                 ...prevState,
@@ -124,7 +123,7 @@ const Game: React.FC = () => {
                 socket.emit('Game_Input', "ArrowDown");
             }
 
-        }, 0.01)
+        }, 10)
 
         return () => {
             clearInterval(intervalId);
