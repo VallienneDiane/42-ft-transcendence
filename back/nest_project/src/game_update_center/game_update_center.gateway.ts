@@ -1,5 +1,5 @@
 import { Logger, OnModuleInit } from '@nestjs/common';
-import { MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
@@ -81,6 +81,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.game_instance = [];
     this.pong_instance = [];
     this.pong_public_space = [];
+    this.socket_login = new Map<string, string>();
   }
 
   @WebSocketServer()
@@ -89,7 +90,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * take the socket in the public game room and shove them into a room to start a game instance for them
    * @param client the second player socket
    */
-  StartGameRoom(client: Socket) {
+  StartGameRoom(@ConnectedSocket() client: Socket) {
     // shortcut
     let player1 = this.game_public_space[0];
     let player2 = this.game_public_space[1];
@@ -108,8 +109,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
     // emit the Player struct to the front to display the player login
     let players = new Players();
-    players.l1 = this.socket_login[player1.id];
-    players.l2 = this.socket_login[player2.id];
+    players.l1 = this.socket_login.get(player1.id);
+    players.l2 = this.socket_login.get(player2.id);
     this.server.to(player1.id).emit('players', players);
 
     // debug line
@@ -124,7 +125,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * take the socket in the public pong room and shove them into a room to start a pong instance for them
    * @param client the second player socker
    */
-  StartPongRoom(client: Socket) {
+  StartPongRoom(@ConnectedSocket() client: Socket) {
     // shortcut
     let player1 = this.pong_public_space[0];
     let player2 = this.pong_public_space[1];
@@ -143,8 +144,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
     // emit the Player struct to the front to display the player login
     let players = new Players();
-    players.l1 = this.socket_login[player1.id];
-    players.l2 = this.socket_login[player2.id];
+    players.l1 = this.socket_login.get(player1.id);
+    players.l2 = this.socket_login.get(player2.id);
     this.server.to(player1.id).emit('players', players);
 
     // debug line
@@ -161,7 +162,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param body anything will start pong execpt if the string === "game"
    */
   @SubscribeMessage('public matchmaking')
-  handlePublicMatchmaking(client: Socket, body: any) {
+  handlePublicMatchmaking(@ConnectedSocket() client: Socket, body: any) {
     if (body === "game") {
       this.game_public_space.push(client);
       console.log("socket :" + client + "has been added to game public space");
@@ -184,8 +185,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the soket of the client
    */
   @SubscribeMessage('handshake')
-  handlehandsshake(@MessageBody() body: string, client: Socket) {
-    this.socket_login[client.id] = body; // map the socket to a login
+  handlehandsshake(@MessageBody() body: string, @ConnectedSocket() client: Socket) {
+    console.log(client.id);
+    this.socket_login.set(client.id, body); // map the socket to a login
   }
 
   /**
@@ -194,7 +196,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the client clicking on the ready button (Socket from socket.io)
    */
   @SubscribeMessage('ready')
-  handleReady(client: Socket) {
+  handleReady(@ConnectedSocket() client: Socket) {
     for (let i = 0; i < this.game_instance.length; i++) {
       const element = this.game_instance[i];
       for (let j = 0; j < element.player.length; j++) {
@@ -220,8 +222,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.log("Initialized");
   }
 
-  handleConnection(client: Socket, ...args: any[]) { // log client connection
-    this.logger.log('client Connected: ' + client.id);
+  handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) { // log client connection
+    this.logger.debug('client Connected: ' + client.id);
   }
 
   /**
@@ -229,7 +231,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * stop the current match if necessary, and remove the client from known loggin
    * @param client the client disconnected
    */
-  handleDisconnect(client: Socket) { // log client disconnection
+  handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
     this.logger.log('client Disconnected: ' + client.id);
     this.find_and_remove(client);
     this.socket_login.delete(client.id);
@@ -240,7 +242,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client find the client and do the necessary clean-up
    * @returns 
    */
-  find_and_remove(client: Socket) {
+  find_and_remove(@ConnectedSocket() client: Socket) {
 
     // if the client is in a game
     game: for (let i = 0; i < this.game_instance.length; i++) {
@@ -286,30 +288,30 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       }
     }
 
-    // if the client was in pong_public_space
-    this.pong_public_space.forEach((player, index) => {
-      if (player === client) {
-        delete this.pong_public_space[index];
-      }
-    });
+    // // if the client was in pong_public_space
+    // this.pong_public_space.forEach((player, index) => {
+    //   if (player === client) {
+    //     delete this.pong_public_space[index];
+    //   }
+    // });
 
-    // if the client was in game_public_space
-    this.game_public_space.forEach((player, index) => {
-      if (player === client) {
-        delete this.game_public_space[index];
-      }
-    });
+    // // if the client was in game_public_space
+    // this.game_public_space.forEach((player, index) => {
+    //   if (player === client) {
+    //     delete this.game_public_space[index];
+    //   }
+    // });
 
-    // if the client was waiting for a private match
-    this.private_space.forEach((element, index) => {
-      if (element.socket === client) {
-        delete this.private_space[index];
-      }
-    });
+    // // if the client was waiting for a private match
+    // this.private_space.forEach((element, index) => {
+    //   if (element.socket === client) {
+    //     delete this.private_space[index];
+    //   }
+    // });
   }
  
   // @SubscribeMessage('private matchmaking')
-  // handlePrivateMatchmaking(@MessageBody() body: any, client: Socket) {
+  // handlePrivateMatchmaking(@MessageBody() body: any, @ConnectedSocket() client: Socket) {
   //   client.join("private matchmaking");
   // }
   
@@ -322,7 +324,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
 
   // @SubscribeMessage('Game_Input')
-  // OnGame_Input(@MessageBody() body: any, client: Socket) { // rajouter dans le message le joueur ou prendre en compte le joueur
+  // OnGame_Input(@MessageBody() body: any, @ConnectedSocket() client: Socket) { // rajouter dans le message le joueur ou prendre en compte le joueur
   //   const game = this.Game;
   //   const pong = this.Pong;
   //   if (this.state === "game") {
