@@ -90,7 +90,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             if (user != null) {
                 this.logger.debug('changeLoc event : ');
                 console.log(data, data.Loc, data.isChannel);
-                this.chatService.changeLocEvent(client, user.login, data.Loc, data.isChannel, this.chatRoomHandler);
+                this.chatService.changeLocEvent(client, user, data.Loc, data.isChannel, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');

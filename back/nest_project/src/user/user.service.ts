@@ -21,7 +21,7 @@ export class UserService {
         return this.usersRepository.findOneBy({login});
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
-    public findById(id: string): Promise<UserDto> {
+    public findById(id: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id: id});
     }
     
@@ -69,7 +69,64 @@ export class UserService {
         })
         await this.usersRepository.update({id: userId}, {channelsAsOp: channels});
     }
-    // SEND A PRIVATE MESSAGE TO ANOTHER PERSON
+    /**
+     * UNREGISTER CLIENT TO A CHANNEL AS GOD USER IN DATABASE
+     * @param userId 
+     * @param channelId 
+     */
+    async deleteChannelAsGodUser(userId: string, channelId: string) {
+        let channels = (await this.usersRepository.findOne({where: {id: userId}})).channelsAsGod;
+        channels = channels.filter((channel) => {
+            return channel.id !== channelId;
+        })
+        await this.usersRepository.update({id: userId}, {channelsAsGod: channels});
+    }
+    /**
+     * return the link between an user and a channel
+     * @param userId primary key of a user
+     * @param channelId primary key of a channel
+     * @returns channel: channel entity + status: user status in this channel as a string ("normal", "op" or "god")  
+     * exemple {channel: {id: 14ad8e..., channelName: pouet, ...}, status: "op"}
+     * returns null if no link exists or user not exist
+     */
+    async getChannelLink(userId: string, channelId: string): Promise<{channel: ChannelEntity, status: string}> {
+        let user = await this.findById(userId);
+        if (user == null)
+            return null;
+        let status: string = null;
+        let channel = user.channelsAsGod.find(channel => {
+            channel.id == channelId;
+        })
+        if (channel != undefined)
+            status = "god";
+        if (!status) {
+            channel = user.channelsAsOp.find(channel => {
+                channel.id == channelId;
+            })
+            if (channel != undefined)
+                status = "op";
+        }
+        if (!status) {
+            channel = user.channelsAsNormal.find(channel => {
+                channel.id == channelId;
+            })
+            if (channel != undefined)
+                status = "normal";
+        }
+        if (!status)
+            return null;
+        else
+            return {channel, status};
+    }
+
+    async listAllChannel
+    /**
+     * SEND A PRIVATE MESSAGE TO ANOTHER PERSON
+     * @param meId primary key of user 1
+     * @param himId primary key of user 2
+     * @param content random text
+     * @returns nothing
+     */
     async sendPrivateMessage(meId: string, himId: string, content: string) {
         let me = await this.findById(meId);
         if (me == null)
@@ -86,26 +143,7 @@ export class UserService {
         };
         let messages = me.messagesSend;
         messages.push(message);
-        await this.usersRepository.update({id: meId}, {messagesSend: messages});
+        await this.usersRepository.save(me);
     }
-    // GET ALL PRIVATE MESSAGES ORDERED BY DATE
-    async getMessages(meId: string, himId: string): Promise<MessagePrivateEntity[]> {
-        let me = await this.findById(meId);
-        let him = await this.findById(himId);
-        let messages: MessagePrivateEntity[] = await this.usersRepository
-            .createQueryBuilder("userEntity")
-            .leftJoinAndSelect(
-                "user.messagesSend",
-                "send",
-                "send.receiver = :receiver",
-                { receiver: him })
-            .leftJoinAndSelect(
-                "user.messagesReceived",
-                "received",
-                "received.sender = :sender",
-                { sender: me })
-            .select
-            .where("user.id = :id", { id: meId })
-
-    }
+    
 }
