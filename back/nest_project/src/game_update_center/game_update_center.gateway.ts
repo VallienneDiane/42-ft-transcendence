@@ -89,7 +89,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * take the socket in the public game room and shove them into a room to start a game instance for them
    * @param client the second player socket
    */
-  startgameroom(client: Socket) {
+  StartGameRoom(client: Socket) {
     // shortcut
     let player1 = this.game_public_space[0];
     let player2 = this.game_public_space[1];
@@ -124,7 +124,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * take the socket in the public pong room and shove them into a room to start a pong instance for them
    * @param client the second player socker
    */
-  startpongroom(client: Socket) {
+  StartPongRoom(client: Socket) {
     // shortcut
     let player1 = this.pong_public_space[0];
     let player2 = this.pong_public_space[1];
@@ -166,14 +166,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.game_public_space.push(client);
       console.log("socket :" + client + "has been added to game public space");
       if (this.game_public_space.length > 1) {
-        this.startgameroom(client);
+        this.StartGameRoom(client);
       }
     }
     else {
       this.pong_public_space.push(client);
       console.log("socket :" + client + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
-        this.startpongroom(client);
+        this.StartPongRoom(client);
       }
     }
   }
@@ -195,20 +195,24 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   @SubscribeMessage('ready')
   handleReady(client: Socket) {
-    this.game_instance.forEach(element => {
-      element.player.forEach(player => {
-        if (client === player) {
-          element.game_engine.set_player_ready(player, this.server.to(element.player[0].id));
+    for (let i = 0; i < this.game_instance.length; i++) {
+      const element = this.game_instance[i];
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          element.game_engine.set_player_ready(player, element.player[0].id)
         }
-      });
-    });
-    this.pong_instance.forEach(element => {
-      element.player.forEach(player => {
-        if (client === player) {
-          element.game_engine.set_player_ready(player, this.server.to(element.player[0].id));
+      }
+    }
+    for (let i = 0; i < this.pong_instance.length; i++) {
+      const element = this.pong_instance[i];
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          element.game_engine.set_player_ready(player, element.player[0].id)
         }
-      });
-    });
+      }
+    }
   }
 
   
@@ -239,32 +243,48 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   find_and_remove(client: Socket) {
 
     // if the client is in a game
-    this.game_instance.forEach(element => {
-      element.spectator.forEach(spec => {
+    game: for (let i = 0; i < this.game_instance.length; i++) {
+      const element = this.game_instance[i];
+      for (let j = 0; j < element.spectator.length; j++) {
+        const spec = element.spectator[j];
         if (client === spec) {
-          this.disconnect_from_game(client);
+          this.server.to(element.player[0].id).emit('spectateur disconnected');
+          delete element.spectator[j];
+          break;
         }
-      });
-      element.player.forEach(player => {
-        if (client === player) {
-          this.disconnect_from_game(client);
+      }
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(player.id));
+          element.game_engine.stop_game();
+          delete this.pong_instance[i];
+          break game;
         }
-      });
-    });
+      }
+    }
 
     // if the client is in a pong
-    this.pong_instance.forEach(element => {
-      element.spectator.forEach(spec => {
+    pong: for (let i = 0; i < this.pong_instance.length; i++) {
+      const element = this.pong_instance[i];
+      for (let j = 0; j < element.spectator.length; j++) {
+        const spec = element.spectator[j];
         if (client === spec) {
-          this.disconnect_from_pong(client);
+          this.server.to(element.player[0].id).emit('spectateur disconnected');
+          delete element.spectator[j];
+          break;
         }
-      });
-      element.player.forEach(player => {
-        if (client === player) {
-          this.disconnect_from_pong(client);
+      }
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(player.id));
+          element.game_engine.stop_game();
+          delete this.pong_instance[i];
+          break pong;
         }
-      });
-    });
+      }
+    }
 
     // if the client was in pong_public_space
     this.pong_public_space.forEach((player, index) => {
@@ -287,51 +307,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       }
     });
   }
-
-  /**
-   * handle the case of a disconnection mid match
-   * @param client the client to be disconnected
-   */
-  disconnect_from_pong(client: Socket) {
-    this.pong_instance.forEach((element, big_index) => { // look through the instance to find if the client is a spectator or player
-      element.spectator.forEach((spec, index) => { // if spectator just remove it and update the front ui
-        if (spec === client) {
-          this.server.to(element.player[0].id).emit('spectateur disconnected');
-          delete element.spectator[index];
-        }
-      });
-      element.player.forEach(Players => { // if player alert the front, stop the game and delete the game instance
-        if (Players === client) {
-          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(Players.id));
-          element.game_engine.stop_game();
-          delete this.pong_instance[big_index];
-        }
-      });
-    });
-  }
-
-  /**
-   * handle the case of a disconnection mid match
-   * @param client the client to be disconnected
-   */
-  disconnect_from_game(client: Socket) {
-    this.game_instance.forEach((element, big_index) => { // look through the instance to find if the client is a spectator or player
-      element.spectator.forEach((spec, index) => { // if spectator just remove it and update the front ui
-        if (spec === client) {
-          this.server.to(element.player[0].id).emit('spectateur disconnected');
-          delete element.spectator[index];
-        }
-      });
-      element.player.forEach(Players => { // if player alert the front, stop the game and delete the game instance
-        if (Players === client) {
-          this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(Players.id));
-          element.game_engine.stop_game();
-          delete this.game_instance[big_index];
-        }
-      });
-    });
-  }
-
+ 
   // @SubscribeMessage('private matchmaking')
   // handlePrivateMatchmaking(@MessageBody() body: any, client: Socket) {
   //   client.join("private matchmaking");
@@ -360,37 +336,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   //     else {
   //       pong.p1.process_input(body);
   //     }
-  //   }
-  // }
-
-  @SubscribeMessage('joinning_room')
-  handleJoinRoom(@MessageBody() body: any, client: Socket) {
-    client.join(body.room);
-  }
-
-  @SubscribeMessage('leaving_room')
-  handleLeaveRoom(@MessageBody() body: any, client: Socket) {
-    if (body === "complex") {
-      this.state = "game";
-    }
-  }
-
-  // @SubscribeMessage('Game_start')
-  // OnGame_start(@MessageBody() body: any) {
-  //   const game = this.Game;
-  //   const pong = this.Pong;
-  //   const thiss = this;
-  //   if (thiss.state === "game") {
-  //     setInterval(function() {
-  //       game.main_loop();
-  //       thiss.server.emit('Game_Update', game.gs)
-  //     }, 1000/60);
-  //   }
-  //   else {
-  //     setInterval(function() {
-  //       pong.main_loop();
-  //       thiss.server.emit('Game_Update', pong.gs)
-  //     }, 1000/60);
   //   }
   // }
 }
