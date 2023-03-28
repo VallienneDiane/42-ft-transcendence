@@ -4,7 +4,6 @@ import { Server, Socket } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 import { OnGatewayInit } from '@nestjs/websockets';
-import { match } from 'assert';
 
 /**
  * struct use to share the ball position
@@ -129,15 +128,16 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // shortcut
     let player1 = this.pong_public_space[0];
     let player2 = this.pong_public_space[1];
-
+    
     // make the player join the room of name player1.socket.id
     player1.join(player1.id);
     player2.join(player1.id);
-
+    
     // set a pong instance for the player and add it to the pong instance []
     let p = new Pong_instance();
     p.game_engine = new PongEngineService();
     p.game_engine.set_player(player1, player2);
+    console.log(player1);
     p.player.push(player1);
     p.player.push(player2);
     this.pong_instance.push(p);
