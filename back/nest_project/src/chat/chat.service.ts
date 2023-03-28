@@ -121,7 +121,7 @@ export class ChatService {
                     client.emit('notice', 'only channel operator can talk in this channel');
             }
             else {
-                this.messageService.create(this.messageEntityfier(userId, {room: room.room, isChannel: room.isChannel, content: message}));
+                this.userService.sendPrivateMessage(user.id, room.room, message);
                 client.emit('selfMessage', toSend);
                 let connected = false;
                 let dest = roomHandler.userMap.get(room.room);
@@ -129,11 +129,11 @@ export class ChatService {
                     connected = true;
                 client.emit('checkNewDM', room.room, connected);
                 if (dest != undefined) {
-                    dest.socket.emit('checkNewDM', userId, true);
-                    if (!dest.isChannel && dest.room == userId)
+                    dest.socket.emit('checkNewDM', user.id, true);
+                    if (!dest.isChannel && dest.room == user.id)
                         dest.socket.emit("newMessage", toSend);
                     else
-                        dest.socket.emit("pingedBy", userId);
+                        dest.socket.emit("pingedBy", user.id);
                 }
             }
         }
@@ -141,62 +141,52 @@ export class ChatService {
             client.emit('notice', 'You are nowhere');
     }
 
-    public changeLocEvent(client: Socket, userId: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
+    public changeLocEvent(client: Socket, user: UserDto, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
         {
             if (loc == 'general') {
-                roomHandler.joinRoom(userId, loc, true, false, false);
+                roomHandler.joinRoom(user.id, loc, true, false, false, false);
                 this.goBackToGeneral(client);
                 return;
             }
             else {
-                this.channelService.getOneByName(loc)
+                this.userService.getChannelLink(user.id, loc)
                 .then(
-                    (loc) => {
-                        if (loc != null)
-                        {
-                            this.linkUCService.findOne(loc.name, userId)
-                            .then(
-                                (found) => {
-                                    if (found != null)
-                                    {
-                                        roomHandler.joinRoom(userId, found.channelName, true, found.isOp, loc.onlyOpCanTalk);
-                                        this.messageService.findByChannel(found.channelName)
-                                        .then(
-                                            ( (messages) => {
-                                                client.emit('newLocChannel', loc, found.isOp, messages);
-                                            }
-                                        ))
-                                    }
-                                    else
-                                        client.emit('notice', 'error: you need to join the channel');
-                                }
-                            )
+                    (found) => {
+                        if (found) {
+                            roomHandler.joinRoom(
+                                user.id,
+                                loc,
+                                true,
+                                found.status == "god" ? true : false,
+                                found.status == "op" ? true : false,
+                                found.channel.onlyOpCanTalk);
+                            client.emit("newLocChannel", found);
                         }
-                        else
-                            client.emit('notice', 'error', 'noSuchChannel');
+                        else {
+                            client.emit("notice", "You not belong to this channel");
+                        }
                     }
                 )
             }
         }
         else
         {
-            this.userService.findByuserId(loc)
+            this.userService.findById(loc)
             .then (
                 (found) => {
                     if (found != null) {
-                        roomHandler.joinRoom(userId, found.userId, false, false, false);
-                        console.log('user currently in room : ', roomHandler.userMap.get(userId).room, roomHandler.userMap.get(userId).isChannel)
-                        this.messageService.findByPrivate(userId, found.userId)
-                        .then (
+                        roomHandler.joinRoom(user.id, found.id, false, false, false, false);
+                        console.log('user currently in room : ', roomHandler.userMap.get(user.id).room, roomHandler.userMap.get(userId).isChannel)
+                        this.messagePrivateService.findConversation(user.id, found.id)
+                        .then(
                             (messages) => {
-                                console.log('newlocprivate send');
-                                client.emit('newLocPrivate', found.userId, messages);
+                                client.emit("newLocPrivate", found.id, messages);
                             }
                         )
                     }
                     else
-                        client.emit('notice', 'error', 'noSuchUser');
+                        client.emit("notice", `User ${loc} not found`);
                 }
             )
         }
