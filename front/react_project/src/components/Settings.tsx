@@ -25,7 +25,8 @@ export default function Settings() {
   const [qrcode, setQrcode] = useState<string>("null");
   const [is2faActive, setActivate2fa] = useState<boolean>(false);
   const [user, setUser] = useState<User>();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [avatar, setAvatar] = useState<string>();
+  const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
 
   const {register, handleSubmit, formState: {errors}} = useForm<VerifyCodeForm>({
     resolver: yupResolver(schema)
@@ -47,6 +48,7 @@ export default function Settings() {
     userService.getUser(decodedToken.login)
     .then(response => {
         setUser(response.data);
+        setAvatar(response.data.avatarSvg);
     })
     .catch(error => {
         console.log(error);
@@ -75,8 +77,21 @@ export default function Settings() {
 
   const avatarSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("selectedfile", selectedFile);
-    // accountService.uploadAvatar(selectedFile);
+    // console.log("selectedfile", selectedFile);
+    let reader = new FileReader();
+    reader.onloadend = function() {
+      // console.log('result', reader);
+      // console.log('before reqest');
+      accountService.uploadAvatar(reader.result! as string)
+      .then(response => {
+        console.log(response);
+        setAvatar(reader.result! as string);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    }
+    reader.readAsDataURL(selectedFile!)
   }
   
   const handleChange = (value: boolean) => {
@@ -102,7 +117,7 @@ export default function Settings() {
     <div id="settingsPage">
       <div id="avatarSetting">
         <h2>Avatar settings</h2>
-        <img id="profilePicture" src={`${(user?.avatarSvg!)}`} />
+        <img id="profilePicture" src={avatar} />
         <form onSubmit={avatarSubmit}>
           <input type="file" name="" id="" accept="image/*" onChange={avatarSelected}/>
           <button type="submit">Upload your new avatar</button>

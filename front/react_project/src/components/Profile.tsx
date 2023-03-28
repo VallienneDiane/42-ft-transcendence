@@ -33,7 +33,6 @@ export default function Profile() {
             userService.getUser(decodedToken.login)
             .then(response => {
                 setUser(response.data);
-                console.log('svg user', user?.avatarSvg, typeof( user?.avatarSvg));
             })
             .catch(error => {
                 console.log(error);
@@ -41,12 +40,18 @@ export default function Profile() {
         }
     }, [currentUser])
     
+    useEffect(() => {
+        console.log('user', user);
+        // console.log('svg user', user?.avatarSvg, typeof( user?.avatarSvg));
+    }, [user])
+    
     return (
         
         <div id="profilePage">
             
             <aside>
-                <img id="profilePicture" src={(user?.avatarSvg!)} />
+                {/* { user?.avatarSvg} */}
+                <img id="profilePicture" src={user?.avatarSvg!} />
                 {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>

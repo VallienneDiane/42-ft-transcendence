@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards } from "@nestjs/common";
+import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
@@ -17,8 +17,6 @@ export class UserController {
     //Create user account in db, hash password with bcrypt and generate token with jwtservice
     @Post('user/signup') 
     async create(@Body() newUser: UserDto) {
-        console.log('ICI', newUser);
-        console.log('ICI avatar', newUser.avatarSvg);
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
@@ -58,8 +56,10 @@ export class UserController {
 
     //update avatar picture
     @UseGuards(JwtAuthGuard)
-    @Patch('user/uploadAvatar')
-    async uploadAvatar(@Body() file: string) {
-        console.log(file);
+    @Post('user/uploadAvatar')
+    async uploadAvatar(@Body() data: {id: number, file: string}, @Headers('Authorization') token: string): Promise<void> {
+        return this.userService.loadAvatar(data.id, data.file);
     }
+
+    
 }

@@ -16,7 +16,9 @@
         clip-path: inset(0px -15px 0px 0px);
 
         & #profilePicture {
+            object-fit: cover;
             width: 100%;
+            aspect-ratio: 1/1;
             max-width: 300px;
             border-radius: 100%;
         }
