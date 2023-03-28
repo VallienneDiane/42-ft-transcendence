@@ -11,7 +11,7 @@ import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
 import Avatar from 'avataaars';
 import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
-
+import { Canvg } from 'canvg';
 
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters"),
@@ -27,50 +27,40 @@ const SignupPage: React.FC = () => {
     resolver: yupResolver(userSchema)
   });
   
-  const signUp = (data: SignUpForm) => {
-    const avatarElement = document.createElement('div');
-    const svg = ReactDOMServer.renderToString(
-      <Avatar
-        style={{ width: '100px', height: '100px' }}
-        avatarStyle='Circle'
-        {...generateRandomAvatarOptions()}
-        />
-    )
+  const signUp = async (data: SignUpForm) => {
+    const avatar = generateRandomAvatarOptions();
+    const svgString = ReactDOMServer.renderToString(avatar);
 
-    const svgBlob = new Blob([svg], {type: 'image/svg+xml'});
-    console.log('url', svgBlob);
-    const newUrl = URL.createObjectURL(svgBlob);
-    console.log('url', newUrl);
-    setSvgUrl(newUrl);
+    data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
+    accountService.signUp(data)
+    .then(Response => {
+      accountService.saveToken(Response.data.access_token);
+      // accountService.enable2fa();
+      navigate("/");
+    })
+    .catch(error => {
+        console.log(error);
+    })
     
-    // domToImage.toPng(avatarElement)
-    // .then(dataUrl => {
-    //   var img = new Image();
-    //     img.src = dataUrl;
-    //     document.body.appendChild(img);
-    //   // const file = new File([blob], data.login + "_avatar.png", { type: "image/png"});
-    //   // const url = URL.createObjectURL(file);
-    //   // data.avatarSvg = url;
-    //   // console.log("user in front", data);
-    //   // accountService.signUp(data)
-    //   // .then(Response => {
-    //   //   accountService.saveToken(Response.data.access_token);
-    //   //   // accountService.enable2fa();
-    //   //   navigate("/");
-    //   // })
-    //   // .catch(error => {
-    //   //     console.log(error);
-    //   // });
+    /* First "working" solution */
+    // console.log('avatarElement', avatarElement.innerHTML);
+    // data.avatarSvg = avatarElement.innerHTML;
+    // accountService.signUp(data)
+    // .then(Response => {
+    //   accountService.saveToken(Response.data.access_token);
+    //   // accountService.enable2fa();
+    //   navigate("/");
     // })
     // .catch(error => {
-    //   console.log(error);
+    //     console.log(error);
     // })
   }
 
 
   return (
     <div id='signup_page'>
-      <img src={svgUrl} alt="SVG" />
+      {/* { generateRandomAvatarOptions() } */}
+      {/* <img src={svgUrl} alt="SVG" /> */}
       <div className="card">
         <h1>SignUp Page</h1>
         <form className="login" onSubmit={handleSubmit(signUp)}>

@@ -74,4 +74,13 @@ export class UserService {
         await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
+
+    //upload avatar
+    async loadAvatar(id: number, file: string) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.avatarSvg = file;
+        await this.usersRepository.save(user);
+    }
+
+    
 }

@@ -13,7 +13,8 @@ let login = (credentials: LogInForm) => {
 }
 // Upload Avatar picture
 let uploadAvatar = (file: string) => {
-    return Axios.patch('user/uploadAvatar', file);
+    const user: JwtPayload = accountService.readPayload()!;
+    return Axios.post('user/uploadAvatar', {id: user.sub, file});
 }
 
 // Request to generate token
