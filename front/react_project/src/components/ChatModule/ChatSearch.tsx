@@ -203,7 +203,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     }
 
     componentDidMount(): void {
-        document.addEventListener("mousedown", this.closeDropdown);
+        document.addEventListener("mousedown", this.closeSearchList);
         this.fetchUsers();
 
         this.props.socket!.emit('listChannel');
@@ -237,7 +237,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     }
 
     componentWillUnmount(): void {
-        document.removeEventListener("mousedown", this.closeDropdown);
+        document.removeEventListener("mousedown", this.closeSearchList);
         this.props.socket!.off('listChannel');
         this.props.socket!.off('newUserConnected');
         this.props.socket!.off('newLocChannel');

@@ -55,7 +55,7 @@ export class MessageList extends React.Component<{history: Message[], action: an
     componentWillUnmount(): void {
         this.props.socket!.off('newMessage');
         this.props.socket!.off('notice');
-        this.props.socket!.off('selfMessage')
+        this.props.socket!.off('selfMessage');
     }
 
     render() {
@@ -63,6 +63,7 @@ export class MessageList extends React.Component<{history: Message[], action: an
         const listItems: JSX.Element[] = tmpList.reverse().map(
             (message) => <MessageDisplay key={message.id} sender={message.sender!} text={message.text} />
         );
+        console.log("reverse");
         return (
             <div id="messageList">
                 {listItems}
