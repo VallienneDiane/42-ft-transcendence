@@ -11,7 +11,9 @@ export class MessageService {
     ) {}
     // save a new message in database
     public create(newMessage: MessageEntity): Promise<MessageEntity> {
-        return this.messagesRepository.save(newMessage);
+        if (!(newMessage.isChannel && newMessage.room == 'general'))
+            return this.messagesRepository.save(newMessage);
+        return undefined;
     }
     // find all messages send to a receiver ordered by date
     public findByChannel(roomEntry: string): Promise<MessageEntity[]> {
@@ -35,6 +37,15 @@ export class MessageService {
             order: {
                 date: "ASC",
             }
+        })
+    }
+    
+    public findAllDialogByUserName(userName: string): Promise<MessageEntity[]> {
+        return this.messagesRepository.find({
+            where: [
+                { room: userName, isChannel: false },
+                { sender: userName, isChannel: false },
+            ]
         })
     }
     //update all row containing an username when this username is about to change

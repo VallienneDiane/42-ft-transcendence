@@ -13,7 +13,7 @@ export class Ball {
 	mass;
 	inv_mass;
 
-	constructor (pos: Vec2, r) {
+	constructor (pos: Vec2, r: number) {
 		this.position = pos;
 		this.speed = new Vec2(0, 0);
 		this.acc = new Vec2(0, 0);

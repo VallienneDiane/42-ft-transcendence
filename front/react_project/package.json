@@ -29,6 +29,7 @@
     "react-yup": "^1.24.1",
     "sass": "^1.58.3",
     "socket.io": "^4.6.0",
+    "styled-components": "^5.3.9",
     "socket.io-client": "^4.6.1",
     "util": "^0.12.5",
     "yup": "^1.0.2"

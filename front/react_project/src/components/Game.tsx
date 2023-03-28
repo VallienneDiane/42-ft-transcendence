@@ -74,7 +74,7 @@ useEffect(() => {
                 paddleOne: { x: gameState.paddleOne.x / (16 / 9), y: gameState.paddleOne.y },
                 paddleTwo: { x: gameState.paddleTwo.x / (16 / 9), y: gameState.paddleTwo.y }
             }));
-            console.log('gameUpdate', gameState);
+            // console.log('gameUpdate', gameState);
         });
     }
 }, [socket]);
