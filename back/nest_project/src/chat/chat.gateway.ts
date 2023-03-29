@@ -11,6 +11,7 @@ import { UserService } from "src/user/user.service";
 import { UserDto } from "src/user/user.dto";
 import { JwtService } from '@nestjs/jwt';
 import { ChannelEntity } from "./channel/channel.entity";
+import { UserEntity } from "src/user/user.entity";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -43,7 +44,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return id;
     }
 
-    private tokenChecker(client: Socket): Promise<UserDto> {
+    private tokenChecker(client: Socket): Promise<UserEntity> {
         let id = this.extractUserId(client);
         return this.userService.findById(id);    
     }
@@ -102,38 +103,38 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.listChannelEvent(client, user.login);
+                this.chatService.listChannelEvent(client, user);
         })
     }
 
     @SubscribeMessage('listUsersChann')
-    handlelistUsersChann(@MessageBody() channelName: string, @ConnectedSocket() client: Socket) {
+    handlelistUsersChann(@MessageBody() channelId: string, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.listUsersInChannel(client, channelName);
+                this.chatService.listUsersInChannel(client, channelId, this.chatRoomHandler);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
     }
     
     @SubscribeMessage('joinChannel')
-    handleJoinChannel(@MessageBody() data: {channelName: string, channelPass: string}, @ConnectedSocket() client: Socket) {
+    handleJoinChannel(@MessageBody() data: {channelId: string, channelPass: string}, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.joinChannelEvent(client, user.login, data, this.chatRoomHandler);
+                this.chatService.joinChannelEvent(client, user, data, this.chatRoomHandler);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
     }
 
     @SubscribeMessage('inviteUser')
-    handleInviteUser(@MessageBody() data: {userToInvite: string, channel: string}, @ConnectedSocket() client: Socket) {
+    handleInviteUser(@MessageBody() data: {userToInvite: string, channelId: string}, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channel);
+                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
@@ -208,7 +209,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.listMyDMEvent(client, user.login, this.chatRoomHandler);
+                this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
         })
     }
 
