@@ -80,6 +80,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.game_instance = [];
     this.pong_instance = [];
     this.pong_public_space = [];
+    this.game_public_space = [];
+    this.private_space = [];
     this.socket_login = new Map<string, string>();
   }
 
@@ -137,7 +139,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let p = new Pong_instance();
     p.game_engine = new PongEngineService();
     p.game_engine.set_player(player1, player2);
-    console.log(player1);
+    p.player = [];
+    p.spectator = [];
     p.player.push(player1);
     p.player.push(player2);
     this.pong_instance.push(p);
@@ -163,17 +166,20 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   @SubscribeMessage('public matchmaking')
   handlePublicMatchmaking(@ConnectedSocket() client: Socket, body: any) {
-    if (body === "game") {
+    if (body === "game" && this.game_public_space[0] != client) {
       this.game_public_space.push(client);
-      console.log("socket :" + client + "has been added to game public space");
+      console.log("socket :" + client.id + "has been added to game public space");
       if (this.game_public_space.length > 1) {
         this.StartGameRoom(client);
       }
     }
-    else {
+    else if (this.pong_public_space[0] != client) {
+      console.log("array avant ", this.pong_public_space);
       this.pong_public_space.push(client);
-      console.log("socket :" + client + "has been added to pong public space");
+      console.log("array apres ", this.pong_public_space);
+      console.log("socket :" + client.id + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
+        console.log("pas normal");
         this.StartPongRoom(client);
       }
     }
@@ -186,7 +192,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   @SubscribeMessage('handshake')
   handlehandsshake(@MessageBody() body: string, @ConnectedSocket() client: Socket) {
-    console.log(client.id);
+    console.log("client : " + client.id + "has this pseudo :" + body);
     this.socket_login.set(client.id, body); // map the socket to a login
   }
 
@@ -202,7 +208,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       for (let j = 0; j < element.player.length; j++) {
         const player = element.player[j];
         if (player === client) {
-          element.game_engine.set_player_ready(player, element.player[0].id)
+          element.game_engine.set_player_ready(player, this.server)
         }
       }
     }
@@ -211,12 +217,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       for (let j = 0; j < element.player.length; j++) {
         const player = element.player[j];
         if (player === client) {
-          element.game_engine.set_player_ready(player, element.player[0].id)
+          element.game_engine.set_player_ready(player, this.server)
         }
       }
     }
   }
-
   
   afterInit(server: Server) { // log module initialization
     this.logger.log("Initialized");
@@ -251,8 +256,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = element.spectator[j];
         if (client === spec) {
           this.server.to(element.player[0].id).emit('spectateur disconnected');
-          delete element.spectator[j];
-          break;
+          element.spectator.splice(j, 1);
+          break game;
         }
       }
       for (let j = 0; j < element.player.length; j++) {
@@ -260,7 +265,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         if (player === client) {
           this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(player.id));
           element.game_engine.stop_game();
-          delete this.pong_instance[i];
+          this.pong_instance.splice(i, 1);
           break game;
         }
       }
@@ -273,8 +278,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = element.spectator[j];
         if (client === spec) {
           this.server.to(element.player[0].id).emit('spectateur disconnected');
-          delete element.spectator[j];
-          break;
+          element.spectator.splice(j, 1);
+          break pong;
         }
       }
       for (let j = 0; j < element.player.length; j++) {
@@ -282,32 +287,38 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         if (player === client) {
           this.server.to(element.player[0].id).emit('player_disconnection', this.socket_login.get(player.id));
           element.game_engine.stop_game();
-          delete this.pong_instance[i];
+          this.pong_instance.splice(i, 1);
           break pong;
         }
       }
     }
 
-    // // if the client was in pong_public_space
-    // this.pong_public_space.forEach((player, index) => {
-    //   if (player === client) {
-    //     delete this.pong_public_space[index];
-    //   }
-    // });
+    // if the client was in pong_public_space
+    for (let i = 0; i < this.pong_public_space.length; i++) {
+      const element = this.pong_public_space;
+      if (element[i] === client) {
+        element.splice(i, 1);
+        break;
+      }
+    }
 
-    // // if the client was in game_public_space
-    // this.game_public_space.forEach((player, index) => {
-    //   if (player === client) {
-    //     delete this.game_public_space[index];
-    //   }
-    // });
+    // if the client was in game_public_space
+    for (let i = 0; i < this.game_public_space.length; i++) {
+      const element = this.game_public_space;
+      if (element[i] === client) {
+        element.splice(i, 1);
+        break;
+      }
+    }
 
-    // // if the client was waiting for a private match
-    // this.private_space.forEach((element, index) => {
-    //   if (element.socket === client) {
-    //     delete this.private_space[index];
-    //   }
-    // });
+    // if the client was waiting for a private match
+    for (let i = 0; i < this.private_space.length; i++) {
+      const element = this.private_space;
+      if (element[i].socket === client) {
+        element.splice(i, 1);
+        break;
+      }
+    }
   }
  
   // @SubscribeMessage('private matchmaking')
