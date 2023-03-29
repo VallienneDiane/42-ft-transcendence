@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Channel } from "diagnostics_channel";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { DataSource, Repository } from "typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
@@ -119,7 +120,57 @@ export class UserService {
             return {channel, status};
     }
 
-    async listAllChannel
+    /**
+     * 
+     * @param userId user who you want to obtain all the channels he's currently registered
+     * @returns a promise of an array of a {channel: ChannelEntity, status: string}, status is either 
+     * "god", "op", or "normal" ordered this way in the array:  
+     * god < op < normal  
+     * and then ordered by channel.name
+     */
+    async listAllUserChannel(userId: string): Promise<{channel: ChannelEntity, status: string}[]> {
+        const user = await this.findById(userId);
+        let arrayOfChannels: {channel: ChannelEntity, status: string}[] = [{
+            channel: {
+                id: "general",
+                date: new Date(),
+                name: "general",
+                password: false,
+                channelPass: null,
+                opNumber: 0,
+                inviteOnly: false,
+                persistant: true,
+                onlyOpCanTalk: false,
+                hidden: false,
+                normalUsers: [],
+                opUsers: [],
+                messages: []
+            },
+            status: "normal"}];
+        let arrayOfGods = new Map<string, {channel: ChannelEntity, status: string}>;
+        let arrayOfOps = new Map<string, {channel: ChannelEntity, status: string}>;
+        let arrayOfNormals = new Map<string, {channel: ChannelEntity, status: string}>;
+        user.channelsAsGod.forEach((channel) => {
+            arrayOfGods.set(channel.name, {channel: channel, status: "god"});
+        });
+        arrayOfGods.forEach((channel) => {
+            arrayOfChannels.push(channel);
+        });
+        user.channelsAsOp.forEach((channel) => {
+            arrayOfOps.set(channel.name, {channel: channel, status: "op"});
+        });
+        arrayOfOps.forEach((channel) => {
+            arrayOfChannels.push(channel);
+        });
+        user.channelsAsNormal.forEach((channel) => {
+            arrayOfNormals.set(channel.name, {channel: channel, status: "normal"});
+        });
+        arrayOfNormals.forEach((channel) => {
+            arrayOfChannels.push(channel);
+        });
+        return arrayOfChannels;
+    }
+
     /**
      * SEND A PRIVATE MESSAGE TO ANOTHER PERSON
      * @param meId primary key of user 1
@@ -134,16 +185,42 @@ export class UserService {
         let him = await this.findById(himId);
         if (him == null)
             return;
-        let message: MessagePrivateEntity = {
-            id: undefined,
+        let message = {
             sender: me,
             receiver: him,
             content: content,
-            date: undefined
         };
-        let messages = me.messagesSend;
-        messages.push(message);
-        await this.usersRepository.save(me);
+        // let messages = me.messagesSend;
+        // messages.push(message);
+        // await this.usersRepository.save(me);
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "messagesSend")
+            .of(me)
+            .add(message);
+    }
+
+    async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
+        let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
+        const msgSendDM: UserEntity[] = await this.usersRepository
+            .createQueryBuilder("user")
+            .leftJoinAndSelect("user.messagesSend", "send")
+            .select("send.receiver")
+            .where("user.id = :id", { id: userId })
+            .getRawMany();
+        const msgReceivedDM: UserEntity[] = await this.usersRepository
+            .createQueryBuilder("user")
+            .leftJoinAndSelect("user.messagesReceived", "received")
+            .select("received.sender")
+            .where("user.id = :id", { id: userId })
+            .getRawMany();
+        msgSendDM.forEach((user) => {
+            sorted.set(user.login, {user: user, connected: false});
+        })
+        msgReceivedDM.forEach((user) => {
+            sorted.set(user.login, {user: user, connected: false});
+        })
+        return sorted;
     }
     
 }

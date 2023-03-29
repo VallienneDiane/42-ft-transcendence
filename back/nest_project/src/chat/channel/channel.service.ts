@@ -93,57 +93,130 @@ export class ChannelService {
 		);
 	}
 
+	async listChannelsWhereUserIsNot(user: UserEntity): Promise<ChannelEntity[]> {
+		const allChannels = await this.listChannels();
+		let channListToReturn: ChannelEntity[] = [];
+		allChannels.forEach(channel => {
+			if (!channel.hidden
+				&& channel.godUser != user
+				&& !channel.opUsers.includes(user)
+				&& !channel.normalUsers.includes(user)) {
+					channListToReturn.push(channel);
+				}
+		});
+		return channListToReturn;
+	}
+
+	/**
+	 * 
+	 * @param channelId 
+	 * @returns an array or UserEntity belong to this channel with theyre grade in this channel, a connected: boolean is available 
+	 * to set it up later, it can be ignored either
+	 */
+	async listUsersInChannel(channelId: string): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
+		const godUser: UserEntity = await this.channelRepository
+			.createQueryBuilder("channel")
+			.leftJoinAndSelect("channel.godUser", "god")
+			.select("god")
+			.where("channel.id = :id", { id: channelId })
+			.getRawOne();
+		let opUsers: UserEntity[] = await this.channelRepository
+			.createQueryBuilder("channel")
+			.leftJoinAndSelect("channel.opUsers", "ops")
+			.select("ops")
+			.where("channel.id = :id", { id: channelId })
+			.getRawMany();
+		let normalUsers: UserEntity[] = await this.channelRepository
+			.createQueryBuilder("channel")
+			.leftJoinAndSelect("channel.normalUsers", "normal")
+			.select("ops")
+			.where("channel.id = :id", { id: channelId })
+			.getRawMany();
+		opUsers.sort((a, b) => {
+			return (a.login.localeCompare(b.login))
+		});
+		normalUsers.sort((a, b) => {
+			return (a.login.localeCompare(b.login))
+		});
+		let toReturn: {user: UserEntity, status: string, connected: boolean}[] = [];
+		if (godUser)
+		toReturn.push({user: godUser, status: "god", connected: false});
+		opUsers.forEach(
+			(user) => {
+				toReturn.push({user: user, status: "op", connected: false});
+			}
+		);
+		normalUsers.forEach(
+			(user) => {
+				toReturn.push({user: user, status: "normal", connected: false});
+			}
+		)
+		return toReturn;
+	}
+
+	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
+		const usersArray = await this.listUsersInChannel(channelId);
+		for (let elt of usersArray) {
+			if (elt.user.id == userId)
+				return ({user: elt.user, status: elt.status});
+		}
+		return null;
+	}
+
 	async addNormalUser(user: UserEntity, channelId: string) {
-		let	users = (await this.getOneById(channelId)).normalUsers;
-		users.push(user);
-		await this.channelRepository.update(
-			{id: channelId},
-			{normalUsers: users});
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "normalUsers")
+			.of(channelId)
+			.add(user)
 	}
 
 	async addOpUser(user: UserEntity, channelId: string) {
 		let chann = await this.getOneById(channelId);
-		if (chann == null)
-			return;
-		let	users = chann.opUsers;
-		users.push(user);
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "opUsers")
+			.of(channelId)
+			.add(user)
 		await this.channelRepository.update(
 			{id: channelId},
-			{opUsers: users, opNumber: chann.opNumber + 1});
+			{opNumber: chann.opNumber + 1});
 	}
 
 	async delNormalUser(userId: string, channelId: string) {
-		let chann = await this.getOneById(channelId);
-		if (chann == null)
-			return;
-		let users =chann.normalUsers;
-		let prevLenght = users.length;
-		users = users.filter((user) => {
-			return user.id !== userId;
-		})
-		if (users.length < prevLenght)
-			await this.channelRepository.update(
-				{id : channelId},
-				{normalUsers: users});
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "normalUsers")
+			.of(channelId)
+			.remove(userId)
 	}
 
 	async delOpUser(userId: string, channelId: string) {
 		let chann = await this.getOneById(channelId);
 		if (chann == null)
 			return;
+		let opNumberToReduce = false;
 		let users = chann.opUsers;
-		let prevLenght = users.length;
-		users = users.filter((user) => {
-			return user.id !== userId;
-		})
-		if (users.length < prevLenght) {
-			let opNumber = chann.opNumber;
-			if (opNumber == 1 && !chann.persistant)
-				this.deleteById(channelId);
-			else
-				this.channelRepository.update(
-					{id : channelId},
-					{opUsers: users, opNumber: opNumber - 1});
+		for (let user of users) {
+			if (user.id == userId) {
+				opNumberToReduce = true;
+				break;
+			}
+		}
+		if (opNumberToReduce) {
+			if (chann.opNumber == 1 && !chann.persistant)
+				await this.deleteById(channelId);
+			else {	
+				await this.channelRepository
+					.createQueryBuilder()
+					.relation(ChannelEntity, "opUsers")
+					.of(channelId)
+					.remove(userId);
+				await this.channelRepository.update(
+					{id: channelId},
+					{opNumber: chann.opNumber - 1}
+				)
+			}
 		}
 	}
 
@@ -155,35 +228,45 @@ export class ChannelService {
 		if (user != null && user.id == userId) {
 			let opNumber = chann.opNumber;
 			if (opNumber == 1 && !chann.persistant)
-				this.deleteById(channelId);
+				await this.deleteById(channelId);
 			else
-				this.channelRepository.update(
+				await this.channelRepository.update(
 					{id : channelId},
 					{godUser: null, opNumber: opNumber - 1});
 		}
 	}
 
 	async delUser(userId: string, channelId: string) {
-		this.delGodUser(userId, channelId);
-		this.delOpUser(userId, channelId);
-		this.delNormalUser(userId, channelId);
+		await this.delGodUser(userId, channelId);
+		await this.delOpUser(userId, channelId);
+		await this.delNormalUser(userId, channelId);
 	}
-
+	
 	async addMessage(userId: string, content: string, channelId: string) {
 		let channel = await this.getOneById(channelId);
-		let message: MessageChannelEntity = {
-			id: undefined,
+		let message = {
 			content: content,
-			date: undefined,
 			userId: userId,
 			channel: channel
 		}
-		let messages = channel.messages;
-		messages.push(message);
-		this.channelRepository.update(
-			{id : channelId},
-			{messages: messages}
-		);
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "messages")
+			.of(channelId)
+			.add(message)
+	}
+	
+	async getMessages(channelId: string): Promise<MessageChannelEntity[]> {
+		const channel = await this.getOneById(channelId);
+		if (channel == null)
+			return null;
+		else {
+			let toSort = channel.messages;
+			toSort.sort((a, b) => {
+				return (a.date.toString().localeCompare(b.date.toString()));
+			})
+			return toSort;
+		}
 	}
 
 	async delUserMessages(userId: string, channelId: string) {
@@ -191,11 +274,13 @@ export class ChannelService {
 		if (channel == null)
 			return;
 		let messages = channel.messages.filter(message => {
-			return message.userId !== userId;
+			return message.userId == userId;
 		});
-		this.channelRepository.update(
-			{id: channelId},
-			{messages: messages}
-		);
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "messages")
+			.of(channelId)
+			.remove(messages);
 	}
+
 }
