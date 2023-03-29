@@ -325,30 +325,32 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   // handlePrivateMatchmaking(@MessageBody() body: any, @ConnectedSocket() client: Socket) {
   //   client.join("private matchmaking");
   // }
-  
-  onModuleInit() { // output a ;essage on connection and when the programme start
-    const io = require('socket.io')(this.server);
-    console.log('game server starting');
-    this.server.on('connection', (socket) => {
-      console.log("socket ID", socket.id, 'Is connected');
-    })
-  }
 
-  // @SubscribeMessage('Game_Input')
-  // OnGame_Input(@MessageBody() body: any, @ConnectedSocket() client: Socket) { // rajouter dans le message le joueur ou prendre en compte le joueur
-  //   const game = this.Game;
-  //   const pong = this.Pong;
-  //   if (this.state === "game") {
-  //     game.ballz[0].process_input(body);
-  //     this.server.emit('Game_Update', game.gs)
-  //   }
-  //   else if (this.state === "pong") {
-  //     if (body === "ArrowUp" || body === "ArrowDown") {
-  //         pong.p2.process_input(body);
-  //     }
-  //     else {
-  //       pong.p1.process_input(body);
-  //     }
-  //   }
-  // }
+  @SubscribeMessage('Game_Input')
+  OnGame_Input(@MessageBody() body: any, @ConnectedSocket() client: Socket) {
+    game: for (let i = 0; i < this.game_instance.length; i++) {
+      const element = this.game_instance[i];
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          this.logger.debug("client.id inputed" + body);
+          element.game_engine.process_input(client);
+          break game;
+        }
+      }
+    }
+
+    // if the client is in a pong
+    pong: for (let i = 0; i < this.pong_instance.length; i++) {
+      const element = this.pong_instance[i];
+      for (let j = 0; j < element.player.length; j++) {
+        const player = element.player[j];
+        if (player === client) {
+          this.logger.debug("client.id inputed" + body);
+          element.game_engine.process_input(client);
+          break pong;
+        }
+      }
+    }
+  }
 }
