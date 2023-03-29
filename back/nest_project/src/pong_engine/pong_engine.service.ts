@@ -74,7 +74,7 @@ export class PongEngineService {
      * check if both player are ready and start the game loop
      * @param player the socket of the ready player
      */
-    set_player_ready(player: Socket, room) {
+    set_player_ready(player: Socket, server) {
         if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -83,14 +83,15 @@ export class PongEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             this.game_is_ready = true;
+            let thiss = this;
             this.loop = setInterval(function() {
-                if (this.game_most_stop) {
-                    clearInterval(this.loop);
-                    this.pl1_ready = false;
-                    this.pl2_ready = false;
+                if (thiss.game_must_stop) {
+                    clearInterval(thiss.loop);
+                    thiss.pl1_ready = false;
+                    thiss.pl2_ready = false;
                 }
-                this.main_loop();
-                room.emit('Game_Update', this.gs)
+                thiss.main_loop();
+                server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
             }, 1000/60);
         }
     }
