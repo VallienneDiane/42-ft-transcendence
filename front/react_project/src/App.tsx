@@ -34,8 +34,9 @@ function App() {
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />
               <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
-                <Route path='/' element={<Home />} />
+              <Route path='/callback' element={<Callback />} />
               <Route element={<ProtectedRoutes/>}>
+                <Route path='/' element={<Home />} />
                 <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:login' element={<Profile />} />

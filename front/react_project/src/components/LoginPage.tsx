@@ -18,20 +18,29 @@ const LoginPage: React.FC = () => {
         }
     }, [])
 
+    // WHEN LOGIN WITH API 42
+    const redirectToApi42 = async () => {
+        await accountService.url42()
+        .then(response_url => {
+            window.location.href = (response_url.data);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
+    //WHEN LOGIN WITH OR WITHOUT 2FA
     const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
         .then(response_user => {
             if(response_user.data == true) {
                 accountService.is2faActive(data.login)
                 .then(response_2fa => {
-                    console.log(response_2fa);
                     if(response_2fa.data.is2faActive == true) {
                         navigate("/verifyCode2fa", { state: { login: data.login } });
                     }
                     else {
                         accountService.generateToken(data.login)
                         .then(response_token => {
-                            console.log(response_token);
                             accountService.saveToken(response_token.data.access_token);
                             const from = (location.state as any)?.from || "/";
                             navigate(from);
@@ -50,15 +59,6 @@ const LoginPage: React.FC = () => {
             console.log(error);
             setIncorrectCredentials(true);
         });
-    }
-
-    const redirectToApi42 = async () => {
-        console.log("redirect to api after click");
-        await accountService.url42()
-        .then(response_url => {
-            console.log("window locatin avec url : ", response_url.data);
-            window.location.href = (response_url.data);
-        })
     }
 
     return (
