@@ -5,21 +5,9 @@ import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 import { OnGatewayInit } from '@nestjs/websockets';
 
-/**
- * struct use to share the ball position
- */
-interface ballpos {
-	x: number,
-	y: number,
-}
-
-/**
- * struct use to share the game state
- */
-interface gameState {
-	ballPosition: ballpos[],
-	paddleOne: {x: number, y: number },
-	paddleTwo: {x: number, y:number },
+interface Private_order {
+  target: string,
+  type: string,
 }
 
 /**
@@ -27,8 +15,8 @@ interface gameState {
  */
 export class Waiting_socket {
   socket: Socket;
-  target;
-  game;
+  target: string;
+  game: string;
 }
 
 /**
@@ -113,6 +101,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     players.l1 = this.socket_login.get(player1.id);
     players.l2 = this.socket_login.get(player2.id);
     this.server.to(player1.id).emit('players', players);
+    this.logger.debug("a game room has been created");
   }
 
   /**
@@ -281,15 +270,22 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
  
   @SubscribeMessage('private matchmaking')
-  handlePrivateMatchmaking(@MessageBody() body: any, @ConnectedSocket() client: Socket) {
+  handlePrivateMatchmaking(@MessageBody() body: Private_order, @ConnectedSocket() client: Socket) {
     for (let i = 0; i < this.private_space.length; i++) {
       const element = this.private_space[i];
+      if (element.socket === client) {
+        this.logger.debug("already waiting");
+        console.log(element);
+        return;
+      }
+      console.log(body);
       if (element.target === this.socket_login.get(client.id)) {
         this.StartGameRoom(element.socket, client, body.type);
         this.private_space.splice(i, 1);
         return;
       }
     }
+    this.logger.debug("not waiting so create a new wait order");
     let private_room = new Waiting_socket();
     private_room.socket = client;
     private_room.target = body.target;
