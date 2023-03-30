@@ -3,8 +3,8 @@
 export class Simple_paddle {
 
     x_position;
-    y_position;
     lenght;
+    y_position;
     speed;
     up: boolean;
     down: boolean;

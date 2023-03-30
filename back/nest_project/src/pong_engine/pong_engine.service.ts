@@ -3,6 +3,7 @@ import { Simple_ball } from './Simple_Ball';
 import { Simple_paddle } from './Simple_paddle';
 import { Socket } from 'socket.io';
 
+// TODO replace all interface with the thing nico has talk about
 interface ballpos {
 	x: number,
 	y: number,
@@ -27,14 +28,12 @@ export class PongEngineService {
     pl2: Socket;
     pl1_ready: boolean;
     pl2_ready: boolean;
-    spectator: Socket[];
 
     aspect_ratio = 16/9;
     cooldown = 90; // cooldown between ball respawn
     cooldown_start;
-    game_is_ready: boolean;
     game_must_stop: boolean;
-    loop;
+    loop; // set_interval function handle for stoping the game
 
     constructor () {
         this.ball = new Simple_ball();
@@ -43,9 +42,7 @@ export class PongEngineService {
 
         this.pl1_ready = false;
         this.pl2_ready = false;
-        this.game_is_ready = false;
         this.game_must_stop = false;
-        this.spectator = [];
 
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
@@ -66,6 +63,11 @@ export class PongEngineService {
         console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
     }
     
+    /**
+     * self explenatory
+     * @param client the client doing the key pressing
+     * @param key the key pressed
+     */
     process_input (client: Socket, key: any) {
         if (client === this.pl1) {
             this.p1.process_input(key);
@@ -91,7 +93,6 @@ export class PongEngineService {
             this.pl2_ready = !this.pl2_ready;
         }
         if (this.pl1_ready && this.pl2_ready) {
-            this.game_is_ready = true;
             let thiss = this;
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
@@ -129,7 +130,6 @@ export class PongEngineService {
             x: this.p1.x_position - 0.015,
             y: this.p1.y_position + this.p1.lenght/2
         };
-
         this.gs.paddleTwo = {
             x: this.p2.x_position + 0.015,
             y: this.p2.y_position + this.p2.lenght/2

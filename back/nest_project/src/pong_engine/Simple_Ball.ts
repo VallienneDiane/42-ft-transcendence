@@ -2,12 +2,12 @@ import { Simple_paddle } from "./Simple_paddle";
 
 export class Simple_ball {
 
+    apesct_ratio = 16/9;
     x_position;
     y_position;
     x_speed;
     y_speed;
     r;
-    apesct_ratio = 16/9;
     state;
 
     constructor () {
@@ -20,6 +20,9 @@ export class Simple_ball {
         this.state = "alive";
     }
 
+    /**
+     * return the closest point to the paddle p
+     */
     closest_point_bw(p: Simple_paddle) {
 
         if (this.y_position <= p.y_position)
@@ -55,7 +58,7 @@ export class Simple_ball {
 
         /* check collision with paddle one */
         if (this.x_position - this.r < p1.x_position && Math.sqrt(Math.pow(this.x_position - p1.x_position, 2) + Math.pow(this.y_position - this.closest_point_bw(p1), 2)) <= this.r) {
-
+            
             console.log("colide p1");
             this.x_position = this.r + p1.x_position;
             this.x_speed = -this.x_speed;
@@ -84,7 +87,7 @@ export class Simple_ball {
         }
 
         /* check if goal */
-        if ((this.x_position - this.r < 0) || (this.x_position + this.r > this.apesct_ratio)) {
+        if ((this.x_position - this.r < 0) || (this.x_position + this.r > this.apesct_ratio)) { //TODO register the goal
             this.state = "dead";
             return;
         }
