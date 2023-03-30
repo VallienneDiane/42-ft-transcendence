@@ -154,6 +154,13 @@ export class ChannelService {
 		return toReturn;
 	}
 
+	/**
+	 * 
+	 * @param channelId 
+	 * @param userId 
+	 * @returns the userEntity wich have the userId as id and his grade in this channelId  
+	 * returns null if the user don't belong to this channel or if the channel doesn't exists
+	 */
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
 		const usersArray = await this.listUsersInChannel(channelId);
 		for (let elt of usersArray) {
@@ -241,7 +248,7 @@ export class ChannelService {
 		await this.delOpUser(userId, channelId);
 		await this.delNormalUser(userId, channelId);
 	}
-	
+
 	async addMessage(userId: string, content: string, channelId: string) {
 		let channel = await this.getOneById(channelId);
 		let message = {
