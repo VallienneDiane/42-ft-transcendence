@@ -28,13 +28,13 @@ class MessageDisplay extends React.Component<{message: Message, prevSender: stri
         const secDiff: number = Math.round((now.getTime() - prev.getTime()) / 1000);
         let diff: number = secDiff / (24 * 60 * 60);
         if (diff > 1)
-            return Math.round(diff) + " days ago";
+            return Math.round(diff) + "d ago";
         diff = secDiff / (60 * 60);
         if (diff > 1)
             return Math.round(diff) + "h ago";
         diff = secDiff / 60;
         if (diff > 1)
-            return Math.round(diff) + " mins ago";
+            return Math.round(diff) + "m ago";
         return("Now");
     }
 
@@ -84,7 +84,7 @@ export class MessageList extends React.Component<{history: Message[], action: an
         const tmpList: Message[] = this.props.history!;
         const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: Message, index: number, tmpList: Message[]) => {
             const length: number = tmpList.length;
-            const prevSender: string | undefined = index < (length - 1) ? tmpList[index + 1].sender : '';
+            const prevSender: string = index < (length - 1) ? tmpList[index + 1].sender! : '';
             let lastMessage : boolean = false;
             if (index === 0 || (index > 0 && tmpList[index - 1].sender !== tmpList[index].sender))
                 lastMessage = true;

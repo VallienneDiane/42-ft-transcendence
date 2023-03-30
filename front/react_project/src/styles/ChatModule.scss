@@ -287,7 +287,7 @@
 				z-index: 9999;
 				top: 0;
 				right: 0;
-				width: 190px;
+				width: 270px;
 				height: 100%;
 				background: rgba(223, 223, 223, 0.95);
 				transition: transform 0.5s ease-in-out;
@@ -299,6 +299,7 @@
 					& .sidebarContent {
 						width: 100%;
 						background: transparent;
+						overflow-y: auto;
 						& .closeIcon {
 							padding: 1rem;
 							font-size: 20px;
@@ -315,6 +316,7 @@
 							& .paramMenu {
 								background: transparent;
 								width: 100%;
+								font-size: 17px;
 								& > li {
 									width: 100%;
 									padding: 0.4rem 1rem;
@@ -326,14 +328,55 @@
 										cursor: pointer;
 									}
 								}
-							}
-							& .memberList {
-								background-color: #b9cbce;
-								padding: 0.3rem 1.5rem;
-								& > li {
-									background: transparent;
+								& .memberList {
+									background-color: #b9cbce;
+									padding: 0.3rem 1.5rem;
+									& > li {
+										justify-content: flex-start;
+										text-align: start;
+										font-size: 15px;
+										background: transparent;
+										& svg {
+											background: transparent;
+											width: 15px;
+											padding-left: 6px;
+											opacity: 70%;
+										}
+									}
 								}
-							}	
+								& .settingList {
+									background-color: #b9cbce;
+									width: 100%;
+									& > li {
+										display: flex;
+										flex-direction: row;
+										justify-content: space-between;
+										background: transparent;
+										font-size: 15px;
+										width: 100%;
+										padding: 0.2rem 1.5rem;
+										// border-bottom: 1px solid rgb(150, 156, 177);
+									}
+									& .inputChannel {
+										outline: 0;
+										border-width: 0 0 1px;
+										border-color: rgb(42, 42, 43, 0.5);
+										background: transparent;
+										width: 60%;
+										padding-left: 1px;
+										// padding: 0.5rem 2rem 0.5rem 1rem;
+										// border-bottom: 1px solid rgb(42, 42, 43);
+										// border: none;
+										// outline: none;
+									}
+									& button {
+										background: transparent;
+										color: #fa6969;
+										font-weight: bold;
+										font-size: 17px;
+									}
+								}	
+							}
 						}
 					}
 				}
@@ -433,6 +476,7 @@
 						padding: 0.7rem 3rem 0.7rem 1rem;
 						margin: 0 1.5rem;
 						border: 0px solid transparent;
+						outline: none;
 					}
 					& .send {
 						width: 1.3rem;
