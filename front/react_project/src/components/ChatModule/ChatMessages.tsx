@@ -4,22 +4,26 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { IMessageToSend, Message, IDest } from "../../models";
 
-function MessageDisplay(props: {message: Message, prevSender: string, last: boolean}) {
-    const playload: JwtPayload = accountService.readPayload()!;
-    const [me, setMe] = useState<boolean>(false);
-    const [sameSender, setSameSender] = useState<boolean>(false);
-    
-    useEffect(() => {
-        if (props.prevSender === props.message.sender)
-            setSameSender(true);
-        else 
-            setSameSender(false);
-        if (playload.login === props.message.sender)
-            setMe(true);
-    }, []);
+class MessageDisplay extends React.Component<{message: Message, prevSender: string, last: boolean}, {
+    playload: JwtPayload, me: boolean, sameSender: boolean}> {
+    constructor(props: {message: Message, prevSender: string, last: boolean}) {
+        super(props);
+        this.state = { playload: accountService.readPayload()!, 
+        me: false, 
+        sameSender: false };
+        this.setTimeAgo = this.setTimeAgo.bind(this);
+    }
 
-    const setTimeAgo = () => {
-        const prev: Date = new Date(props.message.id);
+    componentDidMount(): void {
+        // console.log("prev", this.props.prevSender, "new", this.props.message.sender);
+        if (this.props.prevSender === this.props.message.sender)
+            this.setState({ sameSender: true });
+        if (this.state.playload.login === this.props.message.sender)
+            this.setState({me: true});
+    }
+
+    setTimeAgo() {
+        const prev: Date = new Date(this.props.message.id);
         const now: Date = new Date();
         const secDiff: number = Math.round((now.getTime() - prev.getTime()) / 1000);
         let diff: number = secDiff / (24 * 60 * 60);
@@ -34,23 +38,17 @@ function MessageDisplay(props: {message: Message, prevSender: string, last: bool
         return("Now");
     }
 
-    const cons = () => {
-        console.log("me", me)
-        return "Blop"
-    }
-
-    return (
-        // <div>
-        //     <div>{cons()}</div>
-            <div className={me ? "message sent" : "message received"}>
-                {(sameSender === false) && <div className="messageUserName">{props.message.sender}</div>}
+    render() {
+        return (
+            <div className={this.state.me ? "message sent" : "message received"}>
+                {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.sender}</div>}
                 <div className="bubble">
-                    <div className="messageText">{props.message.text}</div>
+                    <div className="messageText">{this.props.message.text}</div>
                 </div>
-                {props.last && <div className="messageDate">{setTimeAgo()}</div>}
+                {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
             </div>
-        // </div>
-    )
+        )
+    }
 }
 
 export class MessageList extends React.Component<{history: Message[], action: any, socket: Socket}, {}> {
