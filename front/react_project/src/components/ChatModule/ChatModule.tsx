@@ -135,15 +135,13 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
 
 export default class ChatModule extends React.Component<{}, {
     dest: IDest,
-    history: Message[],
-    sidebarIsOpen: boolean}> {
+    history: Message[]}> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {Loc: 'general', isChannel: true}, history: [], sidebarIsOpen: false};
+        this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);
-        this.onClickSidebar = this.onClickSidebar.bind(this);
     }
     
     changeLoc(newDest: IDest) {
@@ -163,10 +161,6 @@ export default class ChatModule extends React.Component<{}, {
         this.setState({ history: newHistory });
     }
 
-    onClickSidebar() {
-        this.setState({ sidebarIsOpen: !this.state.sidebarIsOpen });
-    }
-
     render() {
         return (  
             <SocketContext.Consumer>
@@ -181,10 +175,7 @@ export default class ChatModule extends React.Component<{}, {
                                     <CreateChannel />
                                 </div>
                                 <div id="chatRight">
-                                    <div className={this.state.sidebarIsOpen ? "sidebar show" : "sidebar"}>
-                                    {this.state.sidebarIsOpen && (this.state.dest.isChannel ? <SidebarChannel dest={this.state.dest} handleClose={this.onClickSidebar}/> : <SidebarUser handleClose={this.onClickSidebar} dest={this.state.dest}/>)}
-                                    </div>
-                                    <Header dest={this.state.dest} onClick={this.onClickSidebar}/>
+                                    <Header dest={this.state.dest}/>
                                     <MessageList history={this.state.history} action={this.handleNewMessageOnHistory} socket={socket} />
                                     <SendMessageForm dest={this.state.dest} socket={socket}/>
                                 </div>
