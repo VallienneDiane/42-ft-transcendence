@@ -49,7 +49,7 @@
     
 }
 
-@media (min-width: 800px) {
+@media (min-width: 900px) {
     #navbar {
         & li > a, li > button {
             transition: all 300ms;
@@ -75,7 +75,7 @@
     }
 }
 
-@media (max-width: 800px) {
+@media (max-width: 900px) {
     #navbar {
         // border: 5px solid red;
         
