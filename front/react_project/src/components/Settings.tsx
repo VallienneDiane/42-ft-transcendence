@@ -23,10 +23,12 @@ export default function Settings() {
   let decodedToken: JwtPayload = accountService.readPayload()!;
   const [checked, setchecked] = useState<boolean>(false);
   const [qrcode, setQrcode] = useState<string>("null");
+  const [qrLoad, setQrLoad] = useState<boolean>(false)
   const [is2faActive, setActivate2fa] = useState<boolean>(false);
   const [user, setUser] = useState<User>();
   const [avatar, setAvatar] = useState<string>();
   const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
 
   const {register, handleSubmit, formState: {errors}} = useForm<VerifyCodeForm>({
     resolver: yupResolver(schema)
@@ -77,15 +79,13 @@ export default function Settings() {
 
   const avatarSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // console.log("selectedfile", selectedFile);
     let reader = new FileReader();
     reader.onloadend = function() {
-      // console.log('result', reader);
-      // console.log('before reqest');
       accountService.uploadAvatar(reader.result! as string)
       .then(response => {
         console.log(response);
         setAvatar(reader.result! as string);
+        setSelectedFile(null)
       })
       .catch(error => {
         console.log(error);
@@ -100,6 +100,7 @@ export default function Settings() {
       accountService.enable2fa()
       .then(response => {
         setQrcode(response.data.qrcode);
+        setQrLoad(true);
       })
       .catch(error => console.log(error));
     }
@@ -107,9 +108,41 @@ export default function Settings() {
       accountService.disable2fa()
       .then(response => {
         setActivate2fa(response.data.is2faActive);
+        setQrLoad(false);
       })
       .catch(error => console.log(error));
     }
+  }
+
+  const handleDragOver = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setIsHovered(true);
+    // console.log(event);
+  }
+
+  const handleDragLeave = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    setIsHovered(false);
+    // console.log(event);
+  }
+  
+    
+    const handleDrop = (event : React.DragEvent<HTMLInputElement>) => {
+    setIsHovered(false);
+    event.preventDefault();
+    if (event.type === 'drop') {
+      const files = event.dataTransfer?.files;
+      if (files && files.length > 0) {
+        const imgFiles = Array.from(files).filter(file => {
+          return file.type.startsWith('image/');
+        })
+        if (imgFiles.length > 0) {
+          setSelectedFile(imgFiles[0]);
+          console.log(selectedFile);
+        }
+      }
+    }
+
   }
 
   // if(checked == true && (is2faActive == false || is2faActive == null))
@@ -119,8 +152,15 @@ export default function Settings() {
         <h2>Avatar settings</h2>
         <img id="profilePicture" src={avatar} />
         <form onSubmit={avatarSubmit}>
-          <input type="file" name="" id="" accept="image/*" onChange={avatarSelected}/>
-          <button type="submit">Upload your new avatar</button>
+          {/* <div id="dropZone" accept="image/*"> */}
+            <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
+              <p>Drop file here</p>
+              <p className="or">OR</p>
+              <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected}/>
+            </div>
+            <label htmlFor="">{selectedFile? selectedFile.name : "No file selected..."}</label>
+            <button type="submit">Upload file</button>
+          {/* </div> */}
         </form>
       </div>
       <div id="fasetting">
@@ -133,8 +173,8 @@ export default function Settings() {
             onChange={handleChange}
           />
         </div>
-          {checked === true ? <img id="qrcode" src={qrcode} alt="" /> : null}
-          {checked === true && (is2faActive == false || is2faActive == null) ? 
+          {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
+          {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ? 
           <div>
             <p>Scan the QRCode in your application </p>
             <form onSubmit={handleSubmit(verifySubmittedCode)}>
