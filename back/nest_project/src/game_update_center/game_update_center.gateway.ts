@@ -269,8 +269,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
  
+  /**
+   * handle invitation to a pong/game game
+   * @param body of private_order type containing a target: string and a type: string
+   * @param client the client posting the request
+   * @returns nothing
+   */
   @SubscribeMessage('private matchmaking')
-  handlePrivateMatchmaking(@MessageBody() body: Private_order, @ConnectedSocket() client: Socket) {
+  handlePrivateMatchmaking(@MessageBody() body: Private_order, @ConnectedSocket() client: Socket) { //TODO make it work
     for (let i = 0; i < this.private_space.length; i++) {
       const element = this.private_space[i];
       if (element.socket === client) {
