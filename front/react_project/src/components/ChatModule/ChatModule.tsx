@@ -4,7 +4,7 @@ import { Socket } from 'socket.io-client'
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { Message, IDest } from "../../models";
-import { CreateChannel, Popup } from "./ChatNewChannel";
+import { CreateChannel } from "./ChatNewChannel";
 import { Header, SidebarUser, SidebarChannel } from "./ChatSidebar";
 import SearchChat from "./ChatSearch";
 import { SendMessageForm, MessageList } from "./ChatMessages";
@@ -136,16 +136,14 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
 export default class ChatModule extends React.Component<{}, {
     dest: IDest,
     history: Message[],
-    sidebarIsOpen: boolean,
-    popupIsOpen: boolean}> {
+    sidebarIsOpen: boolean}> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {Loc: 'general', isChannel: true}, history: [], sidebarIsOpen: false, popupIsOpen: false};
+        this.state = {dest: {Loc: 'general', isChannel: true}, history: [], sidebarIsOpen: false};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);
         this.onClickSidebar = this.onClickSidebar.bind(this);
-        this.onClickPopup = this.onClickPopup.bind(this);
     }
     
     changeLoc(newDest: IDest) {
@@ -169,10 +167,6 @@ export default class ChatModule extends React.Component<{}, {
         this.setState({ sidebarIsOpen: !this.state.sidebarIsOpen });
     }
 
-    onClickPopup() {
-        this.setState({ popupIsOpen: !this.state.popupIsOpen });
-    }
-
     render() {
         return (  
             <SocketContext.Consumer>
@@ -181,11 +175,10 @@ export default class ChatModule extends React.Component<{}, {
                         return (
                         <div id="chat_page">
                             <div className="card">
-                                {this.state.popupIsOpen && <Popup handleClose={this.onClickPopup} />}
                                 <div id="chatLeft">
                                     <SearchChat socket={socket} action={this.handleHistory} action2={this.changeLoc} />
                                     <ChannelDMList socket={socket} />
-                                    <CreateChannel onClick={this.onClickPopup} />
+                                    <CreateChannel />
                                 </div>
                                 <div id="chatRight">
                                     <div className={this.state.sidebarIsOpen ? "sidebar show" : "sidebar"}>

@@ -19,9 +19,13 @@
 		
 		& .popup {
 			position: fixed;
+			top: 0;
+			left: 0;
+			margin-top: 3rem;
 			z-index: 9;
 			background: transparent;
 			width: 100%;
+			cursor: default;
 			
 			& .box {
 				display: flex;
@@ -363,6 +367,7 @@
 				& .message {
 					background: transparent;
 					vertical-align: top;
+					padding: 0.1rem 0;
 					&.received {
 						float: left;
 						align-self: flex-start;
@@ -397,6 +402,13 @@
 				& .messageText {
 					word-break: break-all;
 					background: transparent;
+				}
+				& .messageDate {
+					display: flex;
+					justify-content: flex-end;
+					background: transparent;
+					font-size: 11px;
+					color: #3b3b3b;
 				}
 			}
 
