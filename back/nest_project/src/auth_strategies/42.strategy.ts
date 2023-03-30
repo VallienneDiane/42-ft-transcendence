@@ -23,7 +23,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
             }
         });
     }
-    async validate(accessToken: string, refreshToken: string, profile: any) { //done: any
+    async validate(accessToken: string, refreshToken: string, profile: any, done: any) {
         console.log("validate 42 strategy");
         const { id, username, displayName, emails } = profile;
         refreshToken;
@@ -34,7 +34,7 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, '42') {
             email: emails[0].value
         };
         accessToken;
-        // done(null, user);
-        return accessToken ;
+        done(null, user);
+        return profile ;
     }
 }

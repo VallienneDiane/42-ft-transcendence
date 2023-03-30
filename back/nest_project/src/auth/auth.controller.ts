@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Controller, Body, Request, Post, Get, UseGuards, UnauthorizedException, Req, Headers, Res, Query, Redirect } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
 import { UserDto } from 'src/user/user.dto';
@@ -7,34 +8,48 @@ import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
 import { FortyTwoGuard } from '../auth_strategies/42-auth.guard';
 import { Response } from 'express';
+import { JwtService } from "@nestjs/jwt";
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService, private userService: UserService) {}
+  constructor(private authService: AuthService, private userService: UserService, private jwtService: JwtService) {}
 
-  // @UseGuards(FortyTwoGuard)
-  @Get('/url')
+  @Get('/')
   async getUrl42() {
     const api_callback_url = encodeURIComponent(process.env.API_CALLBACK_URL);
     const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.API_UID + "&redirect_uri=" + api_callback_url + "&response_type=code";
-    console.log("url ", url);
-    return url;
+    return (url);
   }
   
-  @UseGuards(FortyTwoGuard)
   @Get('/callback')
-  async callback(@Query('code') code: string, @Req() req: any, @Res() res: Response) {
-    console.log("dans callback", req.user.access_token);
-    if (code) {
-      console.log("code : ", code);
-      // const token = await req.access_token;
-      // console.log("token dans controller " , token);
-      // res.redirect('http://localhost/auth?token=' + token.access_token);
-      // res.redirect("http://localhost:8000/home");
+  async callback(@Query('code') code: string) {
+    const token = await this.authService.validateFortyTwo(code);
+    console.log("controller : token = ", token);
+    const response = await fetch('https://api.intra.42.fr/v2/me/', {
+      method: 'GET',
+      headers: {
+        'Authorization' : `Bearer ${token}`,
+      } 
+    });
+    const data = await response.json();
+
+    if(!this.userService.findByLogin(data.login)) {
+      const newUser42 = {
+        id: null,
+        login: data.login,
+        email: data.email,
+        password: null,
+        twoFactorSecret: null,
+        isTwoFactorEnabled: null,
+        qrCode: null,
+      }
+      await this.userService.create(newUser42);
     }
-    else {
-      throw ("Unauthorized");
+    // this.generateToken(data);
+    const payload = {login: data.login};
+    return {
+      access_token: this.jwtService.sign(payload)
     }
   }
 

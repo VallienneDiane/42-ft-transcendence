@@ -23,6 +23,7 @@ export class UserService {
     public create(newUser: UserEntity): Promise<UserEntity> {
         return this.usersRepository.save(newUser);
     }
+
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
     public findByLogin(login: string): Promise<UserDto> {
         return this.usersRepository.findOneBy({login});

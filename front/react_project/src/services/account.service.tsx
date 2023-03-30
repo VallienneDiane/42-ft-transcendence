@@ -1,4 +1,4 @@
-import { LogInForm, SignUpForm, VerifyCodeForm, User} from "../models";
+import { LogInForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -47,7 +47,11 @@ let saveToken = (token: string) => {
 
 ////////////////// API 42 /////////////////////////////
 let url42 = () => {
-    return Axios.get('/url')
+    return Axios.get('/')
+}
+
+let callback = () => {
+    return Axios.get('/callback');
 }
 // Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
 let logout = () => {
@@ -58,7 +62,11 @@ let logout = () => {
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
 let isLogged = () => {
     let token = localStorage.getItem('token');
-    if (token !== null) {
+    // const cookieToken = document.cookie
+
+    // console.log("cookie token : ", cookieToken);
+    console.log("dans is Logged de account service");
+    if (token !== null)  { // || cookieToken !== null) 
         let decodedToken: JwtPayload = accountService.readPayload()!;
         if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
             logout();
@@ -98,5 +106,5 @@ let readPayload = () => {
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
     enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings, url42
+    is2faActive, generateToken, is2faActiveSettings, url42, callback
 }
