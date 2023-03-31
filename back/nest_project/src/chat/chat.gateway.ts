@@ -52,6 +52,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     private tokenChecker(client: Socket): Promise<UserEntity> {
         let id = this.extractUserId(client);
+        // this.logger.debug(`${id}`)
         return this.userService.findById(id);    
     }
 
@@ -62,8 +63,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     handleConnection(client: Socket) {
+        // this.logger.debug(`${client.id} tente de se connecter`)
         this.tokenChecker(client)
         .then( (user) => {
+            // this.logger.debug(`${client.id} est connecté`)
             if (user != null)
                 this.chatService.connectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger);
             else
@@ -104,12 +107,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    /**
+     * liste tous les channels dans lequels je ne suis pas enregistré.e
+     * @param client 
+     */
     @SubscribeMessage('listChannel')
     handlelistChannel(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
-            if (user != null)
+            if (user != null) {
+                this.logger.debug(`${client.id} : listChannel`)
                 this.chatService.listChannelEvent(client, user);
+            }
         })
     }
 
@@ -201,21 +210,33 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    /**
+     * liste tous les channels dont je fais partie
+     * @param client 
+     */
     @SubscribeMessage('myChannels')
     handleMyChannels(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
-            if (user != null)
-                this.chatService.listMyChannelEvent(client, user.login);
+            if (user != null) {
+                this.logger.debug(`${user.id} : listMyChannels`)
+                this.chatService.listMyChannelEvent(client, user.id);
+            }
         })
     }
 
+    /**
+     * liste tous les users a qui j'ai déjà envoyé un message
+     * @param client 
+     */
     @SubscribeMessage('myDM')
     handleListMyDM(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
-            if (user != null)
+            if (user != null) {
+                this.logger.debug(`${user.id} : listMyDMs`)
                 this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
+            }
         })
     }
 
