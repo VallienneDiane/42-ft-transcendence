@@ -92,6 +92,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       p.game_engine = new PongEngineService();
     }
     p.game_engine.set_player(player1, player2);
+    p.player = [];
+    p.spectator = [];
     p.player.push(player1);
     p.player.push(player2);
     this.game_instance.push(p);
@@ -280,22 +282,23 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let i = 0; i < this.private_space.length; i++) {
       const element = this.private_space[i];
       if (element.socket === client) {
-        this.logger.debug("already waiting");
-        console.log(element);
+        this.logger.debug("already waiting" + element);
         return;
       }
       console.log(body);
-      if (element.target === this.socket_login.get(client.id)) {
+      if (element.target === this.socket_login.get(client.id) && body.target === this.socket_login.get(element.socket.id)) {
+        this.logger.debug("oui !!!");
         this.StartGameRoom(element.socket, client, body.type);
         this.private_space.splice(i, 1);
         return;
       }
     }
-    this.logger.debug("not waiting so create a new wait order");
+    this.logger.debug("not waiting so create a new wait order" + body);
     let private_room = new Waiting_socket();
     private_room.socket = client;
     private_room.target = body.target;
     private_room.game = body.type;
+    this.logger.debug("resulting in this object: game: " + private_room.game +"\n"+ private_room.socket.id +"\n"+ private_room.target);
     this.private_space.push(private_room);
   }
 
