@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
-import { IChannel, IMessageChat } from "./chat.interface";
+import { IChannelToEmit, IMessageChat, IUserToEmit } from "./chat.interface";
 import { MessageChannelEntity } from "./messageChannel/messageChannel.entity";
 import { MessageChannelService } from "./messageChannel/messageChannel.service";
 import { MessagePrivateEntity } from "./messagePrivate/messagePrivate.entity";
@@ -11,6 +11,7 @@ import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
+import { channel } from "diagnostics_channel";
 
 @Injectable({})
 export class ChatService {
@@ -21,34 +22,27 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private async messageChannelEntityfier(userId: string, data: IMessageChat): Promise<MessageChannelEntity> {
-        let channel = await this.channelService.getOneById(data.room);
+    private sendEssentialUserData(userEntity: UserEntity): IUserToEmit {
         return {
-            id: undefined,
-            content: data.content,
-            date: undefined,
-            userId: userId,
-            channel: channel
-        };
+            id: userEntity.id,
+            login: userEntity.login
+        }
     }
 
-    private channelEntityfier(channProperties: IChannel, founder: UserEntity): ChannelEntity {
+    private sendEssentialChannelData(channelEntity: ChannelEntity): IChannelToEmit {
         return {
-            id: undefined,
-            date: undefined,
-            name: channProperties.channelName,
-            password: channProperties.password,
-            channelPass: channProperties.channelPass,
-            opNumber: 1,
-            inviteOnly: channProperties.inviteOnly,
-            persistant: channProperties.persistant,
-            onlyOpCanTalk: channProperties.onlyOpCanTalk,
-            hidden: channProperties.hidden,
-            normalUsers: [],
-            opUsers: [],
-            godUser: founder,
-            messages: []
-        };
+            id: channelEntity.id,
+            date: channelEntity.date,
+            name: channelEntity.name,
+            password: channelEntity.password,
+            inviteOnly: channelEntity.inviteOnly,
+            persistant: channelEntity.persistant,
+            onlyOpCanTalk: channelEntity.onlyOpCanTalk,
+            hidden: channelEntity.hidden,
+            normalUsers: channelEntity.normalUsers,
+            opUsers: channelEntity.opUsers,
+            godUser: channelEntity.godUser
+        }
     }
 
     private goBackToGeneral(client: Socket) {
@@ -114,7 +108,8 @@ export class ChatService {
             let toSend = {date: new Date(), sender: user.login, content: message};
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
-                    this.channelService.addMessage(user.id, message, room.room);
+                    if (room.room != "general")
+                        this.channelService.addMessage(user.id, message, room.room);
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
                 }
                 else
@@ -195,13 +190,9 @@ export class ChatService {
         }
     }
 
-    public listChannelEvent(client: Socket, user: UserEntity) {
-        this.channelService.listChannelsWhereUserIsNot(user)
-            .then(
-                (array) => {
-                    client.emit("listChannel", array);
-                }
-            )
+    async listChannelEvent(client: Socket, user: UserEntity) {
+        let channelsArray: IChannelToEmit[] = await this.channelService.listChannelsWhereUserIsNot(user);
+        client.emit("listChannel", channelsArray);
     }
 
     public listMyChannelEvent(client: Socket, userId: string) {
@@ -242,16 +233,14 @@ export class ChatService {
      * @param channelId 
      * @param roomHandler 
      */
-    public listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        this.channelService.listUsersInChannel(channelId)
-            .then((array) =>{
-                array.forEach((elt) => {
-                    let connected = roomHandler.userMap.get(elt.user.id);
-                    if (connected != undefined)
-                        elt.connected = true;
-                })
-                client.emit("listUsersChann", array);
-            })
+    async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
+        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId);
+        usersArray.forEach((elt) => {
+            let connected = roomHandler.userMap.get(elt.user.id);
+            if (connected != undefined)
+                elt.connected = true;
+        })
+        client.emit("listUsersChann", usersArray);
     }
 
     public joinChannelEvent(client: Socket, user: UserEntity, data: {channelId: string, channelPass: string}, roomHandler: UserRoomHandler) {
@@ -351,12 +340,12 @@ export class ChatService {
         })
     }
 
-    public leaveChannelEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, channelId: string) {
+    public leaveChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, channelId: string) {
         logger.debug('leave channel request');
-        this.channelService.getUserInChannel(channelId, userId)
+        this.channelService.getUserInChannel(channelId, user.id)
         .then( (found) => {
-            if (found != null) {
-                this.delUserFromChannel(userId, channelId, roomHandler);
+            if (found != null && found.status != "god") {
+                this.delUserFromChannel(user.id, channelId, roomHandler);
             }
             else
                 client.emit('notice', 'you are not registered to that channel.');
