@@ -5,7 +5,7 @@ import { Injectable } from "@nestjs/common";
 @Injectable()
 export class WsJwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
-    console.log('SECRET', process.env.SECRET);
+    // console.log('SECRET', process.env.SECRET);
         super({
             usernameField: 'login',
             jwtFromRequest: ExtractJwt.fromAuthHeaderWithScheme("token"),

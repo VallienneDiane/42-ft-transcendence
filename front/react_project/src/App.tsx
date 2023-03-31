@@ -1,18 +1,19 @@
 import './App.css'
-import ChatModule from './components/ChatModule';
-import SignupForm from './components/SignupForm'
-import LoginForm from './components/LoginForm'
+import ChatModule from './components/ChatModule/ChatModule';
+import SignupPage from './components/SignupPage'
+import LoginPage from './components/LoginPage'
 import Home from './components/Home'
 import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Profile from './components/Profile';
 import ProtectedRoutes from './components/ProtectedRoutes';
-import Layout from './components/Layout'
-import Game from './components/Game'
 import SocketContext from './components/context';
 import { accountService } from "./services/account.service";
-import io from 'socket.io-client';
-import { Socket } from 'socket.io-client';
 import { useState} from "react";
+import Layout from './components/Layout'
+import Game from './components/Game'
+import { io, Socket } from 'socket.io-client';
+import Settings from './components/Settings'
+import VerifyCode2fa from './components/VerifyCode2fa'
 
 function App() {
   const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
@@ -47,15 +48,17 @@ function App() {
         <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
         <Routes>
           <Route element={<Layout />}>
-            <Route path='/login' element={<LoginForm />} />
-            <Route path='/signin' element={<SignupForm />} />
+            <Route path='/login' element={<LoginPage />} />
+            {/* <Route path='/login42' element={<Login42 />} /> */}
+            <Route path='/signup' element={<SignupPage />} />
+            <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
             <Route element={<ProtectedRoutes/>}>
               <Route path='/' element={<Home />} />
               <Route path='/game' element={<Game />} />
               <Route path='/profile' element={<Profile />} />
-              <Route path='/profile/:id' element={<Profile />} />
-              <Route path='/' element={<Home />} />
-              <Route path='/chat' element={<ChatModule socket={socket}/>} />
+              <Route path='/profile/:login' element={<Profile />} />
+              <Route path='/settings' element={<Settings />} />
+              <Route path='/chat' element={<ChatModule />} />
             </Route>
           </Route>
         </Routes>

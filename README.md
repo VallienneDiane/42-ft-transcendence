@@ -186,6 +186,8 @@ After the user is successfully saved, you can return a response to the front-end
 
 https://medium.com/att-israel/authentication-authorization-using-react-nestjs-jwt-token-55f52070a3f2
 
+https://dev.to/hahnmatthieu/2fa-with-nestjs-passeport-using-google-authenticator-1l32
+
 
 ## OAuth
 
