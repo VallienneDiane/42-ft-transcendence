@@ -28,15 +28,18 @@ export class UserService {
         return this.usersRepository.save(newUser);
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
-    public findByLogin(login: string): Promise<UserDto> {
+    public findByLogin(login: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({login});
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
-    public findById(id: string): Promise<UserEntity> {
-        return this.usersRepository.findOneBy({id: id});
+    async findById(id: string): Promise<UserEntity> {
+        // console.log(`${id}`)
+        const toReturn = await this.usersRepository.findOneBy({id: id});
+        // console.log(`${id} apres ooooooooooooooooooooooooooooooooooooooooooo findById`)
+        return toReturn
     }
     
-    public findOne(options?: object): Promise<UserDto> {
+    public findOne(options?: object): Promise<UserEntity> {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
     }

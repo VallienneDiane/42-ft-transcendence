@@ -199,7 +199,7 @@ export class ChatService {
         this.channelService.listChannelsWhereUserIsNot(user)
             .then(
                 (array) => {
-                    client.emit("listChannels", array);
+                    client.emit("listChannel", array);
                 }
             )
     }
