@@ -2,8 +2,9 @@ import React, { useState, useContext, useEffect, useRef } from "react";
 import SocketContext from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
+import { userService } from "../../services/user.service";
 import { JwtPayload } from "jsonwebtoken";
-import { IDest, IChannel } from "../../models";
+import { IDest, IChannel, UserData } from "../../models";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
@@ -65,11 +66,60 @@ function ModifyChannel(props: {channel: IChannel}) {
     )
 }
 
+function InviteUser(props: {channel: string, members: string[]}) {
+    const {socket} = useContext(SocketContext);
+    const [text, setText] = useState<string>('');
+    const [users, setUsers] = useState<string[]>([]);
+    
+    const fetchUsers = () => {
+        userService.getAllUsers()
+        .then(response => {
+            const playload: JwtPayload = accountService.readPayload()!;
+            const users: string[] = response.data.map((user: UserData) => user.login);
+            let newUserList: string[] = [];
+            users.forEach((user: string) => {
+                let present: boolean = false;
+                for (let elt of props.members) {
+                    if (elt === user) {
+                        present = true;
+                        return;
+                    }
+                }
+                if (present === false)
+                    newUserList.push(user);
+            })
+            console.log("users", newUserList);
+            setUsers(newUserList);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+
+    const updateText = (event: any) => {
+        setText(event.target.value);
+    }
+
+    const sendInvitation = () => {
+        fetchUsers();
+        socket.emit('inviteUser', "nami", props.channel);
+    }
+
+    return (
+        <div className="searchbar">
+            <input type="text" onChange={updateText} onClick={sendInvitation} value={text} placeholder="Search"/>
+            <svg className="svgSearch" viewBox="0 0 24 24"><path fill="#666666" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
+            </svg>
+        </div>
+    )
+}
+
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
     const [members, setMembers] = useState<string[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
+    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const me: JwtPayload = accountService.readPayload()!;
 
@@ -78,17 +128,16 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         props.handleClose();
     }
 
-    const inviteUser = () => {
-        // coder l'invitation : search user
-        socket.emit('inviteUser', "nami", props.dest.Loc);
-    }
-
     const listMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
     }
 
     const showSettings = () => {
         setOnClickSettings((onClickSettings) => !onClickSettings)
+    }
+
+    const showInvite = () => {
+        setOnClickInvite((onClickInvite) => !onClickInvite)
     }
 
     const showUserParam = () => {
@@ -132,7 +181,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                     </ul>
                 )}
                 { props.dest.channel?.inviteOnly ? (
-                    <li onClick={inviteUser}>Invite</li>
+                    <React.Fragment>
+                        <li onClick={showInvite}>Invite</li>
+                        {onClickInvite && (
+                           <InviteUser channel={props.dest.Loc} members={members}/>
+                        )}
+                    </React.Fragment>
                 ) : null }
                 { props.dest.isOp ? (
                     <React.Fragment>
