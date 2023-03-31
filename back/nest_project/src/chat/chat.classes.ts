@@ -94,7 +94,7 @@ class RoomMap {
 }
 
 class UserRoomMap {
-    private users: Map<string, {socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOP: boolean, onlyOpCanTalk: boolean}>;
+    public users: Map<string, {socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOP: boolean, onlyOpCanTalk: boolean}>;
 
     constructor() {
         this.users = new Map<string, {socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOP: boolean, onlyOpCanTalk: boolean}>();
@@ -147,6 +147,7 @@ class UserRoomMap {
                 user.socket.emit(ev, ...args);
         });
     }
+
 }
 
 export class UserRoomHandler {

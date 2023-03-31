@@ -364,28 +364,10 @@ export class ChatService {
     }
 
     public makeHimOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channelId: string) {
-        // this.linkUCService.findOne(channel, userId)
-        // .then((link) => {
-        //     if (link == null || !link.isOp)
-        //         client.emit('notice', 'You cannot.');
-        //     else
-        //         this.linkUCService.findOne(channel, userToOp)
-        //         .then((found) => {
-        //             if (found == null)
-        //                 client.emit('notice', "user not in channel");
-        //             else if (found.isOp)
-        //                 client.emit('notice', "this user is already operator to this channel");
-        //             else {
-        //                 this.linkUCService.doUserOp(channel, userToOp);
-        //                 this.channelService.upgradeOpByName(channel);
-        //                 roomHandler.userMap.userBecomeOp(userToOp, channel);
-        //             }
-        //         })
-        // })
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
-                if (!link || link.status == "normal") {
+                if (!link || link.status != "god") {
                     client.emit("notice", "You cannot.");
                 }
                 else {
@@ -394,112 +376,96 @@ export class ChatService {
                         (linkToOp) => {
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
-                            else if (linkToOp.status == "op" || linkToOp.status == "god")
+                            else if (linkToOp.status == "op")
                                 client.emit('notice', "this user is already operator to this channel");
                             else {
-                                this.channelService.
+                                this.channelService.upgradeUserOnChannel(linkToOp.user, channelId);
+                                roomHandler.userMap.userBecomeOp(userToOp, channelId);
                             }
-                        }
-                    )
-                }
-            }
-        )
-    }
-
-    public makeHimNoOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToNoOp: string, channel: string) {
-        this.linkUCService.findOne(channel, userId)
-        .then((link) => {
-            if (link == null || !link.isOp)
-                client.emit('notice', 'You cannot.');
-            else
-                this.linkUCService.findOne(channel, userToNoOp)
-                .then((found) => {
-                    if (found == null)
-                        client.emit('notice', "user not in channel");
-                    else if (!found.isOp)
-                        client.emit('notice', "this user is already not operator to this channel");
-                    else {
-                        this.linkUCService.doUserNoOp(channel, userToNoOp);
-                        this.channelService.downgradeOpByName(channel)
-                        .then(() => {
-                            this.channelService.getOneByName(channel)
-                            .then((exist) => {
-                                if (exist == null) {
-                                    this.linkUCService.deleteChannel(channel);
-                                    this.messageService.deleteChannel(channel);
-                                    let user = roomHandler.userMap.get(userToNoOp);
-                                    if (user != undefined) {
-                                        this.listMyChannelEvent(user.socket, userToNoOp);
-                                        if (user.isChannel && user.room == channel) {
-                                            roomHandler.joinRoom(userToNoOp, 'general', true, false, false);
-                                            this.goBackToGeneral(user.socket);
-                                        }
-                                    }
-                                }
-                                else
-                                    roomHandler.userMap.userBecomeNoOp(userToNoOp, channel);
-                            })
                         });
                     }
-                })
-        })
+                });
     }
 
-    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channel: string) {
-        if (userToKick == undefined || channel == undefined)
-        {
-            client.emit('notice', "no comprendo the requete");
-            return;
-        }
-        this.linkUCService.findOne(channel, userId)
-        .then( (found) => {
-            if (found == null || !found.isOp)
-                client.emit('notice', "You can't do that.");
-            else 
-                this.linkUCService.findOne(channel, userToKick)
-                .then( (kicked) => {
-                    if (kicked == null)
-                        client.emit('notice', "user not in channel");
-                    else {
-                        this.delUserFromChannel(userToKick, channel, roomHandler, kicked);
-                    }
-                })
-        })
+    public makeHimNoOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToNoOp: string, channelId: string) {
+        this.channelService.getUserInChannel(channelId, userId)
+        .then(
+            (link) => {
+                if (!link || link.status != "god")
+                    client.emit("notice", "You cannot.");
+                else
+                    this.channelService.getUserInChannel(channelId, userToNoOp)
+                    .then(
+                        (linkToDeOp) => {
+                            if (!linkToDeOp)
+                                client.emit("notice", "user not in channel");
+                            else if (linkToDeOp.status != "op")
+                                client.emit("notice", "This user is not operator to this channel");
+                            else {
+                                this.channelService.downgradeUserOnChannel(linkToDeOp.user, channelId);
+                                roomHandler.userMap.userBecomeNoOp(userToNoOp, channelId);
+                            }
+                        });
+            });
     }
 
-    public createChannelEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
-        logger.debug('create channel request');
-        console.log(channel);
+    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channelId: string) {
+        this.channelService.getUserInChannel(channelId, userId)
+        .then(
+            (link) => {
+                if (!link || link.status == "normal")
+                    client.emit("notice", "You can't do that.");
+                else
+                    this.channelService.getUserInChannel(channelId, userToKick)
+                    .then(
+                        (linkToKick) => {
+                            if (!linkToKick)
+                                client.emit("notice", "This user is not in this channel.");
+                            else if (linkToKick.status == "god")
+                                client.emit("notice", "God isn't kickable.");
+                            else if (linkToKick.status == "op" && link.status != "god")
+                                client.emit("notice", "Only god can kick an operator.");
+                            else {
+                                this.delUserFromChannel(userToKick, channelId, roomHandler);
+                            }
+                        });
+            });
+    }
+
+    public createChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
         if (channel.name == 'general') {
-            client.emit('notice', 'This channel already exists.');
+            client.emit("notice", "This channel already exists.");
         }
-        this.channelService.getOneByName(channel.name)
-        .then( (exist) => {
-            if (exist == null) {
-                channel.opNumber = 1;
-                this.channelService.create(channel)
-                .then( (succeed) => {
-                    client.emit('channelCreated', succeed.name);
-                    if (!succeed.hidden) {
-                        this.channelService.listChannels().then( (list) => {
-                            let strs: {channelName: string, password: boolean}[] = [];
-                            for (let l of list) {
-                                strs.push({channelName: l.name, password: l.password});}
-                            roomHandler.userMap.emitExcept('listChannel', userId, strs);
-                        })
+        else {
+            this.channelService.getOneByName(channel.name)
+            .then(
+                (exist) => {
+                    if (!exist)
+                    {
+                        channel.opNumber = 1;
+                        channel.godUser = user;
+                        this.channelService.create(channel)
+                        .then(
+                            (succeed) => {
+                                if (!succeed.hidden)
+                                {
+                                    roomHandler.userMap.users.forEach(
+                                        (userInMap, userId) => {
+                                            if (userId != user.id)
+                                                this.userService.findById(userId)
+                                                .then(
+                                                    (userEntity) => {
+                                                        this.listChannelEvent(userInMap.socket, userEntity);
+                                                    });
+                                        });
+                                }
+                                this.listMyChannelEvent(client, user.id);
+                                this.changeLocEvent(client, user, succeed.name, true, roomHandler);
+                            });
                     }
-                    this.linkUCService.create(this.linkUCEntityfier(userId, succeed.name, true))
-                    .then( () => {
-                        this.linkUCService.findAllByUserName(userId).then( (result) => {
-                            logger.debug(`list of channel joined by ${userId} : `);
-                            console.log(result)});
-                        this.listMyChannelEvent(client, userId);
-                        this.changeLocEvent(client, userId, channel.name, true, roomHandler);
-                        });
-                })
-            }
-            else
-                client.emit("notice", "This channel already exists.");
-        })
+                    else
+                        client.emit("notice", "This channel already exists.");
+                });
+        }
     }
 }
