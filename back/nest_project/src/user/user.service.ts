@@ -7,6 +7,16 @@ import { ChannelEntity } from "../chat/channel/channel.entity";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
+interface User {
+    id: number,
+    login: string,
+    email: string,
+    twoFactorSecret: string,
+    isTwoFactorEnabled: boolean,
+    qrCode: string,
+    avatarSvg: string
+}
+
 @Injectable({})
 export class UserService {
     constructor (
@@ -31,8 +41,10 @@ export class UserService {
         return (user);  
     }
     // DISPLAY ALL USERS
-    public findAll(): Promise<UserEntity[]> {
-        return this.usersRepository.find();
+    async findAll(): Promise<{ id: string, login: string }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.id', 'user.login'])
+          .getMany();
     }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
@@ -224,4 +236,31 @@ export class UserService {
         return sorted;
     }
     
+    //set secret code for 2fa in user entity
+    async set2faSecret(secret: string, id: string) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.twoFactorSecret = secret;
+        await this.usersRepository.save(user);
+        return (user.twoFactorSecret);
+    }
+    //set secret code for 2fa in user entity
+    async setQrCode(qrcode: string, id: string) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.qrCode = qrcode;
+        await this.usersRepository.save(user);
+        return (user.qrCode);
+    }
+    //the user turned on the 2fa
+    async turnOn2fa(user: UserEntity) {
+        user.isTwoFactorEnabled = true;
+        await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
+        return (user.isTwoFactorEnabled);
+    }
+    //the user turned off the 2fa
+    async turnOff2fa(id: string) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.isTwoFactorEnabled = false;
+        await this.usersRepository.save(user);
+        return (user.isTwoFactorEnabled);
+    }
 }

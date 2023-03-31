@@ -41,4 +41,15 @@ export class UserEntity {
   @OneToMany(() => MessagePrivateEntity, (message) => message.sender)
   messagesSend: MessagePrivateEntity[];
 
+  @Column({nullable: true})
+  twoFactorSecret: string;
+
+  @Column({nullable: true})
+  isTwoFactorEnabled: boolean;
+
+  @Column({nullable: true})
+  qrCode: string;
+
+  @Column({nullable: true})
+  avatarSvg: string;
 }

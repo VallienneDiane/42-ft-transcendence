@@ -6,22 +6,29 @@ export interface LogInForm {
     password: string
 }
 
-export interface SignInForm { 
+export interface VerifyCodeForm {
+    login?: string,
+    code: string,
+    errors?:string,
+}
+
+export interface SignUpForm { 
     id?: number,
     login: string,
     email: string,
     password: string,
-    errors?: string
-  }
-
+    errors?: string,
+    avatarSvg?: string
+}
+  
 export interface UserData { 
     id?: number,
     login: string,
     email: string,
     password: string
-  }
-
-// export interface JwtPayload {
+}
+  
+  // export interface JwtPayload {
 //   login: string,
 //   sub: number,
 //   iat: number,
@@ -29,11 +36,11 @@ export interface UserData {
 // }
 
 export interface User {
-  token: string,
+  // token: string,
   id?: number,
   login: string,
   email: string,
-  password: string
+  avatarSvg?: string
 }
 
 export interface IChannel {
@@ -74,5 +81,3 @@ export interface IDest {
   channel?: IChannel;
   isOp?: boolean;
 };
-
-// export LogInForm, SignInForm

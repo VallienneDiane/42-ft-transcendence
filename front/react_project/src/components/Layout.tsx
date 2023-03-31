@@ -1,8 +1,21 @@
+import { ReactNode } from "react";
 import { Outlet } from "react-router-dom"
 import NavBar from "./Navbar"
 
+// type LayoutProps = {
+//     children: ReactNode;
+// };
+  
+// const Layout = ({ children }: LayoutProps) => {
+//     return (
+//         <div>
+//         <NavBar />
+//         {children}
+//         </div>
+//     );
+// };
+
 const Layout = () => {
-    console.log('lAYOUT');
     return (
         <div>
             <NavBar />
