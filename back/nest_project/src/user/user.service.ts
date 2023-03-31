@@ -83,9 +83,6 @@ export class UserService {
         await this.usersRepository.update({id: userId}, {channelsAsGod: channels});
     }
 
-    async getUpgraded(userId: string, channelId: string) {
-        
-    }
     /**
      * return the link between an user and a channel
      * @param userId primary key of a user

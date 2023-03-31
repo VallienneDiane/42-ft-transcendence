@@ -175,7 +175,7 @@ export class ChannelService {
 			.createQueryBuilder()
 			.relation(ChannelEntity, "normalUsers")
 			.of(channelId)
-			.add(user)
+			.add(user);
 	}
 
 	async addOpUser(user: UserEntity, channelId: string) {
@@ -198,7 +198,7 @@ export class ChannelService {
 			.remove(userId)
 	}
 
-	async delOpUser(userId: string, channelId: string) {
+	async delOpUser(userId: string, channelId: string): Promise<boolean> {
 		let chann = await this.getOneById(channelId);
 		if (chann == null)
 			return;
@@ -211,8 +211,10 @@ export class ChannelService {
 			}
 		}
 		if (opNumberToReduce) {
-			if (chann.opNumber == 1 && !chann.persistant)
+			if (chann.opNumber == 1 && !chann.persistant) {
 				await this.deleteById(channelId);
+				return true;
+			}
 			else {	
 				await this.channelRepository
 					.createQueryBuilder()
@@ -225,6 +227,7 @@ export class ChannelService {
 				)
 			}
 		}
+		return false;
 	}
 
 	async delGodUser(userId: string, channelId: string) {
@@ -247,6 +250,17 @@ export class ChannelService {
 		await this.delGodUser(userId, channelId);
 		await this.delOpUser(userId, channelId);
 		await this.delNormalUser(userId, channelId);
+	}
+
+	async upgradeUserOnChannel(user: UserEntity, channelId: string) {
+		await this.delNormalUser(user.id, channelId);
+		await this.addOpUser(user, channelId);
+	}
+
+	async downgradeUserOnChannel(user: UserEntity, channelId: string) {
+		const channDeleted = await this.delOpUser(user.id, channelId);
+		if (!channDeleted)
+			await this.addNormalUser(user, channelId);
 	}
 
 	async addMessage(userId: string, content: string, channelId: string) {
