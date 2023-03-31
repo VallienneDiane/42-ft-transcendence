@@ -80,10 +80,8 @@ function InviteUser(props: {channel: string, members: string[]}) {
             users.forEach((user: string) => {
                 let present: boolean = false;
                 for (let elt of props.members) {
-                    if (elt === user) {
+                    if (elt === user)
                         present = true;
-                        return;
-                    }
                 }
                 if (present === false)
                     newUserList.push(user);
@@ -101,8 +99,14 @@ function InviteUser(props: {channel: string, members: string[]}) {
     }
 
     const sendInvitation = () => {
+        let ok: boolean = false;
         fetchUsers();
-        socket.emit('inviteUser', "nami", props.channel);
+        for (let user of users) {
+            if (user = text)
+                ok = true; 
+        }
+        if (ok)
+            socket.emit('inviteUser', text, props.channel);
     }
 
     return (
