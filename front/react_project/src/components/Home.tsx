@@ -1,12 +1,9 @@
 import "../styles/Home.scss"
-import React, { useContext, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom"
-import { UserContext } from "../user/UserContext";
-import {User} from "../models";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 //import { useSpring, animated } from "react-spring";
-import SearchUserBar from "./SearchUserBar";
 
 interface BallProps {
     x: number,
@@ -16,7 +13,7 @@ interface BallProps {
     r: number,
 }
 
-const BallContainer = (props) => {
+const BallContainer = (props: any) => {
     const Ball = (ball: BallProps) => {
         return (
             <circle className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad)"/> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
@@ -24,7 +21,7 @@ const BallContainer = (props) => {
     }
     return (
         <svg width={props.CONTAINER_WIDTH} height={props.CONTAINER_HEIGHT}>
-            {props.balls.map(ball => (
+            {props.balls.map((ball: BallProps) => (
                 Ball(ball)
             ))}
               <defs>
@@ -97,7 +94,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         if (ball.y > CONTAINER_HEIGHT + ball.r / 2) {
             balls.splice(i, 1);
             let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - ball.r / 2) + ball.r / 2;
-            let y = Math.random() * -1000;
+            let y = Math.random() * -500;
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
             let r = (Math.random() * 10) + 15;
@@ -182,13 +179,11 @@ const Home: React.FC = () => {
     
     useEffect(() => {
         setPageElements([titleBox!, linkGameBox!, linkChatBox!]);
-        console.log('after set', pageElements);
 
     }, [titleBox, linkGameBox, linkChatBox])
     
     useEffect(() => {
         function handleResize() {
-            console.log('win resize');
             setContainerHeight(window.innerHeight);
             setContainerWidth(window.innerWidth);
         }
