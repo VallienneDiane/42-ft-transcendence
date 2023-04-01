@@ -1,7 +1,0 @@
-@import url("Base.css");
-
-#profilePage {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}

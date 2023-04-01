@@ -26,4 +26,7 @@ export class UserEntity {
 
   @Column({nullable: true})
   qrCode: string;
+
+  @Column({nullable: true})
+  avatarSvg: string;
 }

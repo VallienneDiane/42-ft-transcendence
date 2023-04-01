@@ -6,6 +6,7 @@
   margin:0;
   padding:0;
   font-family: 'MuseoModerno', cursive;
+  user-select: none;
 }
 
 ul, a, button {
@@ -31,7 +32,6 @@ button:hover {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-
 }
 
 .App > div {
