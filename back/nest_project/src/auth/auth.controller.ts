@@ -24,6 +24,7 @@ export class AuthController {
   @Get('/callback')
   async callback(@Query('code') code: string) {
     const tokenApi42 = await this.authService.validateFortyTwo(code);
+    console.log(tokenApi42);
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',
       headers: {
@@ -33,15 +34,16 @@ export class AuthController {
     const data = await response.json();
     if(!await this.userService.findByLogin(data.login)) {
       const newUser42 = {
-        id: null,
+        id: <number>null,
         login: data.login,
         email: data.email,
-        password: null,
-        twoFactorSecret: null,
-        isTwoFactorEnabled: null,
-        qrCode: null,
+        password: <string>null,
+        twoFactorSecret: <string>null,
+        isTwoFactorEnabled: <boolean>null,
+        qrCode: <string>null,
+        avatarSvg: data.image.link,
       };
-      console.log("create user42", newUser42);
+      console.log("create user42", newUser42, "image ? ", data.image.link);
       await this.userService.create(newUser42);
     }
     const access_token = await this.authService.genToken(data.login);
