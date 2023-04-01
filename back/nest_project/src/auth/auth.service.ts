@@ -11,6 +11,7 @@ export class AuthService {
   constructor(
     private userService: UserService, private jwtService: JwtService) {}
 
+  //give to the api42 infos to get a token to access user infos
   async validateFortyTwo(code: string) {
     const response = await fetch('https://api.intra.42.fr/oauth/token', {
       method: 'POST',
