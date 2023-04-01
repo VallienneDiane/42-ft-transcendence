@@ -11,6 +11,7 @@ import { accountService } from "./services/account.service";
 import { useState} from "react";
 import Layout from './components/Layout'
 import Game from './components/Game'
+import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
 import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
@@ -47,6 +48,7 @@ function App() {
       <BrowserRouter >
         <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
         <Routes>
+          <Route path="/callback/" element={<Callback />} />
           <Route element={<Layout />}>
             <Route path='/login' element={<LoginPage />} />
             {/* <Route path='/login42' element={<Login42 />} /> */}

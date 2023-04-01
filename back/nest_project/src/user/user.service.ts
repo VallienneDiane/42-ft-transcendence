@@ -26,8 +26,8 @@ export class UserService {
         return this.usersRepository.save(newUser);
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
-    public findByLogin(login: string): Promise<UserDto> {
-        return this.usersRepository.findOneBy({login});
+    public async findByLogin(login: string): Promise<UserDto> {
+        return await this.usersRepository.findOneBy({login});
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
     public findById(id: number): Promise<UserDto> {

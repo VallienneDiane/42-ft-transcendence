@@ -1,0 +1,23 @@
+@import url("Base.css");
+
+#loadingPage {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    & .spinner {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 50px;
+
+        & > p {
+            font-size: 35px;
+            font-weight: bold;
+            margin-bottom: 50px;
+        }
+    }
+}
