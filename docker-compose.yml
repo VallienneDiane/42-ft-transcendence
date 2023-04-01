@@ -1,4 +1,9 @@
 version: '3.3'
+
+networks:
+  transcendence_network:
+    driver: bridge
+
 services:
 ########################################## POSTGRESQL - DATABASE ##############################
   db:
@@ -21,12 +26,12 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    networks:
-      - transcendence_network
     env_file:
       - .env
+    networks:
+      - transcendence_network
     volumes:
-      - back:/usr/src/app
+      - ./back:/usr/src/app
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################
@@ -41,7 +46,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - front:/usr/src/app
+      - ./front:/usr/src/app
 ########################################## PGADMIN  ########################################
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -62,19 +67,19 @@ volumes:
     driver_opts:
       type: none 
       o: bind
-      device: /home/vallienne/42_Projects/transcendence/postgres
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
   back:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/vallienne/42_Projects/transcendence/back
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
   front:
     driver: local
     driver_opts:
       type: none 
       o: bind
-      device: /home/vallienne/42_Projects/transcendence/front
+      device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
   # pgadmin:
   #   driver: local
   #   driver_opts:
@@ -82,6 +87,3 @@ volumes:
   #     o: bind
   #     device: /home/vallienne/42_Projects/transcendence/pgadmin
 ########################################## NETWORK  ########################################
-networks:
-  transcendence_network:
-    driver: bridge
