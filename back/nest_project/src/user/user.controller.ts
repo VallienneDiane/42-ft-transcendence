@@ -26,7 +26,6 @@ export class UserController {
             access_token: this.jwtService.sign(payload)
         }
     }
-
     //Requests to database, access ok for validate user only !
         //use jwt strategy to check if token is valid before send back the user infos
         //get all users (login and id) of the db if valid token (use in chat for exemple)

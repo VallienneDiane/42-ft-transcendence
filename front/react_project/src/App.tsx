@@ -11,6 +11,7 @@ import ProtectedRoutes from './components/ProtectedRoutes';
 import Chat from './components/Chat'
 import Layout from './components/Layout'
 import Game from './components/Game'
+import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
 
 import Settings from './components/Settings'
@@ -30,11 +31,11 @@ function App() {
         {/* <UserProvider user={user}> */}
         <BrowserRouter >
           <Routes>
+            <Route path="/callback/" element={<Callback />} />
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />
               <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
-              <Route path='/callback' element={<Callback />} />
               <Route element={<ProtectedRoutes/>}>
                 <Route path='/' element={<Home />} />
                 <Route path='/game' element={<Game />} />

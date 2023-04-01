@@ -14,7 +14,6 @@
         p {
             margin-right: 50px;
         }
-
     }
     p {
         font-size: 0.9em;
@@ -48,15 +47,13 @@
 
     button {
         font-size: 0.8em;
-        color: rgb(255, 255, 255);
+        color: rgb(3, 3, 3);
         margin-left: 10px;
-        color: white;
-        background-color: rgb(60, 67, 203);
         height: 30px;
         width: 180px;
         margin: 20px;
 
-        &:hover {
+        & :hover {
             background-color: rgb(81, 165, 60);
         }
     }

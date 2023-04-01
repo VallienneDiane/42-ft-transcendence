@@ -3,6 +3,7 @@ import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
+////////////////// SIGN UP - LOGIN - LOGOUT - TOKEN /////////////////
 // Request to signup
 let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
@@ -11,11 +12,57 @@ let signUp = (credentials: SignUpForm) => {
 let login = (credentials: LogInForm) => {
     return Axios.post('auth/login', credentials);
 }
+// Fonction qui check si user est connecté. Et que le token n'est pas expiré
+let isLogged = () => {
+    let token = localStorage.getItem('token');
+    if (token !== null)  { 
+        let decodedToken: JwtPayload = accountService.readPayload()!;
+        if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
+            logout();
+            return (false);
+        }
+        else {
+            return (true);
+        }
+    }
+    else {
+        return (false);
+    }
+}
 // Request to generate token
 let generateToken = (login: string) => {
     return Axios.post('auth/generateToken', {login});
 }
-////////////////// TWO FACTOR AUTHENTIFICATOR /////////////////////////////
+let saveToken = (token: string) => {
+    localStorage.setItem('token', token);
+}
+//get token from local storage
+let getToken = () => {
+    return localStorage.getItem('token');
+}
+// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
+let logout = () => {
+    Axios.post('/auth/logout');
+    localStorage.removeItem('token');
+}
+// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
+let readPayload = () => {
+    let token = getToken();
+    if (token === null) {
+        return (null);
+    }
+    else {
+        try {
+            let parseToken = jsrsasign.KJUR.jws.JWS.parse(token);
+            return (parseToken.payloadObj);
+        }
+        catch (error) {
+            console.log('Error parsing JWT: ', error)
+            return (null);
+        }
+    }
+}
+////////////////// TWO FACTOR AUTHENTIFICATOR ////////////////////
 //check if 2fa / google auth is active when login
 let is2faActive = (login: string) => {
     return Axios.post('auth/is2faActive', {login});
@@ -40,67 +87,14 @@ let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
 let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
-
-let saveToken = (token: string) => {
-    localStorage.setItem('token', token);
-}
-
-////////////////// API 42 /////////////////////////////
+////////////////// SIGN IN WITH 42 /////////////////////////////
+//get url to give authorization to connect api42
 let url42 = () => {
     return Axios.get('/')
 }
-
-let callback = () => {
-    return Axios.get('/callback');
-}
-// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
-let logout = () => {
-    Axios.post('/auth/logout');
-    localStorage.removeItem('token');
-}
-
-// Fonction qui check si user est connecté. Et que le token n'est pas expiré
-let isLogged = () => {
-    let token = localStorage.getItem('token');
-    // const cookieToken = document.cookie
-
-    // console.log("cookie token : ", cookieToken);
-    console.log("dans is Logged de account service");
-    if (token !== null)  { // || cookieToken !== null) 
-        let decodedToken: JwtPayload = accountService.readPayload()!;
-        if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
-            logout();
-            return (false);
-        }
-        else {
-            return (true);
-        }
-    }
-    else {
-        return (false);
-    }
-}
-
-let getToken = () => {
-    return localStorage.getItem('token');
-}
-
-// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
-let readPayload = () => {
-    let token = getToken();
-    if (token === null) {
-        return (null);
-    }
-    else {
-        try {
-            let parseToken = jsrsasign.KJUR.jws.JWS.parse(token);
-            return (parseToken.payloadObj);
-        }
-        catch (error) {
-            console.log('Error parsing JWT: ', error)
-            return (null);
-        }
-    }
+//send code to get token and infos user from the api and then generate jwt token
+let callback = (code: string) => {
+    return Axios.get('/callback?code=' + code);
 }
 
 export const accountService = {
