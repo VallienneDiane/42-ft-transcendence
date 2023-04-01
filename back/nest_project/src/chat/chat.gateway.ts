@@ -1,105 +1,233 @@
-import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
-import { Server as SocketIOServer, Socket, Namespace } from '@nestjs/platform-socket.io/node_modules/socket.io';
+import { MessageBody, SubscribeMessage, WebSocketGateway, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
+import { Server, Socket, Namespace } from 'socket.io';
 import { Logger, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
-import { MessageService } from "./message/message.service";
-import { MessageEntity } from "./message/message.entity";
+import { IChannel, IHandle, IMessageChat, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
-
-interface MessageChat {
-    room: string;
-    isChannel: boolean;
-    content?: string;
-}
-
-interface MessageToSend {
-    sender?: string;
-    room: string;
-    content: string;
-}
+import { ChatService } from "./chat.service";
+import { UserRoomHandler } from "./chat.classes";
+import { useContainer } from "class-validator";
+import { UserService } from "src/user/user.service";
+import { UserDto } from "src/user/user.dto";
+import { JwtService } from '@nestjs/jwt';
+import { ChannelEntity } from "./channel/channel.entity";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer() server: SocketIOServer;
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private logger: Logger = new Logger('ChatGateway');
+    private io: Server;
+    private chatNamespace: Namespace;
+    private chatRoomHandler: UserRoomHandler;
 
     constructor(
-        private messageService: MessageService,
+        private chatService: ChatService,
+        private userService: UserService,
+        private jwtService: JwtService
     ) 
     {}
 
-    private socketMap: Map<string, Socket> = new Map<string, Socket>;
+    private extractLogin(client: Socket): string {
+        let token = client.handshake.auth['token'];
+        if (token != null) {
+            try {
+                const decoded = this.jwtService.verify(token, {
+                    secret: process.env.SECRET,
+            });
+            }
+            catch (error) {
+                return (null);
+            }
+        }
+        let object : IToken = undefined;
+        if (token != null)
+            object = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
+        if (object == undefined) {
+            client.emit("fromServerMessage", "you're token is invalid");
+            return null;
+        }
+        let pseudo: string = object.login;
+        return pseudo;
+    }
 
-    @UseGuards(AuthGuard('websocket'))
+    private tokenChecker(client: Socket): Promise<UserDto> {
+        let login = this.extractLogin(client);
+        return this.userService.findByLogin(login);    
+    }
+
+    private iHandlerisator(client: Socket, message?: IMessageChat, channel?: IChannel): IHandle {
+        return {
+            chatNamespace: this.chatNamespace,
+            client: client,
+            roomHandler: this.chatRoomHandler,
+            logger: this.logger,
+            message: message,
+            channelEntries: channel
+        };
+    }
+
+    afterInit() {
+        this.io = new Server();
+        this.chatNamespace = this.io.of('/chat');
+        this.chatRoomHandler = new UserRoomHandler();
+    }
+
+    // @UseGuards(AuthGuard('websocket'))
     handleConnection(client: Socket) {
-		if (client.handshake.auth['token'] != null) {
-			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-			this.socketMap.set(pseudo, client);
-            this.logger.log(`${pseudo} is connected`);
-		}
+        this.tokenChecker(client)
+        .then( (user) => {
+            if (user != null)
+                this.chatService.connectEvent(client, user.login, this.chatNamespace, this.chatRoomHandler, this.logger);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
     }
 
     handleDisconnect(client: Socket) {
-		if (client.handshake.auth['token'] != null) {
-			let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-			this.socketMap.delete(pseudo);
-			this.logger.log(`${pseudo} is disconnected`);
-		}
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.disconnectEvent(client, user.login, this.chatNamespace, this.chatRoomHandler, this.logger)
+        })
     }
 
     @SubscribeMessage('addMessage')
-    handleNewMessage(@MessageBody() blop: MessageChat, @ConnectedSocket() client: Socket) {
-        let pseudo = "unknow";
-		if (client.handshake.auth['token'] != null) {
-			pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-		}
-        this.socketMap.set(pseudo, client);
-        console.log('ChatGateway::handleNewMessage : ', blop, pseudo);
-        let data: MessageEntity = {
-            id: undefined,
-            room: blop.room,
-            isChannel: blop.isChannel,
-            sender: pseudo,
-            content: blop.content,
-            date: undefined
-        }
-        this.messageService.create(data);
-        let toSend : MessageToSend = {sender: pseudo, room: blop.room, content: blop.content};
-        client.emit('selfMessage', toSend);
-        if (!blop.isChannel)
-        {
-            let socketDest = this.socketMap.get(blop.room);
-            if (socketDest != undefined)
-            {
-                console.log("message", blop.room, pseudo, blop.content);
-                socketDest.emit("messagePrivate", toSend);
-                this.logger.log("msg send");
+    handleNewMessage(@MessageBody() blop: string, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.newMessageEvent(client, user.login, this.chatRoomHandler, this.logger, blop);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('changeLoc')
+    handleChangeLoc(@MessageBody() data: {Loc: string, isChannel: boolean}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug('changeLoc event : ');
+                console.log(data, data.Loc, data.isChannel);
+                this.chatService.changeLocEvent(client, user.login, data.Loc, data.isChannel, this.chatRoomHandler);
             }
-        }
-        else
-        {
-            
-
-        }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
     }
 
-    @SubscribeMessage('history')
-    handleHistory(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket) {
-        if (data.isChannel)
-        {
-            this.messageService.findByChannel(data.room).then((data) => client.emit("history", data));
-        }
-        else
-        {
-            let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj!.login;
-            this.messageService.findByPrivate(data.room, pseudo).then((data) => client.emit("history", data));
-        }
+    @SubscribeMessage('listChannel')
+    handlelistChannel(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listChannelEvent(client, user.login);
+        })
     }
-    // // @UseGuards(AuthGuard('jwt'))
-    // @SubscribeMessage('privateMessage')
-    // async handlePrivateEvent(@MessageBody() data: MessageChat, @ConnectedSocket() client: Socket): Promise<void> {
-    //     let pseudo = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
-    //     console.log(pseudo, client.id, data.room, data.content);
-    //     client.emit('message', { sender: client.id, room: data.room, content: data.content });          
-    // }
+
+    @SubscribeMessage('listUsersChann')
+    handlelistUsersChann(@MessageBody() channelName: string, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listUsersInChannel(client, channelName);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+    
+    @SubscribeMessage('joinChannel')
+    handleJoinChannel(@MessageBody() data: {channelName: string, channelPass: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.joinChannelEvent(client, user.login, data, this.chatRoomHandler);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('inviteUser')
+    handleInviteUser(@MessageBody() data: {userToInvite: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('createChannel')
+    handleCreateChannel(@MessageBody() data: ChannelEntity, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.createChannelEvent(client, user.login, this.chatRoomHandler, this.logger, data);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('leaveChannel')
+    handleLeaveChannel(@MessageBody() data: string, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.leaveChannelEvent(client, user.login, this.chatRoomHandler, this.logger, data);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('kickUser')
+    handleKickUser(@MessageBody() data: {userToKick: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.kickUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToKick, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('makeHimOp')
+    handleMakeHimOp(@MessageBody() data: {userToOp: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.makeHimOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToOp, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('makeHimNoOp')
+    handleMakeHimNoOp(@MessageBody() data: {userToNoOp: string, channel: string}, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.makeHimNoOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToNoOp, data.channel);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('myChannels')
+    handleMyChannels(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listMyChannelEvent(client, user.login);
+        })
+    }
+
+    @SubscribeMessage('myDM')
+    handleListMyDM(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.listMyDMEvent(client, user.login, this.chatRoomHandler);
+        })
+    }
+
 }

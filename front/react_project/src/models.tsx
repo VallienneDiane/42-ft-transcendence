@@ -1,3 +1,6 @@
+import { Socket } from 'socket.io-client'
+import { JwtPayload } from "jsonwebtoken";
+
 export interface LogInForm {
     login: string,
     password: string
@@ -16,14 +19,14 @@ export interface SignUpForm {
     password: string,
     errors?: string,
     avatarSvg?: string
-  }
+}
   
-  export interface UserData { 
+export interface UserData { 
     id?: number,
     login: string,
     email: string,
     password: string
-  }
+}
   
   // export interface JwtPayload {
 //   login: string,
@@ -40,4 +43,41 @@ export interface User {
   avatarSvg?: string
 }
 
-// export LogInForm, SignUpForm
+export interface IChannel {
+  name: string;
+  password: boolean;
+  channelPass?: string;
+  inviteOnly: boolean;
+  persistant: boolean;
+  onlyOpCanTalk: boolean;
+  hidden: boolean;
+}
+
+export interface IMessageEntity {
+  id?: number,
+  room?: string,
+  isChannel?: boolean,
+  sender: string,
+  content: string,
+  date: Date,
+}
+
+export interface Message {
+  id: string,
+  text: string;
+  sender?: string;
+}
+
+export interface IMessageToSend {
+  date: Date;
+  sender: string;
+  room: string;
+  content: string;
+}
+
+export interface IDest {
+  Loc: string;
+  isChannel: boolean;
+  channel?: IChannel;
+  isOp?: boolean;
+};

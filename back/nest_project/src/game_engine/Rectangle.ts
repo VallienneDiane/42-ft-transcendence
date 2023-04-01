@@ -6,7 +6,7 @@ export class Rectangle {
 	length;
 	width;
 
-	constructor(position: Vec2, l, w) {
+	constructor(position: Vec2, l: number, w: number) {
 		this.position = position;
 		this.length = l;
 		this.width = w;
