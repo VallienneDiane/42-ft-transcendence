@@ -170,7 +170,6 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
 }
 
 const Home: React.FC = () => {
-    let decodedToken: JwtPayload = accountService.readPayload()!;
 
     const h1_title = useRef(null);
     const link_game = useRef(null);
