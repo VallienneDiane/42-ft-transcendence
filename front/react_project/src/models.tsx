@@ -102,10 +102,11 @@ export interface IMessageToSend {
 }
 
 export interface IDest {
-  loc: string;
+  id: string;
+  name: string;
   isChannel: boolean;
   channel?: IChannelEntity;
-  isOp?: boolean;
+  status?: string;
 };
 
 export interface ISearch {
