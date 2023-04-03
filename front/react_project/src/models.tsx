@@ -20,13 +20,6 @@ export interface SignUpForm {
     errors?: string,
     avatarSvg?: string
 }
-  
-export interface UserData { 
-    id?: number,
-    login: string,
-    email: string,
-    password: string
-}
 
 export interface IUserToEmit {
   id: string;
@@ -114,3 +107,11 @@ export interface IDest {
   channel?: IChannelEntity;
   isOp?: boolean;
 };
+
+export interface ISearch {
+  id:string;
+  name: string;
+  isChannel: boolean;
+  password: boolean;
+  isClickable: boolean;
+}

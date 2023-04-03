@@ -23,7 +23,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         this.checkOffline = this.checkOffline.bind(this);
     }
     
-    changeLoc(channel: IDest) {
+    changeLoc(channel: {loc: string, isChannel: boolean}) {
         this.props.socket.emit('changeLoc', channel);  
     }
 
@@ -113,7 +113,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             <h2>Channels</h2>
             <ul className="channelList">
                 { this.state.channels.map((channel) => { 
-                   return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({loc: channel.channel.name, isChannel: true})}>{channel.channel.name}</button></li> ) }
+                   return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({loc: channel.channel.id, isChannel: true})}>{channel.channel.name}</button></li> ) }
                 )}
             </ul>
             {displayDM && (
@@ -122,7 +122,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
                     <ul className="channelList">
                         { this.state.dms.map((dm, id) => { 
                            if (this.state.me.login != dm.userName)
-                           { return (<li key={id}><button onClick={() => this.changeLoc({loc: dm.userName, isChannel: false})}>{dm.userName}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
+                           { return (<li key={id}><button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})}>{dm.userName}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
                         })}
                     </ul>
                 </React.Fragment>

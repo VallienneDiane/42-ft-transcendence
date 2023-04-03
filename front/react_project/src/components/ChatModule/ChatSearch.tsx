@@ -4,9 +4,9 @@ import SocketContext from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { UserData, Message, IMessageEntity, IChannel, IChannelToEmit } from "../../models";
+import { ISearch, Message, IMessageEntity, IChannel, IChannelToEmit } from "../../models";
 
-function JoinChannelPopUp(props: {handleClose: any, channelName: string}) {
+function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelName: string}) {
     const {socket} = useContext(SocketContext);
     const [pass, setPass] = useState<string>('');
     const ref = useRef<HTMLDivElement>(null);
@@ -38,7 +38,7 @@ function JoinChannelPopUp(props: {handleClose: any, channelName: string}) {
 
     const handlerJoinPass = (event: any) => {
         event.preventDefault();
-        socket.emit('joinChannel', {channelName: props.channelName, channelPass: pass});
+        socket.emit('joinChannel', {channelId: props.channelId, channelPass: pass});
         setPass('');
         props.handleClose('');
     }
@@ -56,37 +56,36 @@ function JoinChannelPopUp(props: {handleClose: any, channelName: string}) {
     )
 }
 
-class SearchElement extends React.Component<{socket: Socket, popupAction: any, handleClose: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}, {openPopup: boolean}> {
-    constructor(props: {socket: Socket, popupAction: any, handleClose: any, name: string, isChannel: boolean, password: boolean, isClickable: boolean}) {
+class SearchElement extends React.Component<{socket: Socket, popupAction: any, handleClose: any, elt: ISearch}> {
+    constructor(props: {socket: Socket, popupAction: any, handleClose: any, elt: ISearch}) {
         super(props);
         this.onClickChatting = this.onClickChatting.bind(this);
         this.handlerJoinChannel = this.handlerJoinChannel.bind(this);
     }
-
     handlerJoinChannel() {
-        if (!this.props.password) {
-            this.props.socket.emit('joinChannel', {channelName: this.props.name, channelPass: null});
+        if (!this.props.elt.password) {
+            this.props.socket.emit('joinChannel', {channelId: this.props.elt.name, channelPass: null});
             this.props.handleClose();
         }
         else {
             this.props.handleClose();
-            this.props.popupAction(this.props.name);
+            this.props.popupAction(this.props.elt.name);
         }
     }
 
     onClickChatting() {
-        this.props.socket.emit('changeLoc', {Loc: this.props.name, isChannel: false});
+        this.props.socket.emit('changeLoc', {loc: this.props.elt.id, isChannel: false});
         this.props.handleClose();
     }
 
     render() {
         return(
         <li className="searchElement">
-            {this.props.isClickable && this.props.isChannel
-                && <button onClick={this.handlerJoinChannel}>{this.props.name}</button>}
-            {this.props.isClickable && !this.props.isChannel
-                && <button onClick={this.onClickChatting}>{this.props.name}</button>}
-            {!this.props.isClickable && <p>{this.props.name}</p>}
+            {this.props.elt.isClickable && this.props.elt.isChannel
+                && <button onClick={this.handlerJoinChannel}>{this.props.elt.name}</button>}
+            {this.props.elt.isClickable && !this.props.elt.isChannel
+                && <button onClick={this.onClickChatting}>{this.props.elt.name}</button>}
+            {!this.props.elt.isClickable && <p>{this.props.elt.name}</p>}
         </li>);
     }
 }
@@ -95,9 +94,9 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     text: string,
     popupIsOpen: boolean,
     channelToUnlock: string,
-    users: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
-    channels: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
-    filtered: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[]
+    users: ISearch[],
+    channels: ISearch[],
+    filtered: ISearch[],
     isDropdown: boolean}
     > {
     constructor(props:{action: any, action2: any, socket: Socket}) {
@@ -134,11 +133,12 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         userService.getAllUsers()
         .then(response => {
             const playload: JwtPayload = accountService.readPayload()!;
-            const users: string[] = response.data.map((user: UserData) => user.login);
-            let newUserList: {name:string, isChannel:boolean, password: boolean, isClickable: boolean}[] = [];
-            users.forEach((user: string) => {
-                if (playload.login !== user)
-                    newUserList.push({name: user, isChannel: false, password: false, isClickable: true});
+            const users = new Map<string, string>();
+            response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login)); // à revoir
+            let newUserList: ISearch[] = [];
+            users.forEach((id: string, login: string) => {
+                if (playload.login !== login)
+                    newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             })
             console.log("users", newUserList);
             this.setState({users: newUserList});
@@ -148,23 +148,22 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         })
     }
     
-    compileFiltered( users: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[],
-        channels: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] ) {
-        let newFiltered: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
+    compileFiltered(users: ISearch[], channels: ISearch[]) {
+        let newFiltered: ISearch[] = [];
 
         if (users.length > 0) {
             if (channels.length > 0)
-                newFiltered = [ {name: "Users : ", isChannel: false, password: false, isClickable: false}, ...users,
-                                {name: "Channels : ", isChannel: true, password: false, isClickable: false}, ...channels ];
+                newFiltered = [ {id: '', name: "Users : ", isChannel: false, password: false, isClickable: false}, ...users,
+                                {id: '', name: "Channels : ", isChannel: true, password: false, isClickable: false}, ...channels ];
             else
-                newFiltered = [{name: "Users : ", isChannel: false, password: false, isClickable: false}, ...users];
+                newFiltered = [{id: '', name: "Users : ", isChannel: false, password: false, isClickable: false}, ...users];
         }
         else if (channels.length > 0)
-            newFiltered = [{name: "Channels : ", isChannel: true, password: false, isClickable: false}, ...channels];
+            newFiltered = [{id: '', name: "Channels : ", isChannel: true, password: false, isClickable: false}, ...channels];
         else
             newFiltered = [];
 
-        const filtered: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = newFiltered;
+        const filtered: ISearch[] = newFiltered;
         return filtered;
     }
 
@@ -178,11 +177,11 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
         if (event.target.value) {
             this.setState(() => {
-                const filteredUsers: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] =
-                this.state.users.filter((user: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}) =>
+                const filteredUsers: ISearch[] =
+                this.state.users.filter((user: ISearch) =>
                     user.name.startsWith(event.target.value));
-                const filteredChannels: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] =
-                this.state.channels.filter((channel: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}) =>
+                const filteredChannels: ISearch[] =
+                this.state.channels.filter((channel: ISearch) =>
                     channel.name.startsWith(event.target.value));
 
                 const filtered = this.compileFiltered(filteredUsers, filteredChannels);
@@ -191,7 +190,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         }
         else {
             this.setState(() => {
-                const filtered = this.compileFiltered(this.state.users, this.state.channels);
+                const filtered: ISearch[] = this.compileFiltered(this.state.users, this.state.channels);
                 return { filtered };
             })
         }
@@ -208,9 +207,9 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
         this.props.socket.emit('listChannel');
         this.props.socket.on('listChannel', (strs: IChannelToEmit[]) => {
-            let newChanList: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
+            let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
-                newChanList.push({name: str.id, password: str.password, isChannel: true, isClickable: true});
+                newChanList.push({id: str.id, name: str.name, password: str.password, isChannel: true, isClickable: true});
             console.log("channels", newChanList);
             this.setState({channels: newChanList})});
             
@@ -254,13 +253,12 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                     </svg>
                 </div>
                 {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
-                    {this.state.filtered.map((user: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}, id: number) => (
-                        <SearchElement  key={id} socket={this.props.socket} handleClose={this.resetFiltered}
-                                        popupAction={this.onClickPopup} name={user.name} isChannel={user.isChannel}
-                                        password={user.password} isClickable={user.isClickable} />
+                    {this.state.filtered.map((elt: ISearch) => (
+                        <SearchElement  key={elt.id} socket={this.props.socket} handleClose={this.resetFiltered}
+                                        popupAction={this.onClickPopup} elt={elt} />
                     ))}
                 </ul>}
-                {this.state.popupIsOpen && <JoinChannelPopUp handleClose={this.onClickPopup} channelName={this.state.channelToUnlock} />}
+                {this.state.popupIsOpen && <JoinChannelPopUp handleClose={this.onClickPopup} channelId={this.state.channelToUnlock} channelName={this.state.channelToUnlock} />}
             </div>
         )
     }
