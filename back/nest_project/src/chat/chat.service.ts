@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
-import { IChannelToEmit, IMessageChat, IUserToEmit } from "./chat.interface";
+import { IChannelToEmit, IUserToEmit } from "./chat.interface";
 import { MessageChannelEntity } from "./messageChannel/messageChannel.entity";
 import { MessageChannelService } from "./messageChannel/messageChannel.service";
 import { MessagePrivateEntity } from "./messagePrivate/messagePrivate.entity";
@@ -95,7 +95,7 @@ export class ChatService {
         if (roomId != undefined)
             roomHandler.roomMap.of(roomId).emit('notice', user.login, " just disconnect");
         chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userDisconnected', user.id);
+            socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
         })
         logger.log(`${user.login} as id ${user.id} is disconnected`);
     }
@@ -124,11 +124,12 @@ export class ChatService {
                     connected = true;
                 client.emit('checkNewDM', room.room, connected);
                 if (dest != undefined) {
-                    dest.socket.emit('checkNewDM', user.id, true);
+                    let userToEmit: IUserToEmit = user;
+                    dest.socket.emit('checkNewDM', userToEmit, true);
                     if (!dest.isChannel && dest.room == user.id)
                         dest.socket.emit("newMessage", toSend);
                     else
-                        dest.socket.emit("pingedBy", user.id);
+                        dest.socket.emit("pingedBy", userToEmit);
                 }
             }
         }

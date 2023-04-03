@@ -47,6 +47,21 @@ export interface IChannelToEmit {
   godUser?: IUserToEmit;
 }
 
+export interface IChannelEntity {
+  id: string;
+  date: Date;
+  name: string;
+  password: boolean;
+  channelPass: string;
+  inviteOnly: boolean;
+  persistant: boolean;
+  onlyOpCanTalk: boolean;
+  hidden: boolean;
+  normalUsers: IUserToEmit[];
+  opUsers: IUserToEmit[];
+  godUser?: IUserToEmit;
+}
+
   // export interface JwtPayload {
 //   login: string,
 //   sub: number,
@@ -97,6 +112,6 @@ export interface IMessageToSend {
 export interface IDest {
   Loc: string;
   isChannel: boolean;
-  channel?: IChannel;
+  channel?: IChannelEntity;
   isOp?: boolean;
 };
