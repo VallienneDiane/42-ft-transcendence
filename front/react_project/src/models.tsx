@@ -27,7 +27,26 @@ export interface UserData {
     email: string,
     password: string
 }
-  
+
+export interface IUserToEmit {
+  id: string;
+  login: string;
+}
+
+export interface IChannelToEmit {
+  id: string;
+  date: Date;
+  name: string;
+  password: boolean;
+  inviteOnly: boolean;
+  persistant: boolean;
+  onlyOpCanTalk: boolean;
+  hidden: boolean;
+  normalUsers: IUserToEmit[];
+  opUsers: IUserToEmit[];
+  godUser?: IUserToEmit;
+}
+
   // export interface JwtPayload {
 //   login: string,
 //   sub: number,

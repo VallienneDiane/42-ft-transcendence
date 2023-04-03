@@ -28,9 +28,9 @@ export interface IChannelToEmit {
     persistant: boolean;
     onlyOpCanTalk: boolean;
     hidden: boolean;
-    normalUsers: UserEntity[];
-    opUsers: UserEntity[];
-    godUser?: UserEntity;
+    normalUsers: IUserToEmit[];
+    opUsers: IUserToEmit[];
+    godUser?: IUserToEmit;
 }
 
 export interface IUserToEmit {

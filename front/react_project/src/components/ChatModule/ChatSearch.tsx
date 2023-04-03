@@ -4,7 +4,7 @@ import SocketContext from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { UserData, Message, IMessageEntity, IChannel } from "../../models";
+import { UserData, Message, IMessageEntity, IChannel, IChannelToEmit } from "../../models";
 
 function JoinChannelPopUp(props: {handleClose: any, channelName: string}) {
     const {socket} = useContext(SocketContext);
@@ -207,11 +207,11 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.fetchUsers();
 
         this.props.socket!.emit('listChannel');
-        this.props.socket!.on('listChannel', (strs: {channelName: string, password: boolean}[]) => {
+        this.props.socket!.on('listChannel', (strs: IChannelToEmit[]) => {
             let newChanList: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
-                newChanList.push({name: str.channelName, password: str.password, isChannel: true, isClickable: true});
-            // console.log("channels", newChanList);
+                newChanList.push({name: str.id, password: str.password, isChannel: true, isClickable: true});
+            console.log("channels", newChanList);
             this.setState({channels: newChanList})});
             
         this.props.socket!.on('newUserConnected', () => {
