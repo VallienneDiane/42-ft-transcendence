@@ -58,9 +58,9 @@ export class GameEngineService {
         this.cooldown_start = 0;
 		this.gs = { ballPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
-		paddleOne: { x: this.wallz[0]., y: 0.5 },
-		paddleTwo: { x: this.aspect_ratio, y: 0.5 } };
-		console.log(this.wallz);
+		paddleOne: { x: this.wallz[0].x_position, y: this.wallz[0].y_position },
+		paddleTwo: { x: this.wallz[1].x_position, y: this.wallz[1].y_position } };
+		console.log("from game engine service player are :" + this.pl1 + "and" + this.pl2);
 
 	}
 
