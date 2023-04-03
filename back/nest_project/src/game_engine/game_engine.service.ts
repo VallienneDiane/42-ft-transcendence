@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { btoaPolyfill } from 'js-base64';
 import { Ball } from './Ball';
 import { Vec2 } from './math/Vec2';
 import { Wall } from './Wall';
 import { Collision } from './math/Collision';
+import { Socket } from 'socket.io';
 
 interface ballpos {
 	x: number,
@@ -20,35 +20,53 @@ interface gameState {
 @Injectable()
 export class GameEngineService {
 
-	public gs: gameState;
+	gs: gameState;
 	ballz: Ball[];
 	wallz: Wall[];
-	n;
-	aspectratio;
-	game_must_stop;
+
+	pl1: Socket;
+	pl2: Socket;
+	pl1_ready: boolean;
+	pl2_ready: boolean;
+
+	aspect_ratio = 16/9;
+    cooldown = 90; // cooldown between ball respawn
+    cooldown_start;
+    game_must_stop: boolean;
+    loop; // set_interval function handle for stoping the game
 
 	constructor() {
-		this.n = 2;
 		this.ballz = [];
 		this.wallz = [];
-		this.aspectratio = 16/9;
-		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: this.aspectratio, y: 0.5 } };
+		
+		let small_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.35), 0.04);
+		this.set_ball_random_start(small_ball);
+		let big_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.7), 0.08);
+		this.ballz[0] = small_ball;
+		this.ballz[1] = big_ball;
 
-		this.wallz[0] = new Wall(new Vec2(0, 0), new Vec2(this.aspectratio, 0));
-		this.wallz[1] = new Wall(new Vec2(this.aspectratio, 0), new Vec2(this.aspectratio, 1));
-		this.wallz[2] = new Wall(new Vec2(this.aspectratio, 1), new Vec2(0, 1));
-		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(0, 0));
-		console.log(this.wallz);
+		this.wallz[0] = new Wall(new Vec2(0.025, 0.415), new Vec2(0.025, 0.585));
+		this.wallz[1] = new Wall(new Vec2(this.aspect_ratio - 0.025, 0.415), new Vec2(this.aspect_ratio - 0.025, 0.585));
+
+		this.wallz[2] = new Wall(new Vec2(0, 0), new Vec2(this.aspect_ratio, 0));
+		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(this.aspect_ratio, 1));
+
+		this.pl1_ready = false;
+		this.pl2_ready = false;
 		this.game_must_stop = false;
 
-		//this.ballz[0] = new Ball(new Vec2(0.2,0.2), 0.1);
-		for (let index = 0; index < this.n; index++) {
-			//let position = new Vec2(Math.random(), Math.random());
-			let position = new Vec2(0.5, 0.5);
-			let radius = Math.random() * 0.05 + 0.05;
-			//let radius = 0.1;
-			this.ballz[index] = new Ball(position, radius);
-		}
+        this.cooldown_start = 0;
+		this.gs = { ballPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
+									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
+		paddleOne: { x: this.wallz[0]., y: 0.5 },
+		paddleTwo: { x: this.aspect_ratio, y: 0.5 } };
+		console.log(this.wallz);
+
+	}
+
+	set_ball_random_start(ball: Ball) {
+		let signe = (Math.random() - 0.5) > 0 ? 1 : -1;
+        ball.speed = new Vec2((signe/120) * this.aspect_ratio, (Math.random() - 0.5) * Math.random()/120);
 	}
 
 	stop_game() {
