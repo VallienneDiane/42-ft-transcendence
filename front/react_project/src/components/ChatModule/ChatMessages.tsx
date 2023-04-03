@@ -117,8 +117,8 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
         event.preventDefault();
         if (this.state.text.trim() !== '') {
             let content: string = this.state.text;
-            let room: string = this.props.dest!.Loc;
-            let isChannel: boolean = this.props.dest!.isChannel;
+            let room: string = this.props.dest.loc;
+            let isChannel: boolean = this.props.dest.isChannel;
             this.props.socket.emit('addMessage', {message: content});
             this.setState({ text: '' });
         }
