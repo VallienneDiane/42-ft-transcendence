@@ -65,7 +65,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             else
                 return;
             let nextState: {userName: string, userId: string, connected: boolean}[] = [];
-            sorted.forEach( (user, id) => nextState.push({userId: id, userName: user.userName, connected: user.connected}));
+            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected}));
             this.setState({dms: nextState});
         })
     }
@@ -82,14 +82,14 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             this.setState({channels: nextState});
         });
         
-        this.props.socket.on('checkNewDM', (login: string, connected: boolean) => {
-            let sorted = new Map<string, boolean>();
+        this.props.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
+            let sorted = new Map<string, {userName: string, userId: string, connected: boolean}>();
             for (let elt of this.state.dms) {
-                sorted.set(elt.login, elt.connected);
+                sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected});
             }
-            sorted.set(login, connected);
-            let nextState: {login: string, connected: boolean}[] = [];
-            sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
+            sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected});
+            let nextState: {userName: string, userId: string, connected: boolean}[] = [];
+            sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected}));
             this.setState({dms: nextState});
         }); // à remplacer par sort
     }
