@@ -138,7 +138,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             let newUserList: ISearch[] = [];
             users.forEach((id: string, login: string) => {
                 if (playload.login !== login)
-                    newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
+                    newUserList.push({id: login, name: id, isChannel: false, password: false, isClickable: true});
             })
             console.log("users", newUserList);
             this.setState({users: newUserList});
