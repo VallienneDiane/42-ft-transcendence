@@ -6,9 +6,15 @@ export class Wall {
     end: Vec2;
     x_position;
     y_position;
+    speed;
     length;
+    up: boolean;
+    down: boolean;
 
     constructor(v1: Vec2, v2: Vec2) {
+        this.up = false;
+        this.down = false;
+        this.speed = 3/60;
         this.start = v1;
         this.end = v2;
         this.x_position = this.start.x;
@@ -17,6 +23,39 @@ export class Wall {
     }
 
     wallUnit() {
-        return (this.end.sub(this.start).normalize());
+        return (new Vec2(0, 1));
+    }
+
+    update_self_position() {
+        if (this.up) {
+			this.y_position -= this.speed;
+            if (this.y_position < 0) {
+                this.y_position = 0;
+            }
+        }
+        else if (this.down) {
+			this.y_position += this.speed;
+            if (this.y_position + this.length > 1) {
+                this.y_position = 1 - this.length;
+            }
+        }
+        this.start.setCoordinates(this.x_position, this.y_position);
+        this.end.setCoordinates(this.x_position, this.y_position + this.length);
+    }
+
+    process_input (body: string) {
+        console.log("process input : " + body);
+        if (body === "ArrowUp" || body === "w") {
+            this.up = !this.up;
+            if (this.up) {
+                this.down = false;
+            }
+        }
+		if (body === "ArrowDown" || body === "s") {
+            this.down = !this.down;
+            if (this.down) {
+                this.up = false;
+            }
+        }
     }
 }
