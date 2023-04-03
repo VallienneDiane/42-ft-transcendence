@@ -2,9 +2,9 @@ import { Vec2 } from "./math/Vec2";
 
 export class Ball {
 
-	position: Vec2;
-	r;
-	speed: Vec2;
+	public position: Vec2;
+	public r;
+	public speed: Vec2;
 	acc: Vec2;
 	acceleration;
 	colision_number;
