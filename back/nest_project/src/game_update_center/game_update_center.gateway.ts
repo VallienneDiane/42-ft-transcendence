@@ -5,6 +5,9 @@ import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 import { OnGatewayInit } from '@nestjs/websockets';
 
+/**
+ * use to send a private matchmaking request
+ */
 interface Private_order {
   target: string,
   type: string,
@@ -41,8 +44,8 @@ export class Game_instance {
  * use to share the player login at the start of a match
  */
 export class Players {
-  l1: string;
-  l2: string;
+  login1: string;
+  login2: string;
 }
 
 /**
@@ -100,8 +103,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
     // emit the Player struct to the front to display the player login
     let players = new Players();
-    players.l1 = this.socket_login.get(player1.id);
-    players.l2 = this.socket_login.get(player2.id);
+    players.login1 = this.socket_login.get(player1.id);
+    players.login2 = this.socket_login.get(player2.id);
     this.server.to(player1.id).emit('players', players);
     this.logger.debug("a game room has been created");
   }

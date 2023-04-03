@@ -3,7 +3,7 @@
 export class Simple_paddle {
 
     x_position;
-    lenght;
+    length;
     y_position;
     speed;
     up: boolean;
@@ -11,8 +11,8 @@ export class Simple_paddle {
 
     constructor () {
         this.x_position = 0.025;
-        this.lenght = 0.17;
-        this.y_position = 0.5 - (this.lenght / 2);
+        this.length = 0.17;
+        this.y_position = 0.5 - (this.length / 2);
         this.speed = 3/60;
         this.up = false;
         this.down = false;
@@ -30,8 +30,8 @@ export class Simple_paddle {
         }
         else if (this.down) {
 			this.y_position += this.speed;
-            if (this.y_position + this.lenght > 1) {
-                this.y_position = 1 - this.lenght;
+            if (this.y_position + this.length > 1) {
+                this.y_position = 1 - this.length;
             }
         }
     }
