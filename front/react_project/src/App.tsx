@@ -22,8 +22,8 @@ function App() {
     transports: ['websocket'],
     auth: { token: 'undefined' },
   }));
-  socket!.on("test", () => {
-    console.log("Id1", socket!.id);
+  socket.on("test", () => {
+    console.log("Id1", socket.id);
   });
   
   function createSocket() {
