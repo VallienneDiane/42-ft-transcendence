@@ -113,7 +113,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             <h2>Channels</h2>
             <ul className="channelList">
                 { this.state.channels.map((channel) => { 
-                   return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({Loc: channel, isChannel: true})}>{channel.channel.name}</button></li> ) }
+                   return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({loc: channel.channel.name, isChannel: true})}>{channel.channel.name}</button></li> ) }
                 )}
             </ul>
             {displayDM && (
@@ -121,8 +121,8 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
                     <h2>DMs</h2>
                     <ul className="channelList">
                         { this.state.dms.map((dm, id) => { 
-                           if (this.state.me.login != dm.login)
-                           { return (<li key={id}><button onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}>{dm.login}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
+                           if (this.state.me.login != dm.userName)
+                           { return (<li key={id}><button onClick={() => this.changeLoc({loc: dm.userName, isChannel: false})}>{dm.userName}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
                         })}
                     </ul>
                 </React.Fragment>
@@ -137,7 +137,7 @@ export default class ChatModule extends React.Component<{}, {
     history: Message[]}> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {Loc: 'general', isChannel: true}, history: []};
+        this.state = {dest: {loc: 'general', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);
