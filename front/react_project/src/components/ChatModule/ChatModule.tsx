@@ -12,7 +12,7 @@ import '../../styles/ChatModule.scss'
 
 class ChannelDMList extends React.Component<{socket: Socket}, {
     channels: string[],
-    dms: {login: string, connected: boolean}[], 
+    dms: {userName: string, userId: string, connected: boolean}[], 
     me: JwtPayload}> {
     constructor(props: {socket: Socket}) {
         super(props);
@@ -32,15 +32,15 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         this.props.socket.on('listMyChannels', (strs: string[]) => { 
             this.setState({ channels: strs }) }); 
         this.props.socket.emit('myDM');
-        this.props.socket.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
-            this.setState({ dms: strs }) });
+        this.props.socket.on('listMyDM', (list: {userName: string, userId: string, connected: boolean}[]) => { 
+            this.setState({ dms: list }) });
     }
 
     checkOnline() {
-        this.props.socket!.on("userConnected", (login: string) => {
+        this.props.socket.on("userConnected", (login: string) => {
             let sorted = new Map<string, boolean>();
             for (let elt of this.state.dms) {
-                sorted.set(elt.login, elt.connected);
+                sorted.set(elt.userName, elt.connected);
             }
             if (sorted.get(login) != undefined) // vérifier si le login se trouve dans ma liste de DM
                 sorted.set(login, true);
@@ -53,7 +53,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
     }
 
     checkOffline() {
-        this.props.socket!.on("userDisconnected", (login: string) => {
+        this.props.socket.on("userDisconnected", (login: string) => {
             let sorted = new Map<string, boolean>();
             for (let elt of this.state.dms) {
                 sorted.set(elt.login, elt.connected);
@@ -83,7 +83,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             this.setState({channels: nextState});
         });
         
-        this.props.socket!.on('checkNewDM', (login: string, connected: boolean) => {
+        this.props.socket.on('checkNewDM', (login: string, connected: boolean) => {
             let sorted = new Map<string, boolean>();
             for (let elt of this.state.dms) {
                 sorted.set(elt.login, elt.connected);
@@ -92,16 +92,16 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             let nextState: {login: string, connected: boolean}[] = [];
             sorted.forEach( (connected, login) => nextState.push({login: login, connected: connected}));
             this.setState({dms: nextState});
-        }); // possible de faire ça dans le back avec l'event listMyDM ?
+        }); // à remplacer par sort
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('listMyChannels');
-        this.props.socket!.off('listMyDM');
-        this.props.socket!.off("leaveChannel");
-        this.props.socket!.off('checkNewDM');
-        this.props.socket!.off("userConnected");
-        this.props.socket!.off("userDisconnected");
+        this.props.socket.off('listMyChannels');
+        this.props.socket.off('listMyDM');
+        this.props.socket.off("leaveChannel");
+        this.props.socket.off('checkNewDM');
+        this.props.socket.off("userConnected");
+        this.props.socket.off("userDisconnected");
     }
 
     render() {
