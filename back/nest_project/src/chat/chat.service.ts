@@ -152,6 +152,7 @@ export class ChatService {
                 return;
             }
             else {
+                console.log("entries: ", user.id, loc);
                 this.userService.getChannelLink(user.id, loc)
                 .then(
                     (found) => {
