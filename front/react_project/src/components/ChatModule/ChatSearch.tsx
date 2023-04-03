@@ -64,12 +64,12 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
     }
     handlerJoinChannel() {
         if (!this.props.elt.password) {
-            this.props.socket.emit('joinChannel', {channelId: this.props.elt.name, channelPass: null});
+            this.props.socket.emit('joinChannel', {channelId: this.props.elt.id, channelPass: null});
             this.props.handleClose();
         }
         else {
             this.props.handleClose();
-            this.props.popupAction(this.props.elt.name);
+            this.props.popupAction(this.props.elt);
         }
     }
 
@@ -93,7 +93,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
 class SearchChat extends React.Component<{action: any, action2: any, socket: Socket}, {
     text: string,
     popupIsOpen: boolean,
-    channelToUnlock: string,
+    channelToUnlock: ISearch,
     users: ISearch[],
     channels: ISearch[],
     filtered: ISearch[],
@@ -104,7 +104,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.state = {
             text: '',
             popupIsOpen: false,
-            channelToUnlock: '',
+            channelToUnlock: {id: '', name: '', isChannel: false, password: false, isClickable: false},
             users: [],
             channels: [],
             filtered: [],
@@ -119,8 +119,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     }
     ref = createRef<HTMLUListElement>();
 
-    onClickPopup(chanName: string) {
-        this.setState({ popupIsOpen: !this.state.popupIsOpen, channelToUnlock: chanName });
+    onClickPopup(chan: ISearch) {
+        this.setState({ popupIsOpen: !this.state.popupIsOpen, channelToUnlock: chan });
     }
     
     closeSearchList(e: any) {
@@ -258,7 +258,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                                         popupAction={this.onClickPopup} elt={elt} />
                     ))}
                 </ul>}
-                {this.state.popupIsOpen && <JoinChannelPopUp handleClose={this.onClickPopup} channelId={this.state.channelToUnlock} channelName={this.state.channelToUnlock} />}
+                {this.state.popupIsOpen && <JoinChannelPopUp handleClose={this.onClickPopup} channelId={this.state.channelToUnlock.id} channelName={this.state.channelToUnlock.name} />}
             </div>
         )
     }
