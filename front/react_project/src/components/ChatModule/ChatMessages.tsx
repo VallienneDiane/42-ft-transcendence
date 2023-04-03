@@ -57,17 +57,17 @@ export class MessageList extends React.Component<{history: Message[], action: an
     }
 
     componentDidMount(): void {
-        this.props.socket!.on("newMessage", (data: IMessageToSend) => {
+        this.props.socket.on("newMessage", (data: IMessageToSend) => {
             console.log('message from nest newMessage: ' + data.content + ', ' + data.sender);
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         });
 
-        this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
+        this.props.socket.on('selfMessage', (data: IMessageToSend) => {
             console.log('message from nest selfMessage: ' + data.content + ', ' + data.sender);
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         })
 
-        this.props.socket!.on('notice', (data: string) => {
+        this.props.socket.on('notice', (data: string) => {
             console.log(data);
             let date = new Date();
             this.props.action({id: date.toString(), text: data, sender: "Message from server :"});
@@ -75,9 +75,9 @@ export class MessageList extends React.Component<{history: Message[], action: an
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('newMessage');
-        this.props.socket!.off('notice');
-        this.props.socket!.off('selfMessage');
+        this.props.socket.off('newMessage');
+        this.props.socket.off('notice');
+        this.props.socket.off('selfMessage');
     }
 
     render() {
@@ -119,7 +119,7 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
             let content: string = this.state.text;
             let room: string = this.props.dest!.Loc;
             let isChannel: boolean = this.props.dest!.isChannel;
-            this.props.socket!.emit('addMessage', {message: content});
+            this.props.socket.emit('addMessage', {message: content});
             this.setState({ text: '' });
         }
     }

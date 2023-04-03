@@ -105,12 +105,11 @@ export interface Message {
 export interface IMessageToSend {
   date: Date;
   sender: string;
-  room: string;
   content: string;
 }
 
 export interface IDest {
-  Loc: string;
+  loc: string;
   isChannel: boolean;
   channel?: IChannelEntity;
   isOp?: boolean;
