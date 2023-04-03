@@ -81,7 +81,7 @@ export class ChatService {
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
-        roomHandler.addUser(user.id, client, "general", false, true, false, false);
+        roomHandler.addUser(user.id, client, "general", true, false, false, false);
         client.emit("changeLocChannel", "general", []);
         chatNamespace.sockets.forEach( (socket) => {
             socket.emit('userConnected', {userId: user.id, userLogin: user.login});
@@ -102,10 +102,10 @@ export class ChatService {
 
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
         logger.debug(`${user.login} send : `);
-        console.log(message);
         let room = roomHandler.userMap.get(user.id);
         if (room != undefined) {
             let toSend = {date: new Date(), sender: user.login, content: message};
+            console.log(room);
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
                     if (room.room != "general")
