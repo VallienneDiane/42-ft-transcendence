@@ -3,7 +3,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { Repository } from "typeorm";
-import { MessageChannelDto } from "../messageChannel/messageChannel.dto";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
