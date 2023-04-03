@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
-import { Repository } from "typeorm";
+import { NotBrackets, Repository } from "typeorm";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
@@ -92,14 +92,26 @@ export class ChannelService {
 		);
 	}
 
+	async listChannelsWithUsers() {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.leftJoinAndSelect("channel.godUser", "god")
+			.leftJoinAndSelect("channel.opUsers", "op")
+			.leftJoinAndSelect("channel.normalUsers", "normal")
+			.getMany();
+	}
+
 	async listChannelsWhereUserIsNot(user: UserEntity): Promise<ChannelEntity[]> {
-		const allChannels = await this.listChannels();
+		//console.log("listchannelwhere....", user.id);
+		const allChannels = await this.listChannelsWithUsers();
 		let channListToReturn: ChannelEntity[] = [];
 		allChannels.forEach(channel => {
+			//console.log(channel);
 			if (!channel.hidden
-				&& channel.godUser != user
+				&& channel.godUser.id != user.id
 				&& !channel.opUsers.includes(user)
-				&& !channel.normalUsers.includes(user)) {
+				&& !channel.normalUsers.includes(user)
+				) {
 					channListToReturn.push(channel);
 				}
 		});
