@@ -12,6 +12,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { channel } from "diagnostics_channel";
+import { createChannelDto } from "./chat.gateway.dto";
 
 @Injectable({})
 export class ChatService {
@@ -427,7 +428,7 @@ export class ChatService {
             });
     }
 
-    public createChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, channel: ChannelEntity) {
+    public createChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, channel: createChannelDto) {
         if (channel.name == 'general') {
             client.emit("notice", "This channel already exists.");
         }
@@ -437,9 +438,23 @@ export class ChatService {
                 (exist) => {
                     if (!exist)
                     {
-                        channel.opNumber = 1;
-                        channel.godUser = user;
-                        this.channelService.create(channel)
+                        const newChannel: ChannelEntity = {
+                            id: undefined,
+                            date: undefined,
+                            name: channel.name,
+                            password: channel.password,
+                            channelPass: channel.channelPass,
+                            opNumber: 1,
+                            inviteOnly: channel.inviteOnly,
+                            persistant: channel.persistant,
+                            onlyOpCanTalk: channel.onlyOpCanTalk,
+                            hidden: channel.hidden,
+                            messages: [],
+                            normalUsers: [],
+                            opUsers: [],
+                            godUser: user
+                        };
+                        this.channelService.create(newChannel)
                         .then(
                             (succeed) => {
                                 if (!succeed.hidden)

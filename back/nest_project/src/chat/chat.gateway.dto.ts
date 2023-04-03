@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class addMessageDto {
     @IsNotEmpty() @IsString() readonly message: string;
@@ -36,4 +36,14 @@ export class makeHimOpDto {
 export class makeHimNoOpDto {
     @IsNotEmpty() @IsUUID() readonly userToNoOp: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
+
+export class createChannelDto {
+	@IsNotEmpty() @IsString() readonly name: string;
+	@IsNotEmpty() @IsBoolean() readonly password: boolean;
+	@IsString() readonly channelPass: string;
+	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
+	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
+	@IsNotEmpty() @IsBoolean() readonly onlyOpCanTalk: boolean;
+	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 }
