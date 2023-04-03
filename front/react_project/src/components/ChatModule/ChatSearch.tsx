@@ -216,13 +216,14 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
 
-        this.props.socket.on('newLocChannel', (channel: IChannelEntity, status: boolean, array: IMessageEntity[]) => {
+        this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageEntity[]) => {
             let newHistory: Message[] = [];
+            console.log("array :", array);
             for (let elt of array) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
             this.props.action(newHistory);
-            this.props.action2({id: channel.id, name: channel.name, isChannel: true, channel: channel, status: status});
+            this.props.action2({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
         })
 
         this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageEntity[]) => {

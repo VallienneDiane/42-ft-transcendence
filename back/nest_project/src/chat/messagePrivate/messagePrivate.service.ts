@@ -20,14 +20,14 @@ export class MessagePrivateService {
         .leftJoin("MessagePrivateEntity.receiver", "receiver")
         .where(
             new Brackets((qb) => {
-                qb.where("sender.id = senderIdA", {senderIdA: personAId})
-                .andWhere("receiver.id = receiverIdB", {senderIdB: personBId})
+                qb.where("sender.id = :senderIdA", {senderIdA: personAId})
+                .andWhere("receiver.id = :receiverIdB", {receiverIdB: personBId})
             })
         )
         .orWhere(
             new Brackets((qb) => {
-                qb.where("sender.id = senderIdB", {senderIdB: personBId})
-                .andWhere("receiver.id = receiverIdA", {senderIdA: personAId})
+                qb.where("sender.id = :senderIdB", {senderIdB: personBId})
+                .andWhere("receiver.id = :receiverIdA", {receiverIdA: personAId})
             })
         )
         .orderBy({"MessagePrivateEntity.date": "ASC"})

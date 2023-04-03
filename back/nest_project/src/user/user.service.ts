@@ -71,20 +71,20 @@ export class UserService {
             return null;
         let status: string = null;
         let channel = user.channelsAsGod.find(channel => {
-            channel.id == channelId;
+            return channel.id == channelId;
         })
         if (channel != undefined)
             status = "god";
         if (!status) {
             channel = user.channelsAsOp.find(channel => {
-                channel.id == channelId;
+                return channel.id == channelId;
             })
             if (channel != undefined)
                 status = "op";
         }
         if (!status) {
             channel = user.channelsAsNormal.find(channel => {
-                channel.id == channelId;
+                return channel.id == channelId;
             })
             if (channel != undefined)
                 status = "normal";
