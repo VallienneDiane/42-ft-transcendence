@@ -13,7 +13,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ChannelEntity } from "./channel/channel.entity";
 import { UserEntity } from "src/user/user.entity";
 import { ChannelDto } from "./channel/channel.dto";
-import { addMessageDto, changeLocDto, channelIdDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
+import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
 
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
@@ -158,7 +158,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('createChannel')
-    handleCreateChannel(@MessageBody() data: ChannelDto, @ConnectedSocket() client: Socket) {
+    handleCreateChannel(@MessageBody() data: createChannelDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
