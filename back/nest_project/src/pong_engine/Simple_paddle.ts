@@ -3,33 +3,55 @@
 export class Simple_paddle {
 
     x_position;
+    length;
     y_position;
-    lenght;
     speed;
+    up: boolean;
+    down: boolean;
 
     constructor () {
         this.x_position = 0.025;
-        this.lenght = 0.17;
-        this.y_position = 0.5 - (this.lenght / 2);
+        this.length = 0.17;
+        this.y_position = 0.5 - (this.length / 2);
         this.speed = 3/60;
+        this.up = false;
+        this.down = false;
     }
 
     /**
-     * 
-     * @param body the key pressed in string format
+     * update the paddle position
      */
-    process_input (body: any) {
-        console.log("process input : " + body);
-        if (body === "ArrowUp" || body === "z") {
+    update_self_position() {
+        if (this.up) {
 			this.y_position -= this.speed;
             if (this.y_position < 0) {
                 this.y_position = 0;
             }
         }
-		if (body === "ArrowDown" || body === "s") {
+        else if (this.down) {
 			this.y_position += this.speed;
-            if (this.y_position + this.lenght > 1) {
-                this.y_position = 1 - this.lenght;
+            if (this.y_position + this.length > 1) {
+                this.y_position = 1 - this.length;
+            }
+        }
+    }
+
+    /**
+     * set the up and down flag correctly in a XOR way
+     * @param body the key pressed in string format
+     */
+    process_input (body: any) {
+        console.log("process input : " + body);
+        if (body === "ArrowUp" || body === "w") {
+            this.up = !this.up;
+            if (this.up) {
+                this.down = false;
+            }
+        }
+		if (body === "ArrowDown" || body === "s") {
+            this.down = !this.down;
+            if (this.down) {
+                this.up = false;
             }
         }
     }

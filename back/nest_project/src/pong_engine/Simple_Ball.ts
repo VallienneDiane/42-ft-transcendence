@@ -2,30 +2,33 @@ import { Simple_paddle } from "./Simple_paddle";
 
 export class Simple_ball {
 
+    aspect_ratio = 16/9;
     x_position;
     y_position;
     x_speed;
     y_speed;
     r;
-    apesct_ratio = 16/9;
-    state;
+    alive;
 
     constructor () {
-        this.x_position = 0.5 * this.apesct_ratio;
+        this.x_position = 0.5 * this.aspect_ratio;
         this.y_position = 0.5;
         let signe = (Math.random() - 0.5) > 0 ? 1 : -1;
-        this.x_speed = (signe/120) * this.apesct_ratio;
+        this.x_speed = (signe/120) * this.aspect_ratio;
         this.y_speed = (Math.random() - 0.5) * Math.random()/120;
         this.r = 0.06;
-        this.state = "alive";
+        this.alive = true;
     }
 
+    /**
+     * return the closest point to the paddle p
+     */
     closest_point_bw(p: Simple_paddle) {
 
         if (this.y_position <= p.y_position)
             return (p.y_position);
-        else if (this.y_position >= p.y_position + p.lenght)
-            return (p.y_position + p.lenght);
+        else if (this.y_position >= p.y_position + p.length)
+            return (p.y_position + p.length);
         return this.y_position;
     }
 
@@ -55,11 +58,11 @@ export class Simple_ball {
 
         /* check collision with paddle one */
         if (this.x_position - this.r < p1.x_position && Math.sqrt(Math.pow(this.x_position - p1.x_position, 2) + Math.pow(this.y_position - this.closest_point_bw(p1), 2)) <= this.r) {
-
+            
             console.log("colide p1");
             this.x_position = this.r + p1.x_position;
             this.x_speed = -this.x_speed;
-            let ratio = (this.y_position - (p1.y_position + p1.lenght/2))/(p1.lenght/2);
+            let ratio = (this.y_position - (p1.y_position + p1.length/2))/(p1.length/2);
             if (ratio >=0) {
                 this.y_speed = Math.min(ratio * 1/60, 1/60);
             }
@@ -74,7 +77,7 @@ export class Simple_ball {
             console.log("colide p2");
             this.x_position = p2.x_position - this.r;
             this.x_speed = -this.x_speed;
-            let ratio = (this.y_position - (p2.y_position + p2.lenght/2))/(p2.lenght/2);
+            let ratio = (this.y_position - (p2.y_position + p2.length/2))/(p2.length/2);
             if (ratio >=0) {
                 this.y_speed = Math.min(ratio * 1/60, 1/60);
             }
@@ -84,8 +87,8 @@ export class Simple_ball {
         }
 
         /* check if goal */
-        if ((this.x_position - this.r < 0) || (this.x_position + this.r > this.apesct_ratio)) {
-            this.state = "dead";
+        if ((this.x_position - this.r < 0) || (this.x_position + this.r > this.aspect_ratio)) { //TODO register the goal
+            this.alive = false;
             return;
         }
     }
