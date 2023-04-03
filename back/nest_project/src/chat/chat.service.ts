@@ -122,7 +122,12 @@ export class ChatService {
                 let dest = roomHandler.userMap.get(room.room);
                 if (dest != undefined)
                     connected = true;
-                client.emit('checkNewDM', room.room, connected);
+                this.userService.findById(room.room)
+                .then(
+                    (user) => {
+                        client.emit('checkNewDM', {id: room.room, login: user.login}, connected);
+                    }
+                )
                 if (dest != undefined) {
                     let userToEmit: IUserToEmit = user;
                     dest.socket.emit('checkNewDM', userToEmit, true);
