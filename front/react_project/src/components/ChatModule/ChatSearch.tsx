@@ -4,7 +4,7 @@ import SocketContext from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { ISearch, Message, IMessageEntity, IChannel, IChannelToEmit } from "../../models";
+import { ISearch, Message, IMessageEntity, IChannelEntity, IChannelToEmit } from "../../models";
 
 function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelName: string}) {
     const {socket} = useContext(SocketContext);
@@ -136,9 +136,9 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             const users = new Map<string, string>();
             response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login)); // à revoir
             let newUserList: ISearch[] = [];
-            users.forEach((id: string, login: string) => {
+            users.forEach((login, id) => {
                 if (playload.login !== login)
-                    newUserList.push({id: login, name: id, isChannel: false, password: false, isClickable: true});
+                    newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             })
             console.log("users", newUserList);
             this.setState({users: newUserList});
@@ -216,22 +216,22 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
 
-        this.props.socket.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
+        this.props.socket.on('newLocChannel', (channel: IChannelEntity, status: boolean, array: IMessageEntity[]) => {
             let newHistory: Message[] = [];
-            for (let elt of chanHistory) {
+            for (let elt of array) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
             this.props.action(newHistory);
-            this.props.action2({Loc: channel.name, isChannel: true, channel: channel, isOp: isOp});
+            this.props.action2({id: channel.id, name: channel.name, isChannel: true, channel: channel, status: status});
         })
 
-        this.props.socket.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {
+        this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageEntity[]) => {
             let newHistory: Message[] = [];
-            for (let elt of chanHistory) {
+            for (let elt of messages) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
             this.props.action(newHistory);
-            this.props.action2({Loc: userName, isChannel: false});
+            this.props.action2({id: id, name: login, isChannel: false});
         })
     }
 

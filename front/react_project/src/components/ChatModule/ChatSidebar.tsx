@@ -74,13 +74,13 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const me: JwtPayload = accountService.readPayload()!;
 
     const leaveChannel = () => {
-        socket.emit('leaveChannel', props.dest.Loc);
+        socket.emit('leaveChannel', props.dest.id);
         props.handleClose();
     }
 
     const inviteUser = () => {
         // coder l'invitation : search user
-        socket.emit('inviteUser', "nami", props.dest.Loc);
+        socket.emit('inviteUser', "nami", props.dest.id);
     }
 
     const listMembers = () => {
@@ -102,7 +102,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     useEffect(() => {
-        socket.emit('listUsersChann', props.dest.Loc); 
+        socket.emit('listUsersChann', props.dest.id); 
         socket.on('listUsersChann', (list: string[]) => {
             setMembers(list);
         })
@@ -117,7 +117,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         <div className="sidebarContent" ref={ref}>
           <span className="closeIcon" onClick={props.handleClose}>x</span>
           <div className="navRight">
-            <h1>{props.dest.Loc}</h1>
+            <h1>{props.dest.name}</h1>
             <ul className="paramMenu">
                 <li onClick={listMembers}>Members</li>
                 {onClickMembers && (
@@ -134,7 +134,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                 { props.dest.channel?.inviteOnly ? (
                     <li onClick={inviteUser}>Invite</li>
                 ) : null }
-                { props.dest.isOp ? (
+                { props.dest.status ? (
                     <React.Fragment>
                         <li onClick={showSettings}>Settings</li>
                         {onClickSettings && (
@@ -163,7 +163,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
 
     const kickUser = () => {
         // search
-        socket.emit('kickUser', "nami", props.dest.loc);
+        socket.emit('kickUser', "nami", props.dest.name);
     }
 
     useEffect(() => {
@@ -182,7 +182,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
         <div className="sidebarContent" ref={ref}>
             <span className="closeIcon" onClick={props.handleClose}>x</span>
             <div className="navRight">
-                <h1>{props.dest.Loc}</h1>
+                <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
                     <li>See profile</li>
                     <li onClick={addFriend}>Add Friend</li>
@@ -211,9 +211,9 @@ export function Header(props: {dest: IDest}) {
             <h1>  
             {isChannel ? <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
             : <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg> }
-                {props.dest.Loc}
+                {props.dest.name}
             </h1>
-            {props.dest.loc !== "general" && <button onClick={onClickSidebar}><svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M56 472a56 56 0 1 1 0-112 56 56 0 1 1 0 112zm0-160a56 56 0 1 1 0-112 56 56 0 1 1 0 112zM0 96a56 56 0 1 1 112 0A56 56 0 1 1 0 96z"/></svg></button>}
+            {props.dest.name !== "general" && <button onClick={onClickSidebar}><svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M56 472a56 56 0 1 1 0-112 56 56 0 1 1 0 112zm0-160a56 56 0 1 1 0-112 56 56 0 1 1 0 112zM0 96a56 56 0 1 1 112 0A56 56 0 1 1 0 96z"/></svg></button>}
         </div>
     )
 }
