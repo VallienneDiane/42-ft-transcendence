@@ -24,28 +24,46 @@ interface inputState {
     down: boolean
 }
 
+interface Players {
+    login1: string,
+    login2: string,
+}
+
 const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [startGame, setStartGame] = useState<boolean>(false);
+    // const [startGame, setStartGame] = useState<boolean>(false);
     const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
+    const [waitMatch, setWaitMatch] = useState<boolean>(false); // A init à false
+    const [matchInProgress, setMatchInProgress] = useState<boolean>(false); // A init à false
+    const [players, setPlayers] = useState<Players>();
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({up: false, down: false});
 
     if (socket === null) {
+        console.log("new socket");
         setSocket(io('localhost:3000', {
             transports: ['websocket'],
             auth: {token: accountService.getToken()}
         }));
     }
 
-    const launchGame = () => {
+    const launchClassic = () => {
         // On click on 'start' button, start the game
-        if (socket !== null && startGame === false) {
-            socket.emit('Game_start');
-            console.log(startGame);
-            setStartGame(true);
+        if (socket !== null) {
+            socket.emit('public_matchmaking', "classic");
+            setWaitMatch(true);
         }
     }
+
+    const launchGame = () => {
+        // On click on 'start' button, start the game
+        if (socket !== null) {
+            socket.emit('public_matchmaking', "game");
+            setWaitMatch(true);
+        }
+    }
+
+
 
 
     useEffect(() => {
@@ -67,6 +85,12 @@ const Game: React.FC = () => {
             socket.on('connect', () => {
                 console.log('Connected to server!');
             });
+
+            socket.on('matchMaking', (players: Players) => {
+                setWaitMatch(false);
+                setMatchInProgress(true);
+                setPlayers(players);
+            })
             
             socket.on('Game_Update', (gameState: gameState) => {
                 setGameState(gameState);
@@ -167,8 +191,17 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <h1>Game Page</h1>
-            <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
-            <button id="startButton" onClick={launchGame}>START !</button>
+            <div id="gamePanel">
+                {matchInProgress ? <div>{players?.login1} VS {players?.login2}</div> : null}
+                <div id="gameField">
+                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                    <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
+                </div>
+            </div>
+            <div id="gameButtons">
+                <button className="gameButton" onClick={launchClassic}>CLASSIC</button>
+                <button className="gameButton" onClick={launchGame}>SUPER</button>
+            </div>
         </div>
     )
 }
