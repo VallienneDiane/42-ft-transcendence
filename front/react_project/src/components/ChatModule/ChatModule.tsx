@@ -24,15 +24,15 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
     }
     
     changeLoc(channel: IDest) {
-        this.props.socket!.emit('changeLoc', channel);  
+        this.props.socket.emit('changeLoc', channel);  
     }
 
     initList() {
-        this.props.socket!.emit('myChannels');
-        this.props.socket!.on('listMyChannels', (strs: string[]) => { 
+        this.props.socket.emit('myChannels');
+        this.props.socket.on('listMyChannels', (strs: string[]) => { 
             this.setState({ channels: strs }) }); 
-        this.props.socket!.emit('myDM');
-        this.props.socket!.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
+        this.props.socket.emit('myDM');
+        this.props.socket.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
             this.setState({ dms: strs }) });
     }
 
@@ -73,7 +73,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         this.checkOnline();
         this.checkOffline();
 
-        this.props.socket!.on("leaveChannel", (channel: string) => {
+        this.props.socket.on("leaveChannel", (channel: string) => {
             let sorted = new Set<string>();
             for (let elt of this.state.channels)
                 sorted.add(elt);

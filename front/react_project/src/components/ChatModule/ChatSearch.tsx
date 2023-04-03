@@ -65,7 +65,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
 
     handlerJoinChannel() {
         if (!this.props.password) {
-            this.props.socket!.emit('joinChannel', {channelName: this.props.name, channelPass: null});
+            this.props.socket.emit('joinChannel', {channelName: this.props.name, channelPass: null});
             this.props.handleClose();
         }
         else {
@@ -75,7 +75,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
     }
 
     onClickChatting() {
-        this.props.socket!.emit('changeLoc', {Loc: this.props.name, isChannel: false});
+        this.props.socket.emit('changeLoc', {Loc: this.props.name, isChannel: false});
         this.props.handleClose();
     }
 
@@ -206,18 +206,18 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         document.addEventListener("mousedown", this.closeSearchList);
         this.fetchUsers();
 
-        this.props.socket!.emit('listChannel');
-        this.props.socket!.on('listChannel', (strs: {channelName: string, password: boolean}[]) => {
+        this.props.socket.emit('listChannel');
+        this.props.socket.on('listChannel', (strs: {channelName: string, password: boolean}[]) => {
             let newChanList: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
                 newChanList.push({name: str.channelName, password: str.password, isChannel: true, isClickable: true});
             // console.log("channels", newChanList);
             this.setState({channels: newChanList})});
             
-        this.props.socket!.on('newUserConnected', () => {
+        this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
 
-        this.props.socket!.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
+        this.props.socket.on('newLocChannel', (channel: IChannel, isOp: boolean, chanHistory: IMessageEntity[]) => {
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
@@ -226,7 +226,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             this.props.action2({Loc: channel.name, isChannel: true, channel: channel, isOp: isOp});
         })
 
-        this.props.socket!.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {
+        this.props.socket.on('newLocPrivate', (userName: string, chanHistory: IMessageEntity[]) => {
             let newHistory: Message[] = [];
             for (let elt of chanHistory) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
@@ -238,10 +238,10 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
     componentWillUnmount(): void {
         document.removeEventListener("mousedown", this.closeSearchList);
-        this.props.socket!.off('listChannel');
-        this.props.socket!.off('newUserConnected');
-        this.props.socket!.off('newLocChannel');
-        this.props.socket!.off('newLocPrivate');
+        this.props.socket.off('listChannel');
+        this.props.socket.off('newUserConnected');
+        this.props.socket.off('newLocChannel');
+        this.props.socket.off('newLocPrivate');
     }
 
     render() {
@@ -255,7 +255,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 </div>
                 {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
                     {this.state.filtered.map((user: {name: string, isChannel: boolean, password: boolean, isClickable: boolean}, id: number) => (
-                        <SearchElement  key={id} socket={this.props.socket!} handleClose={this.resetFiltered}
+                        <SearchElement  key={id} socket={this.props.socket} handleClose={this.resetFiltered}
                                         popupAction={this.onClickPopup} name={user.name} isChannel={user.isChannel}
                                         password={user.password} isClickable={user.isClickable} />
                     ))}
