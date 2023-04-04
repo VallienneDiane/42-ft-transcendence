@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Match } from 'src/typeorm/Match.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, JoinColumn, ManyToMany } from 'typeorm';
 
 @Entity()
 export class UserEntity {
@@ -17,5 +18,10 @@ export class UserEntity {
 
   @Column()
   password: string;
+
+  @ManyToMany(() => Match, Match => Match.player1, {onDelete: 'CASCADE'})
+  @ManyToMany(() => Match, Match => Match.player2, {onDelete: 'CASCADE'})
+  @JoinColumn()
+  match: Match[];
 
 }
