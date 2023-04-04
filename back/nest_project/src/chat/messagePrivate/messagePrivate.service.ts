@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "src/user/user.entity";
-import { Brackets, Repository } from "typeorm";
+import { Brackets, NotBrackets, Repository } from "typeorm";
 import { MessagePrivateEntity } from "./messagePrivate.entity";
+import { IUserToEmit } from "../chat.interface"
 
 @Injectable({})
 export class MessagePrivateService {
@@ -14,7 +15,12 @@ export class MessagePrivateService {
     public create(newMessage: MessagePrivateEntity): Promise<MessagePrivateEntity> {
         return this.messagesRepository.save(newMessage);
     }
-    // find a dialogue between 2 users ordered by date
+    /**
+     * 
+     * @param personAId 
+     * @param personBId 
+     * @returns a dialogue between 2 users ordered by date
+     */
     async findConversation(personAId: string, personBId: string): Promise<{date: Date, sender: string, content: string}[]> {
         const obj: {date: Date, sender: string, content: string}[] =
         await this.messagesRepository.createQueryBuilder("MessagePrivateEntity")
@@ -50,19 +56,40 @@ export class MessagePrivateService {
         };
         await this.messagesRepository.save(newMessage);
     }
-    // //give all message including the userId, not ordered
-    // public findAllDialogByUserName(userId: string): Promise<MessagePrivateEntity[]> {
-    //     return this.messagesRepository.find({
-    //         where: [
-    //             { receiverId: userId },
-    //             { senderId: userId },
-    //         ]
-    //     })
-    // }
-    // //delete all rows containing a given username
-    // async deleteUser(userId: string): Promise<void> {
-    //     this.messagesRepository.delete({receiverId: userId});
-    //     this.messagesRepository.delete({senderId: userId});
-    // }
 
+    async listDM(user: UserEntity): Promise<IUserToEmit[]> {
+        const received: IUserToEmit[] = await this.messagesRepository
+            .createQueryBuilder("message")
+            .innerJoinAndSelect("message.receiver", "user")
+            .leftJoinAndSelect("message.sender", "other")
+            .where("user.id = :id", { id: user.id })
+            .select("other.id", "id")
+            .addSelect("other.login", "login")
+            .distinct(true)
+            .getRawMany();
+        const send: IUserToEmit[] = await this.messagesRepository
+            .createQueryBuilder("message")
+            .innerJoinAndSelect("message.sender", "user")
+            .leftJoinAndSelect("message.receiver", "other")
+            .where("user.id = :id", { id: user.id })
+            .select("other.id", "id")
+            .addSelect("other.login", "login")
+            .distinct(true)
+            .getRawMany();
+        let argie = new Map<string, string>();
+        for (let elt of received) {
+            argie.set(elt.id, elt.login);
+        }
+        for (let elt of send) {
+            argie.set(elt.id, elt.login);
+        }
+        let allDM: IUserToEmit[] = [];
+        argie.forEach((login, id) => {
+            allDM.push({id: id, login: login});
+        });
+        allDM.sort((a, b) => {
+            return a.login.localeCompare(b.login);
+        })
+        return allDM;
+    }
 }
