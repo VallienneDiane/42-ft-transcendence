@@ -221,21 +221,17 @@ export class ChatService {
     }
 
     public listMyDMEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler) {
-        this.userService.listDM(user.id)
+        this.messagePrivateService.listDM(user)
             .then(
-                (mappedDm) => {
+                (array) => {
                     let arrayToEmit: {userName: string, userId: string, connected: boolean}[] = [];
-                    mappedDm.forEach(
-                        (pair, login) => {
-                            let connected = roomHandler.userMap.get(pair.user.id);
-                            if (connected != undefined)
-                                pair.connected = true;
-                            arrayToEmit.push({
-                                userName: login,
-                                userId: pair.user.id,
-                                connected: pair.connected});
-                        }
-                    )
+                    for (let elt of array) {
+                        let argie = roomHandler.userMap.get(elt.id);
+                        if (argie != undefined)
+                            arrayToEmit.push({userId: elt.id, userName: elt.login, connected: true});
+                        else
+                            arrayToEmit.push({userId: elt.id, userName: elt.login, connected: false});
+                    }
                     client.emit("listMyDM", arrayToEmit);
                 })
     }

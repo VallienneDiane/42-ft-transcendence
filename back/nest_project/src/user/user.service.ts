@@ -146,57 +146,28 @@ export class UserService {
         return arrayOfChannels;
     }
 
-    /**
-     * SEND A PRIVATE MESSAGE TO ANOTHER PERSON
-     * @param meId primary key of user 1
-     * @param himId primary key of user 2
-     * @param content random text
-     * @returns nothing
-     */
-    async sendPrivateMessage(meId: string, himId: string, content: string) {
-        let me = await this.findById(meId);
-        if (me == null)
-            return;
-        let him = await this.findById(himId);
-        if (him == null)
-            return;
-        let message = {
-            sender: me,
-            receiver: him,
-            content: content,
-        };
-        // let messages = me.messagesSend;
-        // messages.push(message);
-        // await this.usersRepository.save(me);
-        await this.usersRepository
-            .createQueryBuilder()
-            .relation(UserEntity, "messagesSend")
-            .of(me)
-            .add(message);
-    }
-
-    async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
-        let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
-        const msgSendDM: UserEntity[] = await this.usersRepository
-            .createQueryBuilder("user")
-            .leftJoinAndSelect("user.messagesSend", "send")
-            .select("send.receiver")
-            .where("user.id = :id", { id: userId })
-            .getRawMany();
-        const msgReceivedDM: UserEntity[] = await this.usersRepository
-            .createQueryBuilder("user")
-            .leftJoinAndSelect("user.messagesReceived", "received")
-            .select("received.sender")
-            .where("user.id = :id", { id: userId })
-            .getRawMany();
-        msgSendDM.forEach((user) => {
-            sorted.set(user.login, {user: user, connected: false});
-        })
-        msgReceivedDM.forEach((user) => {
-            sorted.set(user.login, {user: user, connected: false});
-        })
-        return sorted;
-    }
+    // async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
+    //     let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
+    //     const msgSendDM: UserEntity[] = await this.usersRepository
+    //         .createQueryBuilder("user")
+    //         .leftJoinAndSelect("user.messagesSend", "send")
+    //         .select("send.receiver")
+    //         .where("user.id = :id", { id: userId })
+    //         .getRawMany();
+    //     const msgReceivedDM: UserEntity[] = await this.usersRepository
+    //         .createQueryBuilder("user")
+    //         .leftJoinAndSelect("user.messagesReceived", "received")
+    //         .select("received.sender")
+    //         .where("user.id = :id", { id: userId })
+    //         .getRawMany();
+    //     msgSendDM.forEach((user) => {
+    //         sorted.set(user.login, {user: user, connected: false});
+    //     })
+    //     msgReceivedDM.forEach((user) => {
+    //         sorted.set(user.login, {user: user, connected: false});
+    //     })
+    //     return sorted;
+    // }
     
     //set secret code for 2fa in user entity
     async set2faSecret(secret: string, id: string) {
