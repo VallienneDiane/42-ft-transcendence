@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean } from "class-validator";
 import { ChannelDto } from "src/chat/channel/channel.dto";
+import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 
 export class UserDto {
@@ -12,6 +13,7 @@ export class UserDto {
     readonly channelsAsGod: ChannelDto[];
     readonly messagesReceived: MessagePrivateEntity[];
     readonly messagesSend: MessagePrivateEntity[];
+    readonly messagesChannel: MessageChannelEntity[];
     @IsNotEmpty() @IsString() twoFactorSecret: string;
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
     @IsNotEmpty() @IsString() qrCode: string;

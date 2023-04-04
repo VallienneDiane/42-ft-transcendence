@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { UserEntity } from "src/user/user.entity";
 import { Brackets, Repository } from "typeorm";
 import { MessagePrivateEntity } from "./messagePrivate.entity";
 
@@ -14,10 +15,11 @@ export class MessagePrivateService {
         return this.messagesRepository.save(newMessage);
     }
     // find a dialogue between 2 users ordered by date
-    async findConversation(personAId: string, personBId: string): Promise<MessagePrivateEntity[]> {
-        const obj = await this.messagesRepository.createQueryBuilder("MessagePrivateEntity")
-        .leftJoin("MessagePrivateEntity.sender", "sender")
-        .leftJoin("MessagePrivateEntity.receiver", "receiver")
+    async findConversation(personAId: string, personBId: string): Promise<{date: Date, sender: string, content: string}[]> {
+        const obj: {date: Date, sender: string, content: string}[] =
+        await this.messagesRepository.createQueryBuilder("MessagePrivateEntity")
+        .leftJoinAndSelect("MessagePrivateEntity.sender", "sender")
+        .leftJoinAndSelect("MessagePrivateEntity.receiver", "receiver")
         .where(
             new Brackets((qb) => {
                 qb.where("sender.id = :senderIdA", {senderIdA: personAId})
@@ -30,9 +32,23 @@ export class MessagePrivateService {
                 .andWhere("receiver.id = :receiverIdA", {receiverIdA: personAId})
             })
         )
+        .select("date", "date")
+        .addSelect("sender.login", "sender")
+        .addSelect("content")
         .orderBy({"MessagePrivateEntity.date": "ASC"})
-        .getMany();
+        .getRawMany();
         return obj;
+    }
+
+    async sendPrivateMessage(sender: UserEntity, receiver: UserEntity, message: string) {
+        let newMessage: MessagePrivateEntity = {
+            id: undefined,
+            sender: sender,
+            receiver: receiver,
+            content: message,
+            date: undefined
+        };
+        await this.messagesRepository.save(newMessage);
     }
     // //give all message including the userId, not ordered
     // public findAllDialogByUserName(userId: string): Promise<MessagePrivateEntity[]> {

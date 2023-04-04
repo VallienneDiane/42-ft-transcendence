@@ -62,7 +62,7 @@ export class ChatService {
             opUsers: [],
             messages: []
         }
-        client.emit('newLocChannel', locGeneral, false, []);
+        client.emit('newLocChannel', {channel: locGeneral, status: "normal"}, []);
     }
 
     private async delUserFromChannel(userId: string, channelId: string, roomHandler: UserRoomHandler) {
@@ -102,22 +102,29 @@ export class ChatService {
     }
 
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
-        logger.debug(`${user.login} send : `);
+        logger.debug(`${user.login} send : ${message}`);
         let room = roomHandler.userMap.get(user.id);
         if (room != undefined) {
             let toSend = {date: new Date(), sender: user.login, content: message};
-            console.log(room);
             if (room.isChannel) {
                 if (!room.onlyOpCanTalk || room.isOP) {
-                    if (room.room != "general")
-                        this.channelService.addMessage(user.id, message, room.room);
+                    if (room.room != "general") {
+                        logger.debug(`${message} to stock in ${room.room}`);
+                        this.channelService.getOneById(room.room)
+                        .then((channId) => {
+                            this.messageChannelService.addMessage(user, channId, message);
+                        })
+                    }
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
                 }
                 else
                     client.emit('notice', 'only channel operator can talk in this channel');
             }
             else {
-                this.userService.sendPrivateMessage(user.id, room.room, message);
+                this.userService.findById(room.room)
+                .then((dest) => {
+                    this.messagePrivateService.sendPrivateMessage(user, dest, message);
+                })
                 client.emit('selfMessage', toSend);
                 let connected = false;
                 let dest = roomHandler.userMap.get(room.room);
@@ -187,6 +194,7 @@ export class ChatService {
                         this.messagePrivateService.findConversation(user.id, found.id)
                         .then(
                             (messages) => {
+                                console.log(messages);
                                 client.emit("newLocPrivate", found.id, found.login, messages);
                             }
                         )

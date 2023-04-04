@@ -13,8 +13,8 @@ export class MessageChannelEntity {
     @CreateDateColumn()
     date: Date
 
-    @Column()
-    userId: string;
+    @ManyToOne(() => UserEntity, (user) => user.messagesChannel)
+    user: UserEntity;
     
     @ManyToOne(() => ChannelEntity, (channel) => channel.messages)
     channel: ChannelEntity;
