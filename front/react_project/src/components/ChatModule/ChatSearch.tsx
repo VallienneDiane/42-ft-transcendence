@@ -4,7 +4,7 @@ import SocketContext from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { ISearch, Message, IMessageEntity, IChannelEntity, IChannelToEmit } from "../../models";
+import { ISearch, Message, IMessageEntity, IChannelEntity, IChannelToEmit, IMessageToSend } from "../../models";
 
 function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelName: string}) {
     const {socket} = useContext(SocketContext);
@@ -216,7 +216,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
 
-        this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageEntity[]) => {
+        this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageToSend[]) => {
             let newHistory: Message[] = [];
             console.log("array :", array);
             for (let elt of array) {
@@ -226,7 +226,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             this.props.action2({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
         })
 
-        this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageEntity[]) => {
+        this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageToSend[]) => {
+            console.log(messages);
             let newHistory: Message[] = [];
             for (let elt of messages) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})

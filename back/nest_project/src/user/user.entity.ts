@@ -1,4 +1,5 @@
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
+import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 
@@ -41,6 +42,9 @@ export class UserEntity {
   @OneToMany(() => MessagePrivateEntity, (message) => message.sender)
   messagesSend: MessagePrivateEntity[];
 
+  @OneToMany(() => MessageChannelEntity, (message) => message.user)
+  messagesChannel: MessageChannelEntity[];
+
   @Column({nullable: true})
   twoFactorSecret: string;
 
@@ -52,4 +56,5 @@ export class UserEntity {
 
   @Column({nullable: true})
   avatarSvg: string;
+  
 }

@@ -140,7 +140,7 @@ export class ChannelService {
 		let normalUsers: UserEntity[] = await this.channelRepository
 			.createQueryBuilder("channel")
 			.leftJoinAndSelect("channel.normalUsers", "normal")
-			.select("ops")
+			.select("normal")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
 		opUsers.sort((a, b) => {
@@ -186,7 +186,7 @@ export class ChannelService {
 			.createQueryBuilder()
 			.relation(ChannelEntity, "normalUsers")
 			.of(channelId)
-			.add(user);
+			.add(user.id);
 	}
 
 	async addOpUser(user: UserEntity, channelId: string) {
@@ -274,39 +274,27 @@ export class ChannelService {
 			await this.addNormalUser(user, channelId);
 	}
 
-	async addMessage(userId: string, content: string, channelId: string) {
-		let channel = await this.getOneById(channelId);
-		let message = {
-			content: content,
-			userId: userId,
-			channel: channel
-		}
-		await this.channelRepository
-			.createQueryBuilder()
-			.relation(ChannelEntity, "messages")
-			.of(channelId)
-			.add(message)
-	}
-	
-	async getMessages(channelId: string): Promise<MessageChannelEntity[]> {
-		const channel = await this.getOneById(channelId);
-		if (channel == null)
-			return null;
-		else {
-			let toSort = channel.messages;
-			toSort.sort((a, b) => {
-				return (a.date.toString().localeCompare(b.date.toString()));
-			})
-			return toSort;
-		}
+	async getMessages(channelId: string): Promise<{date: Date, sender: string, content: string}[]> {
+		const msgs: {date: Date, sender: string, content: string}[] = await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.messages", "messages")
+			.leftJoinAndSelect("messages.user", "sender")
+			.select("messages.date", "date")
+			.addSelect("sender.login", "sender")
+			.addSelect("content", "content")
+			.where("channel.id = :id", { id: channelId })
+			.orderBy("messages.date", "ASC")
+			.getRawMany();
+		console.log("msgs: ", msgs);
+		return msgs;
 	}
 
-	async delUserMessages(userId: string, channelId: string) {
+	async delUserMessages(user: UserEntity, channelId: string) {
 		let channel = await this.getOneById(channelId);
 		if (channel == null)
 			return;
 		let messages = channel.messages.filter(message => {
-			return message.userId == userId;
+			return message.user == user;
 		});
 		await this.channelRepository
 			.createQueryBuilder()
