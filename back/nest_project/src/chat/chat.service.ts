@@ -67,13 +67,15 @@ export class ChatService {
 
     private async delUserFromChannel(userId: string, channelId: string, roomHandler: UserRoomHandler) {
         await this.channelService.delUser(userId, channelId);
-        let user = roomHandler.userMap.get(userId);
-        if (user != undefined) {
-            user.socket.emit("leaveChannel", channelId);
-            if (user.isChannel && user.room == channelId) {
-                roomHandler.joinRoom(userId, 'general', true, false, false, false);
-                this.goBackToGeneral(user.socket);
-            }
+        let socketMap = roomHandler.userMap.get(userId);
+        if (socketMap != undefined) {
+            socketMap.emit("leaveChannel", channelId);
+            socketMap.sockets.forEach((user, socket) => {
+                if (user.isChannel && user.room == channelId) {
+                    roomHandler.joinRoom(userId, socket, 'general', true, false, false, false);
+                    this.goBackToGeneral(socket);
+                }
+            });
         }
         let chan: ChannelEntity = await this.channelService.getOneById(channelId);
         if (chan == null)
@@ -82,32 +84,33 @@ export class ChatService {
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
-        roomHandler.addUser(user.id, client, "general", true, false, false, false);
+        let newUser = roomHandler.addUser(user.id, client, "general", true, false, false, false);
         client.emit("changeLocChannel", "general", []);
-        chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userConnected', {userId: user.id, userLogin: user.login});
-        })
-        logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
+        if (newUser) {
+            chatNamespace.sockets.forEach( (socket) => {
+                socket.emit('userConnected', {userId: user.id, userLogin: user.login});
+            })
+            logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
+        }
     }
 
-    public disconnectEvent(user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
+    public disconnectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.delete(user.id);
-        let roomId = roomHandler.delUser(user.id);
-        if (roomId != undefined)
-            roomHandler.roomMap.of(roomId).emit('notice', user.login, " just disconnect");
-        chatNamespace.sockets.forEach( (socket) => {
-            socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
-        })
-        logger.log(`${user.login} as id ${user.id} is disconnected`);
+        if (roomHandler.delSocket(client)) {
+            chatNamespace.sockets.forEach( (socket) => {
+                socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
+            })
+            logger.log(`${user.login} as id ${user.id} is disconnected`);
+        }
     }
 
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
         logger.debug(`${user.login} send : ${message}`);
-        let room = roomHandler.userMap.get(user.id);
+        let room = roomHandler.socketMap.sockets.get(client);
         if (room != undefined) {
             let toSend = {date: new Date(), sender: user.login, content: message};
             if (room.isChannel) {
-                if (!room.onlyOpCanTalk || room.isOP) {
+                if (!room.onlyOpCanTalk || room.isOp) {
                     if (room.room != "general") {
                         logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
@@ -126,23 +129,23 @@ export class ChatService {
                     this.messagePrivateService.sendPrivateMessage(user, dest, message);
                 })
                 client.emit('selfMessage', toSend);
-                let connected = false;
                 let dest = roomHandler.userMap.get(room.room);
-                if (dest != undefined)
-                    connected = true;
+                let connected = dest != undefined;
                 this.userService.findById(room.room)
                 .then(
                     (user) => {
                         client.emit('checkNewDM', {id: room.room, login: user.login}, connected);
                     }
                 )
-                if (dest != undefined) {
+                if (connected) {
                     let userToEmit: IUserToEmit = user;
-                    dest.socket.emit('checkNewDM', userToEmit, true);
-                    if (!dest.isChannel && dest.room == user.id)
-                        dest.socket.emit("newMessage", toSend);
-                    else
-                        dest.socket.emit("pingedBy", userToEmit);
+                    dest.emit('checkNewDM', userToEmit, true);
+                    dest.sockets.forEach((data, socket) => {
+                        if (!data.isChannel && data.room == user.id)
+                            socket.emit("newMessage", toSend);
+                        else
+                            socket.emit("pingedBy", userToEmit);
+                    })
                 }
             }
         }
@@ -154,7 +157,7 @@ export class ChatService {
         if (isChannel)
         {
             if (loc == 'general') {
-                roomHandler.joinRoom(user.id, loc, true, false, false, false);
+                roomHandler.joinRoom(user.id, client, loc, true, false, false, false);
                 this.goBackToGeneral(client);
                 return;
             }
@@ -166,10 +169,11 @@ export class ChatService {
                         if (found) {
                             roomHandler.joinRoom(
                                 user.id,
+                                client,
                                 loc,
                                 true,
-                                found.status == "god" ? true : false,
-                                found.status == "op" ? true : false,
+                                found.status == "god",
+                                found.status == "op",
                                 found.channel.onlyOpCanTalk);
                             this.channelService.getMessages(loc)
                                 .then((array) => {
@@ -189,12 +193,11 @@ export class ChatService {
             .then (
                 (found) => {
                     if (found != null) {
-                        roomHandler.joinRoom(user.id, found.id, false, false, false, false);
-                        console.log('user currently in room : ', roomHandler.userMap.get(user.id).room, roomHandler.userMap.get(user.id).isChannel)
+                        roomHandler.joinRoom(user.id, client, found.id, false, false, false, false);
+                        console.log('user currently in room : ', roomHandler.socketMap.sockets.get(client).room, roomHandler.socketMap.sockets.get(client).isChannel)
                         this.messagePrivateService.findConversation(user.id, found.id)
                         .then(
                             (messages) => {
-                                console.log(messages);
                                 client.emit("newLocPrivate", found.id, found.login, messages);
                             }
                         )
@@ -268,6 +271,7 @@ export class ChatService {
                                     if (!channel.password || data.channelPass == channel.channelPass) {
                                         this.channelService.addNormalUser(user, channel.id)
                                             .then(() => {
+                                                roomHandler.roomMap.of(channel.id).emit("newUserInChannel", user.id, user.login);
                                                 this.listMyChannelEvent(client, user.id);
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                             })
@@ -299,9 +303,13 @@ export class ChatService {
                                     if (alreadyHere == null) {
                                         this.channelService.addNormalUser(userEntity, channelId)
                                         .then( () => {
+                                            roomHandler.roomMap.of(channelId).emit("newUserInChannel", userEntity.id, userEntity.login);
                                             let logged = roomHandler.userMap.get(userToInvite);
-                                            if (logged != undefined)
-                                                this.listMyChannelEvent(logged.socket, userToInvite);
+                                            if (logged != undefined) {
+                                                logged.sockets.forEach(({}, socket) => {
+                                                    this.listMyChannelEvent(socket, userToInvite);
+                                                })
+                                            }
                                         })
                                     }
                                     else
@@ -327,9 +335,13 @@ export class ChatService {
                                                 if (alreadyHere == null) {
                                                     this.channelService.addNormalUser(userEntity, channelId)
                                                     .then( () => {
+                                                        roomHandler.roomMap.of(channelId).emit("newUserInChannel", userEntity.id, userEntity.login);
                                                         let logged = roomHandler.userMap.get(userToInvite);
-                                                        if (logged != undefined)
-                                                            this.listMyChannelEvent(logged.socket, userToInvite);
+                                                        if (logged != undefined) {
+                                                            logged.sockets.forEach(({}, socket) => {
+                                                                this.listMyChannelEvent(socket, userToInvite);
+                                                            })
+                                                        }
                                                     })
                                                 }
                                                 else
@@ -464,13 +476,13 @@ export class ChatService {
                             (succeed) => {
                                 if (!succeed.hidden)
                                 {
-                                    roomHandler.userMap.users.forEach(
-                                        (userInMap, userId) => {
-                                            if (userId != user.id)
-                                                this.userService.findById(userId)
+                                    roomHandler.socketMap.sockets.forEach(
+                                        (data, socket) => {
+                                            if (data.userId != user.id)
+                                                this.userService.findById(data.userId)
                                                 .then(
                                                     (userEntity) => {
-                                                        this.listChannelEvent(userInMap.socket, userEntity);
+                                                        this.listChannelEvent(socket, userEntity);
                                                     });
                                         });
                                 }
