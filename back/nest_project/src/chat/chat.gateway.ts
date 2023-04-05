@@ -80,7 +80,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.disconnectEvent(user, this.chatNamespace, this.chatRoomHandler, this.logger)
+                this.chatService.disconnectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger)
         })
     }
 
