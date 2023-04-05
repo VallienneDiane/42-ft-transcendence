@@ -271,7 +271,9 @@ export class ChatService {
                                     if (!channel.password || data.channelPass == channel.channelPass) {
                                         this.channelService.addNormalUser(user, channel.id)
                                             .then(() => {
-                                                roomHandler.roomMap.of(channel.id).emit("newUserInChannel", user.id, user.login);
+                                                let room = roomHandler.roomMap.of(channel.id);
+                                                if (room != undefined)
+                                                    room.emit("newUserInChannel", user.id, user.login);
                                                 this.listMyChannelEvent(client, user.id);
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                             })
@@ -303,7 +305,9 @@ export class ChatService {
                                     if (alreadyHere == null) {
                                         this.channelService.addNormalUser(userEntity, channelId)
                                         .then( () => {
-                                            roomHandler.roomMap.of(channelId).emit("newUserInChannel", userEntity.id, userEntity.login);
+                                            let room = roomHandler.roomMap.of(channelId);
+                                            if (room != undefined)
+                                                room.emit("newUserInChannel", userEntity.id, userEntity.login);
                                             let logged = roomHandler.userMap.get(userToInvite);
                                             if (logged != undefined) {
                                                 logged.sockets.forEach(({}, socket) => {
@@ -335,7 +339,9 @@ export class ChatService {
                                                 if (alreadyHere == null) {
                                                     this.channelService.addNormalUser(userEntity, channelId)
                                                     .then( () => {
-                                                        roomHandler.roomMap.of(channelId).emit("newUserInChannel", userEntity.id, userEntity.login);
+                                                        let room = roomHandler.roomMap.of(channelId);
+                                                        if (room != undefined)
+                                                            room.emit("newUserInChannel", userEntity.id, userEntity.login);
                                                         let logged = roomHandler.userMap.get(userToInvite);
                                                         if (logged != undefined) {
                                                             logged.sockets.forEach(({}, socket) => {
