@@ -7,16 +7,6 @@ import { ChannelEntity } from "../chat/channel/channel.entity";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
-interface User {
-    id: number,
-    login: string,
-    email: string,
-    twoFactorSecret: string,
-    isTwoFactorEnabled: boolean,
-    qrCode: string,
-    avatarSvg: string
-}
-
 @Injectable({})
 export class UserService {
     constructor (
