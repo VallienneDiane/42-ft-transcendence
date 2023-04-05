@@ -74,7 +74,8 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const me: JwtPayload = accountService.readPayload()!;
 
     const leaveChannel = () => {
-        socket.emit('leaveChannel', props.dest.id);
+        console.log(props.dest.id)
+        socket.emit('leaveChannel', {channelId: props.dest.id});
         props.handleClose();
     }
 
