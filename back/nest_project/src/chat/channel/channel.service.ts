@@ -15,16 +15,16 @@ export class ChannelService {
 	) {}
 
 	// Add a new channel to database, don't forget to fill the newChannel.godUser
-	public create(newChannel: ChannelDto): Promise<ChannelEntity> {
+	async create(newChannel: ChannelDto): Promise<ChannelEntity> {
 		if (newChannel.godUser == undefined)
 			return null;
-		return this.channelRepository.save(newChannel);
+		return await this.channelRepository.save(newChannel);
 	}
 
-	public create2(newChannel: ChannelDto, creator: UserDto): Promise<ChannelEntity> {
+	async create2(newChannel: ChannelDto, creator: UserDto): Promise<ChannelEntity> {
 		let entityToAdd: ChannelEntity = newChannel;
 		entityToAdd.godUser = creator;
-		return this.channelRepository.save(entityToAdd);
+		return await this.channelRepository.save(entityToAdd);
 	}
 
 	// Finds first entity by a given channelName. If entity was not found in the database - returns null.
