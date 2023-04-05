@@ -106,11 +106,10 @@ export class ChannelService {
 		const allChannels = await this.listChannelsWithUsers();
 		let channListToReturn: ChannelEntity[] = [];
 		allChannels.forEach(channel => {
-			//console.log(channel);
 			if (!channel.hidden
 				&& channel.godUser.id != user.id
-				&& !channel.opUsers.includes(user)
-				&& !channel.normalUsers.includes(user)
+				&& channel.opUsers.every((opUser) => {return opUser.id != user.id})
+				&& channel.normalUsers.every((normalUser) => {return normalUser.id != user.id})
 				) {
 					channListToReturn.push(channel);
 				}
@@ -127,19 +126,19 @@ export class ChannelService {
 	async listUsersInChannel(channelId: string): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
 		const godUser: UserEntity = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.godUser", "god")
+			.innerJoinAndSelect("channel.godUser", "god")
 			.select("god")
 			.where("channel.id = :id", { id: channelId })
 			.getRawOne();
 		let opUsers: UserEntity[] = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.opUsers", "ops")
+			.innerJoinAndSelect("channel.opUsers", "ops")
 			.select("ops")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
 		let normalUsers: UserEntity[] = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.normalUsers", "normal")
+			.innerJoinAndSelect("channel.normalUsers", "normal")
 			.select("normal")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
