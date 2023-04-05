@@ -381,6 +381,7 @@ export class ChatService {
                 client.emit('notice', 'you are not registered to that channel.');
         })
     }
+    
 
     public makeHimOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channelId: string) {
         this.channelService.getUserInChannel(channelId, userId)
