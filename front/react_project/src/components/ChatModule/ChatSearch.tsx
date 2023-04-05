@@ -140,11 +140,26 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 if (playload.login !== login)
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             })
-            console.log("users", newUserList);
             this.setState({users: newUserList});
         })
         .catch(error => {
             console.log(error);
+        })
+        this.props.socket.emit('myDM');
+        this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+            // console.log("dmi", strs);
+            let newList: ISearch[] = [];
+            for (let user of this.state.users) {
+                let ok: boolean = true;
+                for (let elt of strs) {
+                    if (elt.userId == user.id)
+                        ok = false;
+                }
+                if (ok)
+                    newList.push(user);
+            }
+            // console.log("blop", newList);
+            this.setState({users: newList});
         })
     }
     
@@ -215,10 +230,16 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
+        this.props.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
+            let newList: ISearch[] = this.state.users.filter(
+                elt => {return (elt.id != room.id)}
+                );
+            this.setState({users: newList});
+        })
 
         this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageToSend[]) => {
             let newHistory: Message[] = [];
-            console.log("array :", array);
+            // console.log("array :", array);
             for (let elt of array) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
             }
@@ -227,7 +248,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         })
 
         this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageToSend[]) => {
-            console.log(messages);
+            // console.log(messages);
             let newHistory: Message[] = [];
             for (let elt of messages) {
                 newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
@@ -255,8 +276,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                     </svg>
                 </div>
                 {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
-                    {this.state.filtered.map((elt: ISearch) => (
-                        <SearchElement  key={elt.id} socket={this.props.socket} handleClose={this.resetFiltered}
+                    {this.state.filtered.map((elt: ISearch, id: number) => (
+                        <SearchElement  key={id} socket={this.props.socket} handleClose={this.resetFiltered}
                                         popupAction={this.onClickPopup} elt={elt} />
                     ))}
                 </ul>}
