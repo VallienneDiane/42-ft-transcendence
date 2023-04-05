@@ -20,9 +20,10 @@ const Callback: React.FC = () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     
-    if (code) {
-        accountService.callback(code)
+    useEffect(() => {
+        accountService.callback(code!)
         .then(response => {
+            console.log("dans le useffect de callback");
             accountService.is2faActive(response.data.login)
             .then(response_2fa => {
                 if(response_2fa.data.is2faActive == true) {
@@ -42,6 +43,9 @@ const Callback: React.FC = () => {
         .catch(error => {
             console.log(error);
         });
+    }, [code])
+
+    if (code) {
     }
 
     return (
