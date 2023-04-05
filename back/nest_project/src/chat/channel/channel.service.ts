@@ -127,20 +127,20 @@ export class ChannelService {
 	async listUsersInChannel(channelId: string): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
 		const godUser: UserEntity = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.godUser", "god")
-			.select("god")
+			.innerJoinAndSelect("channel.godUser", "god")
+			.select("god.*")
 			.where("channel.id = :id", { id: channelId })
 			.getRawOne();
 		let opUsers: UserEntity[] = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.opUsers", "ops")
-			.select("ops")
+			.innerJoinAndSelect("channel.opUsers", "ops")
+			.select("ops.*")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
 		let normalUsers: UserEntity[] = await this.channelRepository
 			.createQueryBuilder("channel")
-			.leftJoinAndSelect("channel.normalUsers", "normal")
-			.select("normal")
+			.innerJoinAndSelect("channel.normalUsers", "normal")
+			.select("normal.*")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
 		opUsers.sort((a, b) => {
@@ -162,6 +162,7 @@ export class ChannelService {
 				toReturn.push({user: user, status: "normal", connected: false});
 			}
 		)
+		console.log(toReturn)
 		return toReturn;
 	}
 
@@ -175,6 +176,8 @@ export class ChannelService {
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
 		const usersArray = await this.listUsersInChannel(channelId);
 		for (let elt of usersArray) {
+			console.log(elt.user.id)
+			console.log(userId)
 			if (elt.user.id == userId)
 				return ({user: elt.user, status: elt.status});
 		}
@@ -210,11 +213,17 @@ export class ChannelService {
 	}
 
 	async delOpUser(userId: string, channelId: string): Promise<boolean> {
-		let chann = await this.getOneById(channelId);
+		let chann: ChannelEntity = await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.opUsers", "op")
+			.where("channel = :id", { id: channelId })
+			.select("op.*")
+			.getRawOne();
 		if (chann == null)
 			return;
 		let opNumberToReduce = false;
 		let users = chann.opUsers;
+		console.log(users);
 		for (let user of users) {
 			if (user.id == userId) {
 				opNumberToReduce = true;
