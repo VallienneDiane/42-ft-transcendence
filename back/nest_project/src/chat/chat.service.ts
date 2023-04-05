@@ -107,7 +107,7 @@ export class ChatService {
     public connectEvent(client: Socket, login: string, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(login, client);
         roomHandler.addUser(login, client, "general", true, false, false);
-        console.log(login);
+        console.log("login chat service : ", login);
         client.emit("changeLocChannel", "general", []);
         chatNamespace.sockets.forEach( (socket) => {
             socket.emit('userConnected', login);
@@ -153,7 +153,7 @@ export class ChatService {
                     if (!dest.isChannel && dest.room == login)
                         dest.socket.emit("newMessage", toSend);
                     else
-                        dest.socket.emit("pingedBy", login);
+                        dest.socket.emit("pingedBy", login, true);
                 }
             }
         }

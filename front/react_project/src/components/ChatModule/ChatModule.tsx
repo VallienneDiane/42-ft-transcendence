@@ -9,14 +9,18 @@ import { Header, SidebarUser, SidebarChannel } from "./ChatSidebar";
 import SearchChat from "./ChatSearch";
 import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 
 class ChannelDMList extends React.Component<{socket: Socket}, {
     channels: string[],
-    dms: {login: string, connected: boolean}[], 
+    // waitingMsg: boolean,
+    dms: {login: string, connected: boolean } [],
     me: JwtPayload}> {
     constructor(props: {socket: Socket}) {
         super(props);
         this.state = {channels: [], dms: [], me: accountService.readPayload()!};
+        // this.state = {channels: [], dms: [], waitingMsg: false, me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
         this.initList = this.initList.bind(this);
         this.checkOnline = this.checkOnline.bind(this);
@@ -24,7 +28,8 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
     }
     
     changeLoc(channel: IDest) {
-        this.props.socket!.emit('changeLoc', channel);  
+        this.props.socket!.emit('changeLoc', channel);
+        // this.setState({ waitingMsg: false });
     }
 
     initList() {
@@ -32,8 +37,11 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         this.props.socket!.on('listMyChannels', (strs: string[]) => { 
             this.setState({ channels: strs }) }); 
         this.props.socket!.emit('myDM');
-        this.props.socket!.on('listMyDM', (strs: {login: string, connected: boolean}[]) => { 
+        this.props.socket!.on('listMyDM', (strs: {login: string, connected: boolean} []) => { 
             this.setState({ dms: strs }) });
+        this.props.socket!.on('pingedBy', (login: string) => {
+            // this.setState({ waitingMsg: true });
+        })
     }
 
     checkOnline() {
@@ -121,11 +129,22 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
-                        { this.state.dms.map((dm, id) => { 
-                           if (this.state.me.login != dm.login)
-                           { return (<li key={id}><button onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}>{dm.login}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
-                        })}
-                    </ul>
+                    {this.state.dms.map((dm, id) => {
+                    if (this.state.me.login !== dm.login) {
+                        return (
+                        <li key={id}>
+                            <button onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})}>
+                            {/* <button onClick={() => this.changeLoc({Loc: dm.login, isChannel: false})} className={this.state.waitingMsg ? "waitingMsg" : ""}> */}
+                                {dm.login}
+                                {/* { this.state.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  } */}
+                            </button>
+                            <div className={dm.connected? "circle online" : "circle offline"}></div>
+                        </li>
+                        );
+                    }
+                    return null;
+                    })}
+                </ul>
                 </React.Fragment>
             )}
         </div>
