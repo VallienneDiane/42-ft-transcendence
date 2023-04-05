@@ -493,7 +493,7 @@ export class ChatService {
                                         });
                                 }
                                 this.listMyChannelEvent(client, user.id);
-                                this.changeLocEvent(client, user, succeed.name, true, roomHandler);
+                                this.changeLocEvent(client, user, succeed.id, true, roomHandler);
                             });
                     }
                     else
