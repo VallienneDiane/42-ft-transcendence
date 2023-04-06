@@ -276,13 +276,15 @@ export class ChatService {
                                                     room.emit("newUserInChannel", user.id, user.login);
                                                 this.listMyChannelEvent(client, user.id);
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
+                                                client.emit("true");
                                             })
                                     }
                                     else
-                                        client.emit("notice", "Wrong channel password");
+                                        client.emit("wrong");
+                                        // client.emit("notice", "Wrong password");
                                 }
                                 else
-                                    client.emit("notice", "this channel is on invite only");
+                                    client.emit("notice", "This channel is on invite only");
                             }
                             else
                                 client.emit("notice", "no such channel");

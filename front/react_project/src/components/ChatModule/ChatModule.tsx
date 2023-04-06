@@ -34,7 +34,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             this.setState({ channels: channels }) }); 
         this.props.socket.emit('myDM');
         this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
-            console.log("my DM: ", strs);
+            // console.log("my DM: ", strs);
             this.setState({ dms: strs }) });
     }
 

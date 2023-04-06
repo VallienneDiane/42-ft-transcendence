@@ -1,6 +1,6 @@
 import { accountService } from "../services/account.service";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";;
+import { useEffect, useState } from "react";
 import { GridLoader, SyncLoader } from 'react-spinners';
 import "../styles/Callback.scss"
 

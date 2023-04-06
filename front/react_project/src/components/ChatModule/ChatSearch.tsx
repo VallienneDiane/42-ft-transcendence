@@ -10,6 +10,8 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     const {socket} = useContext(SocketContext);
     const [pass, setPass] = useState<string>('');
     const ref = useRef<HTMLDivElement>(null);
+    const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
+    const [ offSocket, setOffSocket ] = useState<boolean>(false);
 
     const handleClickOutside = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
@@ -24,11 +26,23 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     }
 
     useEffect(() => {
+        socket.on("wrong", () => {
+            setIncorrectCredentials(true);
+        });
+        socket.on("true", () => {
+            setOffSocket(true);
+            setPass('');
+            props.handleClose('');
+        })
         document.addEventListener("mousedown", handleClickOutside);
         document.addEventListener("keydown", onKeyPress);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
+            if (offSocket) {
+                socket.off("wrong");
+                socket.off("true");
+            }
         }
     }, [ref]);
 
@@ -39,8 +53,6 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     const handlerJoinPass = (event: any) => {
         event.preventDefault();
         socket.emit('joinChannel', {channelId: props.channelId, channelPass: pass});
-        setPass('');
-        props.handleClose('');
     }
 
     return (
@@ -49,6 +61,7 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
                 <h1>{props.channelName}</h1>
                 <form onSubmit={handlerJoinPass}>
                     <input type="password" placeholder="Enter channel pass here..." value={pass} onChange={handlePass} />
+                    { incorrectCredentials && <div className="logError">Wrong password</div>}
                     <button type="submit">Enter</button>
                 </form>
             </div>
@@ -129,7 +142,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         }
     }
 
-    fetchUsers() { // récupération de tous les users, sauf moi-même
+    fetchUsers() { // récupération de tous les users, sauf moi-même, et les users que j'ai déjà DM
         userService.getAllUsers()
         .then(response => {
             const playload: JwtPayload = accountService.readPayload()!;
@@ -141,25 +154,23 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             })
             this.setState({users: newUserList});
+            this.props.socket.emit('myDM');
+            this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+                let newList: ISearch[] = [];
+                for (let user of this.state.users) {
+                    let ok: boolean = true;
+                    for (let elt of strs) {
+                        if (elt.userId == user.id)
+                            ok = false;
+                    }
+                    if (ok)
+                        newList.push(user);
+                }
+                this.setState({users: newList});
+            })
         })
         .catch(error => {
             console.log(error);
-        })
-        this.props.socket.emit('myDM');
-        this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-            // console.log("dmi", strs);
-            let newList: ISearch[] = [];
-            for (let user of this.state.users) {
-                let ok: boolean = true;
-                for (let elt of strs) {
-                    if (elt.userId == user.id)
-                        ok = false;
-                }
-                if (ok)
-                    newList.push(user);
-            }
-            // console.log("blop", newList);
-            this.setState({users: newList});
         })
     }
     
