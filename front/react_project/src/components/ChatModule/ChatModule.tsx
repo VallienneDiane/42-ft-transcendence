@@ -115,10 +115,11 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
     componentWillUnmount(): void {
         this.props.socket.off('listMyChannels');
         this.props.socket.off('listMyDM');
-        this.props.socket.off("leaveChannel");
         this.props.socket.off('checkNewDM');
         this.props.socket.off("userConnected");
         this.props.socket.off("userDisconnected");
+        this.props.socket.off("channelJoined");
+        this.props.socket.off("channelLeaved");
     }
 
     render() {

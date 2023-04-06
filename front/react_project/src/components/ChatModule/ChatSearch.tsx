@@ -236,11 +236,26 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
                 newChanList.push({id: str.id, name: str.name, password: str.password, isChannel: true, isClickable: true});
-            console.log("channels", newChanList);
-            this.setState({channels: newChanList})});
+            // console.log("channels", newChanList);
+            this.setState({channels: newChanList})
+        });
         
-        
-            
+        this.props.socket.on('channelJoined', (chann: {channel: IChannelEntity, status: string}) => {
+            let nextState: ISearch[] = this.state.channels.filter(
+                elt => {return (elt.id != chann.channel.id)}
+                );
+            this.setState({channels: nextState});
+        })
+
+        this.props.socket.on('channelLeaved', (chann: IChannelEntity) => {
+            let newChann: ISearch = {id: chann.id, name: chann.name, password: chann.password, isChannel: true, isClickable: true};
+            let nextState: ISearch[] = [...this.state.channels, newChann];
+            nextState.sort((a, b) => {
+                return (a.name.localeCompare(b.name))
+            });
+            this.setState({channels: nextState});
+        })
+           
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});
         this.props.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
@@ -248,7 +263,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 elt => {return (elt.id != room.id)}
                 );
             this.setState({users: newList});
-        })
+        });
 
         this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageToSend[]) => {
             let newHistory: Message[] = [];
@@ -258,7 +273,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             }
             this.props.action(newHistory);
             this.props.action2({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
-        })
+        });
 
         this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageToSend[]) => {
             // console.log(messages);
@@ -268,7 +283,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             }
             this.props.action(newHistory);
             this.props.action2({id: id, name: login, isChannel: false});
-        })
+        });
     }
 
     componentWillUnmount(): void {
