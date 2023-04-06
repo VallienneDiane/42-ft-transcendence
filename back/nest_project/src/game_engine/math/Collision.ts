@@ -61,7 +61,7 @@ export class Collision {
 
         let closest_dist_vec = Collision.closest_point_bw(b, w).sub(b.position);
         if (closest_dist_vec.mag() <= b.r) {
-            console.log("colission detected zith a wwall");
+            console.log("colission detected with a wall");
             return true;
         }
         return false;
