@@ -33,7 +33,7 @@ export class PongEngineService {
     cooldown = 90; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
-    loop; // set_interval function handle for stoping the game
+    loop: any; // set_interval function handle for stoping the game
 
     constructor () {
         this.ball = new Simple_ball();
@@ -85,7 +85,7 @@ export class PongEngineService {
      * check if both player are ready and start the game loop
      * @param player the socket of the ready player
      */
-    set_player_ready(player: Socket, server) {
+    set_player_ready(player: Socket, server: any) {
         if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }

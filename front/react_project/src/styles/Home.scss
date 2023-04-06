@@ -46,7 +46,7 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    top: 8px;
+                    top: 9px;
                     left: -5px;
                     width: 15px;
                     height: 15px;
@@ -85,11 +85,13 @@
                 // background-color: red;
                 // background-color: transparent;
                 background-color: var(--second-color);
-                font-size: 3.2em;
+                // font-size: 3.2em;
                 border: solid 4px var(--text-color);
                 position: relative;
                 z-index: 2;
 
+                // container-type: inline-size;
+                font-size: 7cqw;
             }
 
             & .navLink {
@@ -137,10 +139,11 @@
             }
 
             & h1:hover {
+                
                 // background-color: red;
-                font-size: 3.1em;
-                width: 99%;
-                transform: translateY(-5px);
+                // font-size: 30%;
+                // width: 99%;
+                transform: translateY(-12px) scale(0.97);
                 filter: brightness(95%);
                 z-index: 2;
 
@@ -150,13 +153,13 @@
                 }
 
                 &+.shadow::after {
-                    height: 9px;
+                    height: 0px;
                     left: -2px;
                     // top: -1px;
                 }
 
                 &+.shadow::before {
-                    width: 8px;
+                    width: 0px;
                     top: 4px;
                     right: 2px;
                 }
@@ -206,8 +209,8 @@
 
             & .navLink:hover {
                 // background-color: red;
-                width: 288px;
-                transform: translateY(-5px);
+                // width: 288px;
+                transform: translateY(-12px) scale(0.95);
                 filter: brightness(95%);
                 z-index: 2;
 
@@ -217,13 +220,13 @@
                 }
 
                 &+.shadow::after {
-                    height: 9px;
+                    height: 0px;
                     left: -2px;
                     // top: -1px;
                 }
 
                 &+.shadow::before {
-                    width: 8px;
+                    width: 0px;
                     top: 4px;
                     right: 2px;
                 }
@@ -246,7 +249,7 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    top: 8px;
+                    top: 9px;
                     left: -5px;
                     width: 15px;
                     height: 15px;

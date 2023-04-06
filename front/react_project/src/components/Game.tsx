@@ -5,7 +5,8 @@ import socketIOClient from 'socket.io-client'
 import io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
 import { accountService } from "../services/account.service";
-import {DefaultEventsMap} from "@socket.io/component-emitter";
+import { DefaultEventsMap } from "@socket.io/component-emitter";
+import MatchsInProgress from "./MatchsInProgress"
 
 interface ball {
     x: number,
@@ -15,8 +16,8 @@ interface ball {
 
 interface gameState {
     ballPosition: ball[],
-    paddleOne: {x: number, y: number},
-    paddleTwo: {x: number, y: number}
+    paddleOne: { x: number, y: number },
+    paddleTwo: { x: number, y: number }
 }
 
 interface inputState {
@@ -29,41 +30,54 @@ interface Players {
     login2: string,
 }
 
+
 const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     // const [startGame, setStartGame] = useState<boolean>(false);
     const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
     const [waitMatch, setWaitMatch] = useState<boolean>(false); // A init à false
     const [matchInProgress, setMatchInProgress] = useState<boolean>(false); // A init à false
+    const [ready, setReady] = useState<boolean>(false); // A init à false
+    const [timer, setTimer] = useState<boolean>(false); // A init à false
+    const [countdown, setCountdown] = useState<number | string>(3);
+    const countDownDiv = useRef<HTMLElement>(null);
     const [players, setPlayers] = useState<Players>();
     const [gameState, setGameState] = useState<gameState>();
-    const [inputState, setInputState] = useState<inputState>({up: false, down: false});
+    const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
 
     if (socket === null) {
         console.log("new socket");
         setSocket(io('localhost:3000', {
             transports: ['websocket'],
-            auth: {token: accountService.getToken()}
+            auth: { token: accountService.getToken() }
         }));
     }
 
-    const launchClassic = () => {
+     const launchClassic = () => {
         // On click on 'start' button, start the game
+        // setTimer(true); ////////////// TO DELETE
+        // countDownDiv.current!.classList.add('zoom')
+
         if (socket !== null) {
-            socket.emit('public_matchmaking', "classic");
-            setWaitMatch(true);
+            socket.emit('public matchmaking', "classic");
+             setWaitMatch(true);
         }
     }
-
+    
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socket !== null) {
-            socket.emit('public_matchmaking', "game");
+            socket.emit('public matchmaking', "game");
             setWaitMatch(true);
         }
     }
 
-
+    const informReady = () => {
+        // On click on 'ready' button, inform server that the player is ready
+        if (socket !== null) {
+            socket.emit('ready');
+        }
+    }
 
 
     useEffect(() => {
@@ -71,13 +85,40 @@ const Game: React.FC = () => {
         if (canvasRef.current) {
             setGameState({
                 ballPosition: [
-                    { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5},
+                    { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
                 ],
-                paddleOne: {x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
-                paddleTwo: {x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
+                paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
+                paddleTwo: { x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
             });
         }
     }, []);
+
+    // countdown handler
+    useEffect(() => {
+        let intervalId: NodeJS.Timeout;
+        if (timer === true) {
+            intervalId = setInterval(() => {
+                countDownDiv.current!.classList.add('zoom')
+                setTimeout(() => {
+                    if (countDownDiv.current) {
+                        countDownDiv.current!.classList.remove('zoom')
+                    }
+                }, 1000);
+                if (countdown === "GO !") {
+                    setTimer(false);
+                }
+                else {
+                    setCountdown(countdown as number - 1);
+                    if (countdown === 1) {
+                        setCountdown("GO !");
+                    }
+                }
+            }, 500)
+        }
+        return () => {
+            clearInterval(intervalId);
+        };
+    }, [timer, countdown])
 
     useEffect(() => {
         // triggered when receiving socket data, update position of elements
@@ -86,13 +127,22 @@ const Game: React.FC = () => {
                 console.log('Connected to server!');
             });
 
-            socket.on('matchMaking', (players: Players) => {
+            socket.on('players', (players: Players) => {
                 setWaitMatch(false);
                 setMatchInProgress(true);
+                setReady(true);
                 setPlayers(players);
             })
-            
+
+            // socket.on('matchsInProgress', (matchs: Match[]) => {
+            //     setMatchs(matchs);
+            // })
+
             socket.on('Game_Update', (gameState: gameState) => {
+                if (ready === true) {
+                    setTimer(true);
+                }
+                setReady(false);
                 setGameState(gameState);
                 setGameState((prevState) => ({
                     ...prevState,
@@ -112,14 +162,14 @@ const Game: React.FC = () => {
         event.preventDefault();
         console.log(event.key);
         if (event.key === "ArrowUp") {
-            setInputState({up: true, down : false});
+            setInputState({ up: true, down: false });
         }
         else if (event.key === "ArrowDown") {
-            setInputState({up: false, down : true});
+            setInputState({ up: false, down: true });
         }
         // socket.emit('Game_Input_Down', event.key);
     }, []);
-    
+
     const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
@@ -136,10 +186,10 @@ const Game: React.FC = () => {
         }
         // socket.emit('Game_Input_Up', event.key);
     }, []);
-    
+
     useEffect(() => {
         const intervalId = setInterval(() => {
-            
+
             if (inputState.up === true) {
                 socket.emit('Game_Input', "ArrowUp");
             }
@@ -161,7 +211,7 @@ const Game: React.FC = () => {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (canvas && gameState) {
+        if (canvas && gameState && ready) {
             const context = canvas.getContext("2d")!;
             if (context) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
@@ -173,11 +223,6 @@ const Game: React.FC = () => {
                     context.fill();
                     context.stroke()
                 })
-                // context.beginPath();
-                // context.arc(gameState.ballPosition[0].x, gameState.ballPosition[0].y, 5, 0, Math.PI * 2);
-                // context.fillStyle = 'black';
-                // context.fill();
-                // context.arc(gameState.ballPosition[1].x, gameState.ballPosition[1].y, 5, 0, Math.PI * 2);
 
                 context.fillStyle = secondaryColor;
                 context.fillRect(gameState!.paddleOne.x * canvas.width, gameState!.paddleOne.y * canvas.height - 25, 8, 50);
@@ -191,16 +236,19 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             <h1>Game Page</h1>
+            <MatchsInProgress socket={socket}/>
             <div id="gamePanel">
                 {matchInProgress ? <div>{players?.login1} VS {players?.login2}</div> : null}
                 <div id="gameField">
-                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                    {/* {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null} */}
+                    {ready ? <button id="readyButton" onClick={informReady}>READY ?</button> : null}
+                    {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
                 </div>
             </div>
             <div id="gameButtons">
-                <button className="gameButton" onClick={launchClassic}>CLASSIC</button>
-                <button className="gameButton" onClick={launchGame}>SUPER</button>
+                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`}onClick={launchClassic}>CLASSIC</button>
+                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`}onClick={launchGame}>SUPER</button>
             </div>
         </div>
     )

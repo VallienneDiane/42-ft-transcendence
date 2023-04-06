@@ -77,7 +77,13 @@
 
 @media (max-width: 900px) {
     #navbar {
+        position: relative;
+        justify-content: flex-end;
         // border: 5px solid red;
+        & #logo {
+            position: absolute;
+            width: 100%;
+        }
         
         & > #links {
             border: 1px solid rgb(199, 199, 199);
@@ -119,6 +125,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
+            z-index: 1;
 
             & > .bar {
                 width: 80%;
