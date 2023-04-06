@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom"
-import SearchUserBar from "./SearchUserBar";
 import { User } from "../models";
 import "../styles/Profile.scss"
 import { userService } from "../services/user.service";
@@ -18,7 +17,6 @@ export default function Profile() {
         if (currentUser !== undefined){
             userService.getUser(currentUser)
             .then(response => {
-                console.log(response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }

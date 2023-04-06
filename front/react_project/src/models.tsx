@@ -21,6 +21,11 @@ export interface SignUpForm {
     avatarSvg?: string
 }
   
+export interface SettingsForm { 
+    login: string,
+    errors?: string,
+}
+  
 export interface UserData { 
     id?: number,
     login: string,

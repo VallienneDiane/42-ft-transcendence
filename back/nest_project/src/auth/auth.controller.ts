@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Get, UseGuards, Headers, Query } from '@nestjs/common';
+import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
 import { UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
 import { JwtService } from "@nestjs/jwt";
+import { Response } from 'express';
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
@@ -23,6 +24,7 @@ export class AuthController {
   //then generate access token to navigate on our website
   @Get('/callback')
   async callback(@Query('code') code: string) {
+    let newUser = false;
     const tokenApi42 = await this.authService.validateFortyTwo(code);
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',
@@ -32,7 +34,7 @@ export class AuthController {
     });
     const data = await response.json();
     if(!await this.userService.findByLogin(data.login)) {
-      const newUser42 = {
+      const user42 = {
         id: <number>null,
         login: data.login,
         email: data.email,
@@ -42,14 +44,22 @@ export class AuthController {
         qrCode: <string>null,
         avatarSvg: data.image?.link,
       };
-      await this.userService.create(newUser42);
+      await this.userService.create(user42);
+      newUser = true;
     }
-    const access_token = await this.authService.genToken(data.login);
-    return { 
-      token: access_token,
+    return {
+      newuser: newUser,
       login: data.login,
+      avatarSvg: data.image?.link,
     }
   }
+
+  @Post('user/update')
+  async updateUser42(@Body() user: UserDto) {
+    console.log("dans auth controller user ", user, user.login);
+    this.userService.update(user.login, user);
+  }
+
   //check login and password with local stratgey of passport
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')

@@ -23,17 +23,26 @@ const Callback: React.FC = () => {
     useEffect(() => {
         accountService.callback(code!)
         .then(response => {
-            console.log("dans le useffect de callback");
             accountService.is2faActive(response.data.login)
             .then(response_2fa => {
                 if(response_2fa.data.is2faActive == true) {
                     navigate("/verifyCode2fa", { state: { login: response.data.login } });
                 }
                 else {
-                    const token = response.data.token.access_token;
-                    accountService.saveToken(token);
-                    const from = (location.state as any)?.from || "/";
-                    navigate(from);
+                    console.log("REEEESPONSE : ", response);
+                    if(response.data.newuser == true) {
+                        console.log("avant redir homepage");
+                        navigate("/homePageSettings", { state: { login: response.data.login, avatar: response.data.avatarSvg } });
+                    }
+                    else {
+                        accountService.generateToken(response.data.login)
+                        .then(res_token => {
+                            console.log(" RES TOKEN ", res_token);
+                            accountService.saveToken(res_token.data.access_token);
+                            const from = (location.state as any)?.from || "/";
+                            navigate(from);
+                        })
+                    }
                 }
             })
             .catch(error => {
@@ -44,9 +53,6 @@ const Callback: React.FC = () => {
             console.log(error);
         });
     }, [code])
-
-    if (code) {
-    }
 
     return (
         <div id="loadingPage">
