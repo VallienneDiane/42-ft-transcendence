@@ -47,8 +47,8 @@ export class PongEngineService {
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
-        paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
-        paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
+        paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
+        paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
         console.log("from pong engine service ;y player are :" + this.pl1 + "and" + this.pl2);
     }
 
@@ -69,6 +69,7 @@ export class PongEngineService {
      * @param key the key pressed
      */
     process_input (client: Socket, key: any) {
+        console.log("key received" + key);
         if (client === this.pl1) {
             this.p1.process_input(key);
         }
@@ -112,12 +113,18 @@ export class PongEngineService {
      */
     main_loop() {
         this.cooldown_start++; // increment the cooldown counter
-        if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
-            this.ball = new Simple_ball();
-            this.cooldown_start = 0;
-        }
         if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
             return;
+        if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
+            this.ball = new Simple_ball();
+            this.p1.reset_self_y_position();
+            this.p2.reset_self_y_position();
+            this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+            paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
+            paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p2.length/2}};
+            this.cooldown_start = 0;
+            return;
+        }
         this.p1.update_self_position();
         this.p2.update_self_position();
         this.ball.update_self_position(this.p1, this.p2);

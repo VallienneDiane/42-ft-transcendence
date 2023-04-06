@@ -13,7 +13,7 @@ export class Simple_paddle {
         this.x_position = 0.025;
         this.length = 0.17;
         this.y_position = 0.5 - (this.length / 2);
-        this.speed = 3/60;
+        this.speed = 1/60;
         this.up = false;
         this.down = false;
     }
@@ -34,6 +34,10 @@ export class Simple_paddle {
                 this.y_position = 1 - this.length;
             }
         }
+    }
+
+    reset_self_y_position() {
+        this.y_position = 0.5 - (this.length / 2);
     }
 
     /**
