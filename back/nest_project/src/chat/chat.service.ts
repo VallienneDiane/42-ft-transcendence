@@ -23,29 +23,6 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private sendEssentialUserData(userEntity: UserEntity): IUserToEmit {
-        return {
-            id: userEntity.id,
-            login: userEntity.login
-        }
-    }
-
-    private sendEssentialChannelData(channelEntity: ChannelEntity): IChannelToEmit {
-        return {
-            id: channelEntity.id,
-            date: channelEntity.date,
-            name: channelEntity.name,
-            password: channelEntity.password,
-            inviteOnly: channelEntity.inviteOnly,
-            persistant: channelEntity.persistant,
-            onlyOpCanTalk: channelEntity.onlyOpCanTalk,
-            hidden: channelEntity.hidden,
-            normalUsers: channelEntity.normalUsers,
-            opUsers: channelEntity.opUsers,
-            godUser: channelEntity.godUser
-        }
-    }
-
     private goBackToGeneral(client: Socket) {
         let locGeneral: ChannelEntity = {
             id: "00000000-0000-0000-0000-000000000000",
@@ -251,7 +228,7 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId);
+        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId, true);
         usersArray.forEach((elt) => {
             let connected = roomHandler.userMap.get(elt.user.id);
             if (connected != undefined)
@@ -386,7 +363,6 @@ export class ChatService {
                 client.emit('notice', 'you are not registered to that channel.');
         })
     }
-    
 
     public makeHimOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channelId: string) {
         this.channelService.getUserInChannel(channelId, userId)
@@ -401,7 +377,7 @@ export class ChatService {
                         (linkToOp) => {
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
-                            else if (linkToOp.status == "op")
+                            else if (linkToOp.status != "normal")
                                 client.emit('notice', "this user is already operator to this channel");
                             else {
                                 this.channelService.upgradeUserOnChannel(linkToOp.user, channelId);
@@ -506,5 +482,19 @@ export class ChatService {
                         client.emit("notice", "This channel already exists.");
                 });
         }
+    }
+
+    public destroyChannelEvent(client: Socket, user: UserEntity, channelId: string, roomHandler: UserRoomHandler) {
+        this.channelService.getUserInChannel(channelId, user.id)
+        .then((link) => {
+            if (!link || link.status != "god")
+                client.emit("notice", "You cna't do that !");
+            else {
+                this.channelService.deleteById(channelId)
+                .then(() => {
+                    roomHandler.roomKill(channelId);
+                })
+            }
+        })
     }
 }

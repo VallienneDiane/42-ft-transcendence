@@ -123,7 +123,7 @@ export class ChannelService {
 	 * @returns an array or UserEntity belong to this channel with theyre grade in this channel, a connected: boolean is available 
 	 * to set it up later, it can be ignored either
 	 */
-	async listUsersInChannel(channelId: string): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
+	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
 		const godUser: UserEntity = await this.channelRepository
 			.createQueryBuilder("channel")
 			.innerJoinAndSelect("channel.godUser", "god")
@@ -142,12 +142,14 @@ export class ChannelService {
 			.select("normal.*")
 			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
-		opUsers.sort((a, b) => {
-			return (a.login.localeCompare(b.login))
-		});
-		normalUsers.sort((a, b) => {
-			return (a.login.localeCompare(b.login))
-		});
+		if (sorted) {
+			opUsers.sort((a, b) => {
+				return (a.login.localeCompare(b.login))
+			});
+			normalUsers.sort((a, b) => {
+				return (a.login.localeCompare(b.login))
+			});
+		}
 		let toReturn: {user: UserEntity, status: string, connected: boolean}[] = [];
 		if (godUser)
 		toReturn.push({user: godUser, status: "god", connected: false});
@@ -173,7 +175,7 @@ export class ChannelService {
 	 * returns null if the user don't belong to this channel or if the channel doesn't exists
 	 */
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
-		const usersArray = await this.listUsersInChannel(channelId);
+		const usersArray = await this.listUsersInChannel(channelId, false);
 		for (let elt of usersArray) {
 			console.log(elt.user.id)
 			console.log(userId)
