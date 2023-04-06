@@ -212,40 +212,11 @@ export class ChannelService {
 	}
 
 	async delOpUser(userId: string, channelId: string): Promise<boolean> {
-		let chann: ChannelEntity = await this.channelRepository
-			.createQueryBuilder("channel")
-			.innerJoinAndSelect("channel.opUsers", "op")
-			.where("channel = :id", { id: channelId })
-			.select("op.*")
-			.getRawOne();
-		if (chann == null)
-			return;
-		let opNumberToReduce = false;
-		let users = chann.opUsers;
-		console.log(users);
-		for (let user of users) {
-			if (user.id == userId) {
-				opNumberToReduce = true;
-				break;
-			}
-		}
-		if (opNumberToReduce) {
-			if (chann.opNumber == 1 && !chann.persistant) {
-				await this.deleteById(channelId);
-				return true;
-			}
-			else {	
-				await this.channelRepository
-					.createQueryBuilder()
-					.relation(ChannelEntity, "opUsers")
-					.of(channelId)
-					.remove(userId);
-				await this.channelRepository.update(
-					{id: channelId},
-					{opNumber: chann.opNumber - 1}
-				)
-			}
-		}
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "opUsers")
+			.of(channelId)
+			.remove(userId);
 		return false;
 	}
 
