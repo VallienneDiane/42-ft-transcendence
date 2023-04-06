@@ -1,6 +1,6 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
 import { Server, Socket, Namespace } from 'socket.io';
-import { Logger, UseGuards } from "@nestjs/common";
+import { Logger, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 import { IChannelToEmit, IMessageChat, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
@@ -15,6 +15,7 @@ import { UserEntity } from "src/user/user.entity";
 import { ChannelDto } from "./channel/channel.dto";
 import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
 
+@UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
     private logger: Logger = new Logger('ChatGateway');
