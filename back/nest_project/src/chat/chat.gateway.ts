@@ -1,18 +1,13 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
 import { Server, Socket, Namespace } from 'socket.io';
 import { Logger, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
-import { AuthGuard } from "@nestjs/passport";
 import { IChannelToEmit, IMessageChat, IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
 import { ChatService } from "./chat.service";
 import { UserRoomHandler } from "./chat.classes";
-import { useContainer } from "class-validator";
 import { UserService } from "src/user/user.service";
-import { UserDto } from "src/user/user.dto";
 import { JwtService } from '@nestjs/jwt';
-import { ChannelEntity } from "./channel/channel.entity";
 import { UserEntity } from "src/user/user.entity";
-import { ChannelDto } from "./channel/channel.dto";
 import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)

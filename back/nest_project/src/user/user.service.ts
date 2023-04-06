@@ -98,7 +98,7 @@ export class UserService {
         const user = await this.findById(userId);
         let arrayOfChannels: {channel: ChannelEntity, status: string}[] = [{
             channel: {
-                id: "general",
+                id: "00000000-0000-0000-0000-000000000000",
                 date: new Date(),
                 name: "general",
                 password: false,

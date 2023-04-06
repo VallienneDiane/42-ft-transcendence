@@ -238,6 +238,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 newChanList.push({id: str.id, name: str.name, password: str.password, isChannel: true, isClickable: true});
             console.log("channels", newChanList);
             this.setState({channels: newChanList})});
+        
+        
             
         this.props.socket.on('newUserConnected', () => {
             this.fetchUsers()});

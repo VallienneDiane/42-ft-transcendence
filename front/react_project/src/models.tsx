@@ -45,7 +45,7 @@ export interface IChannelEntity {
   date: Date;
   name: string;
   password: boolean;
-  channelPass: string;
+  channelPass?: string;
   inviteOnly: boolean;
   persistant: boolean;
   onlyOpCanTalk: boolean;

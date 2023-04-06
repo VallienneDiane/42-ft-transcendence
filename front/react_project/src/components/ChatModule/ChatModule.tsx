@@ -30,7 +30,7 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
     initList() {
         this.props.socket.emit('myChannels');
         this.props.socket.on('listMyChannels', (channels: {channel: IChannelEntity, status: string}[]) => { 
-            console.log("My Channels: ", channels);
+            // console.log("My Channels: ", channels);
             this.setState({ channels: channels }) }); 
         this.props.socket.emit('myDM');
         this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
@@ -74,13 +74,6 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
         this.initList();
         this.checkOnline();
         this.checkOffline();
-
-        this.props.socket.on("leaveChannel", (channelId: string) => {
-            let nextState: {channel: IChannelEntity, status: string}[] = this.state.channels.filter(
-                (elt: {channel: IChannelEntity}) => {return (elt.channel.id != channelId)}
-                );
-            this.setState({channels: nextState});
-        });
         
         this.props.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
             let sorted = new Map<string, {userName: string, userId: string, connected: boolean}>();
@@ -92,6 +85,31 @@ class ChannelDMList extends React.Component<{socket: Socket}, {
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected}));
             this.setState({dms: nextState});
         }); // à remplacer par sort
+
+        this.props.socket.on('channelJoined', (chann: {channel: IChannelEntity, status: string}) => {
+            let nextState: {channel: IChannelEntity, status: string}[] = [...this.state.channels, chann];
+            nextState.sort((a, b) => {
+                if (a.status == "god" && b.status != "god")
+                    return (-1)
+                if (a.status == "op") {
+                    if (b.status == "god")
+                        return (1)
+                    if (b.status == "normal")
+                        return (-1) 
+                }
+                if (a.status == "normal" && b.status != "normal")
+                    return (1)
+                return (a.channel.name.localeCompare(b.channel.name))
+            });
+            this.setState({channels: nextState});
+        })
+
+        this.props.socket.on('channelLeaved', (chann: IChannelEntity) => {
+            let nextState: {channel: IChannelEntity, status: string}[] = this.state.channels.filter(
+                (elt: {channel: IChannelEntity}) => {return (elt.channel.id != chann.id)}
+                );
+            this.setState({channels: nextState});
+        })
     }
 
     componentWillUnmount(): void {
