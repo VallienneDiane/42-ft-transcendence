@@ -139,6 +139,7 @@ const Game: React.FC = () => {
             // })
 
             socket.on('Game_Update', (gameState: gameState) => {
+                // console.log(gameState);
                 if (ready === true) {
                     setTimer(true);
                 }
@@ -158,51 +159,119 @@ const Game: React.FC = () => {
         }
     }, [socket]);
 
-    const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
-        console.log(event.key);
+        console.log('Keydown', event.key);
         if (event.key === "ArrowUp") {
-            setInputState({ up: true, down: false });
+            if (inputState.up === false) {
+                socket.emit('Game_Input', "ArrowUp");
+            }
+            // setInputState({ up: true, down: false });
+            setInputState((prevState) => ({
+                ...prevState,
+                up: true
+            }));
         }
         else if (event.key === "ArrowDown") {
-            setInputState({ up: false, down: true });
+            if (inputState.down === false) {
+                socket.emit('Game_Input', "ArrowDown");
+            }
+            // setInputState({ up: false, down: true });
+            setInputState((prevState) => ({
+                ...prevState,
+                down: true
+            }));
         }
-        // socket.emit('Game_Input_Down', event.key);
-    }, []);
-
-    const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    };
+    // const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    //     event.preventDefault();
+    //     console.log('Keydown', event.key);
+    //     if (event.key === "ArrowUp") {
+    //         if (inputState.up === false) {
+    //             socket.emit('Game_Input', "ArrowUp");
+    //         }
+    //         // setInputState({ up: true, down: false });
+    //         setInputState((prevState) => ({
+    //             ...prevState,
+    //             up: true
+    //         }));
+    //     }
+    //     else if (event.key === "ArrowDown") {
+    //         if (inputState.down === false) {
+    //             socket.emit('Game_Input', "ArrowDown");
+    //         }
+    //         // setInputState({ up: false, down: true });
+    //         setInputState((prevState) => ({
+    //             ...prevState,
+    //             down: true
+    //         }));
+    //     }
+    // }, []);
+    
+    const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
+        console.log('Keyup', event.key);
         if (event.key === "ArrowUp") {
+            if (inputState.up === true) {
+                socket.emit('Game_Input', "ArrowUp");
+            }
             setInputState((prevState) => ({
                 ...prevState,
                 up: false
             }));
         }
         else if (event.key === "ArrowDown") {
+            if (inputState.down === true) {
+                socket.emit('Game_Input', "ArrowDown");
+            }
             setInputState((prevState) => ({
                 ...prevState,
                 down: false
             }));
         }
         // socket.emit('Game_Input_Up', event.key);
-    }, []);
+    };
+    
+    // const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
+    //     event.preventDefault();
+    //     console.log('Keyup', event.key);
+    //     if (event.key === "ArrowUp") {
+    //         if (inputState.up === true) {
+    //             socket.emit('Game_Input', "ArrowUp");
+    //         }
+    //         setInputState((prevState) => ({
+    //             ...prevState,
+    //             up: false
+    //         }));
+    //     }
+    //     else if (event.key === "ArrowDown") {
+    //         if (inputState.down === true) {
+    //             socket.emit('Game_Input', "ArrowDown");
+    //         }
+    //         setInputState((prevState) => ({
+    //             ...prevState,
+    //             down: false
+    //         }));
+    //     }
+    //     // socket.emit('Game_Input_Up', event.key);
+    // }, []);
 
-    useEffect(() => {
-        const intervalId = setInterval(() => {
+    // useEffect(() => {
+    //     const intervalId = setInterval(() => {
 
-            if (inputState.up === true) {
-                socket.emit('Game_Input', "ArrowUp");
-            }
-            else if (inputState.down === true) {
-                socket.emit('Game_Input', "ArrowDown");
-            }
+    //         if (inputState.up === true) {
+    //             socket.emit('Game_Input', "ArrowUp");
+    //         }
+    //         else if (inputState.down === true) {
+    //             socket.emit('Game_Input', "ArrowDown");
+    //         }
 
-        }, 10)
+    //     }, 10)
 
-        return () => {
-            clearInterval(intervalId);
-        }
-    }, [inputState]);
+    //     return () => {
+    //         clearInterval(intervalId);
+    //     }
+    // }, [inputState]);
 
     // Get css colors variables to use it in the canva
     const style = getComputedStyle(document.documentElement);
@@ -210,13 +279,15 @@ const Game: React.FC = () => {
     const secondaryColor = style.getPropertyValue('--secondary-color');
 
     useEffect(() => {
+        // console.log('gamestate changed');
         const canvas = canvasRef.current;
-        if (canvas && gameState && ready) {
+        if (canvas && gameState) {
             const context = canvas.getContext("2d")!;
             if (context) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
 
                 gameState!.ballPosition.forEach((ball) => {
+                    // console.log('ball', ball);
                     context.beginPath();
                     context.arc(ball.x * canvas.width, ball.y * canvas.height, ball.r * canvas.height, 0, Math.PI * 2);
                     context.fillStyle = ballColor;
