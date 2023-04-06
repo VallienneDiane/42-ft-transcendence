@@ -10,8 +10,9 @@ export class Wall {
     length;
     up: boolean;
     down: boolean;
+    is_a_paddle: boolean;
 
-    constructor(v1: Vec2, v2: Vec2) {
+    constructor(v1: Vec2, v2: Vec2, paddle: boolean) {
         this.up = false;
         this.down = false;
         this.speed = 1/60;
@@ -20,6 +21,7 @@ export class Wall {
         this.x_position = this.start.x;
         this.length = this.end.sub(this.start).mag();
         this.y_position = this.start.y;
+        this.is_a_paddle = paddle;
     }
 
     wallUnit() {

@@ -19,7 +19,7 @@ export class Ball {
 		this.r = r;
 		this.colision_number = 0;
 		this.friction = 0;
-		this.elasticity = 1.01;
+		this.elasticity = 1.02;
 		this.mass = Math.PI * r * r;
 		this.alive = true;
 		if (this.mass === 0)
