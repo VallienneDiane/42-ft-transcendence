@@ -139,7 +139,7 @@ const Game: React.FC = () => {
             // })
 
             socket.on('Game_Update', (gameState: gameState) => {
-                // console.log(gameState);
+                console.log(gameState);
                 if (ready === true) {
                     setTimer(true);
                 }
@@ -183,30 +183,6 @@ const Game: React.FC = () => {
             }));
         }
     };
-    // const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-    //     event.preventDefault();
-    //     console.log('Keydown', event.key);
-    //     if (event.key === "ArrowUp") {
-    //         if (inputState.up === false) {
-    //             socket.emit('Game_Input', "ArrowUp");
-    //         }
-    //         // setInputState({ up: true, down: false });
-    //         setInputState((prevState) => ({
-    //             ...prevState,
-    //             up: true
-    //         }));
-    //     }
-    //     else if (event.key === "ArrowDown") {
-    //         if (inputState.down === false) {
-    //             socket.emit('Game_Input', "ArrowDown");
-    //         }
-    //         // setInputState({ up: false, down: true });
-    //         setInputState((prevState) => ({
-    //             ...prevState,
-    //             down: true
-    //         }));
-    //     }
-    // }, []);
     
     const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -231,47 +207,6 @@ const Game: React.FC = () => {
         }
         // socket.emit('Game_Input_Up', event.key);
     };
-    
-    // const handleKeyUp = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
-    //     event.preventDefault();
-    //     console.log('Keyup', event.key);
-    //     if (event.key === "ArrowUp") {
-    //         if (inputState.up === true) {
-    //             socket.emit('Game_Input', "ArrowUp");
-    //         }
-    //         setInputState((prevState) => ({
-    //             ...prevState,
-    //             up: false
-    //         }));
-    //     }
-    //     else if (event.key === "ArrowDown") {
-    //         if (inputState.down === true) {
-    //             socket.emit('Game_Input', "ArrowDown");
-    //         }
-    //         setInputState((prevState) => ({
-    //             ...prevState,
-    //             down: false
-    //         }));
-    //     }
-    //     // socket.emit('Game_Input_Up', event.key);
-    // }, []);
-
-    // useEffect(() => {
-    //     const intervalId = setInterval(() => {
-
-    //         if (inputState.up === true) {
-    //             socket.emit('Game_Input', "ArrowUp");
-    //         }
-    //         else if (inputState.down === true) {
-    //             socket.emit('Game_Input', "ArrowDown");
-    //         }
-
-    //     }, 10)
-
-    //     return () => {
-    //         clearInterval(intervalId);
-    //     }
-    // }, [inputState]);
 
     // Get css colors variables to use it in the canva
     const style = getComputedStyle(document.documentElement);
