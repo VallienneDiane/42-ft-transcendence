@@ -48,7 +48,7 @@ export class ChatService {
 
     private goBackToGeneral(client: Socket) {
         let locGeneral: ChannelEntity = {
-            id: "general",
+            id: "00000000-0000-0000-0000-000000000000",
             name: "general",
             date: new Date(),
             password: false,
@@ -156,7 +156,7 @@ export class ChatService {
     public changeLocEvent(client: Socket, user: UserEntity, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
         {
-            if (loc == 'general') {
+            if (loc == '00000000-0000-0000-0000-000000000000') {
                 roomHandler.joinRoom(user.id, client, loc, true, false, false, false);
                 this.goBackToGeneral(client);
                 return;
@@ -274,7 +274,7 @@ export class ChatService {
                                                 let room = roomHandler.roomMap.of(channel.id);
                                                 if (room != undefined)
                                                     room.emit("newUserInChannel", user.id, user.login);
-                                                this.listMyChannelEvent(client, user.id);
+                                                roomHandler.emitToUserHavingThisSocket(client, "channelJoined", channel.id, channel.name);
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                             })
                                     }
@@ -310,14 +310,17 @@ export class ChatService {
                                                 room.emit("newUserInChannel", userEntity.id, userEntity.login);
                                             let logged = roomHandler.userMap.get(userToInvite);
                                             if (logged != undefined) {
-                                                logged.sockets.forEach(({}, socket) => {
-                                                    this.listMyChannelEvent(socket, userToInvite);
+                                                this.channelService.getOneById(channelId)
+                                                .then((channelEntity) => {
+                                                    logged.sockets.forEach(({}, socket) => {
+                                                        socket.emit("channelJoined", channelEntity.id, channelEntity.name);
+                                                    })
                                                 })
                                             }
                                         })
                                     }
                                     else
-                                        client.emit("notice", `The user ${userToInvite} already belong to this channel.`);
+                                        client.emit("notice", `The user ${userEntity.login} already belong to this channel.`);
                                 }
                             )
                         }
@@ -345,7 +348,7 @@ export class ChatService {
                                                         let logged = roomHandler.userMap.get(userToInvite);
                                                         if (logged != undefined) {
                                                             logged.sockets.forEach(({}, socket) => {
-                                                                this.listMyChannelEvent(socket, userToInvite);
+                                                                socket.emit("channelJoined", chanOpts.id, chanOpts.name);
                                                             })
                                                         }
                                                     })

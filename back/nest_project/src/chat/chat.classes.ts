@@ -218,7 +218,7 @@ export class UserRoomHandler {
 
     public roomKill(channelId: string) {
         let locGeneral: ChannelEntity = {
-            id: "general",
+            id: "00000000-0000-0000-0000-000000000000",
             name: "general",
             date: new Date(),
             password: false,
@@ -282,4 +282,15 @@ export class UserRoomHandler {
             return {room: found.room, isChannel: found.isChannel};
         return undefined;
     }
+
+    public emitToUserHavingThisSocket(socket: Socket, ev: string, ...args: any[]) {
+        let socketFound = this.socketMap.sockets.get(socket);
+        if (socketFound != undefined) {
+            let userFound = this.userMap.get(socketFound.userId);
+            if (userFound != undefined) {
+                userFound.emit(ev, ...args);
+            }
+        }
+    }
+
 }
