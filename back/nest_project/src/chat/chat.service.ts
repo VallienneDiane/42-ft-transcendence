@@ -23,32 +23,9 @@ export class ChatService {
         private userService: UserService
     ) {}
 
-    private sendEssentialUserData(userEntity: UserEntity): IUserToEmit {
-        return {
-            id: userEntity.id,
-            login: userEntity.login
-        }
-    }
-
-    private sendEssentialChannelData(channelEntity: ChannelEntity): IChannelToEmit {
-        return {
-            id: channelEntity.id,
-            date: channelEntity.date,
-            name: channelEntity.name,
-            password: channelEntity.password,
-            inviteOnly: channelEntity.inviteOnly,
-            persistant: channelEntity.persistant,
-            onlyOpCanTalk: channelEntity.onlyOpCanTalk,
-            hidden: channelEntity.hidden,
-            normalUsers: channelEntity.normalUsers,
-            opUsers: channelEntity.opUsers,
-            godUser: channelEntity.godUser
-        }
-    }
-
     private goBackToGeneral(client: Socket) {
         let locGeneral: ChannelEntity = {
-            id: "general",
+            id: "00000000-0000-0000-0000-000000000000",
             name: "general",
             date: new Date(),
             password: false,
@@ -70,16 +47,18 @@ export class ChatService {
         let socketMap = roomHandler.userMap.get(userId);
         if (socketMap != undefined) {
             socketMap.emit("leaveChannel", channelId);
+            let channel: IChannelToEmit = await this.channelService.getOneById(channelId);
             socketMap.sockets.forEach((user, socket) => {
+                socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
                     roomHandler.joinRoom(userId, socket, 'general', true, false, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
         }
-        let chan: ChannelEntity = await this.channelService.getOneById(channelId);
-        if (chan == null)
-            roomHandler.roomKill(channelId);
+        // let chan: ChannelEntity = await this.channelService.getOneById(channelId);
+        // if (chan == null)
+        //     roomHandler.roomKill(channelId);
     }
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
@@ -156,7 +135,7 @@ export class ChatService {
     public changeLocEvent(client: Socket, user: UserEntity, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
         {
-            if (loc == 'general') {
+            if (loc == '00000000-0000-0000-0000-000000000000') {
                 roomHandler.joinRoom(user.id, client, loc, true, false, false, false);
                 this.goBackToGeneral(client);
                 return;
@@ -249,7 +228,7 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId);
+        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId, true);
         usersArray.forEach((elt) => {
             let connected = roomHandler.userMap.get(elt.user.id);
             if (connected != undefined)
@@ -274,7 +253,7 @@ export class ChatService {
                                                 let room = roomHandler.roomMap.of(channel.id);
                                                 if (room != undefined)
                                                     room.emit("newUserInChannel", user.id, user.login);
-                                                this.listMyChannelEvent(client, user.id);
+                                                roomHandler.emitToUserHavingThisSocket(client, "channelJoined", channel.id, channel.name);
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                                 client.emit("true");
                                             })
@@ -312,14 +291,17 @@ export class ChatService {
                                                 room.emit("newUserInChannel", userEntity.id, userEntity.login);
                                             let logged = roomHandler.userMap.get(userToInvite);
                                             if (logged != undefined) {
-                                                logged.sockets.forEach(({}, socket) => {
-                                                    this.listMyChannelEvent(socket, userToInvite);
+                                                this.channelService.getOneById(channelId)
+                                                .then((channelEntity) => {
+                                                    logged.sockets.forEach(({}, socket) => {
+                                                        socket.emit("channelJoined", channelEntity.id, channelEntity.name);
+                                                    })
                                                 })
                                             }
                                         })
                                     }
                                     else
-                                        client.emit("notice", `The user ${userToInvite} already belong to this channel.`);
+                                        client.emit("notice", `The user ${userEntity.login} already belong to this channel.`);
                                 }
                             )
                         }
@@ -347,7 +329,7 @@ export class ChatService {
                                                         let logged = roomHandler.userMap.get(userToInvite);
                                                         if (logged != undefined) {
                                                             logged.sockets.forEach(({}, socket) => {
-                                                                this.listMyChannelEvent(socket, userToInvite);
+                                                                socket.emit("channelJoined", chanOpts.id, chanOpts.name);
                                                             })
                                                         }
                                                     })
@@ -383,7 +365,6 @@ export class ChatService {
                 client.emit('notice', 'you are not registered to that channel.');
         })
     }
-    
 
     public makeHimOpEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToOp: string, channelId: string) {
         this.channelService.getUserInChannel(channelId, userId)
@@ -398,7 +379,7 @@ export class ChatService {
                         (linkToOp) => {
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
-                            else if (linkToOp.status == "op")
+                            else if (linkToOp.status != "normal")
                                 client.emit('notice', "this user is already operator to this channel");
                             else {
                                 this.channelService.upgradeUserOnChannel(linkToOp.user, channelId);
@@ -503,5 +484,19 @@ export class ChatService {
                         client.emit("notice", "This channel already exists.");
                 });
         }
+    }
+
+    public destroyChannelEvent(client: Socket, user: UserEntity, channelId: string, roomHandler: UserRoomHandler) {
+        this.channelService.getUserInChannel(channelId, user.id)
+        .then((link) => {
+            if (!link || link.status != "god")
+                client.emit("notice", "You cna't do that !");
+            else {
+                this.channelService.deleteById(channelId)
+                .then(() => {
+                    roomHandler.roomKill(channelId);
+                })
+            }
+        })
     }
 }
