@@ -18,7 +18,7 @@ export class UserEntity {
   @Column()
   email: string;
 
-  @Column()
+  @Column({nullable: true})
   password: string;
 
   @ManyToMany(() => ChannelEntity, (channel) => channel.normalUsers, {

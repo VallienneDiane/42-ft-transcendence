@@ -11,6 +11,25 @@ export class AuthService {
   constructor(
     private userService: UserService, private jwtService: JwtService) {}
 
+  //give to the api42 infos to get a token to access user infos
+  async validateFortyTwo(code: string) {
+    const response = await fetch('https://api.intra.42.fr/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        grant_type: 'authorization_code',
+        client_id: process.env.API_UID,
+        client_secret: process.env.API_KEY,
+        code: code,
+        redirect_uri: process.env.API_CALLBACK_URL,
+      }),
+    })
+    const data = await response.json();
+    return data.access_token;
+  }
+
   async validateUser(login: string, password: string) {
     const validUser = await this.userService.findByLogin(login);
     if(!validUser) {
@@ -30,7 +49,6 @@ export class AuthService {
       access_token: this.jwtService.sign(payload)
     }
   }
-  
   // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
   //otp auth = one time password compatible with Google authentificator
   async decodeToken(fullToken: string): Promise<{ id: string, login: string }>{
@@ -51,7 +69,6 @@ export class AuthService {
     await this.userService.setQrCode(QRcode, id);
     return (QRcode);
   }
-
   //check if entered code for google authentificator is valid
   async is2faCodeValid(token: string, secret:string) {
     const isCodeValid = speakeasy.totp.verify(

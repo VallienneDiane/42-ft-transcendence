@@ -1,6 +1,8 @@
 import "../styles/LoginPage.scss"
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import ReactDOM from 'react-dom';
+import ReactDOMServer from 'react-dom/server';
+import domToImage from 'dom-to-image';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
@@ -9,7 +11,7 @@ import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
 import Avatar from 'avataaars';
 import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
-
+import { Canvg } from 'canvg';
 
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters"),
@@ -18,24 +20,18 @@ const userSchema = yup.object().shape({
 })
 
 const SignupPage: React.FC = () => {
+  const [svgUrl, setSvgUrl] = useState<string>();
   let navigate = useNavigate();
   
   const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
   });
   
-  const signUp = (data: SignUpForm) => {
-    const avatarElement = document.createElement('div');
-    ReactDOM.render(
-      <Avatar
-        style={{ width: '100px', height: '100px' }}
-        avatarStyle='Circle'
-        {...generateRandomAvatarOptions()}
-        />,
-        avatarElement
-    )
-    console.log('avatarElement', avatarElement.innerHTML);
-    data.avatarSvg = avatarElement.innerHTML;
+  const signUp = async (data: SignUpForm) => {
+    const avatar = generateRandomAvatarOptions();
+    const svgString = ReactDOMServer.renderToString(avatar);
+
+    data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
     accountService.signUp(data)
     .then(Response => {
       accountService.saveToken(Response.data.access_token);
@@ -44,11 +40,27 @@ const SignupPage: React.FC = () => {
     })
     .catch(error => {
         console.log(error);
-    });
+    })
+    
+    /* First "working" solution */
+    // console.log('avatarElement', avatarElement.innerHTML);
+    // data.avatarSvg = avatarElement.innerHTML;
+    // accountService.signUp(data)
+    // .then(Response => {
+    //   accountService.saveToken(Response.data.access_token);
+    //   // accountService.enable2fa();
+    //   navigate("/");
+    // })
+    // .catch(error => {
+    //     console.log(error);
+    // })
   }
+
 
   return (
     <div id='signup_page'>
+      {/* { generateRandomAvatarOptions() } */}
+      {/* <img src={svgUrl} alt="SVG" /> */}
       <div className="card">
         <h1>SignUp Page</h1>
         <form className="login" onSubmit={handleSubmit(signUp)}>
