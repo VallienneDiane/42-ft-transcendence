@@ -113,7 +113,7 @@ const Game: React.FC = () => {
                         setCountdown("GO !");
                     }
                 }
-            }, 500)
+            }, 1000)
         }
         return () => {
             clearInterval(intervalId);
