@@ -46,7 +46,6 @@ export class ChatService {
         await this.channelService.delUser(userId, channelId);
         let socketMap = roomHandler.userMap.get(userId);
         if (socketMap != undefined) {
-            socketMap.emit("leaveChannel", channelId);
             let channel: IChannelToEmit = await this.channelService.getOneById(channelId);
             socketMap.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
@@ -253,7 +252,8 @@ export class ChatService {
                                                 let room = roomHandler.roomMap.of(channel.id);
                                                 if (room != undefined)
                                                     room.emit("newUserInChannel", user.id, user.login);
-                                                roomHandler.emitToUserHavingThisSocket(client, "channelJoined", channel.id, channel.name);
+                                                let channelToEmit: IChannelToEmit = channel;
+                                                roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                                 client.emit("true");
                                             })
@@ -293,8 +293,9 @@ export class ChatService {
                                             if (logged != undefined) {
                                                 this.channelService.getOneById(channelId)
                                                 .then((channelEntity) => {
+                                                    let channelToEmit: IChannelToEmit = channelEntity;
                                                     logged.sockets.forEach(({}, socket) => {
-                                                        socket.emit("channelJoined", channelEntity.id, channelEntity.name);
+                                                        socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
                                                     })
                                                 })
                                             }
@@ -328,8 +329,9 @@ export class ChatService {
                                                             room.emit("newUserInChannel", userEntity.id, userEntity.login);
                                                         let logged = roomHandler.userMap.get(userToInvite);
                                                         if (logged != undefined) {
+                                                            let channelToEmit: IChannelToEmit = chanOpts;
                                                             logged.sockets.forEach(({}, socket) => {
-                                                                socket.emit("channelJoined", chanOpts.id, chanOpts.name);
+                                                                socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
                                                             })
                                                         }
                                                     })
