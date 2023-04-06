@@ -211,7 +211,7 @@ const Game: React.FC = () => {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (canvas && gameState && ready) {
+        if (canvas && gameState) {
             const context = canvas.getContext("2d")!;
             if (context) {
                 context.clearRect(0, 0, canvas.width, canvas.height);
