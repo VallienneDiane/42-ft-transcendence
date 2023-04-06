@@ -53,12 +53,12 @@ export class GameEngineService {
 		this.ballz[1] = big_ball;
 
 		// creating the pl1 and pl2 paddle respectivly
-		this.wallz[0] = new Wall(new Vec2(0.025, 0.415), new Vec2(0.025, 0.585));
-		this.wallz[1] = new Wall(new Vec2(this.aspect_ratio - 0.025, 0.415), new Vec2(this.aspect_ratio - 0.025, 0.585));
+		this.wallz[0] = new Wall(new Vec2(0.025, 0.415), new Vec2(0.025, 0.585), true);
+		this.wallz[1] = new Wall(new Vec2(this.aspect_ratio - 0.025, 0.415), new Vec2(this.aspect_ratio - 0.025, 0.585), true);
 
 		// creating the wall
-		this.wallz[2] = new Wall(new Vec2(0, 0), new Vec2(this.aspect_ratio, 0));
-		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(this.aspect_ratio, 1));
+		this.wallz[2] = new Wall(new Vec2(0, 0), new Vec2(this.aspect_ratio, 0), false);
+		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(this.aspect_ratio, 1), false);
 
 		// setting the game start and stop variables
 		this.pl1_ready = false;

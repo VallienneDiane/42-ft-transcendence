@@ -81,6 +81,15 @@ export class Collision {
         let normal_velocity = Vec2.dot(normal, b.speed);
         let new_separation_velocity = -normal_velocity * b.elasticity;
         b.speed = b.speed.add(normal.mult(-normal_velocity + new_separation_velocity));
+        if (w.is_a_paddle) {
+            let ratio = (b.position.y - (w.y_position + w.length/2))/(w.length/2);
+            if (ratio >=0) {
+                b.speed.y = Math.min(ratio * 1/60, 1/60);
+            }
+            else {
+                b.speed.y = Math.max(ratio * 1/60, -1/60);
+            }
+        }
     }
 }
 
