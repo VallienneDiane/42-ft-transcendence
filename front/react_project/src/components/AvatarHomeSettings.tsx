@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
-import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../services/account.service";
 import { userService } from "../services/user.service";
 
-const AvatarSettings: React.FC = () => {
-    let decodedToken: JwtPayload = accountService.readPayload()!;
+interface userProps {
+    login: string,
+    avatar: string,
+}
+
+const AvatarHomeSettings = (props: userProps) => {
+
     const [avatar, setAvatar] = useState<string>();
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
     useEffect(() => {
-        userService.getUser(decodedToken.login)
+        userService.getUser(props.login)
             .then(response => {
-                setAvatar(response.data.avatarSvg);
+                setAvatar(props.avatar);
             })
             .catch(error => {
                 console.log(error);
@@ -88,4 +92,4 @@ const AvatarSettings: React.FC = () => {
     )
 }
 
-export default AvatarSettings;
+export default AvatarHomeSettings;
