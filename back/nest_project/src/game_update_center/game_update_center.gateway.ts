@@ -83,6 +83,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   StartGameRoom(@ConnectedSocket() player1: Socket, @ConnectedSocket() player2: Socket, type: string) {
     // make the player join the room of name player1.socket.id
+    console.log("test:" + player1);
     player1.join(player1.id);
     player2.join(player1.id);
 
@@ -126,11 +127,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("game room created");
       }
     }
-    else if (this.pong_public_space[0] != client) {
+    console.log("donc" + this.pong_public_space[0].id);
+    if (this.pong_public_space[0] != client) {
       this.pong_public_space.push(client);
       this.logger.debug("socket :" + client.id + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
-        this.StartGameRoom(this.game_public_space[0], client, "game");
+        console.log("heu..." + this.game_public_space[0]);
+        this.StartGameRoom(this.game_public_space[0], client, "");
         this.pong_public_space.pop();
         this.pong_public_space.pop();
         this.logger.debug("pong room created");

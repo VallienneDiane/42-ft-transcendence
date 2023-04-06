@@ -30,7 +30,7 @@ export class PongEngineService {
     pl2_ready: boolean;
 
     aspect_ratio = 16/9;
-    cooldown = 90; // cooldown between ball respawn
+    cooldown = 180; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
     loop: any; // set_interval function handle for stoping the game
