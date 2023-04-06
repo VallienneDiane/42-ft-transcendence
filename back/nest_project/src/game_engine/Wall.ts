@@ -19,11 +19,11 @@ export class Wall {
         this.end = v2;
         this.x_position = this.start.x;
         this.length = this.end.sub(this.start).mag();
-        this.y_position = this.start.y - (this.length / 2);
+        this.y_position = this.start.y;
     }
 
     wallUnit() {
-        return (new Vec2(0, 1));
+        return ((this.end.sub(this.start)).normalize());
     }
 
     update_self_position() {

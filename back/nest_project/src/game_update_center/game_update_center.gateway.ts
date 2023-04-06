@@ -116,7 +116,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param body anything will start pong execpt if the string === "game"
    */
   @SubscribeMessage('public matchmaking')
-  handlePublicMatchmaking(@ConnectedSocket() client: Socket, body: any) {
+  handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: any) {
+    console.log("body : " + body);
     if (body === "game" && this.game_public_space[0] != client) {
       this.game_public_space.push(client);
       this.logger.debug("socket :" + client.id + "has been added to game public space");

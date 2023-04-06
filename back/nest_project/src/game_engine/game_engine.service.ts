@@ -69,8 +69,8 @@ export class GameEngineService {
 		// filling the gamestate
 		this.gs = { ballPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
-		paddleOne: { x: this.wallz[0].x_position, y: this.wallz[0].y_position },
-		paddleTwo: { x: this.wallz[1].x_position, y: this.wallz[1].y_position } };
+		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
+		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
 		console.log("from game engine service player are :" + this.pl1 + "and" + this.pl2);
 
 	}
@@ -81,7 +81,7 @@ export class GameEngineService {
 	 */
 	set_ball_random_start(ball: Ball) {
 		let signe = (Math.random() - 0.5) > 0 ? 1 : -1;
-        ball.speed = new Vec2((signe/120) * this.aspect_ratio, (Math.random() - 0.5) * Math.random()/120);
+        ball.speed = new Vec2((signe/120) * this.aspect_ratio, (Math.random() - 0.5) * Math.random()/60);
 	}
 
 	/**
@@ -145,6 +145,8 @@ export class GameEngineService {
 		this.cooldown_start++; // use to time the delay between balls respawn
 
 		// check if a ball is dead
+		if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
+			return;
 		if (this.ballz[0].alive === false || this.ballz[1].alive === false) { // respawn a ball if there was a goal TODO register goal
             // spwan and set the new balls
 			let small_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.35), 0.04);
@@ -152,11 +154,30 @@ export class GameEngineService {
 			let big_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.7), 0.08);
 			this.ballz[0] = small_ball;
 			this.ballz[1] = big_ball;
+			this.wallz[0].reset_self_y_position();
+			this.wallz[1].reset_self_y_position();
+			this.ballz.forEach((ball, index) => {
+				let bp: ballpos;
+				bp = {
+					x: ball.position.x,
+					y: ball.position.y,
+					r: ball.r,
+				}
+				// console.log("test", this.gs.ballPosition[index]);
+				this.gs.ballPosition[index] = bp;
+			});
+			this.gs.paddleOne = {
+				x: this.wallz[0].x_position - 0.015,
+				y: this.wallz[0].y_position + this.wallz[0].length/2
+			};
+			this.gs.paddleTwo = {
+				x: this.wallz[1].x_position + 0.015,
+				y: this.wallz[1].y_position + this.wallz[1].length/2
+			};
 			// reset the timer
             this.cooldown_start = 0;
+			return;
         }
-        if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
-            return;
 
 		// update the paddle
 		this.wallz[0].update_self_position();
