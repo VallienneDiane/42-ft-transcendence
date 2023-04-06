@@ -1,10 +1,10 @@
-import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards } from "@nestjs/common";
+import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
-import { JwtAuthGuard } from "./jwt-auth.guard";
+import { JwtAuthGuard } from "../auth_strategies/jwt-auth.guard";
 
 // SIGN UP, REGISTER NEW USER IN DATABASE, NEW TOKEN
 @Controller()
@@ -26,7 +26,6 @@ export class UserController {
             access_token: this.jwtService.sign(payload)
         }
     }
-
     //Requests to database, access ok for validate user only !
         //use jwt strategy to check if token is valid before send back the user infos
         //get all users (login and id) of the db if valid token (use in chat for exemple)
@@ -53,4 +52,13 @@ export class UserController {
     async delete(@Param('login') login: string) {
         return this.userService.delete(login);
     }
+
+    //update avatar picture
+    @UseGuards(JwtAuthGuard)
+    @Post('user/uploadAvatar')
+    async uploadAvatar(@Body() data: {id: string, file: string}, @Headers('Authorization') token: string): Promise<void> {
+        return this.userService.loadAvatar(data.id, data.file);
+    }
+
+    
 }

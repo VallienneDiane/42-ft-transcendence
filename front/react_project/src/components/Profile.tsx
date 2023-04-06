@@ -29,7 +29,7 @@ export default function Profile() {
             });
         }
         else {
-            let decodedToken: JwtPayload = accountService .readPayload()!;
+            let decodedToken: JwtPayload = accountService.readPayload()!;
             userService.getUser(decodedToken.login)
             .then(response => {
                 setUser(response.data);
@@ -40,10 +40,17 @@ export default function Profile() {
         }
     }, [currentUser])
     
+    useEffect(() => {
+        console.log('user', user);
+    }, [user])
+    
     return (
+        
         <div id="profilePage">
+            
             <aside>
-                <img id="profilePicture" src={`data:image/svg+xml;utf8,${encodeURIComponent(user?.avatarSvg!)}`} />
+                {/* { user?.avatarSvg} */}
+                <img id="profilePicture" src={user?.avatarSvg!} />
                 {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>

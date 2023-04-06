@@ -1,3 +1,5 @@
+import Avatar from 'avataaars';
+
 interface Configs {
   topType: string[],
   accessoriesType: string[],
@@ -191,5 +193,9 @@ const configs = {
       options[key] = configArray[Math.floor(Math.random()*configArray.length)];
     })
   
-    return options;
+    return (
+      <Avatar style={{ width: '100px', height: '100px' }}
+      avatarStyle='Circle'
+      {...options} />
+    );
   }

@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Channel } from "diagnostics_channel";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
-import { DataSource, Repository } from "typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
+import { ByteData } from "qrcode";
+import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 
@@ -18,8 +19,8 @@ export class UserService {
         return this.usersRepository.save(newUser);
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
-    public findByLogin(login: string): Promise<UserEntity> {
-        return this.usersRepository.findOneBy({login});
+    async findByLogin(login: string): Promise<UserEntity> {
+        return await this.usersRepository.findOneBy({login});
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
     async findById(id: string): Promise<UserEntity> {
@@ -186,4 +187,13 @@ export class UserService {
         await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
+
+    //upload avatar
+    async loadAvatar(id: string, file: string) {
+        const user = await this.usersRepository.findOneBy({id});
+        user.avatarSvg = file;
+        await this.usersRepository.save(user);
+    }
+
+    
 }

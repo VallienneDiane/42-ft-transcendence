@@ -37,7 +37,7 @@ export class GameEngineService {
 		this.wallz[1] = new Wall(new Vec2(this.aspectratio, 0), new Vec2(this.aspectratio, 1));
 		this.wallz[2] = new Wall(new Vec2(this.aspectratio, 1), new Vec2(0, 1));
 		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(0, 0));
-		console.log(this.wallz);
+		// console.log(this.wallz);
 
 		//this.ballz[0] = new Ball(new Vec2(0.2,0.2), 0.1);
 		for (let index = 0; index < this.n; index++) {
