@@ -39,29 +39,11 @@ export class GameEngineService {
     cooldown = 90; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
-    loop; // set_interval function handle for stoping the game
+    loop: any; // set_interval function handle for stoping the game
 
 	constructor() {
 		this.ballz = [];
 		this.wallz = [];
-<<<<<<< HEAD
-		this.aspectratio = 16/9;
-		this.gs = { ballPosition: [], paddleOne: { x: 0, y: 0.5 }, paddleTwo: { x: this.aspectratio, y: 0.5 } };
-
-		this.wallz[0] = new Wall(new Vec2(0, 0), new Vec2(this.aspectratio, 0));
-		this.wallz[1] = new Wall(new Vec2(this.aspectratio, 0), new Vec2(this.aspectratio, 1));
-		this.wallz[2] = new Wall(new Vec2(this.aspectratio, 1), new Vec2(0, 1));
-		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(0, 0));
-		// console.log(this.wallz);
-
-		//this.ballz[0] = new Ball(new Vec2(0.2,0.2), 0.1);
-		for (let index = 0; index < this.n; index++) {
-			//let position = new Vec2(Math.random(), Math.random());
-			let position = new Vec2(0.5, 0.5);
-			let radius = Math.random() * 0.05 + 0.05;
-			//let radius = 0.1;
-			this.ballz[index] = new Ball(position, radius);
-=======
 		
 		// creating the two ball
 		let small_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.35), 0.04);
@@ -120,7 +102,6 @@ export class GameEngineService {
 	process_input (client: Socket, key: string) {
 		if (client === this.pl1) {
 			this.wallz[0].process_input(key);
->>>>>>> 6ee8b810125fac2c1842b869192523998045da9e
 		}
 		else {
 			this.wallz[1].process_input(key);
@@ -139,7 +120,7 @@ export class GameEngineService {
 	 * @param player the player sendin the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	set_player_ready (player: Socket, server) {
+	set_player_ready (player: Socket, server: any) {
 		if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }

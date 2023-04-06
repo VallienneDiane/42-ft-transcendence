@@ -26,7 +26,7 @@ export class Waiting_socket {
  * struct use to store a pong game instance
  */
 export class Pong_instance {
-  game_engine;
+  game_engine: any;
   player: Socket[];
   spectator: Socket[];
 }
@@ -35,7 +35,7 @@ export class Pong_instance {
  * struct use to store a game game instance
  */
 export class Game_instance {
-  game_engine;
+  game_engine: any;
   player: Socket[];
   spectator: Socket[];
 }
