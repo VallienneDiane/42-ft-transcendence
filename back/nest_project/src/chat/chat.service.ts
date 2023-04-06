@@ -70,16 +70,18 @@ export class ChatService {
         let socketMap = roomHandler.userMap.get(userId);
         if (socketMap != undefined) {
             socketMap.emit("leaveChannel", channelId);
+            let channel: IChannelToEmit = await this.channelService.getOneById(channelId);
             socketMap.sockets.forEach((user, socket) => {
+                socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
                     roomHandler.joinRoom(userId, socket, 'general', true, false, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
         }
-        let chan: ChannelEntity = await this.channelService.getOneById(channelId);
-        if (chan == null)
-            roomHandler.roomKill(channelId);
+        // let chan: ChannelEntity = await this.channelService.getOneById(channelId);
+        // if (chan == null)
+        //     roomHandler.roomKill(channelId);
     }
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
