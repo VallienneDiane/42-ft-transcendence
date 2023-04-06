@@ -127,12 +127,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("game room created");
       }
     }
-    // console.log("donc" + this.pong_public_space[0].id);
     else if (this.pong_public_space[0] != client) {
       this.pong_public_space.push(client);
       this.logger.debug("socket :" + client.id + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
-        // console.log("heu..." + this.game_public_space[0]);
+        console.log("heu..." + this.game_public_space[0]);
         this.StartGameRoom(this.pong_public_space[0], client, "");
         this.pong_public_space.pop();
         this.pong_public_space.pop();
