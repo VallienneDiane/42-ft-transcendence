@@ -79,6 +79,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
     }
     handlerJoinChannel() {
         if (!this.props.elt.password) {
+            console.log("I join");
             this.props.socket.emit('joinChannel', {channelId: this.props.elt.id, channelPass: null});
             this.props.handleClose();
         }

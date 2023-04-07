@@ -25,9 +25,7 @@ export class UserService {
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
     async findById(id: string): Promise<UserEntity> {
-        // console.log(`${id}`)
         const toReturn = await this.usersRepository.findOneBy({id: id});
-        // console.log(`${id} apres ooooooooooooooooooooooooooooooooooooooooooo findById`)
         return toReturn
     }
     
