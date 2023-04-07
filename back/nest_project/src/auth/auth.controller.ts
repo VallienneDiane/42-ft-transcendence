@@ -48,7 +48,9 @@ export class AuthController {
         channelsAsOp: [],
         messagesChannel: [],
         messagesReceived: [],
-        messagesSend: []
+        messagesSend: [],
+        requestsSend: [], 
+        requestsReceived: []
       };
       console.log("create user42", newUser42, "image ? ", data.image.link);
       await this.userService.create(newUser42);

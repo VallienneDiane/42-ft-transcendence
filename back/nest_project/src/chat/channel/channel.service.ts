@@ -45,32 +45,6 @@ export class ChannelService {
 		this.channelRepository.update({id: channelToUpdate}, newChannelConfig);
 	}
 
-	async downgradeOpByName(channelName: string): Promise<void> {
-		this.getOneByName(channelName).then( (found) => {
-			if (found.opNumber == 1 && !found.persistant) {
-				this.deleteById(found.id);
-			}
-			else
-				this.channelRepository.update({name: channelName}, {opNumber: found.opNumber - 1});
-		})
-	}
-
-	async downgradeOpById(id: string): Promise<void> {
-		this.getOneById(id).then( (found) => {
-			if (found.opNumber == 1 && !found.persistant) {
-				this.deleteById(found.id);
-			}
-			else
-				this.channelRepository.update({name: found.name}, {opNumber: found.opNumber - 1});
-		})
-	}
-
-	async upgradeOpByName(channelName: string): Promise<void> {
-		this.getOneByName(channelName).then( (found) => {
-			this.channelRepository.update({name: channelName}, {opNumber: found.opNumber + 1});
-		})
-	}
-
 	async deleteByName(channelName: string): Promise<void> {
 		this.channelRepository.delete(channelName);
 	}
@@ -194,15 +168,11 @@ export class ChannelService {
 	}
 
 	async addOpUser(user: UserEntity, channelId: string) {
-		let chann = await this.getOneById(channelId);
 		await this.channelRepository
 			.createQueryBuilder()
 			.relation(ChannelEntity, "opUsers")
 			.of(channelId)
 			.add(user)
-		await this.channelRepository.update(
-			{id: channelId},
-			{opNumber: chann.opNumber + 1});
 	}
 
 	async delNormalUser(userId: string, channelId: string) {
@@ -222,24 +192,7 @@ export class ChannelService {
 		return false;
 	}
 
-	async delGodUser(userId: string, channelId: string) {
-		let chann = await this.getOneById(channelId);
-		if (chann == null)
-			return;
-		let user = chann.godUser;
-		if (user != null && user.id == userId) {
-			let opNumber = chann.opNumber;
-			if (opNumber == 1 && !chann.persistant)
-				await this.deleteById(channelId);
-			else
-				await this.channelRepository.update(
-					{id : channelId},
-					{godUser: null, opNumber: opNumber - 1});
-		}
-	}
-
 	async delUser(userId: string, channelId: string) {
-		await this.delGodUser(userId, channelId);
 		await this.delOpUser(userId, channelId);
 		await this.delNormalUser(userId, channelId);
 	}

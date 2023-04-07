@@ -137,8 +137,7 @@
 						outline: none;
 					}
 					& .svgSearch {
-						width: 1.5rem;
-						height: 1.5rem;
+						height: 1.1rem;
 						margin-left: -2rem;
 						opacity: 50%;
 						background-color: #eee;
@@ -479,13 +478,16 @@
 						outline: none;
 					}
 					& .send {
+						display: flex;
+						justify-content: center;
+						align-items: center;
 						width: 1.3rem;
 						height: 2rem;
 						margin-left: -4rem;
-						margin-top: 0.3rem;
 						opacity: 40%;
 						background-color: transparent;
 						& .svgSend {
+							height: 70%;
 							background: rgb(238, 238, 238);
 						}
 					}

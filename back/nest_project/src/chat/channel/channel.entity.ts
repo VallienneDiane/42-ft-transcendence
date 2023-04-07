@@ -20,16 +20,7 @@ export class ChannelEntity {
 	channelPass: string;
 
 	@Column()
-	opNumber: number;
-
-	@Column()
 	inviteOnly: boolean;
-
-	@Column()
-	persistant: boolean;
-
-	@Column()
-	onlyOpCanTalk: boolean;
 
 	@Column()
 	hidden: boolean;

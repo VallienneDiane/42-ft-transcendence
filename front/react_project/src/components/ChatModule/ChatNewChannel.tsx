@@ -11,8 +11,6 @@ function Popup(props: {handleClose: any}) {
         password: false,
         channelPass: "",
         inviteOnly: false,
-        persistant: false,
-        onlyOpCanTalk: false, 
         hidden: false } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
@@ -50,8 +48,6 @@ function Popup(props: {handleClose: any}) {
             password: data.password,
             channelPass: data.channelPass,
             inviteOnly: data.inviteOnly,
-            persistant: data.persistant,
-            onlyOpCanTalk: data.onlyOpCanTalk,
             hidden: data.hidden,
         });
         props.handleClose();
@@ -86,16 +82,8 @@ function Popup(props: {handleClose: any}) {
                         <input type="checkbox" {...register("inviteOnly")}/>
                         <label className="labelName">Invite Only</label>
                     </section>
-                    <section>
-                        <input type="checkbox" {...register("persistant")}/>
-                        <label className="labelName">Persistant</label>
-                    </section>
                 </div>
                 <div className="rawCheckbox">
-                    <section>
-                        <input type="checkbox" {...register("onlyOpCanTalk")}/>
-                        <label className="labelName">Only OP can talk</label>
-                    </section>
                     <section>
                         <input type="checkbox" {...register("hidden")}/>
                         <label className="labelName">Hidden</label>
