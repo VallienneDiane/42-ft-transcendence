@@ -1,10 +1,20 @@
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { UserDto } from "src/user/user.dto";
+import { MessageChannelDto } from "../messageChannel/messageChannel.dto";
 
 export class ChannelDto {
-	readonly id: number;
-	readonly date: Date;
+	@IsString() readonly id: string;
+	@IsDate() readonly date: Date;
 	@IsNotEmpty() @IsString() readonly name: string;
-	@IsString() readonly pass: string;
+	@IsNotEmpty() @IsBoolean() readonly password: boolean;
+	@IsString() readonly channelPass: string;
+	@IsNotEmpty() @IsNumber() readonly opNumber: number;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
 	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
+	@IsNotEmpty() @IsBoolean() readonly onlyOpCanTalk: boolean;
+	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
+	readonly normalUsers: UserDto[];
+	readonly opUsers: UserDto[];
+	readonly godUser?: UserDto;
+	readonly messages: MessageChannelDto[];
 }
