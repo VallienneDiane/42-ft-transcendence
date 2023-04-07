@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { IDest, IChannel } from "../../models";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsisVertical, faUser, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
@@ -13,8 +15,6 @@ function ModifyChannel(props: {channel: IChannel}) {
         password: props.channel.password,
         channelPass: props.channel.channelPass,
         inviteOnly: props.channel.inviteOnly,
-        persistant: props.channel.persistant,
-        onlyOpCanTalk: props.channel.onlyOpCanTalk, 
         hidden: props.channel.hidden } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
@@ -30,8 +30,6 @@ function ModifyChannel(props: {channel: IChannel}) {
             password: data.password,
             channelPass: data.channelPass,
             inviteOnly: data.inviteOnly,
-            persistant: data.persistant,
-            onlyOpCanTalk: data.onlyOpCanTalk,
             hidden: data.hidden,
         });
     };
@@ -57,8 +55,6 @@ function ModifyChannel(props: {channel: IChannel}) {
                 </li>)}
             {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
             <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
-            <li>Persistant<input type="checkbox" {...register("persistant")}/></li>
-            <li>Only OP Can Talk<input type="checkbox" {...register("onlyOpCanTalk")}/></li>
             <li>Hidden<input type="checkbox" {...register("hidden")}/></li>
             <li><button type="submit">Save</button></li>
         </form>
@@ -68,7 +64,7 @@ function ModifyChannel(props: {channel: IChannel}) {
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
-    const [members, setMembers] = useState<string[]>([]);
+    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const me: JwtPayload = accountService.readPayload()!;
@@ -103,8 +99,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     useEffect(() => {
-        socket.emit('listUsersChann', props.dest.id); 
-        socket.on('listUsersChann', (list: string[]) => {
+        console.log(props.dest.id)
+        socket.emit('listUsersChann', {channelId: props.dest.id}); 
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string, connected: boolean}[]) => {
+            console.log("list")
             setMembers(list);
         })
         document.addEventListener("mousedown", handleClickOutside);
@@ -124,10 +122,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                 {onClickMembers && (
                     <ul className="memberList">{members.map(
                         (member, id) => {
-                            if (member !== me.login)
-                                return (<li key={id} onClick={showUserParam}>{member}</li>)
+                            if (member.user.login !== me.login)
+                                return (<li key={id} onClick={showUserParam}>{member.user.login}</li>)
                             else
-                                return (<li key={id}>{member}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M288 192h17.1c22.1 38.3 63.5 64 110.9 64c11 0 21.8-1.4 32-4v4 32V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V339.2L248 448h56c17.7 0 32 14.3 32 32s-14.3 32-32 32H160c-53 0-96-43-96-96V192.5c0-16.1-12-29.8-28-31.8l-7.9-1C10.5 157.6-1.9 141.6 .2 124s18.2-30 35.7-27.8l7.9 1c48 6 84.1 46.8 84.1 95.3v85.3c34.4-51.7 93.2-85.8 160-85.8zm160 26.5v0c-10 3.5-20.8 5.5-32 5.5c-28.4 0-54-12.4-71.6-32h0c-3.7-4.1-7-8.5-9.9-13.2C325.3 164 320 146.6 320 128v0V32 12 10.7C320 4.8 324.7 .1 330.6 0h.2c3.3 0 6.4 1.6 8.4 4.2l0 .1L352 21.3l27.2 36.3L384 64h64l4.8-6.4L480 21.3 492.8 4.3l0-.1c2-2.6 5.1-4.2 8.4-4.2h.2C507.3 .1 512 4.8 512 10.7V12 32v96c0 17.3-4.6 33.6-12.6 47.6c-11.3 19.8-29.6 35.2-51.4 42.9zM400 128a16 16 0 1 0 -32 0 16 16 0 1 0 32 0zm48 16a16 16 0 1 0 0-32 16 16 0 1 0 0 32z"/></svg></li>)
+                                return (<li key={id}>{member.user.login}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M288 192h17.1c22.1 38.3 63.5 64 110.9 64c11 0 21.8-1.4 32-4v4 32V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V339.2L248 448h56c17.7 0 32 14.3 32 32s-14.3 32-32 32H160c-53 0-96-43-96-96V192.5c0-16.1-12-29.8-28-31.8l-7.9-1C10.5 157.6-1.9 141.6 .2 124s18.2-30 35.7-27.8l7.9 1c48 6 84.1 46.8 84.1 95.3v85.3c34.4-51.7 93.2-85.8 160-85.8zm160 26.5v0c-10 3.5-20.8 5.5-32 5.5c-28.4 0-54-12.4-71.6-32h0c-3.7-4.1-7-8.5-9.9-13.2C325.3 164 320 146.6 320 128v0V32 12 10.7C320 4.8 324.7 .1 330.6 0h.2c3.3 0 6.4 1.6 8.4 4.2l0 .1L352 21.3l27.2 36.3L384 64h64l4.8-6.4L480 21.3 492.8 4.3l0-.1c2-2.6 5.1-4.2 8.4-4.2h.2C507.3 .1 512 4.8 512 10.7V12 32v96c0 17.3-4.6 33.6-12.6 47.6c-11.3 19.8-29.6 35.2-51.4 42.9zM400 128a16 16 0 1 0 -32 0 16 16 0 1 0 32 0zm48 16a16 16 0 1 0 0-32 16 16 0 1 0 0 32z"/></svg></li>)
                         }
                         )}
                     </ul>
@@ -210,11 +208,11 @@ export function Header(props: {dest: IDest}) {
                 {sidebarIsOpen && (props.dest.isChannel ? <SidebarChannel dest={props.dest} handleClose={onClickSidebar}/> : <SidebarUser handleClose={onClickSidebar} dest={props.dest}/>)}
             </div>
             <h1>  
-            {isChannel ? <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
-            : <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg> }
+            {isChannel ? <FontAwesomeIcon className="iconChannels" icon={faUserGroup} />
+            : <FontAwesomeIcon className="iconChannels" icon={faUser} /> }
                 {props.dest.name}
             </h1>
-            {props.dest.name !== "general" && <button onClick={onClickSidebar}><svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M56 472a56 56 0 1 1 0-112 56 56 0 1 1 0 112zm0-160a56 56 0 1 1 0-112 56 56 0 1 1 0 112zM0 96a56 56 0 1 1 112 0A56 56 0 1 1 0 96z"/></svg></button>}
+            {props.dest.name !== "general" && <button onClick={onClickSidebar}><FontAwesomeIcon icon={faEllipsisVertical} /></button>}
         </div>
     )
 }

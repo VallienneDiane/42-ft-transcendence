@@ -25,8 +25,6 @@ export interface IChannelToEmit {
     name: string;
     password: boolean;
     inviteOnly: boolean;
-    persistant: boolean;
-    onlyOpCanTalk: boolean;
     hidden: boolean;
     normalUsers: IUserToEmit[];
     opUsers: IUserToEmit[];

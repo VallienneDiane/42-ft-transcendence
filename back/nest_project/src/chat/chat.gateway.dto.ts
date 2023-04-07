@@ -43,7 +43,5 @@ export class createChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
-	@IsNotEmpty() @IsBoolean() readonly onlyOpCanTalk: boolean;
 	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 }

@@ -7,6 +7,7 @@ import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
+import { FriendEntity } from "./relation/friend/friend.entity";
 
 @Injectable({})
 export class UserService {
@@ -103,10 +104,7 @@ export class UserService {
                 name: "general",
                 password: false,
                 channelPass: null,
-                opNumber: 0,
                 inviteOnly: false,
-                persistant: true,
-                onlyOpCanTalk: false,
                 hidden: false,
                 normalUsers: [],
                 opUsers: [],
@@ -195,5 +193,30 @@ export class UserService {
         await this.usersRepository.save(user);
     }
 
-    
+    async getAvatar(id : string): Promise<string> {
+        const userAvatar: string = await this.usersRepository.createQueryBuilder()
+            .where("user.id = :id", { id: id })
+            .select("user.avatarSvg")
+            .from(UserEntity, 'user')
+            .getRawOne();
+        return userAvatar;
+    }
+
+    async getFriendRequestsSend(id: string): Promise<FriendEntity[]> {
+        const requestsSend: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsSend", "send")
+            .select("send.*")
+            .getRawMany();
+        return requestsSend;
+    }
+
+    async getFriendRequestsReceived(id: string): Promise<FriendEntity[]> {
+        const requestsReceived: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsReceived", "receiv")
+            .select("receiv.*")
+            .getRawMany();
+        return requestsReceived;
+    }
 }

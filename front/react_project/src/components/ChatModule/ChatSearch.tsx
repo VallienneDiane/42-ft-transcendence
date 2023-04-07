@@ -5,6 +5,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
 import { ISearch, Message, IMessageEntity, IChannelEntity, IChannelToEmit, IMessageToSend } from "../../models";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelName: string}) {
     const {socket} = useContext(SocketContext);
@@ -300,8 +302,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
             <div id="searchbarWrapper">
                 <div className="searchbar">
                     <input type="text" onChange={this.displayList} onClick={this.showSearchList} value={this.state.text} placeholder="Search"/>
-                    <svg className="svgSearch" viewBox="0 0 24 24"><path fill="#666666" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
-                    </svg>
+                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                 </div>
                 {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
                     {this.state.filtered.map((elt: ISearch, id: number) => (

@@ -2,6 +2,7 @@ import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
+import { FriendEntity } from './relation/friend/friend.entity';
 
 @Entity()
 export class UserEntity {
@@ -56,5 +57,11 @@ export class UserEntity {
 
   @Column({nullable: true})
   avatarSvg: string;
+
+  @OneToMany(() => FriendEntity, (request) => request.sender)
+  requestsSend : FriendEntity[];
+
+  @OneToMany(() => FriendEntity, (request) => request.receiver)
+  requestsReceived : FriendEntity[];
   
 }

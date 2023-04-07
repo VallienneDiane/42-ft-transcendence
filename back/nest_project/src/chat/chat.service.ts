@@ -30,10 +30,7 @@ export class ChatService {
             date: new Date(),
             password: false,
             channelPass: null,
-            opNumber: 0,
             inviteOnly: false,
-            persistant: true,
-            onlyOpCanTalk: false,
             hidden: false,
             normalUsers: [],
             opUsers: [],
@@ -50,7 +47,7 @@ export class ChatService {
             socketMap.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
-                    roomHandler.joinRoom(userId, socket, 'general', true, false, false, false);
+                    roomHandler.joinRoom(userId, socket, 'general', true, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
@@ -88,14 +85,12 @@ export class ChatService {
         if (room != undefined) {
             let toSend = {date: new Date(), sender: user.login, content: message};
             if (room.isChannel) {
-                if (!room.onlyOpCanTalk || room.isOp) {
                     if (room.room != "general") {
                         logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
                         .then((channId) => {
                             this.messageChannelService.addMessage(user, channId, message);
                         })
-                    }
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
                 }
                 else
@@ -135,7 +130,7 @@ export class ChatService {
         if (isChannel)
         {
             if (loc == '00000000-0000-0000-0000-000000000000') {
-                roomHandler.joinRoom(user.id, client, loc, true, false, false, false);
+                roomHandler.joinRoom(user.id, client, loc, true, false, false);
                 this.goBackToGeneral(client);
                 return;
             }
@@ -151,8 +146,7 @@ export class ChatService {
                                 loc,
                                 true,
                                 found.status == "god",
-                                found.status == "op",
-                                found.channel.onlyOpCanTalk);
+                                found.status == "op");
                             this.channelService.getMessages(loc)
                                 .then((array) => {
                                     client.emit("newLocChannel", found, array);
@@ -171,7 +165,7 @@ export class ChatService {
             .then (
                 (found) => {
                     if (found != null) {
-                        roomHandler.joinRoom(user.id, client, found.id, false, false, false, false);
+                        roomHandler.joinRoom(user.id, client, found.id, false, false, false);
                         console.log('user currently in room : ', roomHandler.socketMap.sockets.get(client).room, roomHandler.socketMap.sockets.get(client).isChannel)
                         this.messagePrivateService.findConversation(user.id, found.id)
                         .then(
@@ -227,6 +221,7 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
+        console.log("blop")
         let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId, true);
         usersArray.forEach((elt) => {
             let connected = roomHandler.userMap.get(elt.user.id);
@@ -453,10 +448,7 @@ export class ChatService {
                             name: channel.name,
                             password: channel.password,
                             channelPass: channel.channelPass,
-                            opNumber: 1,
                             inviteOnly: channel.inviteOnly,
-                            persistant: channel.persistant,
-                            onlyOpCanTalk: channel.onlyOpCanTalk,
                             hidden: channel.hidden,
                             messages: [],
                             normalUsers: [],
