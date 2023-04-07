@@ -1,14 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Ball } from './Ball';
 import { Vec2 } from './match/Vec2';
 import { Wall } from './Wall';
 import { Collision } from './match/Collision';
 import { Socket } from 'socket.io';
-import { Match } from 'src/match/Match';
-import { UserEntity } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { MatchService } from 'src/match/Match.service';
 import { CreateMatchDto } from 'src/match/CreateMatch.dto';
+import { UserEntity } from 'src/user/user.entity';
 
 /**
  * use to store info on a ball
@@ -37,8 +36,8 @@ export class GameEngineService {
 
 	pl1: Socket;
 	pl2: Socket;
-	userid1: string;
-	userid2: string;
+	userid1: UserEntity;
+	userid2: UserEntity;
 	pl1_ready: boolean;
 	pl2_ready: boolean;
 	pl1_score: number;
@@ -50,8 +49,12 @@ export class GameEngineService {
     cooldown_start;
     game_must_stop: boolean;
     loop: any; // set_interval function handle for stoping the game
+	userservice;
+	matchservice;
 
-	constructor(private userservice: UserService, matchservice: MatchService) {
+	constructor(userservice: UserService, matchservice: MatchService) {
+		this.userservice = userservice;
+		this.matchservice = matchservice;
 		this.ballz = [];
 		this.wallz = [];
 		
@@ -101,9 +104,9 @@ export class GameEngineService {
 	 * @param player1 se
 	 * @param player2 
 	 */
-	set_player (player1: Socket, player2: Socket, login1: string, login2: string) {
-		this.userid1 = login1;
-		this.userid2 = login2;
+	set_player (player1: Socket, player2: Socket, userid1: UserEntity, userid2: UserEntity) {
+		this.userid1 = userid1;
+		this.userid2 = userid2;
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
@@ -134,7 +137,9 @@ export class GameEngineService {
 	 * @param player the player sendin the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	set_player_ready (player: Socket, server: any) {
+	async set_player_ready (player: Socket, server: any) {
+		let result = await this.matchservice.findMatch();
+		console.log("the score should be save", result);
 		if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -169,13 +174,17 @@ export class GameEngineService {
 		return n2;
 	}
 
-	close_the_game() {
-		let match: CreateMatchDto;
+	async close_the_game() {
+		console.log("entering close_the_game");
+		let match: CreateMatchDto = new CreateMatchDto();
+		console.log("heu :" + this.max(this.pl1_score, this.pl2_score));
 		match.score_winner = this.max(this.pl1_score, this.pl2_score);
 		match.score_looser = this.min(this.pl1_score, this.pl2_score);
-		match.winner = await this.userservice.findById(this.pl1_score > this.pl2_score ? this.userid1 : this.userid2);
-		match.looser = await this.userservice.findById(this.pl1_score < this.pl2_score ? this.userid1 : this.userid2);
-		this.game_must_stop = true;
+		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
+		match.looser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
+		await this.matchservice.createMatch(match);
+		let result = await this.matchservice.findMatch();
+		console.log("the score should be save", result);
 	}
 
 	main_loop() {
@@ -230,7 +239,9 @@ export class GameEngineService {
 				this.pl2_score++;
 			}
 			if (this.pl1_score > 4 || this.pl2_score > 4) {
+				this.close_the_game();
 				this.game_must_stop = true;
+				console.log("past close_the_game");
 				return;
 			}
 

@@ -10,5 +10,6 @@ import { MatchService } from "./Match.service";
     ],
     controllers: [MatchController],
     providers: [MatchService],
+    exports: [MatchService],
 })
 export class MatchModule {}

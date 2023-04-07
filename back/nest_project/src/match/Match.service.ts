@@ -12,7 +12,13 @@ export class MatchService {
 
 	}
 
-	findMatch() {}
+	findMatch() {
+		return this.MatchRepository
+			.createQueryBuilder("matchos")
+			.leftJoinAndSelect("matchos.winner", "winner")
+			.leftJoinAndSelect("matchos.looser", "looser")
+			.getMany();
+	}
 
 	createMatch(matchdetails: CreateMatchDto) {
 		let newMatch = this.MatchRepository.create({
