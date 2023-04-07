@@ -34,17 +34,17 @@ export class AuthController {
     });
     const data = await response.json();
     if(!await this.userService.findByLogin(data.login)) {
-      const user42 = {
-        id: <number>null,
-        login: data.login,
-        email: data.email,
-        password: <string>null,
-        twoFactorSecret: <string>null,
-        isTwoFactorEnabled: <boolean>null,
-        qrCode: <string>null,
-        avatarSvg: data.image?.link,
-      };
-      await this.userService.create(user42);
+      // const user42 = {
+      //   id: <number>null,
+      //   login: data.login,
+      //   email: data.email,
+      //   password: <string>null,
+      //   twoFactorSecret: <string>null,
+      //   isTwoFactorEnabled: <boolean>null,
+      //   qrCode: <string>null,
+      //   avatarSvg: data.image?.link,
+      // };
+      // await this.userService.create(user42);
       newUser = true;
     }
     return {
@@ -128,6 +128,7 @@ export class AuthController {
   async is2faActive(@Body() user: UserDto) {
     const validUser = await this.userService.findByLogin(user.login);
     const is2faActive = validUser.isTwoFactorEnabled;
+    console.log("VALUE DE ISTWOFACTORENABLED ? : ", is2faActive, validUser.isTwoFactorEnabled);
     return {is2faActive};
   }
 }
