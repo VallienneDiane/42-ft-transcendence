@@ -76,7 +76,6 @@ export class ChannelService {
 	}
 
 	async listChannelsWhereUserIsNot(user: UserEntity): Promise<ChannelEntity[]> {
-		//console.log("listchannelwhere....", user.id);
 		const allChannels = await this.listChannelsWithUsers();
 		let channListToReturn: ChannelEntity[] = [];
 		allChannels.forEach(channel => {
@@ -137,7 +136,6 @@ export class ChannelService {
 				toReturn.push({user: user, status: "normal", connected: false});
 			}
 		)
-		console.log(toReturn)
 		return toReturn;
 	}
 
@@ -151,8 +149,6 @@ export class ChannelService {
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
 		const usersArray = await this.listUsersInChannel(channelId, false);
 		for (let elt of usersArray) {
-			console.log(elt.user.id)
-			console.log(userId)
 			if (elt.user.id == userId)
 				return ({user: elt.user, status: elt.status});
 		}
@@ -219,7 +215,6 @@ export class ChannelService {
 			.where("channel.id = :id", { id: channelId })
 			.orderBy("messages.date", "ASC")
 			.getRawMany();
-		console.log("msgs: ", msgs);
 		return msgs;
 	}
 

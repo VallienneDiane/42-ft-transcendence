@@ -41,6 +41,9 @@ export class ChatService {
 
     private async delUserFromChannel(userId: string, channelId: string, roomHandler: UserRoomHandler) {
         await this.channelService.delUser(userId, channelId);
+        let room = roomHandler.roomMap.of(channelId)
+        if (room != undefined)
+            room.emit("userLeaveChannel", userId);
         let socketMap = roomHandler.userMap.get(userId);
         if (socketMap != undefined) {
             let channel: IChannelToEmit = await this.channelService.getOneById(channelId);
@@ -52,9 +55,6 @@ export class ChatService {
                 }
             });
         }
-        // let chan: ChannelEntity = await this.channelService.getOneById(channelId);
-        // if (chan == null)
-        //     roomHandler.roomKill(channelId);
     }
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
@@ -135,7 +135,6 @@ export class ChatService {
                 return;
             }
             else {
-                console.log("entries: ", user.id, loc);
                 this.userService.getChannelLink(user.id, loc)
                 .then(
                     (found) => {
@@ -166,7 +165,6 @@ export class ChatService {
                 (found) => {
                     if (found != null) {
                         roomHandler.joinRoom(user.id, client, found.id, false, false, false);
-                        console.log('user currently in room : ', roomHandler.socketMap.sockets.get(client).room, roomHandler.socketMap.sockets.get(client).isChannel)
                         this.messagePrivateService.findConversation(user.id, found.id)
                         .then(
                             (messages) => {
@@ -221,7 +219,6 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        console.log("blop")
         let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId, true);
         usersArray.forEach((elt) => {
             let connected = roomHandler.userMap.get(elt.user.id);
@@ -245,8 +242,9 @@ export class ChatService {
                                         this.channelService.addNormalUser(user, channel.id)
                                             .then(() => {
                                                 let room = roomHandler.roomMap.of(channel.id);
-                                                if (room != undefined)
-                                                    room.emit("newUserInChannel", user.id, user.login);
+                                                if (room != undefined) {
+                                                    room.emit("newUserInChannel", user.id, user.login, true);
+                                                }
                                                 let channelToEmit: IChannelToEmit = channel;
                                                 roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);

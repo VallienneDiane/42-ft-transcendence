@@ -13,7 +13,6 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '1000mb' }));
   app.use(bodyParser.urlencoded({ limit: '1000mb', extended: true }));
   await app.listen(3000);
-  app.useGlobalPipes(new ValidationPipe());
   // additional feature to make sure server shutdown gracefully to try and see
   app.enableShutdownHooks();
 }
