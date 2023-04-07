@@ -23,16 +23,15 @@ const Callback: React.FC = () => {
     useEffect(() => {
         accountService.callback(code!)
         .then(response => {
-            accountService.is2faActive(response.data.login)
-            .then(response_2fa => {
-                if(response_2fa.data.is2faActive == true) {
-                    navigate("/verifyCode2fa", { state: { login: response.data.login } });
-                }
-                else {
-                    console.log("REEEESPONSE : ", response);
-                    if(response.data.newuser == true) {
-                        console.log("avant redir homepage");
-                        navigate("/homePageSettings", { state: { login: response.data.login, avatar: response.data.avatarSvg } });
+            if(response.data.newuser == true) {
+                navigate("/homeSettings", { state: { login: response.data.login, avatar: response.data.avatarSvg } });
+            }
+            else {
+                console.log("user déjà connu dans la BDD");
+                accountService.is2faActive(response.data.login)
+                .then(response_2fa => {
+                    if(response_2fa.data.is2faActive == true) {
+                        navigate("/verifyCode2fa", { state: { login: response.data.login } });
                     }
                     else {
                         accountService.generateToken(response.data.login)
@@ -43,15 +42,15 @@ const Callback: React.FC = () => {
                             navigate(from);
                         })
                     }
-                }
-            })
-            .catch(error => {
-                console.log(error);
-            })
+                })
+                .catch(error => {
+                    console.log(error);
+                })
+            }
         })
         .catch(error => {
             console.log(error);
-        });
+        })
     }, [code])
 
     return (

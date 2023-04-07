@@ -21,7 +21,7 @@ export class UserEntity {
   @Column({nullable: true})
   twoFactorSecret: string;
 
-  @Column({nullable: true})
+  @Column({default: false})
   isTwoFactorEnabled: boolean;
 
   @Column({nullable: true})

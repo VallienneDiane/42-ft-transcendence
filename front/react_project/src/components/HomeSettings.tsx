@@ -1,28 +1,28 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { accountService } from "../services/account.service";
-import { userService } from "../services/user.service";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { SettingsForm } from "../models";
+import { useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom"
 
-interface userProps {
-    login: string,
-    avatar: string,
-}
+const userSchema = yup.object().shape({
+    login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") ,
+})
 
-const AvatarHomeSettings = (props: userProps) => {
+const HomeSettings: React.FC = () => {
+    const location = useLocation();
+    const login = location.state?.login;
+    const avatardb = location.state?.avatar;
 
-    const [avatar, setAvatar] = useState<string>();
+    const [avatar, setAvatar] = useState<string>(avatardb);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
-    useEffect(() => {
-        userService.getUser(props.login)
-            .then(response => {
-                setAvatar(props.avatar);
-            })
-            .catch(error => {
-                console.log(error);
-            });
-    }, [])
-
+    const { register, handleSubmit, formState: { errors }} = useForm<SettingsForm>({
+        resolver: yupResolver(userSchema)
+    });
+    
     const avatarSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
         const files = event.target.files;
@@ -31,7 +31,9 @@ const AvatarHomeSettings = (props: userProps) => {
         }
     }
 
-    const avatarSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const avatarSubmit = (event: React.FormEvent<HTMLFormElement>, data: SettingsForm) => {
+        console.log("data.login ? ", data.login);
+        accountService.updateUser(data.login);
         event.preventDefault();
         let reader = new FileReader();
         reader.onloadend = function () {
@@ -77,19 +79,27 @@ const AvatarHomeSettings = (props: userProps) => {
 
     return (
         <div id="avatarSetting">
-            <h2>Upload a new Avatar</h2>
-            <img id="profilePicture" src={avatar} />
+            <h2>Choose your login </h2>
             <form onSubmit={avatarSubmit}>
+                <input className="form_element" 
+                    {...register("login")}
+                    // value={props.login}
+                    type="text" 
+                    placeholder={login}
+                />
+                {errors.login && <p className='errorsName'>{errors.login.message}</p>} 
+                <h2>Upload a new Avatar</h2>
+                <img id="profilePicture" src={avatar} />
                 <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
                     <p>Drop file here</p>
                     <p className="or">OR</p>
                     <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
                 </div>
                 <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                <button type="submit">Upload file</button>
+                <button type="submit">Save</button>
             </form>
         </div>
     )
 }
 
-export default AvatarHomeSettings;
+export default HomeSettings;

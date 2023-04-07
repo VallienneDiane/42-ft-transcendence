@@ -15,7 +15,7 @@ import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
 import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
-import HomePageSettings from './components/HomePageSettings';
+import HomeSettings from './components/HomeSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
@@ -49,7 +49,7 @@ function App() {
         <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
           <Routes>
             <Route path="/callback/" element={<Callback />} />
-            <Route path='/homePageSettings' element={<HomePageSettings />} />
+            <Route path='/homeSettings' element={<HomeSettings />} />
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />
