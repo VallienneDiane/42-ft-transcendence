@@ -212,7 +212,7 @@ export function Header(props: {dest: IDest}) {
             : <FontAwesomeIcon className="iconChannels" icon={faUser} /> }
                 {props.dest.name}
             </h1>
-            {props.dest.name !== "general" && <button onClick={onClickSidebar}><FontAwesomeIcon icon={faEllipsisVertical} /></button>}
+            {props.dest.name !== "general" && <button onClick={onClickSidebar}><FontAwesomeIcon className="iconChannels" icon={faEllipsisVertical} /></button>}
         </div>
     )
 }
