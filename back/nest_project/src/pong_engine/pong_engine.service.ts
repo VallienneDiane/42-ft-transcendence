@@ -28,6 +28,9 @@ export class PongEngineService {
     pl2: Socket;
     pl1_ready: boolean;
     pl2_ready: boolean;
+    pl1_score: number;
+    pl2_score: number;
+    victory_condition: string;
 
     aspect_ratio = 16/9;
     cooldown = 180; // cooldown between ball respawn
@@ -43,6 +46,8 @@ export class PongEngineService {
         this.pl1_ready = false;
         this.pl2_ready = false;
         this.game_must_stop = false;
+        this.pl1_score = 0;
+        this.pl2_score = 0;
 
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
@@ -127,7 +132,13 @@ export class PongEngineService {
         }
         this.p1.update_self_position();
         this.p2.update_self_position();
-        this.ball.update_self_position(this.p1, this.p2);
+        let r = this.ball.update_self_position(this.p1, this.p2);
+        if (r === 1) {
+            this.pl1_score++;
+        }
+        else if (r === 2) {
+            this.pl2_score++;
+        }
         this.gs.ballPosition = [{
             x: this.ball.x_position,
             y: this.ball.y_position,

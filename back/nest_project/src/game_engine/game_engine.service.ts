@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Ball } from './Ball';
-import { Vec2 } from './math/Vec2';
+import { Vec2 } from './match/Vec2';
 import { Wall } from './Wall';
-import { Collision } from './math/Collision';
+import { Collision } from './match/Collision';
 import { Socket } from 'socket.io';
+import { Match } from 'src/match/Match';
+import { UserEntity } from 'src/user/user.entity';
+import { UserService } from 'src/user/user.service';
+import { MatchService } from 'src/match/Match.service';
+import { CreateMatchDto } from 'src/match/CreateMatch.dto';
 
 /**
  * use to store info on a ball
@@ -32,8 +37,13 @@ export class GameEngineService {
 
 	pl1: Socket;
 	pl2: Socket;
+	userid1: string;
+	userid2: string;
 	pl1_ready: boolean;
 	pl2_ready: boolean;
+	pl1_score: number;
+	pl2_score: number;
+	victory_condition: string;
 
 	aspect_ratio = 16/9;
     cooldown = 180; // cooldown between ball respawn
@@ -41,7 +51,7 @@ export class GameEngineService {
     game_must_stop: boolean;
     loop: any; // set_interval function handle for stoping the game
 
-	constructor() {
+	constructor(private userservice: UserService, matchservice: MatchService) {
 		this.ballz = [];
 		this.wallz = [];
 		
@@ -64,6 +74,8 @@ export class GameEngineService {
 		this.pl1_ready = false;
 		this.pl2_ready = false;
 		this.game_must_stop = false;
+		this.pl1_score = 0;
+		this.pl2_score = 0;
         this.cooldown_start = 0;
 
 		// filling the gamestate
@@ -89,7 +101,9 @@ export class GameEngineService {
 	 * @param player1 se
 	 * @param player2 
 	 */
-	set_player (player1: Socket, player2: Socket) {
+	set_player (player1: Socket, player2: Socket, login1: string, login2: string) {
+		this.userid1 = login1;
+		this.userid2 = login2;
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
@@ -141,6 +155,29 @@ export class GameEngineService {
         }
 	}
 
+	max(n1: number, n2: number): number {
+		if (n1 >= n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	min(n1: number, n2: number): number {
+		if (n1 < n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	close_the_game() {
+		let match: CreateMatchDto;
+		match.score_winner = this.max(this.pl1_score, this.pl2_score);
+		match.score_looser = this.min(this.pl1_score, this.pl2_score);
+		match.winner = await this.userservice.findById(this.pl1_score > this.pl2_score ? this.userid1 : this.userid2);
+		match.looser = await this.userservice.findById(this.pl1_score < this.pl2_score ? this.userid1 : this.userid2);
+		this.game_must_stop = true;
+	}
+
 	main_loop() {
 		this.cooldown_start++; // use to time the delay between balls respawn
 
@@ -185,7 +222,17 @@ export class GameEngineService {
 		// for each ball check the collision with each wall then with the other ball
 		this.ballz.forEach((ball, index) => {
 			// update the ball position
-			ball.update_self_position();
+			let r = ball.update_self_position();
+			if (r === 1) {
+				this.pl1_score++;
+			}
+			else if (r === 2) {
+				this.pl2_score++;
+			}
+			if (this.pl1_score > 4 || this.pl2_score > 4) {
+				this.game_must_stop = true;
+				return;
+			}
 
 			// check for ball wall collision
 			this.wallz.forEach((w) => {

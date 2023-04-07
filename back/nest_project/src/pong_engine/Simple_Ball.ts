@@ -38,7 +38,7 @@ export class Simple_ball {
      * @param p2 the right paddle as a Simple_paddle object
      * @returns nothing
      */
-    update_self_position(p1: Simple_paddle, p2: Simple_paddle) {
+    update_self_position(p1: Simple_paddle, p2: Simple_paddle): number {
 
         /* update position */
         this.x_position = this.x_position + this.x_speed;
@@ -87,9 +87,14 @@ export class Simple_ball {
         }
 
         /* check if goal */
-        if ((this.x_position - this.r < 0) || (this.x_position + this.r > this.aspect_ratio)) { //TODO register the goal
+        if (this.x_position - this.r < 0) {
             this.alive = false;
-            return;
+            return 2;
         }
+        else if (this.x_position + this.r > this.aspect_ratio) { //TODO register the goal
+            this.alive = false;
+            return 1;
+        }
+        return 0;
     }
 }
