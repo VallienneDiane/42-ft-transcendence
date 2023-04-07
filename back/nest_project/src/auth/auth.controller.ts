@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
 import { JwtService } from "@nestjs/jwt";
+import { UserEntity } from 'src/user/user.entity';
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
@@ -33,7 +34,7 @@ export class AuthController {
     });
     const data = await response.json();
     if(!await this.userService.findByLogin(data.login)) {
-      const newUser42 = {
+      const newUser42: UserEntity = {
         id: <number>null,
         login: data.login,
         email: data.email,
@@ -42,6 +43,7 @@ export class AuthController {
         isTwoFactorEnabled: <boolean>null,
         qrCode: <string>null,
         avatarSvg: data.image.link,
+        match: [],
       };
       console.log("create user42", newUser42, "image ? ", data.image.link);
       await this.userService.create(newUser42);
