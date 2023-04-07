@@ -1,6 +1,8 @@
 pgadmin/
 postgres/
+data/
 nodes_modules/
 docker-compose.yml
 Makefile
 .env
+**/nodes_modules/**
