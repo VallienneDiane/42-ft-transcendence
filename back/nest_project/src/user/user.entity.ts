@@ -1,4 +1,4 @@
-import { Match } from 'src/type_orm/Match';
+import { Match } from 'src/match/Match';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()
@@ -31,7 +31,7 @@ export class UserEntity {
   @Column({nullable: true})
   avatarSvg: string;
 
-  @ManyToOne(() => Match, (match) => (match.player1, match.player2))
+  @ManyToOne(() => Match, (match) => (match.winner, match.looser))
   @JoinColumn()
   match: Match[]
 }

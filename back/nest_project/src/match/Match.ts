@@ -7,14 +7,14 @@ export class Match {
 	id: number
 
 	@Column()
-	score_p1: number
+	score_winner: number
 
 	@Column()
-	score_p2: number
+	score_looser: number
 
-	@OneToMany(() => UserEntity, (player1) => player1.match)
-	player1: UserEntity
+	@OneToMany(() => UserEntity, (winner) => winner.match)
+	winner: UserEntity
 
-	@OneToMany(() => UserEntity, (player2) => player2.match)
-	player2: UserEntity
+	@OneToMany(() => UserEntity, (looser) => looser.match)
+	looser: UserEntity
 }

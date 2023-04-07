@@ -1,6 +1,6 @@
 import { Optional } from "@nestjs/common";
 import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean } from "class-validator";
-import { Match } from "src/type_orm/Match";
+import { Match } from "src/match/Match";
 
 export class UserDto {
     readonly id: number;

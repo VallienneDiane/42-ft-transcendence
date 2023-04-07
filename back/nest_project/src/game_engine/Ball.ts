@@ -1,4 +1,4 @@
-import { Vec2 } from "./math/Vec2";
+import { Vec2 } from "./match/Vec2";
 
 export class Ball {
 
@@ -28,12 +28,17 @@ export class Ball {
 			this.inv_mass = 1 / this.mass;
 	}
 
-	update_self_position() {
+	update_self_position(): number {
 		this.position = this.position.add(this.speed);
-		if ((this.position.x - this.r < 0) || (this.position.x + this.r > this.aspect_ratio)) { //TODO register the goal
+		if (this.position.x - this.r < 0) {
+			this.alive = false;
+            return 2;
+		}
+		else if (this.position.x + this.r > this.aspect_ratio) { //TODO register the goal
             this.alive = false;
-            return;
+            return 1;
         }
+		return 0;
 	}
 
 }
