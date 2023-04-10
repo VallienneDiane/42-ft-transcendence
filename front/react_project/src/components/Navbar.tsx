@@ -11,8 +11,8 @@ const NavBar: React.FC = () => {
   const {socket, disconnect} = useContext(SocketContext);
 
   const logout = () => {
-    accountService.logout();
     disconnect();
+    accountService.logout();
     navigate("/login");
   }
 

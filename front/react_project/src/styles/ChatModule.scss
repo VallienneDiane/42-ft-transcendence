@@ -68,7 +68,7 @@
 					& input {
 						border: 1px solid var(--second-color);
 						border-radius: 50px;
-						padding: 0.3rem 2rem;
+						padding: 0.3rem 1rem;
 						margin: 10px;
 						// font-size: 1.2em;
 					}
@@ -347,8 +347,11 @@
 									}
 								}
 								& .settingList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									width: 100%;
+									padding: 0.5rem 0;
 									& > li {
 										display: flex;
 										flex-direction: row;
@@ -357,7 +360,7 @@
 										font-size: 15px;
 										width: 100%;
 										padding: 0.2rem 1.5rem;
-										// border-bottom: 1px solid rgb(150, 156, 177);
+										// border-bottom: 1px solid rgb(217, 223, 243);
 									}
 									& .inputChannel {
 										outline: 0;
