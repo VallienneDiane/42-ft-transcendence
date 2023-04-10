@@ -4,7 +4,7 @@ import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { IChannel, ISearch, IMessage, IMessageToSend } from "./Chat_models";
+import { IChannel, ISearch, IMessage, IMessageReceived } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
@@ -28,10 +28,10 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     }
 
     useEffect(() => {
-        socket.on("wrong", () => {
+        socket.on("incorrectPassword", () => {
             setIncorrectCredentials(true);
         });
-        socket.on("true", () => {
+        socket.on("correctPassword", () => {
             setOffSocket(true);
             setPass('');
             props.handleClose('');
@@ -274,19 +274,19 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             this.setState({users: newList});
         });
 
-        this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageToSend[]) => {
+        this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
             let newHistory: IMessage[] = [];
             for (let elt of array) {
-                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.sender})
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
             }
             this.props.handleHistory(newHistory);
             this.props.changeLoc({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
-        });
+        }); // récupération du status ici !!
 
-        this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageToSend[]) => {
+        this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
             let newHistory: IMessage[] = [];
             for (let elt of messages) {
-                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.sender})
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
             }
             this.props.handleHistory(newHistory);
             this.props.changeLoc({id: id, name: login, isChannel: false});

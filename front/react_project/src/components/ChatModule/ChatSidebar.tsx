@@ -5,7 +5,7 @@ import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { IDest, IChannel } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsisVertical, faUser, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { faBan, faBroom, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router-dom";
 
 function ModifyChannel(props: {channel: IChannel}) {
@@ -67,55 +67,60 @@ function ModifyChannel(props: {channel: IChannel}) {
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
+    const me: JwtPayload = accountService.readPayload()!;
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
-    // const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
-    const me: JwtPayload = accountService.readPayload()!;
+    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [myGrade, setGrade] = useState<string>("normal");
+    const [userToInvit, setUserToInvit] = useState<string>("");
+
+    const showMembers = () => {
+        setOnClickMembers((onClickMembers) => !onClickMembers)
+    }
+    
+    const showSettings = () => {
+        setOnClickSettings((onClickSettings) => !onClickSettings)
+    }
+    
+    const showInvite = () => {
+        setOnClickInvite((onClickInvite) => !onClickInvite)
+    }
+    
+    const onChange = (e: any) => {
+        setUserToInvit(e.target.value);
+    }
+
+    const handleClickOutside = (e: any) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+            props.handleClose();
+        }
+    }
+     
+    const kickUser = (e: any) => {
+        socket.emit("kickUser", {userToKick: e.target.value, channelId: props.dest.id});
+    }
+    
+    const deOp = () => {
+        console.log("deOp!");
+    }
+    
+    const doOp = () => {
+        console.log("doOp!");
+    }
+
+    const inviteUser = () => {
+        socket.emit('inviteUser', userToInvit, props.dest.id);
+    }
 
     const leaveChannel = () => {
         socket.emit('leaveChannel', {channelId: props.dest.id});
         props.handleClose();
     }
 
-    const inviteUser = () => {
-        // coder l'invitation : search user
-        socket.emit('inviteUser', "nami", props.dest.id);
-    }
-
-    const listMembers = () => {
-        setOnClickMembers((onClickMembers) => !onClickMembers)
-    }
-
-    const showSettings = () => {
-        setOnClickSettings((onClickSettings) => !onClickSettings)
-    }
-
-    const showInvite = () => {
-
-    }
-
-    const showUserParam = () => {
-        console.log("blop");
-    }
-    
-    const handleClickOutside = (e: any) => {
-        if (ref.current && !ref.current.contains(e.target)) {
-            props.handleClose();
-        }
-    }
-
-    const kickUser = (e: any) => {
-        socket.emit("kickUser", {userToKick: e.target.value, channelId: props.dest.id});
-    }
-
-    const deOp = () => {
-        console.log("deOp!");
-    }
-
-    const doOp = () => {
-        console.log("doOp!");
+    const deleteChannel = () => {
+        socket.emit('destroyChannel', {channelId: props.dest.id});
+        props.handleClose();
     }
 
     useEffect(() => {
@@ -174,30 +179,46 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
           <div className="navRight">
             <h1>{props.dest.name}</h1>
             <ul className="paramMenu">
-                <li onClick={listMembers}>Members</li>
+                <li onClick={showMembers}>Members</li>
                 {onClickMembers && (
                     <ul className="memberList">{
                         members.map(
                         (member, id) => {
+                            let iconStatus: JSX.Element = null!;
+                            if (member.status === "god")
+                                iconStatus = <FontAwesomeIcon className="iconStatus" icon={faKiwiBird} />;
+                            else if (member.status === "op")
+                                iconStatus = <FontAwesomeIcon className="iconStatus" icon={faFeather} />;
+
                             if (member.user.id !== me.sub) {
                                 if (props.dest.status == "normal")
-                                    return (<li key={id}><button onClick={showUserParam}>{member.user.login}</button> </li>)
+                                    return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
                                 else if (props.dest.status == "op" && member.status == "normal")
-                                    return (<li key={id}><button onClick={showUserParam}>{member.user.login}</button> <button value={member.user.id} onClick={kickUser}>kickUser</button></li>)
+                                    return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                                    <div><button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div></li>)
                                 else if (props.dest.status == "god")
-                                    return (<li key={id}><button onClick={showUserParam}>{member.user.login}</button> <button value={member.user.id} onClick={kickUser}>kickUser</button>
-                                    { member.status == "op" ? (<button onClick={deOp}>deOp</button>) : (<button onClick={doOp}>doOp</button>) }
+                                    return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                                    <div>
+                                    { member.status == "op" ? (<button onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) : (<button onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
+                                    <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div>
                                     </li>)
                             }
                             else
-                                return (<li key={id}>{member.user.login}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M288 192h17.1c22.1 38.3 63.5 64 110.9 64c11 0 21.8-1.4 32-4v4 32V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V339.2L248 448h56c17.7 0 32 14.3 32 32s-14.3 32-32 32H160c-53 0-96-43-96-96V192.5c0-16.1-12-29.8-28-31.8l-7.9-1C10.5 157.6-1.9 141.6 .2 124s18.2-30 35.7-27.8l7.9 1c48 6 84.1 46.8 84.1 95.3v85.3c34.4-51.7 93.2-85.8 160-85.8zm160 26.5v0c-10 3.5-20.8 5.5-32 5.5c-28.4 0-54-12.4-71.6-32h0c-3.7-4.1-7-8.5-9.9-13.2C325.3 164 320 146.6 320 128v0V32 12 10.7C320 4.8 324.7 .1 330.6 0h.2c3.3 0 6.4 1.6 8.4 4.2l0 .1L352 21.3l27.2 36.3L384 64h64l4.8-6.4L480 21.3 492.8 4.3l0-.1c2-2.6 5.1-4.2 8.4-4.2h.2C507.3 .1 512 4.8 512 10.7V12 32v96c0 17.3-4.6 33.6-12.6 47.6c-11.3 19.8-29.6 35.2-51.4 42.9zM400 128a16 16 0 1 0 -32 0 16 16 0 1 0 32 0zm48 16a16 16 0 1 0 0-32 16 16 0 1 0 0 32z"/></svg></li>)
+                                return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
                         }
                         )}
                     </ul>
                 )}
                 {props.dest.channel?.inviteOnly ? (
-                    <li onClick={inviteUser}>Invite</li>
-                    // {onClickInvite &&
+                     <React.Fragment>
+                         <li onClick={showInvite}>Invite</li>
+                         {onClickInvite && (
+                             <div className="searchbar">
+                                 <input type="text" onChange={onChange} value={userToInvit} placeholder="Search"/>
+                                 <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={inviteUser} />
+                             </div>)
+                         }
+                     </React.Fragment>
                 ) : null }
                 {props.dest.status !== "normal" ? (
                     <React.Fragment>
@@ -207,8 +228,8 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </React.Fragment>
                 ) : null }
-                {/* {(props.dest.status === "god" || props.dest.status === "op") ? ( */}
-                <li onClick={leaveChannel}>Leave</li>
+                {props.dest.status !== "god" ? (
+                <li className="outChannel" onClick={leaveChannel}>Leave</li>) : (<li className="outChannel" onClick={deleteChannel}>Delete</li>)}
             </ul>
           </div>
       </div>

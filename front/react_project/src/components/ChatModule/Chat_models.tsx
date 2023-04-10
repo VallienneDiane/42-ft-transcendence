@@ -40,13 +40,14 @@ export interface IMessage {
 	id: string; // corespond à la date
 	content: string;
 	senderName: string;
-	senderId?: string;
+	senderId: string;
 }
 
-export interface IMessageToSend {
+export interface IMessageReceived {
 	date: Date;
-	sender: string;
 	content: string;
+	senderName: string;
+	senderId: string;
 }
 
 // SearchChat, SearchElement
@@ -56,4 +57,4 @@ export interface ISearch {
 	isChannel: boolean;
 	password: boolean;
 	isClickable: boolean;
-  }
+}

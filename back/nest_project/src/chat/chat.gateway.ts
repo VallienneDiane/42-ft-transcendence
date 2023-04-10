@@ -143,16 +143,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
-    // @SubscribeMessage('inviteUser')
-    // handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-    //     this.tokenChecker(client)
-    //     .then((user) => {
-    //         if (user != null)
-    //             this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
-    //         else
-    //             client.emit('notice', 'Your token is invalid, please log out then sign in');
-    //     })
-    // }
+    @SubscribeMessage('inviteUser')
+    handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
 
     @SubscribeMessage('createChannel')
     handleCreateChannel(@MessageBody() data: createChannelDto, @ConnectedSocket() client: Socket) {
@@ -171,6 +171,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null)
                 this.chatService.leaveChannelEvent(client, user, this.chatRoomHandler, this.logger, data.channelId);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('destroyChannel')
+    handleDestroyChannel(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.destroyChannelEvent(client, user, data.channelId, this.chatRoomHandler);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

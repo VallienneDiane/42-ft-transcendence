@@ -110,6 +110,13 @@ class ChannelDMList extends React.Component<{}, {
                 );
             this.setState({channels: nextState});
         })
+
+        this.context.socket.on('channelDestroy', (channelId: string) => {
+            let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
+                (elt: {channel: IChannel}) => {return (elt.channel.id != channelId)}
+                );
+            this.setState({channels: nextState});
+        })
     }
 
     componentWillUnmount(): void {
@@ -120,6 +127,7 @@ class ChannelDMList extends React.Component<{}, {
         this.context.socket.off("userDisconnected");
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
+        this.context.socket.off("channelDestroy");
     }
 
     render() {
