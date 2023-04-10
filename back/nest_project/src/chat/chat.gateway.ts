@@ -9,6 +9,7 @@ import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
 import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
+import { addFriendDto } from "./relation/friend/friend.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -229,6 +230,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('myDM')
     handleListMyDM(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`${user.id} : listMyDMs`)
+                this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage('friendRequest')
+    handleFriendRequest(@MessageBody() data: addFriendDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {

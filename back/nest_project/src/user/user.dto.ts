@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean } from "cla
 import { ChannelDto } from "src/chat/channel/channel.dto";
 import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
-import { FriendEntity } from "./relation/friend/friend.entity";
+import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
 export class UserDto {
     @IsString() readonly id: string;

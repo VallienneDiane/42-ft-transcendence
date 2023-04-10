@@ -61,8 +61,8 @@ export class UserController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('getAvatar/:id')
-    async findAvatar(@Param('id') id: string): Promise<string> {
-        return this.userService.getAvatar(id);
+    @Get('getAvatar/:user')
+    async findAvatar(@Param('user') userId: string): Promise<string> {
+        return this.userService.getAvatar(userId);
     }
 }

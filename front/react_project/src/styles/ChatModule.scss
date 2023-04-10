@@ -57,20 +57,20 @@
 						display: flex;
 						flex-wrap: wrap;
 						justify-content: space-around;
-						padding-top: 1rem;
+						align-items: center;
 					}
 					& section {
-						padding: 0 1.5rem;
-						& input {
-							border: 1px solid var(--second-color);
-        					border-radius: 50px;
-        					padding: 0.3rem 1rem;
-        					margin: 10px;
-        					// font-size: 1.2em;
-						}
+						padding: 0.5rem 1rem;
 						& .labelName {
 							padding: 0.3rem;
 						}
+					}
+					& input {
+						border: 1px solid var(--second-color);
+						border-radius: 50px;
+						padding: 0.3rem 2rem;
+						margin: 10px;
+						// font-size: 1.2em;
 					}
 					& .button {
 						color: var(--text-color);
@@ -321,6 +321,9 @@
 									padding: 0.4rem 1rem;
 									background: transparent;
 									border-bottom: 2px solid rgb(214, 214, 214);
+									& a {
+										background: transparent;
+									}
 									&:hover {
 										background:#ddd;
 										color:#000000;

@@ -7,7 +7,7 @@ import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
-import { FriendEntity } from "./relation/friend/friend.entity";
+import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
 @Injectable({})
 export class UserService {
