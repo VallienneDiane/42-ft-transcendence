@@ -257,6 +257,9 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                 return (a.name.localeCompare(b.name))
             });
             this.setState({channels: nextState});
+            let newFiltered: ISearch[] = this.compileFiltered(this.state.users, nextState);
+            console.log("new filtered:", newFiltered);
+            this.setState({filtered: newFiltered});
         })
            
         this.props.socket.on('newUserConnected', () => {
@@ -305,7 +308,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                     <input type="text" onChange={this.displayList} onClick={this.showSearchList} value={this.state.text} placeholder="Search"/>
                     <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                 </div>
-                {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
+                {(this.state.filtered.length != 0 && this.state.isDropdown) &&
+                <ul ref={this.ref}>
                     {this.state.filtered.map((elt: ISearch, id: number) => (
                         <SearchElement  key={id} socket={this.props.socket} handleClose={this.resetFiltered}
                                         popupAction={this.onClickPopup} elt={elt} />
