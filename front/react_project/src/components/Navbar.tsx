@@ -1,15 +1,18 @@
 import '../styles/Navbar.scss'
 import React, { useContext, useState } from "react"
-import { NavLink, Link } from "react-router-dom"
+import { NavLink } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
+import { SocketContext } from './context';
 
 const NavBar: React.FC = () => {
   let navigate = useNavigate();
-  const [burgerList, setBurgerList] = useState<boolean>(false)
+  const [burgerList, setBurgerList] = useState<boolean>(false);
+  const {socket, disconnect} = useContext(SocketContext);
 
   const logout = () => {
     accountService.logout();
+    disconnect();
     navigate("/login");
   }
 

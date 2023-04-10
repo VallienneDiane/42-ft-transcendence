@@ -2,7 +2,7 @@ import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
-import { FriendEntity } from './relation/friend/friend.entity';
+import { FriendEntity } from '../chat/relation/friend/friend.entity';
 
 @Entity()
 export class UserEntity {

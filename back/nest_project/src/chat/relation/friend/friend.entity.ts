@@ -14,5 +14,4 @@ export class FriendEntity {
 
 	@Column()
 	state: string;
-
 }

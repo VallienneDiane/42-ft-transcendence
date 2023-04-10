@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import SocketContext from "../context";
+import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { IDest, IChannel } from "../../models";
+import { IDest, IChannel } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEllipsisVertical, faUser, faUserGroup } from "@fortawesome/free-solid-svg-icons";
+import { NavLink } from "react-router-dom";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
@@ -99,6 +100,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     useEffect(() => {
+        console.log("status", props.dest.status)
         console.log(props.dest.id)
         socket.emit('listUsersChann', {channelId: props.dest.id}); 
         socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string, connected: boolean}[]) => {
@@ -183,7 +185,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
             <div className="navRight">
                 <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
-                    <li>See profile</li>
+                    <li><NavLink to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game</li>
                     <li onClick={blockUser}>Block</li>

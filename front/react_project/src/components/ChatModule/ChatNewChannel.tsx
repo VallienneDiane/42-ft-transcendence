@@ -1,7 +1,7 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import SocketContext from "../context";
+import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
-import { IChannel } from "../../models";
+import { IChannel } from "./Chat_models";
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
@@ -66,9 +66,17 @@ function Popup(props: {handleClose: any}) {
                     />
                     {errors.name && <div className="logError">Channel name is required</div>}
                 </section>
-                <section>
-                    <label className="labelName">Password</label>
-                    <input type="checkbox" {...register("password")} onChange={changeState}/>
+                <div className="rawCheckbox">
+                    <section>
+                        <input type="checkbox" {...register("password")} onChange={changeState}/>
+                        <label className="labelName">Password</label>
+                    </section>
+                    <section>OR</section>
+                    <section>
+                        <input type="checkbox" {...register("inviteOnly")}/>
+                        <label className="labelName">Invite Only</label>
+                    </section>
+                </div>
                     {showChannelPass && (
                         <input {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                         type="password"
@@ -76,19 +84,10 @@ function Popup(props: {handleClose: any}) {
                         />
                     )}
                     {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
+                <section>
+                    <input type="checkbox" {...register("hidden")}/>
+                    <label className="labelName">Hidden</label>
                 </section>
-                <div className="rawCheckbox">
-                    <section>
-                        <input type="checkbox" {...register("inviteOnly")}/>
-                        <label className="labelName">Invite Only</label>
-                    </section>
-                </div>
-                <div className="rawCheckbox">
-                    <section>
-                        <input type="checkbox" {...register("hidden")}/>
-                        <label className="labelName">Hidden</label>
-                    </section>
-                </div>
                 <button className="button" type="submit">Create</button>
             </form>
         </div>
