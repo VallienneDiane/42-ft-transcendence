@@ -7,9 +7,17 @@ import "../styles/Callback.scss"
 const Callback: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
     const [loading, setLoading] = useState(false);
-    
+    const [ids42, setIds42] = useState<{id42: number}[]>([]);
+
+    useEffect(() => {
+        accountService.getAllIds42()
+        .then(res => {
+            setIds42(res.data);
+        })
+        .catch(error => {});
+    }, [])
+
     useEffect(() => {
         setLoading(true);
         setTimeout(() => {
@@ -22,31 +30,32 @@ const Callback: React.FC = () => {
     
     useEffect(() => {
         accountService.callback(code!)
-        .then(response => {
-            if(response.data.newuser == true) {
-                navigate("/homeSettings", { state: { login: response.data.login, avatar: response.data.avatarSvg } });
+        .then(res => {
+            for(let i = 0; i < ids42.length; i++) {
+                console.log("i ", i, "ids 42 ", ids42.length, ids42[i]);
+                if(res.data.id == ids42[i].id42) {
+                    navigate("/homeSettings", { state: { id42: res.data.id, login: res.data.login, avatar: res.data.avatarSvg, email: res.data.email } });
+                    return;
+                }
             }
-            else {
-                console.log("user déjà connu dans la BDD");
-                accountService.is2faActive(response.data.login)
-                .then(response_2fa => {
-                    if(response_2fa.data.is2faActive == true) {
-                        navigate("/verifyCode2fa", { state: { login: response.data.login } });
-                    }
-                    else {
-                        accountService.generateToken(response.data.login)
-                        .then(res_token => {
-                            console.log(" RES TOKEN ", res_token);
-                            accountService.saveToken(res_token.data.access_token);
-                            const from = (location.state as any)?.from || "/";
-                            navigate(from);
-                        })
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-            }
+            console.log("user déjà connu dans la BDD", res.data);
+            accountService.is2faActive(res.data.id42)
+            .then(response_2fa => {
+                if(response_2fa.data.is2faActive == true) {
+                    navigate("/verifyCode2fa", { state: { login: res.data.login } });
+                }
+                else {
+                    accountService.generateToken(res.data.login)
+                    .then(res_token => {
+                        accountService.saveToken(res_token.data.access_token);
+                        const from = (location.state as any)?.from || "/";
+                        navigate(from);
+                    })
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         })
         .catch(error => {
             console.log(error);

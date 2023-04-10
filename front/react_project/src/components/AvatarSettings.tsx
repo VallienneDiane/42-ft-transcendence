@@ -31,11 +31,11 @@ const AvatarSettings: React.FC = () => {
         event.preventDefault();
         let reader = new FileReader();
         reader.onloadend = function () {
+            setAvatar(reader.result! as string);
             accountService.uploadAvatar(reader.result! as string)
-                .then(response => {
-                    console.log(response);
-                    setAvatar(reader.result! as string);
-                    setSelectedFile(null)
+            .then(response => {
+                console.log(response);
+                setSelectedFile(null)
                 })
                 .catch(error => {
                     console.log(error);

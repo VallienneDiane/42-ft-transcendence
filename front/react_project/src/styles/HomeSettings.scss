@@ -1,75 +1,99 @@
 #homeSettings {
     display: flex;
     justify-content: center;
-    padding-left: 40px;
-    & > div {
-        border: 2px solid var(--text-color);
-        border-radius: 15px;
-        margin: 40px 15px;
-        width: 30%;
-        min-width: 350px;
-        padding-top: 25px;
+    border: 2px solid var(--text-color);
+    border-radius: 15px;
+    margin: 100px 15px;
+    width: 30%;
+    min-width: 350px;
+    padding-top: 25px;
+    flex-direction: column;
+    align-items: center;
+    & #name {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-bottom: 3em;
+        margin: 1em;
+        & h2 {
+            margin-right: 2.8em;
+            color: var(--text-color);
+        }
+        & input {
+            width: 150px;
+            height: 40px;
+            font-size: 1.2em;
+            background-color: white;
+            text-align: center;
+        }
+    }
+    & #avatar {
+        margin: 1em;
         display: flex;
         flex-direction: column;
         align-items: center;
-    }
-    & #avatarSetting {
+        justify-content: center;
+        & h2 {
+            color: var(--text-color);
+            margin-right: 1em;
+        }
+        & #picture {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
         & #profilePicture {
             margin: 15px 15px 0px 15px;
             object-fit: cover;
             aspect-ratio: 1 /1;
-            max-width: 250px;
+            max-width: 150px;
             border-radius: 100%;
         }
-        & form {
+    }
+    & form {
+        & #inputDiv {
+            width: 60%;
+            aspect-ratio: 1;
+            max-height: 180px;
+            display: flex;
+            flex-direction: column;
+            margin: 50px 0;
+            border: 2px dashed var(--text-color);
+            border-radius: 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            width: 100%;
-            & #inputDiv {
-                width: 90%;
-                aspect-ratio: 1;
-                max-height: 300px;
+            justify-content: center;
+            & > p {
+                background-color: transparent;
+            }
+            & .or {
+                margin: 10px 0;
+            }
+            & #files {
+                color: transparent;
+                width: 120px;
+                height: 35px;
                 display: flex;
-                flex-direction: column;
-                margin: 15px 0;
-                border: 2px dashed var(--text-color);
-                border-radius: 15px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                & > p {
-                    background-color: transparent;
-                }
-                & .or {
-                    margin: 15px 0;
-                }
-                & #files {
-                    color: transparent;
-                    width: 120px;
-                    height: 35px;
-                    display: flex;
+                background: transparent;
+                &::before {
+                    color: var(--text-color);
+                    text-align: center;
+                    content: 'Select file';
+                    display: inline-block;
                     background: transparent;
-                    &::before {
-                        color: var(--text-color);
-                        text-align: center;
-                        content: 'Select file';
-                        display: inline-block;
-                        background: transparent;
-                        border: 1px solid #999;
-                        border-radius: 3px;
-                        padding: 5px 8px;
-                        outline: none;
-                        white-space: nowrap;
-                        cursor: pointer;
-                    }
-                    &:hover::before {
-                        background-color: var(--second-color);
-                    }
-                    &::-webkit-file-upload-button {
-                        visibility: hidden;
-                    }
+                    border: 1px solid #999;
+                    border-radius: 3px;
+                    padding: 5px 8px;
+                    outline: none;
+                    white-space: nowrap;
+                    cursor: pointer;
+                }
+                &:hover::before {
+                    background-color: var(--second-color);
+                }
+                &::-webkit-file-upload-button {
+                    visibility: hidden;
                 }
             }
             & label {
@@ -79,7 +103,14 @@
             & .hovered {
                 background-color: var(--second-color);
             }
-            & > button {
+        }
+        & #test {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 80px;
+            margin-top: 2em;
+            & #save {
                 border: 1px solid var(--text-color);
                 min-width: 150px;
                 padding: 5px 10px;
@@ -87,23 +118,12 @@
                     background-color: var(--second-color); 
                 }
             }
-        }
-    }
-    
-    & #nameSettings {
-        & form {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        & > button {
-            border: 1px solid var(--text-color);
-            min-width: 150px;
-            padding: 5px 10px;
-            &:hover {
-                background-color: var(--second-color); 
+            & .error {
+                margin-top: 10px;
+                color: red;
+                font-weight: bold;
             }
         }
     }
 }
+   

@@ -19,10 +19,12 @@ export interface SignUpForm {
     password: string,
     errors?: string,
     avatarSvg?: string
-}
+  }
   
-export interface SettingsForm { 
+  export interface SettingsForm { 
     login: string,
+    email: string,
+    avatarSvg: string
     errors?: string,
 }
   
