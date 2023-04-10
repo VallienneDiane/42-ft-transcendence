@@ -28,12 +28,15 @@ export class PongEngineService {
     pl2: Socket;
     pl1_ready: boolean;
     pl2_ready: boolean;
+    pl1_score: number;
+    pl2_score: number;
+    victory_condition: string;
 
     aspect_ratio = 16/9;
-    cooldown = 90; // cooldown between ball respawn
+    cooldown = 180; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
-    loop; // set_interval function handle for stoping the game
+    loop: any; // set_interval function handle for stoping the game
 
     constructor () {
         this.ball = new Simple_ball();
@@ -43,12 +46,14 @@ export class PongEngineService {
         this.pl1_ready = false;
         this.pl2_ready = false;
         this.game_must_stop = false;
+        this.pl1_score = 0;
+        this.pl2_score = 0;
 
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
-        paddleOne: {x: this.p1.x_position, y: this.p1.y_position},
-        paddleTwo: {x: this.p2.x_position, y: this.p2.y_position}};
+        paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
+        paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
         console.log("from pong engine service ;y player are :" + this.pl1 + "and" + this.pl2);
     }
 
@@ -69,6 +74,7 @@ export class PongEngineService {
      * @param key the key pressed
      */
     process_input (client: Socket, key: any) {
+        console.log("key received" + key);
         if (client === this.pl1) {
             this.p1.process_input(key);
         }
@@ -85,7 +91,7 @@ export class PongEngineService {
      * check if both player are ready and start the game loop
      * @param player the socket of the ready player
      */
-    set_player_ready(player: Socket, server) {
+    set_player_ready(player: Socket, server: any) {
         if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -112,15 +118,27 @@ export class PongEngineService {
      */
     main_loop() {
         this.cooldown_start++; // increment the cooldown counter
-        if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
-            this.ball = new Simple_ball();
-            this.cooldown_start = 0;
-        }
         if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
             return;
+        if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
+            this.ball = new Simple_ball();
+            this.p1.reset_self_y_position();
+            this.p2.reset_self_y_position();
+            this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+            paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
+            paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p2.length/2}};
+            this.cooldown_start = 0;
+            return;
+        }
         this.p1.update_self_position();
         this.p2.update_self_position();
-        this.ball.update_self_position(this.p1, this.p2);
+        let r = this.ball.update_self_position(this.p1, this.p2);
+        if (r === 1) {
+            this.pl1_score++;
+        }
+        else if (r === 2) {
+            this.pl2_score++;
+        }
         this.gs.ballPosition = [{
             x: this.ball.x_position,
             y: this.ball.y_position,

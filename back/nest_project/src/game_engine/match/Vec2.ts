@@ -3,7 +3,7 @@ export class Vec2 {
 	public x: number;
 	public y: number;
 
-	constructor(x, y) {
+	constructor(x: number, y: number) {
 		this.x = x;
 		this.y = y;
 	}
@@ -12,7 +12,7 @@ export class Vec2 {
 		return new Vec2(this.x, this.y);
 	}
 
-	setCoordinates(x, y) {
+	setCoordinates(x: number, y: number) {
 		this.x = x;
 		this.y = y;
 	}
@@ -29,7 +29,7 @@ export class Vec2 {
 		return new Vec2(this.x - v.x, this.y - v.y);
 	}
 
-	mult(x): Vec2 {
+	mult(x: number): Vec2 {
 		return new Vec2(this.x * x, this.y * x);
 	}
 

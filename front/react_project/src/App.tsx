@@ -1,50 +1,74 @@
 import './App.css'
-import NavBar from './components/Navbar'
-import PingHandler from './components/SocketHandler'
-import ChatModule from './components/ChatModule';
-import SignupForm from './components/SignupPage'
-import LoginForm from './components/LoginPage'
+import ChatModule from './components/ChatModule/ChatModule';
+import SignupPage from './components/SignupPage'
+import LoginPage from './components/LoginPage'
 import Home from './components/Home'
 import { Routes, Route, BrowserRouter } from "react-router-dom"
 import Profile from './components/Profile';
-import UserProvider from './user/UserProvider';
 import ProtectedRoutes from './components/ProtectedRoutes';
-import Chat from './components/Chat'
+import SocketContext from './components/context';
+import { accountService } from "./services/account.service";
+import { useState } from "react";
 import Layout from './components/Layout'
 import Game from './components/Game'
+import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
-
+import Settings from './components/Settings'
+import VerifyCode2fa from './components/VerifyCode2fa'
 
 function App() {
-  // let user = {
-  //   token: "",
-  //   id: 666,
-  //   login: "",
-  //   email: "",
-  //   password: "",
-  // };
+  const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
+  {
+    autoConnect: false,
+    transports: ['websocket'],
+    auth: { token: 'undefined' },
+  }));
+  socket.on("test", () => {
+    console.log("Id1", socket.id);
+  });
 
-    return (
-      <div className="App">
-        {/* <UserProvider user={user}> */}
-        <BrowserRouter >
+  function createSocket() {
+    const newSocket = io('127.0.0.1:3000/chat', {
+      transports: ['websocket'],
+      auth: { token: accountService.getToken() },
+    });
+    setSocket(newSocket);
+  }
+
+  function disconnect() {
+    if (socket) {
+      socket.disconnect();
+      // setSocket(null);
+    }
+  }
+
+  return (
+    <div className="App">
+      <BrowserRouter >
+        <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
           <Routes>
-            <Route element={<Layout />}>
-              <Route path='/login' element={<LoginForm />} />
-              <Route path='/signin' element={<SignupForm />} />
+            <Route path="/callback/" element={<Callback />} />
+            <Route element={<ProtectedRoutes />}>
               <Route path='/' element={<Home />} />
-              <Route path='/game' element={<Game />} />
-              <Route element={<ProtectedRoutes/>}>
+            </Route>
+            <Route element={<Layout />}>
+              <Route path='/login' element={<LoginPage />} />
+              {/* <Route path='/login42' element={<Login42 />} /> */}
+              <Route path='/signup' element={<SignupPage />} />
+              <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
+              <Route element={<ProtectedRoutes />}>
+                <Route path='/' element={<Home />} />
+                <Route path='/game' element={<Game />} />
                 <Route path='/profile' element={<Profile />} />
                 <Route path='/profile/:login' element={<Profile />} />
+                <Route path='/settings' element={<Settings />} />
                 <Route path='/chat' element={<ChatModule />} />
               </Route>
             </Route>
-
           </Routes>
-        </BrowserRouter>
-        {/* </UserProvider> */}
-      </div>
+        </SocketContext.Provider>
+      </BrowserRouter>
+    </div>
   )
 }
 

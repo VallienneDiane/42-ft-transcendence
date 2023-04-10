@@ -1,9 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { Ball } from './Ball';
-import { Vec2 } from './math/Vec2';
+import { Vec2 } from './match/Vec2';
 import { Wall } from './Wall';
-import { Collision } from './math/Collision';
+import { Collision } from './match/Collision';
 import { Socket } from 'socket.io';
+import { UserService } from 'src/user/user.service';
+import { MatchService } from 'src/match/Match.service';
+import { CreateMatchDto } from 'src/match/CreateMatch.dto';
+import { UserEntity } from 'src/user/user.entity';
 
 /**
  * use to store info on a ball
@@ -32,16 +36,25 @@ export class GameEngineService {
 
 	pl1: Socket;
 	pl2: Socket;
+	userid1: UserEntity;
+	userid2: UserEntity;
 	pl1_ready: boolean;
 	pl2_ready: boolean;
+	pl1_score: number;
+	pl2_score: number;
+	victory_condition: string;
 
 	aspect_ratio = 16/9;
-    cooldown = 90; // cooldown between ball respawn
+    cooldown = 180; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
-    loop; // set_interval function handle for stoping the game
+    loop: any; // set_interval function handle for stoping the game
+	userservice;
+	matchservice;
 
-	constructor() {
+	constructor(userservice: UserService, matchservice: MatchService) {
+		this.userservice = userservice;
+		this.matchservice = matchservice;
 		this.ballz = [];
 		this.wallz = [];
 		
@@ -53,24 +66,26 @@ export class GameEngineService {
 		this.ballz[1] = big_ball;
 
 		// creating the pl1 and pl2 paddle respectivly
-		this.wallz[0] = new Wall(new Vec2(0.025, 0.415), new Vec2(0.025, 0.585));
-		this.wallz[1] = new Wall(new Vec2(this.aspect_ratio - 0.025, 0.415), new Vec2(this.aspect_ratio - 0.025, 0.585));
+		this.wallz[0] = new Wall(new Vec2(0.025, 0.415), new Vec2(0.025, 0.585), true);
+		this.wallz[1] = new Wall(new Vec2(this.aspect_ratio - 0.025, 0.415), new Vec2(this.aspect_ratio - 0.025, 0.585), true);
 
 		// creating the wall
-		this.wallz[2] = new Wall(new Vec2(0, 0), new Vec2(this.aspect_ratio, 0));
-		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(this.aspect_ratio, 1));
+		this.wallz[2] = new Wall(new Vec2(0, 0), new Vec2(this.aspect_ratio, 0), false);
+		this.wallz[3] = new Wall(new Vec2(0, 1), new Vec2(this.aspect_ratio, 1), false);
 
 		// setting the game start and stop variables
 		this.pl1_ready = false;
 		this.pl2_ready = false;
 		this.game_must_stop = false;
+		this.pl1_score = 0;
+		this.pl2_score = 0;
         this.cooldown_start = 0;
 
 		// filling the gamestate
 		this.gs = { ballPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
-		paddleOne: { x: this.wallz[0].x_position, y: this.wallz[0].y_position },
-		paddleTwo: { x: this.wallz[1].x_position, y: this.wallz[1].y_position } };
+		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
+		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
 		console.log("from game engine service player are :" + this.pl1 + "and" + this.pl2);
 
 	}
@@ -81,7 +96,7 @@ export class GameEngineService {
 	 */
 	set_ball_random_start(ball: Ball) {
 		let signe = (Math.random() - 0.5) > 0 ? 1 : -1;
-        ball.speed = new Vec2((signe/120) * this.aspect_ratio, (Math.random() - 0.5) * Math.random()/120);
+        ball.speed = new Vec2((signe/120) * this.aspect_ratio, (Math.random() - 0.5) * Math.random()/60);
 	}
 
 	/**
@@ -89,7 +104,9 @@ export class GameEngineService {
 	 * @param player1 se
 	 * @param player2 
 	 */
-	set_player (player1: Socket, player2: Socket) {
+	set_player (player1: Socket, player2: Socket, userid1: UserEntity, userid2: UserEntity) {
+		this.userid1 = userid1;
+		this.userid2 = userid2;
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
@@ -120,7 +137,9 @@ export class GameEngineService {
 	 * @param player the player sendin the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	set_player_ready (player: Socket, server) {
+	async set_player_ready (player: Socket, server: any) {
+		let result = await this.matchservice.findMatch();
+		console.log("the score should be save", result);
 		if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -141,10 +160,39 @@ export class GameEngineService {
         }
 	}
 
+	max(n1: number, n2: number): number {
+		if (n1 >= n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	min(n1: number, n2: number): number {
+		if (n1 < n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	async close_the_game() {
+		console.log("entering close_the_game");
+		let match: CreateMatchDto = new CreateMatchDto();
+		console.log("heu :" + this.max(this.pl1_score, this.pl2_score));
+		match.score_winner = this.max(this.pl1_score, this.pl2_score);
+		match.score_looser = this.min(this.pl1_score, this.pl2_score);
+		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
+		match.looser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
+		await this.matchservice.createMatch(match);
+		let result = await this.matchservice.findMatch();
+		console.log("the score should be save", result);
+	}
+
 	main_loop() {
 		this.cooldown_start++; // use to time the delay between balls respawn
 
 		// check if a ball is dead
+		if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
+			return;
 		if (this.ballz[0].alive === false || this.ballz[1].alive === false) { // respawn a ball if there was a goal TODO register goal
             // spwan and set the new balls
 			let small_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.35), 0.04);
@@ -152,11 +200,30 @@ export class GameEngineService {
 			let big_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.7), 0.08);
 			this.ballz[0] = small_ball;
 			this.ballz[1] = big_ball;
+			this.wallz[0].reset_self_y_position();
+			this.wallz[1].reset_self_y_position();
+			this.ballz.forEach((ball, index) => {
+				let bp: ballpos;
+				bp = {
+					x: ball.position.x,
+					y: ball.position.y,
+					r: ball.r,
+				}
+				// console.log("test", this.gs.ballPosition[index]);
+				this.gs.ballPosition[index] = bp;
+			});
+			this.gs.paddleOne = {
+				x: this.wallz[0].x_position - 0.015,
+				y: this.wallz[0].y_position + this.wallz[0].length/2
+			};
+			this.gs.paddleTwo = {
+				x: this.wallz[1].x_position + 0.015,
+				y: this.wallz[1].y_position + this.wallz[1].length/2
+			};
 			// reset the timer
             this.cooldown_start = 0;
+			return;
         }
-        if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
-            return;
 
 		// update the paddle
 		this.wallz[0].update_self_position();
@@ -164,7 +231,19 @@ export class GameEngineService {
 		// for each ball check the collision with each wall then with the other ball
 		this.ballz.forEach((ball, index) => {
 			// update the ball position
-			ball.update_self_position();
+			let r = ball.update_self_position();
+			if (r === 1) {
+				this.pl1_score++;
+			}
+			else if (r === 2) {
+				this.pl2_score++;
+			}
+			if (this.pl1_score > 4 || this.pl2_score > 4) {
+				this.close_the_game();
+				this.game_must_stop = true;
+				console.log("past close_the_game");
+				return;
+			}
 
 			// check for ball wall collision
 			this.wallz.forEach((w) => {

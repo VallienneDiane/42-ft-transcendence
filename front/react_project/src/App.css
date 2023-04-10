@@ -1,11 +1,12 @@
 @import url("styles/Base.css");
 
-* {
+*:not(.react-switch-bg > div, .react-switch-bg > div > svg) {
   background-color: var(--prim-color);
   box-sizing: border-box;
   margin:0;
   padding:0;
   font-family: 'MuseoModerno', cursive;
+  user-select: none;
 }
 
 ul, a, button {
@@ -31,7 +32,6 @@ button:hover {
   flex-direction: column;
   width: 100vw;
   height: 100vh;
-
 }
 
 .App > div {

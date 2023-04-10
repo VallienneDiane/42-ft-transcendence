@@ -67,19 +67,19 @@ volumes:
     driver_opts:
       type: none 
       o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/postgres
+      device: ./postgres
   back:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/back
+      device: ./back
   front:
     driver: local
     driver_opts:
       type: none 
       o: bind
-      device: /home/alexi/Bureau/Dev/42-ft-transcendence/front
+      device: ./front
   # pgadmin:
   #   driver: local
   #   driver_opts:
