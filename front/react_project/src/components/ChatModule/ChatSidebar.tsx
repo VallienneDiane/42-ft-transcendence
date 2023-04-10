@@ -98,6 +98,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
      
     const kickUser = (e: any) => {
+        console.log(e.target.value, props.dest.id);
         socket.emit("kickUser", {userToKick: e.target.value, channelId: props.dest.id});
     }
     
