@@ -5,7 +5,7 @@ import { IChannel } from "./Chat_models";
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
+    const { register, formState: { errors }, setValue, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
         name: "",
         password: false,
@@ -14,6 +14,8 @@ function Popup(props: {handleClose: any}) {
         hidden: false } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
+    const [isPassword, setIsPassword] = useState<boolean>(false);
+    const [isInviteOnly, setIsInviteOnly] = useState<boolean>(false);
     const ref = useRef<HTMLDivElement>(null);
 
     const handleClickOutside = (e: any) => {
@@ -37,8 +39,20 @@ function Popup(props: {handleClose: any}) {
         }
     }, [ref]);
 
-    const changeState = (event: any) => {
+    const changeStatePassword = (event: any) => {
         setShowChannelPass(event.target.checked);
+        setIsPassword(event.target.checked);
+        setIsInviteOnly(false);
+        setValue("password", event.target.checked);
+        setValue("inviteOnly", false);
+    }
+
+    const changeStateInviteOnly = (event: any) => {
+        setShowChannelPass(false);
+        setIsPassword(false);
+        setIsInviteOnly(event.target.checked);
+        setValue("password", false);
+        setValue("inviteOnly", event.target.checked);
     }
 
     const onSubmit = (data: IChannel) => {
@@ -68,12 +82,12 @@ function Popup(props: {handleClose: any}) {
                 </section>
                 <div className="rawCheckbox">
                     <section>
-                        <input type="checkbox" {...register("password")} onChange={changeState}/>
+                        <input type="checkbox" {...register("password")} checked={isPassword} onChange={changeStatePassword}/>
                         <label className="labelName">Password</label>
                     </section>
                     <section>OR</section>
                     <section>
-                        <input type="checkbox" {...register("inviteOnly")}/>
+                        <input type="checkbox" {...register("inviteOnly")} checked={isInviteOnly} onChange={changeStateInviteOnly}/>
                         <label className="labelName">Invite Only</label>
                     </section>
                 </div>

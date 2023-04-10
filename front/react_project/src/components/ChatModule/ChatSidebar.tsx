@@ -36,7 +36,7 @@ function ModifyChannel(props: {channel: IChannel}) {
     };
 
     return (
-        <form className="settingList">
+        <form className="settingList" onSubmit={handleSubmit(onSubmit)}>
             <li>Name 
                 <input className="inputChannel" {...register("name", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                     type="text"
