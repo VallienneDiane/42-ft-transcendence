@@ -106,6 +106,7 @@ export class UserService {
                 hidden: false,
                 normalUsers: [],
                 opUsers: [],
+                godUser: undefined,
                 messages: []
             },
             status: "normal"}];
