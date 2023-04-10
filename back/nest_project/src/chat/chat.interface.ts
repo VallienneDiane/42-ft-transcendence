@@ -14,8 +14,8 @@ export interface IMessageChat {
 export interface IMessageToSend {
     //room can be a channel or an user
     date: Date;
-    sender: string;
-    room: string;
+    senderName: string;
+    senderId: string;
     content: string;
 }
 
