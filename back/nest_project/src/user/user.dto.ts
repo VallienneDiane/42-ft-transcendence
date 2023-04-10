@@ -20,5 +20,6 @@ export class UserDto {
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
     @IsNotEmpty() @IsString() qrCode: string;
     @IsNotEmpty() avatarSvg: string;
-    @Optional() match: Match[];
+    @Optional() wonMatches: Match[];
+    @Optional() lostMatches: Match[];
 }

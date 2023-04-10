@@ -12,12 +12,13 @@ import { UserEntity } from "./user.entity";
 export class UserService {
     constructor (
         @InjectRepository(UserEntity)
-        private readonly usersRepository: Repository<UserEntity>
+        private readonly usersRepository: Repository<UserEntity>,
     ) {}
     // SIGN UP : CREATE NEW USER AND SAVE IT IN THE DATABASE
     public create(newUser: UserEntity): Promise<UserEntity> {
         return this.usersRepository.save(newUser);
     }
+
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
     async findByLogin(login: string): Promise<UserEntity> {
         return await this.usersRepository.findOneBy({login});

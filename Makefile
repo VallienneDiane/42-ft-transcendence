@@ -45,7 +45,7 @@ fclean : clean vclean prune
 fclean : clean vclean prune
 
 prune :
-	docker system prune -a -y
+	docker system prune -a
 
 logs :
 	docker-compose logs

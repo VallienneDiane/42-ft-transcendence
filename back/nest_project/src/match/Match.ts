@@ -1,5 +1,5 @@
 import { UserEntity } from "src/user/user.entity";
-import { Column, Entity, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Match {
@@ -10,11 +10,11 @@ export class Match {
 	score_winner: number
 
 	@Column()
-	score_looser: number
+	score_loser: number
 
-	@OneToMany(() => UserEntity, (winner) => winner.match)
+	@ManyToOne(() => UserEntity, (winner) => winner.wonMatches)
 	winner: UserEntity
 
-	@OneToMany(() => UserEntity, (looser) => looser.match)
-	looser: UserEntity
+	@ManyToOne(() => UserEntity, (loser) => loser.lostMatches)
+	loser: UserEntity
 }
