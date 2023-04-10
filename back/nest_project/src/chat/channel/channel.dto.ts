@@ -12,6 +12,6 @@ export class ChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 	readonly normalUsers: UserDto[];
 	readonly opUsers: UserDto[];
-	readonly godUser?: UserDto;
+	readonly godUser: UserDto;
 	readonly messages: MessageChannelDto[];
 }

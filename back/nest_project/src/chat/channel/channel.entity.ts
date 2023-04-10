@@ -35,7 +35,7 @@ export class ChannelEntity {
 
 	@ManyToOne(() => UserEntity, (user) => user.channelsAsGod)
 	@JoinTable()
-	godUser?: UserEntity;
+	godUser: UserEntity;
 
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
 		eager: true,
