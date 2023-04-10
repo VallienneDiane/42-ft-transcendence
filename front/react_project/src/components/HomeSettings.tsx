@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { accountService } from "../services/account.service";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SettingsForm } from "../models";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
+import "../styles/HomeSettings.scss"
 
 const userSchema = yup.object().shape({
     login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") ,
@@ -12,17 +13,39 @@ const userSchema = yup.object().shape({
 
 const HomeSettings: React.FC = () => {
     const location = useLocation();
-    const login = location.state?.login;
-    const avatardb = location.state?.avatar;
+    const navigate = useNavigate();
 
-    const [avatar, setAvatar] = useState<string>(avatardb);
+    const id42 = location.state?.id42;
+    const email = location.state?.email;
+    const [duplicateLogin, setDupLogin] = useState<boolean>(false);
+    const [avatar, setAvatar] = useState<string>(location.state?.avatar);
+    const [logins, setLogins] = useState<{login: string}[]>([]);
+    const [login, setLogin] = useState<string>(location.state?.login);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
     const { register, handleSubmit, formState: { errors }} = useForm<SettingsForm>({
         resolver: yupResolver(userSchema)
     });
+
+    useEffect(() => {
+        accountService.getAllLogins()
+        .then(res => {
+            setLogins(res.data);
+        })
+        .catch(error => {});
+    }, [])
     
+    useEffect(() => {
+        if(selectedFile) {
+            let reader = new FileReader();
+            reader.onloadend = function () {
+                setAvatar(reader.result! as string);
+            }
+            reader.readAsDataURL(selectedFile!)
+        }
+    }, [selectedFile])
+
     const avatarSelected = (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
         const files = event.target.files;
@@ -31,24 +54,29 @@ const HomeSettings: React.FC = () => {
         }
     }
 
-    const avatarSubmit = (event: React.FormEvent<HTMLFormElement>, data: SettingsForm) => {
-        console.log("data.login ? ", data.login);
-        accountService.updateUser(data.login);
-        event.preventDefault();
-        let reader = new FileReader();
-        reader.onloadend = function () {
-            accountService.uploadAvatar(reader.result! as string)
-                .then(response => {
-                    console.log(response);
-                    setAvatar(reader.result! as string);
-                    setSelectedFile(null)
-                })
-                .catch(error => {
-                    console.log(error);
-                });
+    const userSubmit = async () => {
+        const user = {
+            id42: id42,
+            login: login,
+            email: email,
+            avatarSvg: avatar,
         }
-        reader.readAsDataURL(selectedFile!)
+        for(let i = 0; i < logins.length; i++) {
+            console.log("i ", i, "logins size ", logins.length, logins[i]);
+            if(user.login == logins[i].login) {
+                setDupLogin(true);
+                return;
+            }
+        }
+        accountService.createUser(user)
+        .then(res_token => {
+            accountService.saveToken(res_token.data.access_token);
+            const from = (location.state as any)?.from || "/";
+            navigate(from);
+        })
+        .catch(error => {});
     }
+
 
     const handleDragOver = (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
@@ -77,26 +105,40 @@ const HomeSettings: React.FC = () => {
         }
     }
 
+    const onChangeLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setLogin(event.target.value);
+        setDupLogin(false);
+    }
+
     return (
-        <div id="avatarSetting">
-            <h2>Choose your login </h2>
-            <form onSubmit={avatarSubmit}>
-                <input className="form_element" 
-                    {...register("login")}
-                    // value={props.login}
-                    type="text" 
-                    placeholder={login}
-                />
-                {errors.login && <p className='errorsName'>{errors.login.message}</p>} 
-                <h2>Upload a new Avatar</h2>
-                <img id="profilePicture" src={avatar} />
-                <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
-                    <p>Drop file here</p>
-                    <p className="or">OR</p>
-                    <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
+        <div id="homeSettings">
+            <form onSubmit={handleSubmit(userSubmit)}>
+                <div id="name">
+                    <h2>Choose your login </h2>
+                        <input className="form_element" 
+                            {...register("login")}
+                            value={login}
+                            type="text"
+                            onChange={onChangeLogin}
+                        />
                 </div>
-                <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                <button type="submit">Save</button>
+                <div id="avatar">
+                    <div id="picture">
+                        <h2>Upload your avatar </h2>
+                        <img id="profilePicture" src={avatar} />
+                    </div>
+                    <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
+                        <p>Drop file here</p>
+                        <p className="or">OR</p>
+                        <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
+                    </div>
+                    <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
+                    <div id="test">
+                        <button id="save" type="submit">SAVE</button>
+                        {errors.login && <p className="error">{errors.login.message}</p>}
+                        { duplicateLogin ? <p className="error">This login already exist</p> : null }
+                    </div>
+                </div>
             </form>
         </div>
     )

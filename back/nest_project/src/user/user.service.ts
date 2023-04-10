@@ -39,6 +39,16 @@ export class UserService {
           .select(['user.id', 'user.login'])
           .getMany();
     }
+    async findAllLogins(): Promise<{ login: string }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.login'])
+          .getMany();
+    }
+    async findAllIds42(): Promise<{ id42: number }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.id42'])
+          .getMany();
+    }
     // UPDATE USER INFOS
     async update(login: string, User: UserEntity): Promise<void> {
         this.usersRepository.update(login, User);

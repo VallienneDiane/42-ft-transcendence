@@ -6,7 +6,6 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
 import { JwtService } from "@nestjs/jwt";
-import { Response } from 'express';
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
@@ -20,11 +19,10 @@ export class AuthController {
     const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.API_UID + "&redirect_uri=" + api_callback_url + "&response_type=code";
     return (url);
   }
-  //exchange code send by api42 against token 42 to get user infos, if user unknow create in db
-  //then generate access token to navigate on our website
+  //exchange code send by api42 against token 42 to get user infos
   @Get('/callback')
   async callback(@Query('code') code: string) {
-    let newUser = false;
+    // let newUser = false;
     const tokenApi42 = await this.authService.validateFortyTwo(code);
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',
@@ -33,31 +31,26 @@ export class AuthController {
       } 
     });
     const data = await response.json();
-    if(!await this.userService.findByLogin(data.login)) {
-      // const user42 = {
-      //   id: <number>null,
-      //   login: data.login,
-      //   email: data.email,
-      //   password: <string>null,
-      //   twoFactorSecret: <string>null,
-      //   isTwoFactorEnabled: <boolean>null,
-      //   qrCode: <string>null,
-      //   avatarSvg: data.image?.link,
-      // };
-      // await this.userService.create(user42);
-      newUser = true;
-    }
+    // const result = ! await this.userService.findById42(data.id)
+    // if(result == true) {
+    //   newUser = true;
+    // }
+    // console.log("result fidnd by 42 ", result);
+    // console.log("new user ", newUser);
     return {
-      newuser: newUser,
+      id42: data.id,
       login: data.login,
+      email: data.email,
       avatarSvg: data.image?.link,
+      // newuser: newUser,
     }
   }
 
-  @Post('user/update')
-  async updateUser42(@Body() user: UserDto) {
-    console.log("dans auth controller user ", user, user.login);
-    this.userService.update(user.login, user);
+  @Post('user/create')
+  async createUser(@Body() newUser: UserDto) {
+    await this.userService.create(newUser);
+    const token = this.authService.genToken(newUser.login);
+    return token;
   }
 
   //check login and password with local stratgey of passport

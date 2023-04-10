@@ -1,4 +1,4 @@
-import { LogInForm, SignUpForm, VerifyCodeForm } from "../models";
+import { LogInForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -17,11 +17,15 @@ let uploadAvatar = (file: string) => {
     const user: JwtPayload = accountService.readPayload()!;
     return Axios.post('user/uploadAvatar', {id: user.sub, file});
 }
+let getAllLogins = () => {
+    return Axios.post('user/getAllLogins');
+}
+let getAllIds42 = () => {
+    return Axios.post('user/getAllIds');
+}
 // Update name and avatar if first connection with 42
-let updateUser = (login: string) => {
-    const user = Axios.post('user/update', login);
-    console.log("request update name user : ", user);
-    return user;
+let createUser = (credentials: SettingsForm ) => {
+    return Axios.post('user/create', credentials);
 }
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
@@ -110,7 +114,7 @@ let callback = (code: string) => {
 }
 
 export const accountService = {
-    signUp, login, updateUser, saveToken, logout, isLogged, getToken, readPayload, 
+    signUp, login, getAllLogins, getAllIds42, createUser, saveToken, logout, isLogged, getToken, readPayload, 
     enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
     is2faActive, generateToken, is2faActiveSettings, uploadAvatar, url42, callback
 }
