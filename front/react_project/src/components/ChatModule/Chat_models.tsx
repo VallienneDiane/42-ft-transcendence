@@ -45,9 +45,9 @@ export interface IMessage {
 
 export interface IMessageReceived {
 	date: Date;
-	content: string;
-	senderName: string;
 	senderId: string;
+	senderName: string;
+	content: string;
 }
 
 // SearchChat, SearchElement
