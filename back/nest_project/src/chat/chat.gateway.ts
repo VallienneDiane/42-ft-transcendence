@@ -8,7 +8,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto } from "./chat.gateway.dto";
+import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
 import { addFriendDto } from "./relation/friend/friend.dto";
 
 @UsePipes(ValidationPipe)
@@ -116,7 +116,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug(`${client.id} : listChannel`)
-                this.chatService.listChannelEvent(client, user);
+                this.chatService.listChannelEvent(client, user.id);
             }
         })
     }
@@ -160,6 +160,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null)
                 this.chatService.createChannelEvent(client, user, this.chatRoomHandler, this.logger, data);
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('modifyChannel')
+    handleModifyChannel(@MessageBody() data: modifyChannelDto, @ConnectedSocket() client: Socket) {
+        this.logger.debug(`modifyChannel Event`);
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.modifyChannelEvent(client, user, this.chatRoomHandler, this.logger, data);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

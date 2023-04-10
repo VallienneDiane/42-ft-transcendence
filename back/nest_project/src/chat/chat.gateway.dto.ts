@@ -45,3 +45,12 @@ export class createChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
 	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 }
+
+export class modifyChannelDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsBoolean() readonly password: boolean;
+    @IsOptional() @IsString() readonly channelPass: string;
+    @IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
+    @IsNotEmpty() @IsBoolean() readonly hidden: boolean;
+}
