@@ -39,7 +39,8 @@ export class MessagePrivateService {
             })
         )
         .select("date", "date")
-        .addSelect("sender.login", "sender")
+        .addSelect("sender.id", "senderId")
+        .addSelect("sender.login", "senderLogin")
         .addSelect("content")
         .orderBy({"MessagePrivateEntity.date": "ASC"})
         .getRawMany();
