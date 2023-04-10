@@ -1,4 +1,4 @@
-import { Vec2 } from "./math/Vec2";
+import { Vec2 } from "./match/Vec2";
 
 export class Wall {
 
@@ -10,20 +10,22 @@ export class Wall {
     length;
     up: boolean;
     down: boolean;
+    is_a_paddle: boolean;
 
-    constructor(v1: Vec2, v2: Vec2) {
+    constructor(v1: Vec2, v2: Vec2, paddle: boolean) {
         this.up = false;
         this.down = false;
-        this.speed = 3/60;
+        this.speed = 1/60;
         this.start = v1;
         this.end = v2;
         this.x_position = this.start.x;
         this.length = this.end.sub(this.start).mag();
-        this.y_position = this.start.y + (this.length / 2);
+        this.y_position = this.start.y;
+        this.is_a_paddle = paddle;
     }
 
     wallUnit() {
-        return (new Vec2(0, 1));
+        return ((this.end.sub(this.start)).normalize());
     }
 
     update_self_position() {
@@ -41,6 +43,10 @@ export class Wall {
         }
         this.start.setCoordinates(this.x_position, this.y_position);
         this.end.setCoordinates(this.x_position, this.y_position + this.length);
+    }
+
+    reset_self_y_position() {
+        this.y_position = 0.5 - (this.length / 2);
     }
 
     process_input (body: string) {

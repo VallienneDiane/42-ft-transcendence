@@ -1,33 +1,26 @@
-import { LogInForm, SignInForm, User} from "../models";
+import { LogInForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
-// Requete pour créer un user
-let signIn = (credentials: SignInForm) => {
+////////////////// SIGN UP - LOGIN - LOGOUT - TOKEN /////////////////
+// Request to signup
+let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
-
-// Requete pour se connecter
+// Request to login
 let login = (credentials: LogInForm) => {
-    return Axios.post('/auth/login', credentials);
+    return Axios.post('auth/login', credentials);
 }
-
-// Fonction qui est appelée pour enregistrer le JWT dans localStorage quand un user se connecte
-let saveToken = (token: string) => {
-    localStorage.setItem('token', token);
+// Upload Avatar picture
+let uploadAvatar = (file: string) => {
+    const user: JwtPayload = accountService.readPayload()!;
+    return Axios.post('user/uploadAvatar', {id: user.sub, file});
 }
-
-// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
-let logout = () => {
-    Axios.post('/auth/logout');
-    localStorage.removeItem('token');
-}
-
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
 let isLogged = () => {
     let token = localStorage.getItem('token');
-    if (token !== null) {
+    if (token !== null)  { 
         let decodedToken: JwtPayload = accountService.readPayload()!;
         if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
             logout();
@@ -41,11 +34,22 @@ let isLogged = () => {
         return (false);
     }
 }
-
+// Request to generate token
+let generateToken = (login: string) => {
+    return Axios.post('auth/generateToken', {login});
+}
+let saveToken = (token: string) => {
+    localStorage.setItem('token', token);
+}
+//get token from local storage
 let getToken = () => {
     return localStorage.getItem('token');
 }
-
+// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
+let logout = () => {
+    Axios.post('/auth/logout');
+    localStorage.removeItem('token');
+}
 // Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
 let readPayload = () => {
     let token = getToken();
@@ -63,7 +67,43 @@ let readPayload = () => {
         }
     }
 }
+////////////////// TWO FACTOR AUTHENTIFICATOR ////////////////////
+//check if 2fa / google auth is active when login
+let is2faActive = (login: string) => {
+    return Axios.post('auth/is2faActive', {login});
+}
+//check if 2fa is active in settings to display the right setting and check token
+let is2faActiveSettings = (login: string) => {
+    return Axios.post('auth/is2faActiveSettings', {login});
+}
+//enable 2fa
+let enable2fa = () => {
+    return Axios.post('auth/enable2fa');
+}
+//verify code submitted by the user
+let verifyCode2fa = (credentials: VerifyCodeForm) => {
+    return Axios.post('auth/verifyCode', credentials);
+}
+//verify code submitted by the user in settings to check token
+let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
+    return Axios.post('auth/verifyCodeSettings', credentials);
+}
+//disable 2fa
+let disable2fa = () => {
+    return Axios.post('auth/disable2fa');
+}
+////////////////// SIGN IN WITH 42 /////////////////////////////
+//get url to give authorization to connect api42
+let url42 = () => {
+    return Axios.get('/')
+}
+//send code to get token and infos user from the api and then generate jwt token
+let callback = (code: string) => {
+    return Axios.get('/callback?code=' + code);
+}
 
 export const accountService = {
-    signIn, login, saveToken, logout, isLogged, getToken, readPayload
+    signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
+    enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
+    is2faActive, generateToken, is2faActiveSettings, uploadAvatar, url42, callback
 }

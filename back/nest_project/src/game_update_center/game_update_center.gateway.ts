@@ -4,6 +4,12 @@ import { Server, Socket } from 'socket.io';
 import { GameEngineService } from 'src/game_engine/game_engine.service';
 import { PongEngineService } from 'src/pong_engine/pong_engine.service';
 import { OnGatewayInit } from '@nestjs/websockets';
+import { UserService } from 'src/user/user.service';
+import { MatchService } from 'src/match/Match.service';
+import * as jsrsasign from 'jsrsasign';
+import { JwtService } from '@nestjs/jwt';
+import { IToken } from 'src/chat/chat.interface';
+import { UserEntity } from "src/user/user.entity";
 
 /**
  * use to send a private matchmaking request
@@ -26,7 +32,7 @@ export class Waiting_socket {
  * struct use to store a pong game instance
  */
 export class Pong_instance {
-  game_engine;
+  game_engine: any;
   player: Socket[];
   spectator: Socket[];
 }
@@ -35,7 +41,7 @@ export class Pong_instance {
  * struct use to store a game game instance
  */
 export class Game_instance {
-  game_engine;
+  game_engine: any;
   player: Socket[];
   spectator: Socket[];
 }
@@ -64,15 +70,19 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   pong_public_space: Socket[]; // waiting room for pong public matchmaking
   game_public_space: Socket[]; // waiting room for game public matchmaking
   private_space: Waiting_socket[]; // waiting room for private matchmaking
-  socket_login: Map<string, string>; // map all the socket with their login
+  socket_login: Map<string, UserEntity>; // map all the socket with their login
 
-  constructor() {
+  constructor(
+    private userservice: UserService,
+    private matchservice: MatchService,
+    private jwtservice: JwtService
+  ) {
     this.game_instance = [];
     this.pong_instance = [];
     this.pong_public_space = [];
     this.game_public_space = [];
     this.private_space = [];
-    this.socket_login = new Map<string, string>();
+    this.socket_login = new Map<string, UserEntity>();
   }
 
   @WebSocketServer()
@@ -83,18 +93,19 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   StartGameRoom(@ConnectedSocket() player1: Socket, @ConnectedSocket() player2: Socket, type: string) {
     // make the player join the room of name player1.socket.id
+    console.log("test:" + player1);
     player1.join(player1.id);
     player2.join(player1.id);
 
     // set a game instance for the player and add it to the game instance []
     let p = new Game_instance();
     if (type === "game") {
-      p.game_engine = new GameEngineService();
+      p.game_engine = new GameEngineService(this.userservice, this.matchservice);
     }
     else {
       p.game_engine = new PongEngineService();
     }
-    p.game_engine.set_player(player1, player2);
+    p.game_engine.set_player(player1, player2, this.socket_login.get(player1.id).login, this.socket_login.get(player2.id));
     p.player = [];
     p.spectator = [];
     p.player.push(player1);
@@ -103,11 +114,40 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
     // emit the Player struct to the front to display the player login
     let players = new Players();
-    players.login1 = this.socket_login.get(player1.id);
-    players.login2 = this.socket_login.get(player2.id);
+    players.login1 = this.socket_login.get(player1.id).login;
+    players.login2 = this.socket_login.get(player2.id).login;
     this.server.to(player1.id).emit('players', players);
     this.logger.debug("a game room has been created");
   }
+
+  private extractUserId(client: Socket): string {
+    let token = client.handshake.auth['token'];
+    if (token != null) {
+        try {
+            const decoded = this.jwtservice.verify(token, {
+                secret: process.env.SECRET,
+        });
+        }
+        catch (error) {
+            return (null);
+        }
+    }
+    let object : IToken = undefined;
+    if (token != null)
+        object = jsrsasign.KJUR.jws.JWS.parse(client.handshake.auth['token']).payloadObj;
+    if (object == undefined) {
+        client.emit("fromServerMessage", "you're token is invalid");
+        return null;
+    }
+    let id: string = object.sub;
+    return id;
+}
+
+private tokenChecker(client: Socket): Promise<UserEntity> {
+    let id = this.extractUserId(client);
+    // this.logger.debug(`${id}`)
+    return this.userservice.findById(id);    
+}
 
   /**
    * 
@@ -115,7 +155,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param body anything will start pong execpt if the string === "game"
    */
   @SubscribeMessage('public matchmaking')
-  handlePublicMatchmaking(@ConnectedSocket() client: Socket, body: any) {
+  handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: any) {
+    console.log("body : " + body);
     if (body === "game" && this.game_public_space[0] != client) {
       this.game_public_space.push(client);
       this.logger.debug("socket :" + client.id + "has been added to game public space");
@@ -130,23 +171,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.pong_public_space.push(client);
       this.logger.debug("socket :" + client.id + "has been added to pong public space");
       if (this.pong_public_space.length > 1) {
-        this.StartGameRoom(this.game_public_space[0], client, "game");
+        console.log("heu..." + this.game_public_space[0]);
+        this.StartGameRoom(this.pong_public_space[0], client, "");
         this.pong_public_space.pop();
         this.pong_public_space.pop();
         this.logger.debug("pong room created");
       }
     }
-  }
-
-  /**
-   * 
-   * @param body the login associated with the socket
-   * @param client the soket of the client
-   */
-  @SubscribeMessage('handshake')
-  handlehandsshake(@MessageBody() body: string, @ConnectedSocket() client: Socket) {
-    console.log("client : " + client.id + "has this pseudo :" + body);
-    this.socket_login.set(client.id, body); // map the socket to a login
   }
 
   /**
@@ -180,8 +211,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.log("Initialized");
   }
 
-  handleConnection(@ConnectedSocket() client: Socket, ...args: any[]) { // log client connection
-    this.logger.debug('client Connected: ' + client.id);
+  async handleConnection(@ConnectedSocket() client: Socket) { // log client connection
+    let id = await this.tokenChecker(client);
+    if (id === null) {
+      client.leave(client.id);
+    }
+    this.socket_login.set(client.id, id);
+    this.logger.debug('client Connected: ' + client.id, id.login);
   }
 
   /**
@@ -289,7 +325,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
       console.log(body);
-      if (element.target === this.socket_login.get(client.id) && body.target === this.socket_login.get(element.socket.id)) {
+      if (element.target === this.socket_login.get(client.id).login && body.target === this.socket_login.get(element.socket.id).login) {
         this.logger.debug("oui !!!");
         this.StartGameRoom(element.socket, client, body.type);
         this.private_space.splice(i, 1);
@@ -319,7 +355,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const player = element.player[j];
         if (player === client) {
           this.logger.debug("client.id inputed" + body);
-          element.game_engine.process_input(client);
+          element.game_engine.process_input(client, body);
           break game;
         }
       }
@@ -332,7 +368,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const player = element.player[j];
         if (player === client) {
           this.logger.debug("client.id inputed" + body);
-          element.game_engine.process_input(client);
+          element.game_engine.process_input(client, body);
           break pong;
         }
       }
