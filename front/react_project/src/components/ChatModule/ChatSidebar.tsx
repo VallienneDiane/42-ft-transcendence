@@ -12,6 +12,7 @@ function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
     const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
+        id: props.channel.id,
         name: props.channel.name,
         password: props.channel.password,
         channelPass: props.channel.channelPass,
@@ -27,6 +28,7 @@ function ModifyChannel(props: {channel: IChannel}) {
     const onSubmit = (data: IChannel) => {
         console.log(data)
         socket.emit('modifyChannel', {
+            id: props.channel.id,
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
@@ -68,11 +70,11 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
+    // const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const me: JwtPayload = accountService.readPayload()!;
     const [myGrade, setGrade] = useState<string>("normal");
 
     const leaveChannel = () => {
-        // console.log(props.dest.id)
         socket.emit('leaveChannel', {channelId: props.dest.id});
         props.handleClose();
     }
@@ -88,6 +90,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
 
     const showSettings = () => {
         setOnClickSettings((onClickSettings) => !onClickSettings)
+    }
+
+    const showInvite = () => {
+
     }
 
     const showUserParam = () => {
@@ -189,10 +195,11 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </ul>
                 )}
-                { props.dest.channel?.inviteOnly ? (
+                {props.dest.channel?.inviteOnly ? (
                     <li onClick={inviteUser}>Invite</li>
+                    // {onClickInvite &&
                 ) : null }
-                { props.dest.status ? (
+                {props.dest.status !== "normal" ? (
                     <React.Fragment>
                         <li onClick={showSettings}>Settings</li>
                         {onClickSettings && (
@@ -200,6 +207,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </React.Fragment>
                 ) : null }
+                {/* {(props.dest.status === "god" || props.dest.status === "op") ? ( */}
                 <li onClick={leaveChannel}>Leave</li>
             </ul>
           </div>
