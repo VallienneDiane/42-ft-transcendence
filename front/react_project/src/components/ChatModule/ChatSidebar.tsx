@@ -118,38 +118,40 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
             console.log("list", list);
             setMembers(list);
         })
-        socket.on("channelLeaved", (userId: string) => {
-            console.log("user leaved", userId);
-            let newMembers = members.filter((member) => {
-                return member.user.id != userId
+        socket.on("userLeaveChannel", (userId: string) => {
+            setMembers((members) => {
+                let newMembers = [...members].filter((member) => {
+                    return member.user.id != userId
+                });
+                return newMembers;
             });
-            setMembers(newMembers);
         })
         socket.on("newUserInChannel", (id: string, login: string, connected: boolean) => {
-            let newMembers = members;
-            let user: {user: {id: string, login: string}, status: string, connected: boolean} = {
-                user: {
-                    id: id,
-                    login: login
-                },
-                status: "normal",
-                connected: connected
-            }
-            newMembers.push(user);
-            // newMembers.sort((a, b) => {
-            //     if (a.status == "god" && b.status != "god")
-            //         return (-1)
-            //     if (a.status == "op") {
-            //         if (b.status == "god")
-            //             return (1)
-            //         if (b.status == "normal")
-            //             return (-1) 
-            //     }
-            //     if (a.status == "normal" && b.status != "normal")
-            //         return (1)
-            //     return (a.user.login.localeCompare(b.user.login))
-            // })
-            setMembers(newMembers);
+            setMembers(members => {
+                let user: {user: {id: string, login: string}, status: string, connected: boolean} = {
+                    user: {
+                        id: id,
+                        login: login
+                    },
+                    status: "normal",
+                    connected: connected
+                }
+                let newMembers = [...members, user];
+                newMembers.sort((a, b) => {
+                    if (a.status == "god" && b.status != "god")
+                        return (-1)
+                    if (a.status == "op") {
+                        if (b.status == "god")
+                            return (1)
+                        if (b.status == "normal")
+                            return (-1) 
+                    }
+                    if (a.status == "normal" && b.status != "normal")
+                        return (1)
+                    return (a.user.login.localeCompare(b.user.login))
+                });
+                return newMembers;
+            });
         })
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
@@ -169,7 +171,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                     <ul className="memberList">{
                         members.map(
                         (member, id) => {
-                            if (member.user.login !== me.login) {
+                            if (member.user.id !== me.sub) {
                                 if (props.dest.status == "normal")
                                     return (<li key={id}><button onClick={showUserParam}>{member.user.login}</button> </li>)
                                 else if (props.dest.status == "op" && member.status == "normal")
