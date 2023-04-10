@@ -249,7 +249,8 @@ export class ChatService {
                                                 let channelToEmit: IChannelToEmit = channel;
                                                 roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
-                                                client.emit("true");
+                                                if (channel.password)
+                                                    client.emit("true");
                                             })
                                     }
                                     else
