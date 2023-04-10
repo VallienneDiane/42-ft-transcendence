@@ -204,13 +204,14 @@ export class ChannelService {
 			await this.addNormalUser(user, channelId);
 	}
 
-	async getMessages(channelId: string): Promise<{date: Date, sender: string, content: string}[]> {
-		const msgs: {date: Date, sender: string, content: string}[] = await this.channelRepository
+	async getMessages(channelId: string): Promise<{date: Date, senderId: string, senderName: string, content: string}[]> {
+		const msgs: {date: Date, senderId: string, senderName: string, content: string}[] = await this.channelRepository
 			.createQueryBuilder("channel")
 			.innerJoinAndSelect("channel.messages", "messages")
 			.leftJoinAndSelect("messages.user", "sender")
 			.select("messages.date", "date")
-			.addSelect("sender.login", "sender")
+			.addSelect("sender.id", "senderId")
+			.addSelect("sender.login", "senderLogin")
 			.addSelect("content", "content")
 			.where("channel.id = :id", { id: channelId })
 			.orderBy("messages.date", "ASC")
