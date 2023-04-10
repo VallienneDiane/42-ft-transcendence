@@ -143,16 +143,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
-    @SubscribeMessage('inviteUser')
-    handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
-    }
+    // @SubscribeMessage('inviteUser')
+    // handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
+    //     this.tokenChecker(client)
+    //     .then((user) => {
+    //         if (user != null)
+    //             this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
+    //         else
+    //             client.emit('notice', 'Your token is invalid, please log out then sign in');
+    //     })
+    // }
 
     @SubscribeMessage('createChannel')
     handleCreateChannel(@MessageBody() data: createChannelDto, @ConnectedSocket() client: Socket) {
@@ -181,7 +181,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.kickUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
+                this.chatService.kickUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
