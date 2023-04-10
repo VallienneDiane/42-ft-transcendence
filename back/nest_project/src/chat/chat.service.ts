@@ -220,13 +220,19 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = await this.channelService.listUsersInChannel(channelId, true);
-        usersArray.forEach((elt) => {
-            let connected = roomHandler.userMap.get(elt.user.id);
-            if (connected != undefined)
-                elt.connected = true;
-        })
+        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = [];
+        const rawArray = await this.channelService.listUsersInChannel(channelId, true);
+        for (let elt of rawArray) {
+            usersArray.push({
+                user: {
+                    id: elt.user.id,
+                    login: elt.user.login
+                },
+                status: elt.status,
+                connected: roomHandler.userMap.get(elt.user.id) != undefined
+            })
         client.emit("listUsersChann", usersArray);
+        }
     }
 
     public joinChannelEvent(client: Socket, user: UserEntity, data: {channelId: string, channelPass: string}, roomHandler: UserRoomHandler) {
@@ -379,8 +385,10 @@ export class ChatService {
                             else if (linkToOp.status != "normal")
                                 client.emit('notice', "this user is already operator to this channel");
                             else {
-                                this.channelService.upgradeUserOnChannel(linkToOp.user, channelId);
-                                roomHandler.userMap.userBecomeOp(userToOp, channelId);
+                                this.channelService.upgradeUserOnChannel(linkToOp.user, channelId)
+                                .then(() => {
+                                    roomHandler.userMap.userBecomeOp(userToOp, channelId);
+                                })
                             }
                         });
                     }
