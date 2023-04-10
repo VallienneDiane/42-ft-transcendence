@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
-import { IChannelToEmit, IUserToEmit } from "./chat.interface";
+import { IChannelToEmit, IMessageToSend, IUserToEmit } from "./chat.interface";
 import { MessageChannelEntity } from "./messageChannel/messageChannel.entity";
 import { MessageChannelService } from "./messageChannel/messageChannel.service";
 import { MessagePrivateEntity } from "./messagePrivate/messagePrivate.entity";
@@ -83,7 +83,8 @@ export class ChatService {
         logger.debug(`${user.login} send : ${message}`);
         let room = roomHandler.socketMap.sockets.get(client);
         if (room != undefined) {
-            let toSend = {date: new Date(), sender: user.login, content: message};
+            let toSend: IMessageToSend = {date: new Date(), senderId: user.id, senderName: user.login, content: message};
+            console.log("date : ", toSend.date);
             if (room.isChannel) {
                     if (room.room != "general") {
                         logger.debug(`${message} to stock in ${room.room}`);
@@ -148,6 +149,7 @@ export class ChatService {
                                 found.status == "op");
                             this.channelService.getMessages(loc)
                                 .then((array) => {
+                                    console.log(array);
                                     client.emit("newLocChannel", found, array);
                                 })
                         }
