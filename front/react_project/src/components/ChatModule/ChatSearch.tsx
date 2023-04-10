@@ -240,7 +240,6 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
 
         this.context.socket.emit('listChannel');
         this.context.socket.on('listChannel', (strs: IChannel[]) => {
-            console.log(strs);
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
                 newChanList.push({id: str.id!, name: str.name, password: str.password, isChannel: true, isClickable: true});
