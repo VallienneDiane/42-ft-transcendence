@@ -2,7 +2,7 @@ import React, { ContextType } from "react";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IMessage, IDest, IMessageToSend } from "./Chat_models";
+import { IMessage, IDest, IMessageReceived } from "./Chat_models";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { SocketContext } from "../context";
 
@@ -64,18 +64,15 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     declare context: ContextType<typeof SocketContext>;
 
     componentDidMount(): void {
-        this.context.socket.on("newMessage", (data: IMessageToSend) => {
-            console.log('message from nest newMessage: ' + data.content + ', ' + data.sender);
-            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.sender});
+        this.context.socket.on("newMessage", (data: IMessageReceived) => {
+            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         });
 
-        this.context.socket.on('selfMessage', (data: IMessageToSend) => {
-            console.log('message from nest selfMessage: ' + data.content + ', ' + data.sender);
-            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.sender});
+        this.context.socket.on('selfMessage', (data: IMessageReceived) => {
+            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         })
 
         this.context.socket.on('notice', (data: string) => {
-            console.log(data);
             let date = new Date();
             this.props.handleHistory({id: date.toString(), content: data, senderName: "WARNING"});
         })

@@ -331,19 +331,63 @@
 									}
 								}
 								& .memberList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									padding: 0.3rem 1.5rem;
 									& > li {
-										justify-content: flex-start;
+										display: flex;
+										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
 										background: transparent;
-										& svg {
+										& div {
+											background: transparent;
+										}
+										& .iconStatus {
 											background: transparent;
 											width: 15px;
 											padding-left: 6px;
 											opacity: 70%;
 										}
+										& button {
+											background: transparent;
+											& .iconAction {
+												background: transparent;
+												width: 15px;
+												padding-left: 6px;
+												opacity: 70%;
+												&:hover {
+													// outline: none;
+													// width: 20px;
+													color: #016d06;
+													// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+												}
+											}
+										}
+									}
+								}
+								& .searchbar {
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									background-color: #b9cbce;
+									padding: 0.5rem 1.5rem;
+									& input {
+										width: 100%;
+										background: rgb(238, 238, 238);
+										color: rgb(77, 77, 77);
+										padding: 0.3rem 2rem 0.3rem 1rem;
+										border-radius: 2rem;
+										border: none;
+										outline: none;
+									}
+									& .svgSearch {
+										height: 1.1rem;
+										margin-left: -2rem;
+										opacity: 50%;
+										background-color: #eee;
+										cursor: pointer;
 									}
 								}
 								& .settingList {
@@ -376,10 +420,14 @@
 									}
 									& button {
 										background: transparent;
-										color: #fa6969;
+										color: #088f03;
 										font-weight: bold;
 										font-size: 17px;
 									}
+								}
+								& .outChannel {
+									color: red;
+									background: transparent;
 								}	
 							}
 						}

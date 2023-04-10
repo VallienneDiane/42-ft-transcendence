@@ -235,7 +235,7 @@ export class UserRoomHandler {
                     .get(socket).userId;
                 this.userMap.userChangeRoom(userToMove, socket, "general", true, false, false);
                 socket.emit("newLocChannel", {channel: locGeneral, status: "normal"}, []);
-                socket.emit("leaveChannel", channelId);
+                socket.emit("channelDestroy", channelId);
             })
             this.roomMap.movingAway(channelId, "general");
         }

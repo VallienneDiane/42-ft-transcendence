@@ -250,11 +250,12 @@ export class ChatService {
                                                 let channelToEmit: IChannelToEmit = channel;
                                                 roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
-                                                client.emit("true");
+                                                if (channel.password)
+                                                    client.emit("correctPassword");
                                             })
                                     }
                                     else
-                                        client.emit("wrong");
+                                        client.emit("incorrectPassword");
                                         // client.emit("notice", "Wrong password");
                                 }
                                 else
@@ -484,7 +485,7 @@ export class ChatService {
         this.channelService.getUserInChannel(channelId, user.id)
         .then((link) => {
             if (!link || link.status != "god")
-                client.emit("notice", "You cna't do that !");
+                client.emit("notice", "You can't do that !");
             else {
                 this.channelService.deleteById(channelId)
                 .then(() => {
