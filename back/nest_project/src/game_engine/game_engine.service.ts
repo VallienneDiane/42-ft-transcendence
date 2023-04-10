@@ -179,9 +179,10 @@ export class GameEngineService {
 		let match: CreateMatchDto = new CreateMatchDto();
 		console.log("heu :" + this.max(this.pl1_score, this.pl2_score));
 		match.score_winner = this.max(this.pl1_score, this.pl2_score);
-		match.score_looser = this.min(this.pl1_score, this.pl2_score);
+		match.score_loser = this.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
-		match.looser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
+		match.loser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
+		console.log("the match to be register should be :", match);
 		await this.matchservice.createMatch(match);
 		let result = await this.matchservice.findMatch();
 		console.log("the score should be save", result);
@@ -239,8 +240,8 @@ export class GameEngineService {
 				this.pl2_score++;
 			}
 			if (this.pl1_score > 4 || this.pl2_score > 4) {
-				this.close_the_game();
 				this.game_must_stop = true;
+				this.close_the_game();
 				console.log("past close_the_game");
 				return;
 			}

@@ -16,7 +16,7 @@ export class MatchService {
 		return this.MatchRepository
 			.createQueryBuilder("matchos")
 			.leftJoinAndSelect("matchos.winner", "winner")
-			.leftJoinAndSelect("matchos.looser", "looser")
+			.leftJoinAndSelect("matchos.loser", "loser")
 			.getMany();
 	}
 
