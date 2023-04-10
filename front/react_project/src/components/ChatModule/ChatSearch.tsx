@@ -202,7 +202,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
 
     showSearchList(event: any) {
         this.setState({ isDropdown: !this.state.isDropdown });
-        this.displayList(event); 
+        this.displayList(event);
     }
 
     displayList(event: any) {
@@ -240,10 +240,13 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
 
         this.context.socket.emit('listChannel');
         this.context.socket.on('listChannel', (strs: IChannel[]) => {
+            console.log(strs);
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
                 newChanList.push({id: str.id!, name: str.name, password: str.password, isChannel: true, isClickable: true});
-            this.setState({channels: newChanList})
+            this.setState({channels: newChanList});
+            let newFiltered = this.compileFiltered(this.state.users, newChanList);
+            this.setState({filtered: newFiltered});
         });
         
         this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
@@ -261,7 +264,6 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             });
             this.setState({channels: nextState});
             let newFiltered: ISearch[] = this.compileFiltered(this.state.users, nextState);
-            console.log("new filtered:", newFiltered);
             this.setState({filtered: newFiltered});
         })
            

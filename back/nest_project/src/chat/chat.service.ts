@@ -12,7 +12,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { channel } from "diagnostics_channel";
-import { createChannelDto } from "./chat.gateway.dto";
+import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
 
 @Injectable({})
 export class ChatService {
@@ -34,6 +34,7 @@ export class ChatService {
             hidden: false,
             normalUsers: [],
             opUsers: [],
+            godUser: undefined,
             messages: []
         }
         client.emit('newLocChannel', {channel: locGeneral, status: "normal"}, []);
@@ -50,7 +51,7 @@ export class ChatService {
             socketMap.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
-                    roomHandler.joinRoom(userId, socket, 'general', true, false, false);
+                    roomHandler.joinRoom(userId, socket, '00000000-0000-0000-0000-000000000000', true, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
@@ -84,7 +85,6 @@ export class ChatService {
         let room = roomHandler.socketMap.sockets.get(client);
         if (room != undefined) {
             let toSend: IMessageToSend = {date: new Date(), senderId: user.id, senderName: user.login, content: message};
-            console.log("date : ", toSend.date);
             if (room.isChannel) {
                     if (room.room != "general") {
                         logger.debug(`${message} to stock in ${room.room}`);
@@ -149,7 +149,6 @@ export class ChatService {
                                 found.status == "op");
                             this.channelService.getMessages(loc)
                                 .then((array) => {
-                                    console.log(array);
                                     client.emit("newLocChannel", found, array);
                                 })
                         }
@@ -181,8 +180,8 @@ export class ChatService {
         }
     }
 
-    async listChannelEvent(client: Socket, user: UserEntity) {
-        let channelsArray: IChannelToEmit[] = await this.channelService.listChannelsWhereUserIsNot(user);
+    async listChannelEvent(client: Socket, userId: string) {
+        let channelsArray: IChannelToEmit[] = await this.channelService.listChannelsWhereUserIsNot(userId);
         client.emit("listChannel", channelsArray);
     }
 
@@ -466,7 +465,7 @@ export class ChatService {
                                                 this.userService.findById(data.userId)
                                                 .then(
                                                     (userEntity) => {
-                                                        this.listChannelEvent(socket, userEntity);
+                                                        this.listChannelEvent(socket, userEntity.id);
                                                     });
                                         });
                                 }
@@ -477,6 +476,25 @@ export class ChatService {
                     else
                         client.emit("notice", "This channel already exists.");
                 });
+        }
+    }
+
+    public modifyChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, data: modifyChannelDto) {
+        if (data.password && data.channelPass == "")
+            client.emit("notice", "You can't set an empty pass.");
+        else {
+            this.channelService.getUserInChannel(data.id, user.id)
+            .then((link) => {
+                if (!link || link.status != "god")
+                    client.emit("notice", "You can't do that");
+                else {
+                    this.channelService.updateById(data.id, data).then(() =>
+                        roomHandler.socketMap.sockets.forEach((user, socket) => {
+                            this.listChannelEvent(socket, user.userId);
+                        })
+                    )
+                }
+            })
         }
     }
 

@@ -3,6 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { NotBrackets, Repository } from "typeorm";
+import { modifyChannelDto } from "../chat.gateway.dto";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
@@ -41,8 +42,8 @@ export class ChannelService {
 		this.channelRepository.update({name: channelToUpdate}, newChannelConfig);
 	}
 
-	async updateById(channelToUpdate: string, newChannelConfig: ChannelEntity): Promise<void> {
-		this.channelRepository.update({id: channelToUpdate}, newChannelConfig);
+	async updateById(channelId: string, newChannelConfig: modifyChannelDto): Promise<void> {
+		await this.channelRepository.update({id: channelId}, newChannelConfig);
 	}
 
 	async deleteByName(channelName: string): Promise<void> {
@@ -75,14 +76,14 @@ export class ChannelService {
 			.getMany();
 	}
 
-	async listChannelsWhereUserIsNot(user: UserEntity): Promise<ChannelEntity[]> {
+	async listChannelsWhereUserIsNot(userId: string): Promise<ChannelEntity[]> {
 		const allChannels = await this.listChannelsWithUsers();
 		let channListToReturn: ChannelEntity[] = [];
 		allChannels.forEach(channel => {
 			if (!channel.hidden
-				&& channel.godUser.id != user.id
-				&& channel.opUsers.every((opUser) => {return opUser.id != user.id})
-				&& channel.normalUsers.every((normalUser) => {return normalUser.id != user.id})
+				&& channel.godUser.id != userId
+				&& channel.opUsers.every((opUser) => {return opUser.id != userId})
+				&& channel.normalUsers.every((normalUser) => {return normalUser.id != userId})
 				) {
 					channListToReturn.push(channel);
 				}
@@ -97,9 +98,9 @@ export class ChannelService {
 	 * to set it up later, it can be ignored either
 	 */
 	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
-		const godUser: UserEntity = await this.channelRepository
+		const godUser = await this.channelRepository
 			.createQueryBuilder("channel")
-			.innerJoinAndSelect("channel.godUser", "god")
+			.leftJoinAndSelect("channel.godUser", "god")
 			.select("god.*")
 			.where("channel.id = :id", { id: channelId })
 			.getRawOne();
