@@ -212,7 +212,7 @@ export class ChannelService {
 			.leftJoinAndSelect("messages.user", "sender")
 			.select("messages.date", "date")
 			.addSelect("sender.id", "senderId")
-			.addSelect("sender.login", "senderLogin")
+			.addSelect("sender.login", "senderName")
 			.addSelect("content", "content")
 			.where("channel.id = :id", { id: channelId })
 			.orderBy("messages.date", "ASC")

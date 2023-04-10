@@ -250,11 +250,7 @@ export class ChatService {
                                                 roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                 this.changeLocEvent(client, user, data.channelId, true, roomHandler);
                                                 if (channel.password)
-<<<<<<< HEAD
                                                     client.emit("correctPassword");
-=======
-                                                    client.emit("true");
->>>>>>> dc54d7d1f624e82a8dd036be272cf84b647f34fc
                                             })
                                     }
                                     else
