@@ -284,10 +284,11 @@ export class ChatService {
         .then((found) => {
             if (found != null) {
                 if (found.status != "normal") {
-                    this.userService.findById(userToInvite)
+                    this.userService.findByLogin(userToInvite)
                     .then((userEntity) => {
+                        console.log(userEntity)
                         if (userEntity != null) {
-                            this.channelService.getUserInChannel(channelId, userToInvite)
+                            this.channelService.getUserInChannel(channelId, userEntity.id)
                             .then(
                                 (alreadyHere) => {
                                     if (alreadyHere == null) {
@@ -296,7 +297,7 @@ export class ChatService {
                                             let room = roomHandler.roomMap.of(channelId);
                                             if (room != undefined)
                                                 room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                            let logged = roomHandler.userMap.get(userToInvite);
+                                            let logged = roomHandler.userMap.get(userEntity.id);
                                             if (logged != undefined) {
                                                 this.channelService.getOneById(channelId)
                                                 .then((channelEntity) => {
@@ -322,10 +323,10 @@ export class ChatService {
                     .then(
                         (chanOpts) => {
                             if (!chanOpts.inviteOnly) {
-                                this.userService.findById(userToInvite)
+                                this.userService.findByLogin(userToInvite)
                                 .then((userEntity) => {
                                     if (userEntity != null) {
-                                        this.channelService.getUserInChannel(channelId, userToInvite)
+                                        this.channelService.getUserInChannel(channelId, userEntity.id)
                                         .then(
                                             (alreadyHere) => {
                                                 if (alreadyHere == null) {
@@ -334,7 +335,7 @@ export class ChatService {
                                                         let room = roomHandler.roomMap.of(channelId);
                                                         if (room != undefined)
                                                             room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                                        let logged = roomHandler.userMap.get(userToInvite);
+                                                        let logged = roomHandler.userMap.get(userEntity.id);
                                                         if (logged != undefined) {
                                                             let channelToEmit: IChannelToEmit = chanOpts;
                                                             logged.sockets.forEach(({}, socket) => {

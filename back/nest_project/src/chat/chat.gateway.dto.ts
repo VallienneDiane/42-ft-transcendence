@@ -19,7 +19,7 @@ export class joinChannelDto {
 };
 
 export class inviteUserDto {
-    @IsNotEmpty() @IsUUID() readonly userToInvite: string;
+    @IsNotEmpty() @IsString() readonly userToInvite: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
 };
 
@@ -43,7 +43,6 @@ export class createChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 }
 
 export class modifyChannelDto {
@@ -52,5 +51,4 @@ export class modifyChannelDto {
     @IsNotEmpty() @IsBoolean() readonly password: boolean;
     @IsOptional() @IsString() readonly channelPass: string;
     @IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-    @IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 }
