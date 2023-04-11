@@ -8,7 +8,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
+import { addMessageDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
 import { addFriendDto } from "./relation/friend/friend.dto";
 
 @UsePipes(ValidationPipe)
@@ -272,6 +272,39 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             if (user != null) {
                 this.logger.debug(`${user.id} : listMyDMs`)
                 this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("blockUser")
+    handleBlockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`block event`);
+                this.chatService.blockUserEvent(client, user, data.id);
+            }
+        })
+    }
+
+    @SubscribeMessage("unblockUser")
+    handleUnblockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`block event`);
+                this.chatService.unblockUserEvent(client, user, data.id);
+            }
+        })
+    }
+
+    @SubscribeMessage("listBlock")
+    handleListBlock(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`listBlock event`);
+                this.chatService.listBlockEvent(client);
             }
         })
     }

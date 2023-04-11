@@ -11,7 +11,7 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     constructor(props: {message: IMessage, prevSender: string, last: boolean}) {
         super(props);
         this.state = { playload: accountService.readPayload()!, 
-        me: false, 
+        me: false,
         sameSender: false, 
         avatar: '' };
         this.setTimeAgo = this.setTimeAgo.bind(this);

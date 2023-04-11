@@ -63,5 +63,10 @@ export class UserEntity {
 
   @OneToMany(() => FriendEntity, (request) => request.receiver)
   requestsReceived : FriendEntity[];
-  
+
+  @ManyToMany(() => UserEntity, (user) => user.blockedMeList)
+  blockList: UserEntity[];
+
+  @ManyToMany(() => UserEntity, (user) => user.blockList)
+  blockedMeList: UserEntity[];
 }
