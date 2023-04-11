@@ -102,6 +102,26 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         socket.emit("kickUser", {userToKick: e.currentTarget.value, channelId: props.dest.id});
     }
     
+    const ban = (e: any) => {
+        console.log("ban!");
+
+    }
+
+    const unban = (e: any) => {
+        console.log("unban!");
+
+    }
+
+    const mute = (e: any) => {
+        console.log("silence!");
+        
+    }
+
+    const unmute = (e: any) => {
+        console.log("speak!");
+        
+    }
+
     const deOp = (e: any) => {
         console.log("deOp!");
         socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
