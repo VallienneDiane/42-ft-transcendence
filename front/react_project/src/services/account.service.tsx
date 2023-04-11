@@ -19,7 +19,7 @@ let uploadAvatar = (file: string) => {
 }
 // Get Avatar picture
 let getAvatar = (id: string) => {
-    return Axios.get("getAvatar" + id);
+    return Axios.get('getAvatar/' + id);
 }
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
@@ -110,5 +110,5 @@ let callback = (code: string) => {
 export const accountService = {
     signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
     enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings, uploadAvatar, url42, callback
+    is2faActive, generateToken, is2faActiveSettings, uploadAvatar, getAvatar, url42, callback
 }
