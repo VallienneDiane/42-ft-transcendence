@@ -20,7 +20,6 @@ export interface IChannel {
 	password: boolean;
 	channelPass?: string;
 	inviteOnly: boolean;
-	hidden: boolean;
 	normalUsers?: IUser[];
 	opUsers?: IUser[];
 	godUser?: IUser;

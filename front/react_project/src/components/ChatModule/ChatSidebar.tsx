@@ -16,8 +16,7 @@ function ModifyChannel(props: {channel: IChannel}) {
         name: props.channel.name,
         password: props.channel.password,
         channelPass: props.channel.channelPass,
-        inviteOnly: props.channel.inviteOnly,
-        hidden: props.channel.hidden } 
+        inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
 
@@ -32,8 +31,7 @@ function ModifyChannel(props: {channel: IChannel}) {
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            hidden: data.hidden,
+            inviteOnly: data.inviteOnly
         });
     };
 
@@ -58,7 +56,6 @@ function ModifyChannel(props: {channel: IChannel}) {
                 </li>)}
             {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
             <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
-            <li>Hidden<input type="checkbox" {...register("hidden")}/></li>
             <li><button type="submit">Save</button></li>
         </form>
     )
