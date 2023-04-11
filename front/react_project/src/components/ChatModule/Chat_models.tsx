@@ -40,7 +40,7 @@ export interface IMessage {
 	id: string; // corespond à la date
 	content: string;
 	senderName: string;
-	senderId: string;
+	senderId?: string;
 }
 
 export interface IMessageReceived {
