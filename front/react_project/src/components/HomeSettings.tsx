@@ -17,10 +17,10 @@ const HomeSettings: React.FC = () => {
 
     const id42 = location.state?.id42;
     const email = location.state?.email;
-    const [duplicateLogin, setDupLogin] = useState<boolean>(false);
     const [avatar, setAvatar] = useState<string>(location.state?.avatar);
-    const [logins, setLogins] = useState<{login: string}[]>([]);
     const [login, setLogin] = useState<string>(location.state?.login);
+    const [logins, setLogins] = useState<{login: string}[]>([]);
+    const [duplicateLogin, setDupLogin] = useState<boolean>(false);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
@@ -62,13 +62,12 @@ const HomeSettings: React.FC = () => {
             avatarSvg: avatar,
         }
         for(let i = 0; i < logins.length; i++) {
-            console.log("i ", i, "logins size ", logins.length, logins[i]);
             if(user.login == logins[i].login) {
                 setDupLogin(true);
                 return;
             }
         }
-        accountService.createUser(user)
+        await accountService.createUser(user)
         .then(res_token => {
             accountService.saveToken(res_token.data.access_token);
             const from = (location.state as any)?.from || "/";
@@ -76,7 +75,6 @@ const HomeSettings: React.FC = () => {
         })
         .catch(error => {});
     }
-
 
     const handleDragOver = (event: React.ChangeEvent<HTMLInputElement>) => {
         event.preventDefault();
