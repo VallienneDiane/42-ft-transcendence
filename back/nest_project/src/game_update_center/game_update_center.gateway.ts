@@ -1,19 +1,23 @@
-import { Logger, OnModuleInit } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
-import { GameEngineService } from 'src/game_engine/game_engine.service';
-import { PongEngineService } from 'src/pong_engine/pong_engine.service';
-import { OnGatewayInit } from '@nestjs/websockets';
-import { UserService } from 'src/user/user.service';
-import { MatchService } from 'src/match/Match.service';
-import * as jsrsasign from 'jsrsasign';
-import { JwtService } from '@nestjs/jwt';
-import { IToken } from 'src/chat/chat.interface';
-import { UserEntity } from "src/user/user.entity";
-import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SharePlayersLoginDTO } from './game_update_center.dto';
+/**
+ * this file contain all of the game socket logistic and event handling like disconnection and input
+ */
+
+import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'; // socket event handling stuff
+import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SharePlayersLoginDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
+import { GameEngineService } from 'src/game_engine/game_engine.service'; // use to acces the gameEngine of the super mode
+import { PongEngineService } from 'src/pong_engine/pong_engine.service'; // use to acces the gameEngine of the classic mode
+import { MatchService } from 'src/match/Match.service'; // use to acces function for the MatchEntity in the gameEngine to store goal
+import { UserService } from 'src/user/user.service'; // use to acces function for the UserEntity in the gameEngine to store goal
+import { OnGatewayInit } from '@nestjs/websockets'; // use to log the initialization of the module
+import { UserEntity } from "src/user/user.entity"; // use to access UserEntity table
+import { IToken } from 'src/chat/chat.interface'; // use for token
+import { Server, Socket } from 'socket.io'; // use to manage socket and emit message
+import { JwtService } from '@nestjs/jwt'; // use for token
+import { Logger } from '@nestjs/common'; // use for log
+import * as jsrsasign from 'jsrsasign'; // use for token validation
 
 /**
- * use for storing the client waiting for a private matchmaking
+ * use for storing waiting client
  */
 class Waiting_Socket {
   waiting_client_socket: Socket;
@@ -26,8 +30,8 @@ class Waiting_Socket {
  */
 class Game_Instance {
   game_engine: any;
-  player: Socket[];
-  spectator: Socket[];
+  players: Socket[];
+  spectators: Socket[];
 }
 
 /**
@@ -40,46 +44,63 @@ class Game_Instance {
 })
 export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect{
 
-  game_instance: Game_Instance[]; // all gane instance
+  // logistic things
+  socketID_UserEntity: Map<string, UserEntity>; // map all the socket with their UserEntity for faster acces to user data
   logger: Logger = new Logger("GameGateway"); // use to log thing into the console (inside the container)
-  public_space: Waiting_Socket[]; // waiting room for public matchmaking
+
+  // storing game request and instance thing
+  game_instance: Game_Instance[]; // all gane instance
   private_space: Waiting_Socket[]; // waiting room for private matchmaking
-  socketID_UserEntity: Map<string, UserEntity>; // map all the socket with their login
+  public_space: Waiting_Socket[]; // waiting room for public matchmaking
 
   constructor(
-    private userservice: UserService,
+    private userservice: UserService, // injecting instance of service to be use for token verification and match's goal storing purpuse
     private matchservice: MatchService,
     private jwtservice: JwtService
   ) 
   {
+    // basic initialization
+    this.socketID_UserEntity = new Map<string, UserEntity>();
     this.game_instance = [];
     this.public_space = [];
     this.private_space = [];
-    this.socketID_UserEntity = new Map<string, UserEntity>();
   }
 
+  /**
+   * the big socket manager thing
+   */
   @WebSocketServer()
   server: Server;
+
   /**
-   * take the socket in the public game room and shove them into a room to start a game instance for them
-   * @param client the second player socket
+   * start a game instance for the player 1 and 2 to play together
+   * @param player1 the Socket from socket.io of player1
+   * @param player2 the Socket from socket.io of player2
+   * @param super_game_mode the boolean representing the super_game_mode version of the game
    */
   StartGameRoom(@ConnectedSocket() player1: Socket, @ConnectedSocket() player2: Socket, super_game_mode: boolean) {
+    console.log("entering StartGameRoom function");
     // make the player join the room of name player1.socket.id
     player1.join(player1.id);
     player2.join(player1.id);
 
-    // set a game instance for the player and add it to the game instance []
+    // Start ---------- set a game instance for the player and add it to the game instance [] ----------
+  
+    // creating the game instance with the correct gameEngine and service for storing goal
     let p = new Game_Instance();
     if (super_game_mode === true) { p.game_engine = new GameEngineService(this.userservice, this.matchservice); }
     else { p.game_engine = new PongEngineService(this.userservice, this.matchservice); }
   
+    // setting the player and UserEntity of player for the gameEngine
     p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id));
-    p.player = [];
-    p.spectator = [];
-    p.player.push(player1);
-    p.player.push(player2);
+    p.players = [];
+    p.spectators = [];
+    p.players.push(player1);
+    p.players.push(player2);
+    console.log("the game instance added to the game instance : ", p);
     this.game_instance.push(p);
+    // End ---------- set a game instance for the player and add it to the game instance [] ----------
+
 
     // emit the Player struct to the front to display the player login
     let players = new SharePlayersLoginDTO();
@@ -87,67 +108,86 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     players.player2_login = this.socketID_UserEntity.get(player2.id).login;
     this.server.to(player1.id).emit('players', players);
     this.logger.debug("a game room has been created");
+    console.log("leaving StartGameRoom function");
   }
   
   /**
    * match two player according to the game type they want to play
    * @param client the client Socket
-   * @param body a PublicGameRequestDTO that contain the game type the user want to play
+   * @param body a PublicGameRequestDTO containing the game type that the user want to play
    * @returns nothing
    */
   @SubscribeMessage('public matchmaking')
   handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
+    console.log("entering handlePublicMatchmaking function");
+
+    // check if there is already a waiting socket for a potential matchmaking
     for (let index = 0; index < this.public_space.length; index++) {
       const element = this.public_space[index];
+
+      // if a waiting socket with the same game_mode is already waiting
       if (element.super_game_mode === body.super_game_mode) {
         this.logger.debug("client : ", element.waiting_client_socket.id, "and client : ", client.id, "have been match together in a game instance with super_game_mode : ", body.super_game_mode);
+
+        // create a game instance for them
         this.StartGameRoom(element.waiting_client_socket, client, body.super_game_mode);
+
+        // remove the waiting socket from the queu
         this.public_space.splice(index, 1);
         this.logger.debug("game room created");
         return;
       }
     }
+
+    // if no socket where waiting or no match of mode where found add the socket to the waiting socket list
     let ws: Waiting_Socket = new Waiting_Socket();
     ws.super_game_mode = body.super_game_mode;
     ws.waiting_client_socket = client;
     ws.target_client_login = "";
+    console.log("the waiting socket to be added", ws);
     this.public_space.push(ws);
+    console.log("leaving handlePublicMatchmaking function");
   }
 
   /**
-   * check witch game instance the player ready is in, and set the engin state accordingly,
-   * launching the engin loop automaticaly if both player are ready
-   * @param client the client clicking on the ready button (Socket from socket.io)
-  */
+   * find in witch game instance the client is a player and toggle his ready state
+   * @param client the Socket from Socket.io
+   */
  @SubscribeMessage('ready')
   handleReady(@ConnectedSocket() client: Socket) { // TODO check on the engine side what happen if the player send a ready message in a ongoing match
+    
+    console.log("entering handleReady function");
     for (let i = 0; i < this.game_instance.length; i++) {
-      const element = this.game_instance[i];
-      for (let j = 0; j < element.player.length; j++) {
-        const player = element.player[j];
+      const game = this.game_instance[i];
+      for (let j = 0; j < game.players.length; j++) {
+        const player = game.players[j];
         if (player === client) {
-          element.game_engine.set_player_ready(player, this.server)
+          game.game_engine.set_player_ready(player, this.server);
+          return;
         }
       }
     }
-  }
-  
-  afterInit(server: Server) { // log module initialization
-    this.logger.log("Initialized");
+    console.log("leaving handleReady function");
   }
 
   /**
    * happend on connection to the game page
    * @param client the socket connecting
    */
-  async handleConnection(@ConnectedSocket() client: Socket) { // log client connection
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    
+    // checking if the socket have a valid token
     let user_entity = await this.tokenChecker(client);
-    if (user_entity === null) {
+  
+    // if not remove him
+    if (user_entity === null) { // TODO test if it work
       console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
       client.leave(client.id);
     }
+
+    // if token is ok then store the UserEntity for quick acces
     this.socketID_UserEntity.set(client.id, user_entity);
-    this.logger.debug("client Connected: ", client.id, user_entity.login);
+    this.logger.debug("client Connected, socket id : ", client.id, "\n client login", user_entity.login);
   }
   
   /**
