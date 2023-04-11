@@ -103,9 +103,10 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       p.game_engine = new GameEngineService(this.userservice, this.matchservice);
     }
     else {
-      p.game_engine = new PongEngineService();
+      p.game_engine = new PongEngineService(this.userservice, this.matchservice);
     }
-    p.game_engine.set_player(player1, player2, this.socket_login.get(player1.id).login, this.socket_login.get(player2.id));
+    console.log();
+    p.game_engine.set_player(player1, player2, this.socket_login.get(player1.id), this.socket_login.get(player2.id));
     p.player = [];
     p.spectator = [];
     p.player.push(player1);
@@ -212,12 +213,12 @@ private tokenChecker(client: Socket): Promise<UserEntity> {
   }
 
   async handleConnection(@ConnectedSocket() client: Socket) { // log client connection
-    let id = await this.tokenChecker(client);
-    if (id === null) {
+    let user_entity = await this.tokenChecker(client);
+    if (user_entity === null) {
       client.leave(client.id);
     }
-    this.socket_login.set(client.id, id);
-    this.logger.debug('client Connected: ' + client.id, id.login);
+    this.socket_login.set(client.id, user_entity);
+    this.logger.debug('client Connected: ' + client.id, user_entity.login);
   }
 
   /**

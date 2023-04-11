@@ -2,8 +2,12 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Simple_ball } from './Simple_Ball';
 import { Simple_paddle } from './Simple_paddle';
 import { Socket } from 'socket.io';
+import { UserEntity } from 'src/user/user.entity';
+import { CreateMatchDto } from 'src/match/CreateMatch.dto';
+import { MatchService } from 'src/match/Match.service';
+import { UserService } from 'src/user/user.service';
 
-// TODO replace all interface with the thing nico has talk about
+// TODO replace all interface with dto and validation
 interface ballpos {
 	x: number,
 	y: number,
@@ -26,6 +30,8 @@ export class PongEngineService {
 
     pl1: Socket;
     pl2: Socket;
+    user1: UserEntity;
+    user2: UserEntity;
     pl1_ready: boolean;
     pl2_ready: boolean;
     pl1_score: number;
@@ -37,8 +43,10 @@ export class PongEngineService {
     cooldown_start;
     game_must_stop: boolean;
     loop: any; // set_interval function handle for stoping the game
+    userservice;
+    matchservice;
 
-    constructor () {
+    constructor (userservice: UserService, matchservice: MatchService) {
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
@@ -48,6 +56,8 @@ export class PongEngineService {
         this.game_must_stop = false;
         this.pl1_score = 0;
         this.pl2_score = 0;
+        this.userservice = userservice;
+        this.matchservice = matchservice;
 
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
@@ -62,9 +72,11 @@ export class PongEngineService {
      * @param player1 
      * @param player2 
      */
-    set_player(player1: Socket, player2: Socket) {
+    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity) {
         this.pl1 = player1;
         this.pl2 = player2;
+        this.user1 = user_entity1;
+        this.user2 = user_entity2;
         console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
     }
     
@@ -86,6 +98,33 @@ export class PongEngineService {
     stop_game() {
         this.game_must_stop = true;
     }
+
+    max(n1: number, n2: number): number {
+		if (n1 >= n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	min(n1: number, n2: number): number {
+		if (n1 < n2) {
+			return n1;
+		}
+		return n2;
+	}
+
+	async close_the_game() {
+		console.log("entering close_the_game");
+		let match: CreateMatchDto = new CreateMatchDto();
+		match.score_winner = this.max(this.pl1_score, this.pl2_score);
+		match.score_loser = this.min(this.pl1_score, this.pl2_score);
+		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
+		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
+		console.log("the match to be register should be :", match);
+		await this.matchservice.createMatch(match);
+		let result = await this.matchservice.findMatch();
+		console.log("the score should be save", result);
+	}
 
     /**
      * check if both player are ready and start the game loop
@@ -138,6 +177,12 @@ export class PongEngineService {
         }
         else if (r === 2) {
             this.pl2_score++;
+        }
+        if (this.pl1_score > 4 || this.pl2_score > 4) {
+            this.game_must_stop = true;
+            this.close_the_game();
+            console.log("past close_game");
+            return;
         }
         this.gs.ballPosition = [{
             x: this.ball.x_position,
