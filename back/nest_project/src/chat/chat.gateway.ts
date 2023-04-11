@@ -282,7 +282,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug(`block event`);
-                this.chatService.blockUserEvent(client, user, data.id);
+                this.chatService.blockUserEvent(client, user, data.id, this.chatRoomHandler);
             }
         })
     }
@@ -293,7 +293,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug(`block event`);
-                this.chatService.unblockUserEvent(client, user, data.id);
+                this.chatService.unblockUserEvent(client, user, data.id, this.chatRoomHandler);
             }
         })
     }
@@ -304,7 +304,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug(`listBlock event`);
-                this.chatService.listBlockEvent(client);
+                this.chatService.listBlockEvent(client, user.id);
             }
         })
     }
