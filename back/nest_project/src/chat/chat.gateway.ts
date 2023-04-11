@@ -98,7 +98,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug('changeLoc event : ');
-                console.log(data, data.loc, data.isChannel);
+                // console.log(data, data.loc, data.isChannel);
                 this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
             }
             else
@@ -145,10 +145,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('inviteUser')
     handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
+        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.inviteUserEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
+                this.chatService.inviteUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

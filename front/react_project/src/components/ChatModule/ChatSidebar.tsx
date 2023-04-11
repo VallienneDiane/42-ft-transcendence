@@ -16,8 +16,7 @@ function ModifyChannel(props: {channel: IChannel}) {
         name: props.channel.name,
         password: props.channel.password,
         channelPass: props.channel.channelPass,
-        inviteOnly: props.channel.inviteOnly,
-        hidden: props.channel.hidden } 
+        inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
 
@@ -32,8 +31,7 @@ function ModifyChannel(props: {channel: IChannel}) {
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            hidden: data.hidden,
+            inviteOnly: data.inviteOnly
         });
     };
 
@@ -58,7 +56,6 @@ function ModifyChannel(props: {channel: IChannel}) {
                 </li>)}
             {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
             <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
-            <li>Hidden<input type="checkbox" {...register("hidden")}/></li>
             <li><button type="submit">Save</button></li>
         </form>
     )
@@ -72,7 +69,6 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
-    const [myGrade, setGrade] = useState<string>("normal");
     const [userToInvit, setUserToInvit] = useState<string>("");
 
     const showMembers = () => {
@@ -132,8 +128,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
-    const inviteUser = () => {
-        socket.emit('inviteUser', userToInvit, props.dest.id);
+    const inviteUser = (event: any) => {
+        event.preventDefault();
+        socket.emit('inviteUser', {userToInvite: userToInvit, channelId: props.dest.id});
+        setUserToInvit("");
     }
 
     const leaveChannel = () => {
@@ -238,7 +236,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </ul>
                 )}
-                {props.dest.channel?.inviteOnly ? (
+                {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
                      <React.Fragment>
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
