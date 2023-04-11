@@ -45,6 +45,7 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 
     getProfilePicture() {
+        console.log(this.props.message.senderId);
         accountService.getAvatar(this.props.message.senderId)
             .then(response => { 
                this.setState({avatar: response.data.user_avatarSvg});

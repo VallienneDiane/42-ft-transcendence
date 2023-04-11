@@ -212,6 +212,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
+        this.logger.debug("OP");
+        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)

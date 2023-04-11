@@ -9,7 +9,6 @@ export class ChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 	readonly normalUsers: UserDto[];
 	readonly opUsers: UserDto[];
 	readonly godUser: UserDto;
