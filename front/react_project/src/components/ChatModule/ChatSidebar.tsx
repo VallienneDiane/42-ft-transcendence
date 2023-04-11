@@ -196,13 +196,19 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                             if (member.user.id !== me.sub) {
                                 if (props.dest.status == "normal")
                                     return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
-                                else if (props.dest.status == "op" && member.status == "normal")
-                                    return (<li key={id}><div>{member.user.login}{iconStatus}</div>
-                                    <div><button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div></li>)
+                                else if (props.dest.status == "op") {
+                                    if (member.status == "normal")
+                                        return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                                                <div><button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div></li>)
+                                    else if (member.status == "op" || member.status == "god")
+                                        return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                                }
                                 else if (props.dest.status == "god")
                                     return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                                     <div>
-                                    { member.status == "op" ? (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) : (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
+                                    { member.status == "op" ? 
+                                    (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) :
+                                    (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
                                     <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div>
                                     </li>)
                             }
