@@ -59,7 +59,6 @@ export class Simple_ball {
         /* check collision with paddle one */
         if (this.x_position - this.r < p1.x_position && Math.sqrt(Math.pow(this.x_position - p1.x_position, 2) + Math.pow(this.y_position - this.closest_point_bw(p1), 2)) <= this.r) {
             
-            console.log("colide p1");
             this.x_position = this.r + p1.x_position;
             this.x_speed = -this.x_speed;
             let ratio = (this.y_position - (p1.y_position + p1.length/2))/(p1.length/2);
@@ -74,7 +73,6 @@ export class Simple_ball {
         /* check collision with paddle two */
         if (this.x_position + this.r > p2.x_position && Math.sqrt(Math.pow(this.x_position - p2.x_position, 2) + Math.pow(this.y_position - this.closest_point_bw(p2), 2)) <= this.r) {
 
-            console.log("colide p2");
             this.x_position = p2.x_position - this.r;
             this.x_speed = -this.x_speed;
             let ratio = (this.y_position - (p2.y_position + p2.length/2))/(p2.length/2);
