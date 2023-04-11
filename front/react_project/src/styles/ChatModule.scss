@@ -461,6 +461,8 @@
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
+					display: flex;
+					flex-direction: row;
 					background: transparent;
 					vertical-align: top;
 					padding: 0.1rem 0;
@@ -491,6 +493,15 @@
 							border-radius: .75rem 0 .75rem .75rem;
 						}
 					}
+				}
+				& .messageBlock {
+					background: transparent;
+				}
+				& #profilePicture {
+					border-radius: 50%;
+					margin-right: 0.5rem;
+					width: 3rem;
+					background: transparent;
 				}
 				& .messageUserName {
 					background: transparent;

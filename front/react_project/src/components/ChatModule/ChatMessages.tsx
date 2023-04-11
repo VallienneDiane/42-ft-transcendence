@@ -7,20 +7,25 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { SocketContext } from "../context";
 
 class MessageDisplay extends React.Component<{message: IMessage, prevSender: string, last: boolean}, {
-    playload: JwtPayload, me: boolean, sameSender: boolean}> {
+    playload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
     constructor(props: {message: IMessage, prevSender: string, last: boolean}) {
         super(props);
         this.state = { playload: accountService.readPayload()!, 
         me: false, 
-        sameSender: false };
+        sameSender: false, 
+        avatar: '' };
         this.setTimeAgo = this.setTimeAgo.bind(this);
+        this.getProfilePicture = this.getProfilePicture.bind(this);
     }
 
     componentDidMount(): void {
+        // console.log("message", this.props.message)
         if (this.props.prevSender === this.props.message.senderName)
             this.setState({ sameSender: true });
         if (this.state.playload.login === this.props.message.senderName)
             this.setState({me: true});
+        if (this.props.prevSender !== this.props.message.senderName && this.state.playload.login !== this.props.message.senderName)
+            this.getProfilePicture();
     }
 
     setTimeAgo() {
@@ -40,19 +45,28 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 
     getProfilePicture() {
-        
+        accountService.getAvatar(this.props.message.senderId)
+            .then(response => { 
+               this.setState({avatar: response.data.user_avatarSvg});
+            })
+            .catch(error => console.log(error));
     }
 
     render() {
-        return (
-            <div className={this.state.me ? "message sent" : "message received"}>
-                {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
-                <div className="bubble">
-                    <div className="messageText">{this.props.message.content}</div>
+        if (this.state.avatar !== "") {
+            return (
+                <div className={this.state.me ? "message sent" : "message received"}>
+                    {(this.state.sameSender === false && this.state.me == false) && <img id="profilePicture" src={this.state.avatar} />}
+                    <div className="messageBlock">
+                        {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
+                        <div className="bubble">
+                            <div className="messageText">{this.props.message.content}</div>
+                        </div>
+                        {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
+                    </div>
                 </div>
-                {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
-            </div>
-        )
+            )
+        }
     }
 }
 
