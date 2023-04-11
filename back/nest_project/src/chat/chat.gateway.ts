@@ -98,8 +98,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug('changeLoc event : ');
+<<<<<<< HEAD
                 // console.log(data, data.loc, data.isChannel);
                 this.chatService.changeLocEvent(client, user, data.loc, data.isChannel, this.chatRoomHandler);
+=======
+                console.log(data, data.loc, data.isChannel);
+                this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
+>>>>>>> e0c1eda0e6c8e86c86d9866832870b9058291b3e
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -218,7 +223,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.makeHimOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
+                this.chatService.makeHimOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
@@ -229,7 +234,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.makeHimNoOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
+                this.chatService.makeHimNoOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
