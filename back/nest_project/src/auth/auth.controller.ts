@@ -50,7 +50,9 @@ export class AuthController {
         messagesReceived: [],
         messagesSend: [],
         requestsSend: [], 
-        requestsReceived: []
+        requestsReceived: [],
+        blockList: [],
+        blockedMeList: []
       };
       console.log("create user42", newUser42, "image ? ", data.image.link);
       await this.userService.create(newUser42);

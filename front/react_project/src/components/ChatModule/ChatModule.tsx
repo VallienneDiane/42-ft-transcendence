@@ -163,7 +163,7 @@ export default class ChatModule extends React.Component<{}, {
     history: IMessage[]}> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {id: '', name: 'general', isChannel: true}, history: []};
+        this.state = {dest: {id: '', name: '', isChannel: true}, history: []};
         this.changeLoc = this.changeLoc.bind(this);
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);

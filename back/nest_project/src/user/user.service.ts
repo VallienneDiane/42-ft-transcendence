@@ -218,4 +218,30 @@ export class UserService {
             .getRawMany();
         return requestsReceived;
     }
+
+    async addUserToBlock(userId: string, userIdToBlock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .add(userIdToBlock);
+    }
+
+    async delUserToBlock(userId: string, userIdToUnblock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .remove(userIdToUnblock);
+    }
+
+    async getBlockList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockList", "blocked")
+            .select("blocked.id", "id")
+            .addSelect("blocked.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
 }

@@ -50,7 +50,7 @@ export class ChatService {
             socketMap.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
-                    roomHandler.joinRoom(userId, socket, '00000000-0000-0000-0000-000000000000', true, false, false);
+                    roomHandler.joinRoom(userId, socket, "00000000-0000-0000-0000-000000000000", true, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
@@ -59,8 +59,8 @@ export class ChatService {
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
-        let newUser = roomHandler.addUser(user.id, client, "general", true, false, false, false);
-        client.emit("changeLocChannel", "general", []);
+        let newUser = roomHandler.addUser(user.id, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
+        this.goBackToGeneral(client);
         if (newUser) {
             chatNamespace.sockets.forEach( (socket) => {
                 socket.emit('userConnected', {userId: user.id, userLogin: user.login});
@@ -85,16 +85,13 @@ export class ChatService {
         if (room != undefined) {
             let toSend: IMessageToSend = {date: new Date(), senderId: user.id, senderName: user.login, content: message};
             if (room.isChannel) {
-                    if (room.room != "general") {
+                    if (room.room != "00000000-0000-0000-0000-000000000000") {
                         logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
                         .then((channId) => {
                             this.messageChannelService.addMessage(user, channId, message);
-                        })
+                        })}
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
-                }
-                else
-                    client.emit('notice', 'only channel operator can talk in this channel');
             }
             else {
                 this.userService.findById(room.room)
@@ -549,4 +546,40 @@ export class ChatService {
             }
         })
     }
+
+    public listBlockEvent(client: Socket) {
+        this.userService.getBlockList(client.id)
+        .then((array) => {
+            client.emit("listBlock", array);
+        })
+    }
+
+    public blockUserEvent(client: Socket, user: UserEntity, userIdToBlock: string) {
+        this.userService.findById(userIdToBlock)
+        .then((found) => {
+            if (found) {
+                this.userService.addUserToBlock(user.id, userIdToBlock)
+                .then(() => {
+                    this.listBlockEvent(client);
+                })
+            }
+            else
+                client.emit("notice", "user not found");
+        })
+    }
+
+    public unblockUserEvent(client: Socket, user: UserEntity, userIdToUnblock: string) {
+        this.userService.findById(userIdToUnblock)
+        .then((found) => {
+            if (found) {
+                this.userService.delUserToBlock(user.id, userIdToUnblock)
+                .then(() => {
+                    this.listBlockEvent(client);
+                })
+            }
+            else
+                client.emit("notice", "user not found");
+        })
+    }
+
 }
