@@ -9,7 +9,6 @@ import SearchChat from "./ChatSearch";
 import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
 
-
 class ChannelDMList extends React.Component<{}, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
     dms: {userName: string, userId: string, connected: boolean}[], 
