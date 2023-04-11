@@ -99,7 +99,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             if (user != null) {
                 this.logger.debug('changeLoc event : ');
                 console.log(data, data.loc, data.isChannel);
-                this.chatService.changeLocEvent(client, user, data.loc, data.isChannel, this.chatRoomHandler);
+                this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -217,7 +217,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.makeHimOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
+                this.chatService.makeHimOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
@@ -228,7 +228,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.makeHimNoOpEvent(client, user.login, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
+                this.chatService.makeHimNoOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

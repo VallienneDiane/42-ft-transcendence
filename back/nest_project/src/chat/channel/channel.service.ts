@@ -170,7 +170,7 @@ export class ChannelService {
 			.createQueryBuilder()
 			.relation(ChannelEntity, "opUsers")
 			.of(channelId)
-			.add(user)
+			.add(user.id)
 	}
 
 	async delNormalUser(userId: string, channelId: string) {
