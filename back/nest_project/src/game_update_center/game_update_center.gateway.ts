@@ -3,7 +3,7 @@
  */
 
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'; // socket event handling stuff
-import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SharePlayersLoginDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
+import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
 import { GameEngineService } from 'src/game_engine/game_engine.service'; // use to acces the gameEngine of the super mode
 import { PongEngineService } from 'src/pong_engine/pong_engine.service'; // use to acces the gameEngine of the classic mode
 import { MatchService } from 'src/match/Match.service'; // use to acces function for the MatchEntity in the gameEngine to store goal
@@ -32,6 +32,14 @@ class Game_Instance {
   game_engine: any;
   players: Socket[];
   spectators: Socket[];
+}
+
+/**
+ * use to share players login at the start of a game
+ */
+class Login_Sharing {
+  player1_login: string;
+  player2_login: string;
 }
 
 /**
@@ -103,7 +111,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
 
     // emit the Player struct to the front to display the player login
-    let players = new SharePlayersLoginDTO();
+    let players = new Login_Sharing();
     players.player1_login = this.socketID_UserEntity.get(player1.id).login;
     players.player2_login = this.socketID_UserEntity.get(player2.id).login;
     this.server.to(player1.id).emit('players', players);
