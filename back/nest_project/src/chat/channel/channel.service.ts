@@ -58,7 +58,7 @@ export class ChannelService {
 		return this.channelRepository.find(
 			{
 				where: {
-					hidden: false,
+					inviteOnly: false,
 				},
 				order: {
 					name: "ASC",
@@ -80,7 +80,7 @@ export class ChannelService {
 		const allChannels = await this.listChannelsWithUsers();
 		let channListToReturn: ChannelEntity[] = [];
 		allChannels.forEach(channel => {
-			if (!channel.hidden
+			if (!channel.inviteOnly
 				&& channel.godUser.id != userId
 				&& channel.opUsers.every((opUser) => {return opUser.id != userId})
 				&& channel.normalUsers.every((normalUser) => {return normalUser.id != userId})
@@ -148,6 +148,7 @@ export class ChannelService {
 	 * returns null if the user don't belong to this channel or if the channel doesn't exists
 	 */
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
+		console.log("getUserInChannel: ", channelId, userId);
 		const usersArray = await this.listUsersInChannel(channelId, false);
 		for (let elt of usersArray) {
 			if (elt.user.id == userId)

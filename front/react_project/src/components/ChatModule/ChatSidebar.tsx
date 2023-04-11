@@ -69,7 +69,6 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
-    const [myGrade, setGrade] = useState<string>("normal");
     const [userToInvit, setUserToInvit] = useState<string>("");
 
     const showMembers = () => {
@@ -95,20 +94,24 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
      
     const kickUser = (e: any) => {
-        console.log(e.target.value, props.dest.id);
-        socket.emit("kickUser", {userToKick: e.target.value, channelId: props.dest.id});
+        console.log(e.currentTarget.value, props.dest.id);
+        socket.emit("kickUser", {userToKick: e.currentTarget.value, channelId: props.dest.id});
     }
     
-    const deOp = () => {
+    const deOp = (e: any) => {
         console.log("deOp!");
+        socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
     }
     
-    const doOp = () => {
+    const doOp = (e: any) => {
         console.log("doOp!");
+        socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
-    const inviteUser = () => {
-        socket.emit('inviteUser', userToInvit, props.dest.id);
+    const inviteUser = (event: any) => {
+        event.preventDefault();
+        socket.emit('inviteUser', {userToInvite: userToInvit, channelId: props.dest.id});
+        setUserToInvit("");
     }
 
     const leaveChannel = () => {
@@ -197,7 +200,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                                 else if (props.dest.status == "god")
                                     return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                                     <div>
-                                    { member.status == "op" ? (<button onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) : (<button onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
+                                    { member.status == "op" ? (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) : (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
                                     <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div>
                                     </li>)
                             }
@@ -207,7 +210,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </ul>
                 )}
-                {props.dest.channel?.inviteOnly ? (
+                {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
                      <React.Fragment>
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
