@@ -101,8 +101,14 @@ export class ChatService {
                 this.userService.findById(room.room)
                 .then((dest) => {
                     this.messagePrivateService.sendPrivateMessage(user, dest, message);
-                })
-                client.emit('selfMessage', toSend);
+                });
+                let senderSockets = roomHandler.userMap.get(user.id);
+                if (senderSockets != undefined) {
+                    senderSockets.sockets.forEach((data, socket) => {
+                        if (!data.isChannel && data.room == room.room)
+                            socket.emit('selfMessage', toSend);
+                    })
+                }
                 let dest = roomHandler.userMap.get(room.room);
                 let connected = dest != undefined;
                 this.userService.findById(room.room)
