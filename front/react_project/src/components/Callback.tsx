@@ -8,15 +8,9 @@ const Callback: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [loading, setLoading] = useState(false);
-    const [ids42, setIds42] = useState<{id42: number}[]>([]);
-
-    useEffect(() => {
-        accountService.getAllIds42()
-        .then(res => {
-            setIds42(res.data);
-        })
-        .catch(error => {});
-    }, [])
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    let newUser:boolean = true;
 
     useEffect(() => {
         setLoading(true);
@@ -25,27 +19,32 @@ const Callback: React.FC = () => {
         }, 5000)
     }, [])
 
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    
     useEffect(() => {
+        let ids42: {id42: number}[];
+        accountService.getAllIds42()
+        .then(res => {
+            ids42 = res.data;
+        })
+        .catch(error => {});
+
         accountService.callback(code!)
         .then(res => {
             for(let i = 0; i < ids42.length; i++) {
-                console.log("i ", i, "ids 42 ", ids42.length, ids42[i]);
-                if(res.data.id == ids42[i].id42) {
-                    navigate("/homeSettings", { state: { id42: res.data.id, login: res.data.login, avatar: res.data.avatarSvg, email: res.data.email } });
-                    return;
+                if(res.data.id42 == ids42[i].id42) {
+                    newUser = false;
                 }
             }
-            console.log("user déjà connu dans la BDD", res.data);
-            accountService.is2faActive(res.data.id42)
+            if(newUser == true) {
+                navigate("/homeSettings", { state: { id42: res.data.id42, login: res.data.login, avatar: res.data.avatarSvg, email: res.data.email } });
+                return;
+            }
+            accountService.is2faActive42(res.data.id42)
             .then(response_2fa => {
                 if(response_2fa.data.is2faActive == true) {
-                    navigate("/verifyCode2fa", { state: { login: res.data.login } });
+                    navigate("/verifyCode2fa", { state: { id42: res.data.id42 } });
                 }
                 else {
-                    accountService.generateToken(res.data.login)
+                    accountService.generateToken42(res.data.id42)
                     .then(res_token => {
                         accountService.saveToken(res_token.data.access_token);
                         const from = (location.state as any)?.from || "/";

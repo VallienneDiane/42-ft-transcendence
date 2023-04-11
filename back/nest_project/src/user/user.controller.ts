@@ -30,7 +30,7 @@ export class UserController {
     async getLogins() {
         return this.userService.findAllLogins();
     }
-    @Post('user/getAllIds42')
+    @Post('user/getAllIds')
     async getIds() {
         return this.userService.findAllIds42();
     }

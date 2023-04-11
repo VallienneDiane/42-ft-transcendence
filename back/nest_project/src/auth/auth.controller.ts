@@ -31,18 +31,11 @@ export class AuthController {
       } 
     });
     const data = await response.json();
-    // const result = ! await this.userService.findById42(data.id)
-    // if(result == true) {
-    //   newUser = true;
-    // }
-    // console.log("result fidnd by 42 ", result);
-    // console.log("new user ", newUser);
     return {
       id42: data.id,
       login: data.login,
       email: data.email,
       avatarSvg: data.image?.link,
-      // newuser: newUser,
     }
   }
 
@@ -63,6 +56,12 @@ export class AuthController {
   @Post('auth/generateToken')
   async generateToken(@Body() data: UserDto) {
     const token = await this.authService.genToken(data.login);
+    return token;
+  }
+
+  @Post('auth/generateToken42')
+  async generateToken42(@Body() data: UserDto) {
+    const token = await this.authService.genToken42(data.id42);
     return token;
   }
   //enable authenticate with two factor (google authenticator)
@@ -99,6 +98,16 @@ export class AuthController {
       isCodeValid,
     }
   }
+  @Post('auth/verifyCode42')
+  async verifyCode2fa42(@Body() data: VerifyCodeDto) {
+    const user = await this.userService.findById42(data.id42);
+    const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
+    const is2faActive = await this.userService.turnOn2fa(user);
+    return {
+      is2faActive,
+      isCodeValid,
+    }
+  }
   //disable two factor authentication
   @UseGuards(JwtAuthGuard)
   @Post('auth/disable2fa')
@@ -121,7 +130,12 @@ export class AuthController {
   async is2faActive(@Body() user: UserDto) {
     const validUser = await this.userService.findByLogin(user.login);
     const is2faActive = validUser.isTwoFactorEnabled;
-    console.log("VALUE DE ISTWOFACTORENABLED ? : ", is2faActive, validUser.isTwoFactorEnabled);
+    return {is2faActive};
+  }
+  @Post('auth/is2faActive42')
+  async is2faActive42(@Body() user: UserDto) {
+    const validUser = await this.userService.findById42(user.id42);
+    const is2faActive = validUser.isTwoFactorEnabled;
     return {is2faActive};
   }
 }

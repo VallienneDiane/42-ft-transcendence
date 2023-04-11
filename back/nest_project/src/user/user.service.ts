@@ -33,6 +33,9 @@ export class UserService {
     public findById(id: number): Promise<UserDto> {
         return this.usersRepository.findOneBy({id});
     }
+    public findById42(id42: number): Promise<UserDto> {
+        return this.usersRepository.findOneBy({id42});
+    }
     // DISPLAY ALL USERS
     async findAll(): Promise<{ id: number, login: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
