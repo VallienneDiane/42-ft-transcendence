@@ -547,20 +547,24 @@ export class ChatService {
         })
     }
 
-    public listBlockEvent(client: Socket) {
-        this.userService.getBlockList(client.id)
+    public listBlockEvent(client: Socket, userId: string) {
+        this.userService.getBlockList(userId)
         .then((array) => {
             client.emit("listBlock", array);
         })
     }
 
-    public blockUserEvent(client: Socket, user: UserEntity, userIdToBlock: string) {
+    public blockUserEvent(client: Socket, user: UserEntity, userIdToBlock: string, roomHandler: UserRoomHandler) {
         this.userService.findById(userIdToBlock)
         .then((found) => {
             if (found) {
                 this.userService.addUserToBlock(user.id, userIdToBlock)
                 .then(() => {
-                    this.listBlockEvent(client);
+                    let sockets = roomHandler.userMap.get(user.id);
+                    if (sockets != undefined)
+                    sockets.sockets.forEach(({}, socket) => {
+                        this.listBlockEvent(socket, user.id);
+                    })
                 })
             }
             else
@@ -568,13 +572,17 @@ export class ChatService {
         })
     }
 
-    public unblockUserEvent(client: Socket, user: UserEntity, userIdToUnblock: string) {
+    public unblockUserEvent(client: Socket, user: UserEntity, userIdToUnblock: string, roomHandler: UserRoomHandler) {
         this.userService.findById(userIdToUnblock)
         .then((found) => {
             if (found) {
                 this.userService.delUserToBlock(user.id, userIdToUnblock)
                 .then(() => {
-                    this.listBlockEvent(client);
+                    let sockets = roomHandler.userMap.get(user.id);
+                    if (sockets != undefined)
+                    sockets.sockets.forEach(({}, socket) => {
+                        this.listBlockEvent(socket, user.id);
+                    })
                 })
             }
             else
