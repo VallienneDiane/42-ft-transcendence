@@ -31,7 +31,6 @@ export class ChatService {
             password: false,
             channelPass: null,
             inviteOnly: false,
-            hidden: false,
             normalUsers: [],
             opUsers: [],
             godUser: undefined,
@@ -132,6 +131,7 @@ export class ChatService {
         else
             client.emit('notice', 'You are nowhere');
     }
+
 
     public changeLocEvent(client: Socket, user: UserEntity, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
@@ -284,10 +284,11 @@ export class ChatService {
         .then((found) => {
             if (found != null) {
                 if (found.status != "normal") {
-                    this.userService.findById(userToInvite)
+                    this.userService.findByLogin(userToInvite)
                     .then((userEntity) => {
+                        console.log(userEntity)
                         if (userEntity != null) {
-                            this.channelService.getUserInChannel(channelId, userToInvite)
+                            this.channelService.getUserInChannel(channelId, userEntity.id)
                             .then(
                                 (alreadyHere) => {
                                     if (alreadyHere == null) {
@@ -296,7 +297,7 @@ export class ChatService {
                                             let room = roomHandler.roomMap.of(channelId);
                                             if (room != undefined)
                                                 room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                            let logged = roomHandler.userMap.get(userToInvite);
+                                            let logged = roomHandler.userMap.get(userEntity.id);
                                             if (logged != undefined) {
                                                 this.channelService.getOneById(channelId)
                                                 .then((channelEntity) => {
@@ -322,10 +323,10 @@ export class ChatService {
                     .then(
                         (chanOpts) => {
                             if (!chanOpts.inviteOnly) {
-                                this.userService.findById(userToInvite)
+                                this.userService.findByLogin(userToInvite)
                                 .then((userEntity) => {
                                     if (userEntity != null) {
-                                        this.channelService.getUserInChannel(channelId, userToInvite)
+                                        this.channelService.getUserInChannel(channelId, userEntity.id)
                                         .then(
                                             (alreadyHere) => {
                                                 if (alreadyHere == null) {
@@ -334,7 +335,7 @@ export class ChatService {
                                                         let room = roomHandler.roomMap.of(channelId);
                                                         if (room != undefined)
                                                             room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                                        let logged = roomHandler.userMap.get(userToInvite);
+                                                        let logged = roomHandler.userMap.get(userEntity.id);
                                                         if (logged != undefined) {
                                                             let channelToEmit: IChannelToEmit = chanOpts;
                                                             logged.sockets.forEach(({}, socket) => {
@@ -379,6 +380,7 @@ export class ChatService {
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
+                console.log(link);
                 if (!link || link.status != "god") {
                     client.emit("notice", "You cannot.");
                 }
@@ -386,6 +388,7 @@ export class ChatService {
                     this.channelService.getUserInChannel(channelId, userToOp)
                     .then(
                         (linkToOp) => {
+                            console.log(linkToOp);
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
                             else if (linkToOp.status != "normal")
@@ -394,6 +397,12 @@ export class ChatService {
                                 this.channelService.upgradeUserOnChannel(linkToOp.user, channelId)
                                 .then(() => {
                                     roomHandler.userMap.userBecomeOp(userToOp, channelId);
+                                    let room = roomHandler.roomMap.of(channelId);
+                                    if (room != undefined) {
+                                        room.c.forEach(socket => {
+                                            this.listUsersInChannel(socket, channelId, roomHandler);
+                                        })
+                                    }
                                 })
                             }
                         });
@@ -418,6 +427,12 @@ export class ChatService {
                             else {
                                 this.channelService.downgradeUserOnChannel(linkToDeOp.user, channelId);
                                 roomHandler.userMap.userBecomeNoOp(userToNoOp, channelId);
+                                let room = roomHandler.roomMap.of(channelId);
+                                    if (room != undefined) {
+                                        room.c.forEach(socket => {
+                                            this.listUsersInChannel(socket, channelId, roomHandler);
+                                        })
+                                    }
                             }
                         });
             });
@@ -463,7 +478,6 @@ export class ChatService {
                             password: channel.password,
                             channelPass: channel.channelPass,
                             inviteOnly: channel.inviteOnly,
-                            hidden: channel.hidden,
                             messages: [],
                             normalUsers: [],
                             opUsers: [],
@@ -472,7 +486,7 @@ export class ChatService {
                         this.channelService.create(newChannel)
                         .then(
                             (succeed) => {
-                                if (!succeed.hidden)
+                                if (!succeed.inviteOnly)
                                 {
                                     roomHandler.socketMap.sockets.forEach(
                                         (data, socket) => {

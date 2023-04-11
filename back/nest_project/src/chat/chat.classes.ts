@@ -222,7 +222,6 @@ export class UserRoomHandler {
             password: false,
             channelPass: null,
             inviteOnly: false,
-            hidden: false,
             normalUsers: [],
             opUsers: [],
             godUser: undefined,

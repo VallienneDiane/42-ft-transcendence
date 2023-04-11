@@ -22,9 +22,6 @@ export class ChannelEntity {
 	@Column()
 	inviteOnly: boolean;
 
-	@Column()
-	hidden: boolean;
-
 	@ManyToMany(() => UserEntity, (user) => user.channelsAsNormal)
 	@JoinTable()
 	normalUsers: UserEntity[];
