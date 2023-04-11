@@ -45,18 +45,21 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 
     getProfilePicture() {
-        accountService.getAvatar(this.props.message.senderId)
-            .then(response => { 
-               this.setState({avatar: response.data.user_avatarSvg});
-            })
-            .catch(error => console.log(error));
+        if (this.props.message.senderName !== "WARNING") {
+            accountService.getAvatar(this.props.message.senderId!)
+                .then(response => { 
+                   this.setState({avatar: response.data.user_avatarSvg});
+                })
+                .catch(error => console.log(error));
+        }
     }
 
     render() {
-        if (this.state.avatar !== "") {
             return (
                 <div className={this.state.me ? "message sent" : "message received"}>
-                    {(this.state.sameSender === false && this.state.me == false) && <img id="profilePicture" src={this.state.avatar} />}
+                    {(this.state.me == false) && <div className="avatar">
+                        {(this.state.sameSender === false) && <img id="profilePicture" src={this.state.avatar} />}
+                        </div>}
                     <div className="messageBlock">
                         {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
                         <div className="bubble">
@@ -66,7 +69,6 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
                     </div>
                 </div>
             )
-        }
     }
 }
 
