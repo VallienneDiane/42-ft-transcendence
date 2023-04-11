@@ -1,3 +1,7 @@
+
+/**
+ * a 2D basic vector class
+ */
 export class Vec2 {
 
 	public x: number;

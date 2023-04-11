@@ -1,13 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Ball } from './Ball';
-import { Vec2 } from './match/Vec2';
+import { Vec2 } from './math/Vec2';
 import { Wall } from './Wall';
-import { Collision } from './match/Collision';
+import { Collision } from './math/Collision';
 import { Socket } from 'socket.io';
 import { UserService } from 'src/user/user.service';
 import { MatchService } from 'src/match/Match.service';
 import { CreateMatchDto } from 'src/match/CreateMatch.dto';
 import { UserEntity } from 'src/user/user.entity';
+import { GameInputDTO } from 'src/game_update_center/game_update_center.dto';
 
 /**
  * use to store info on a ball
@@ -30,10 +31,12 @@ interface gameState {
 @Injectable()
 export class GameEngineService {
 
+	// game contente
 	gs: gameState;
 	ballz: Ball[];
 	wallz: Wall[];
 
+	// player related data
 	pl1: Socket;
 	pl2: Socket;
 	userid1: UserEntity;
@@ -44,6 +47,7 @@ export class GameEngineService {
 	pl2_score: number;
 	victory_condition: string;
 
+	// game related data
 	aspect_ratio = 16/9;
     cooldown = 180; // cooldown between ball respawn
     cooldown_start;
@@ -100,42 +104,51 @@ export class GameEngineService {
 	}
 
 	/**
-	 * set who is gonna play the game
-	 * @param player1 se
+	 * set how's gonna play the game
+	 * @param player1 
 	 * @param player2 
+	 * @param userid1 player1 data
+	 * @param userid2 player2 data
 	 */
 	set_player (player1: Socket, player2: Socket, userid1: UserEntity, userid2: UserEntity) {
 		this.userid1 = userid1;
 		this.userid2 = userid2;
-		console.log("first : ",userid1, "\n\nsecond :", userid2);
+		console.log("first : ", userid1, "\n\nsecond :", userid2);
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
 
 	/**
 	 * tell the correct wall to process the input of the client
-	 * @param client the client sendin the input
-	 * @param key the input in string format
+	 * @param client the client sending the input
+	 * @param key the input in a GameInputDTO format
 	 */
-	process_input (client: Socket, key: string) {
+	process_input (client: Socket, input: GameInputDTO) {
 		if (client === this.pl1) {
-			this.wallz[0].process_input(key);
+			this.wallz[0].process_input(input);
 		}
 		else {
-			this.wallz[1].process_input(key);
+			this.wallz[1].process_input(input);
 		}
 	}
 
 	/**
-	 * tell the game to stop
+	 * tell the game to stop do to a disconnection and set the disconnected player to be the loser of the match
 	 */
-	stop_game() {
+	stop_game(player_leaving: Socket) {
+		if (player_leaving === this.pl1) {
+			this.pl1_score = -1;
+		}
+		else {
+			this.pl2_score = -1;
+		}
 		this.game_must_stop = true;
+		this.close_the_game();
 	}
 
 	/**
-	 * set the readyness of the playerm if both are ready then the game start
-	 * @param player the player sendin the ready signal
+	 * set the readyness of the playerm if both are ready then the game start and the function start emiting Game_Update
+	 * @param player the player sending the ready signal
 	 * @param server use to emit to the correct room
 	 */
 	async set_player_ready (player: Socket, server: any) {
@@ -161,31 +174,20 @@ export class GameEngineService {
         }
 	}
 
-	max(n1: number, n2: number): number {
-		if (n1 >= n2) {
-			return n1;
-		}
-		return n2;
-	}
-
-	min(n1: number, n2: number): number {
-		if (n1 < n2) {
-			return n1;
-		}
-		return n2;
-	}
-
+	/**
+	 * save the players score in the data base
+	 */
 	async close_the_game() {
 		console.log("entering close_the_game");
 		let match: CreateMatchDto = new CreateMatchDto();
-		match.score_winner = this.max(this.pl1_score, this.pl2_score);
-		match.score_loser = this.min(this.pl1_score, this.pl2_score);
+		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
+		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
 		match.loser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
-		console.log("the match to be register should be :", match);
+		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
 		let result = await this.matchservice.findMatch();
-		console.log("the score should be save", result);
+		console.log("the score should be save and the match history is :", result);
 	}
 
 	main_loop() {
@@ -194,7 +196,7 @@ export class GameEngineService {
 		// check if a ball is dead
 		if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
 			return;
-		if (this.ballz[0].alive === false || this.ballz[1].alive === false) { // respawn a ball if there was a goal TODO register goal
+		if (this.ballz[0].alive === false || this.ballz[1].alive === false) { // respawn a ball if there was a goal
             // spwan and set the new balls
 			let small_ball = new Ball(new Vec2(0.5 * this.aspect_ratio, 0.35), 0.04);
 			this.set_ball_random_start(small_ball);
@@ -203,6 +205,7 @@ export class GameEngineService {
 			this.ballz[1] = big_ball;
 			this.wallz[0].reset_self_y_position();
 			this.wallz[1].reset_self_y_position();
+			// fill the gamestate
 			this.ballz.forEach((ball, index) => {
 				let bp: ballpos;
 				bp = {
@@ -233,12 +236,14 @@ export class GameEngineService {
 		this.ballz.forEach((ball, index) => {
 			// update the ball position
 			let r = ball.update_self_position();
+			// check for goal
 			if (r === 1) {
 				this.pl1_score++;
 			}
 			else if (r === 2) {
 				this.pl2_score++;
 			}
+			// if end of game save score and quit
 			if (this.pl1_score > 4 || this.pl2_score > 4) {
 				this.game_must_stop = true;
 				this.close_the_game();

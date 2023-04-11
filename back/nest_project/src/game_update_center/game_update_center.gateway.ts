@@ -239,7 +239,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const player = game.players[j];
         if (player === client) {
           this.server.to(game.players[0].id).emit('player_disconnection', this.socketID_UserEntity.get(player.id).login);
-          game.game_engine.stop_game();
+          game.game_engine.stop_game(client);
           this.game_instance.splice(i, 1);
           console.log("leaving find_and_remove function having found a player and stoping the ongoing game");
           return;

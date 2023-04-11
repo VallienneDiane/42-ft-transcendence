@@ -6,8 +6,8 @@ import { UserEntity } from 'src/user/user.entity';
 import { CreateMatchDto } from 'src/match/CreateMatch.dto';
 import { MatchService } from 'src/match/Match.service';
 import { UserService } from 'src/user/user.service';
+import { GameInputDTO } from 'src/game_update_center/game_update_center.dto';
 
-// TODO replace all interface with dto and validation
 interface ballpos {
 	x: number,
 	y: number,
@@ -23,11 +23,13 @@ interface gameState {
 @Injectable()
 export class PongEngineService {
 
+    // gamestat related
     gs: gameState;
     ball: Simple_ball;
     p1: Simple_paddle;
     p2: Simple_paddle;
 
+    // player related
     pl1: Socket;
     pl2: Socket;
     user1: UserEntity;
@@ -38,6 +40,7 @@ export class PongEngineService {
     pl2_score: number;
     victory_condition: string;
 
+    // game related
     aspect_ratio = 16/9;
     cooldown = 180; // cooldown between ball respawn
     cooldown_start;
@@ -47,10 +50,12 @@ export class PongEngineService {
     matchservice;
 
     constructor (userservice: UserService, matchservice: MatchService) {
+        // creating game object
         this.ball = new Simple_ball();
         this.p1 = new Simple_paddle();
         this.p2 = new Simple_paddle();
 
+        // initialazing player stuff
         this.pl1_ready = false;
         this.pl2_ready = false;
         this.game_must_stop = false;
@@ -59,76 +64,73 @@ export class PongEngineService {
         this.userservice = userservice;
         this.matchservice = matchservice;
 
+        // initialyzing game stuff
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
         this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
-        console.log("from pong engine service ;y player are :" + this.pl1 + "and" + this.pl2);
+        console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
     }
 
     /**
-     * set who are the two socket the input must be taken into acount
+     * set the player for the game instance
      * @param player1 
      * @param player2 
+     * @param user_entity1 player 1 data
+     * @param user_entity2 player 2 data
      */
     set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity) {
         this.pl1 = player1;
         this.pl2 = player2;
         this.user1 = user_entity1;
         this.user2 = user_entity2;
-        console.log("2 player has been set the match can start player 1 :" + this.pl1.id + "player 2 :" + this.pl2.id);
+        console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
     }
     
     /**
      * self explenatory
      * @param client the client doing the key pressing
-     * @param key the key pressed
+     * @param input the key pressed in a GameInputDTO format
      */
-    process_input (client: Socket, key: any) {
-        console.log("key received" + key);
+    process_input (client: Socket, input: GameInputDTO) {
+        console.log("key received", input);
         if (client === this.pl1) {
-            this.p1.process_input(key);
+            this.p1.process_input(input);
         }
         else {
-            this.p2.process_input(key);
+            this.p2.process_input(input);
         }
     }
 
-    stop_game() {
-        this.game_must_stop = true;
+    stop_game(player_leaving: Socket) {
+        if (player_leaving === this.pl1) {
+			this.pl1_score = -1;
+		}
+		else {
+			this.pl2_score = -1;
+		}
+		this.game_must_stop = true;
+		this.close_the_game();
     }
-
-    max(n1: number, n2: number): number {
-		if (n1 >= n2) {
-			return n1;
-		}
-		return n2;
-	}
-
-	min(n1: number, n2: number): number {
-		if (n1 < n2) {
-			return n1;
-		}
-		return n2;
-	}
 
 	async close_the_game() {
 		console.log("entering close_the_game");
 		let match: CreateMatchDto = new CreateMatchDto();
-		match.score_winner = this.max(this.pl1_score, this.pl2_score);
-		match.score_loser = this.min(this.pl1_score, this.pl2_score);
+		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
+		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-		console.log("the match to be register should be :", match);
+		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
 		let result = await this.matchservice.findMatch();
-		console.log("the score should be save", result);
+		console.log("the score should be save and the match history is :", result);
 	}
 
     /**
-     * check if both player are ready and start the game loop
-     * @param player the socket of the ready player
+     * set the player ready
+     * @param player the player clicking ready
+     * @param server the server to emit to the room
      */
     set_player_ready(player: Socket, server: any) {
         if (player === this.pl1) {
@@ -169,8 +171,12 @@ export class PongEngineService {
             this.cooldown_start = 0;
             return;
         }
+
+        // update paddle position
         this.p1.update_self_position();
         this.p2.update_self_position();
+
+        // update ball position and check if there was a goal
         let r = this.ball.update_self_position(this.p1, this.p2);
         if (r === 1) {
             this.pl1_score++;
@@ -178,12 +184,14 @@ export class PongEngineService {
         else if (r === 2) {
             this.pl2_score++;
         }
-        if (this.pl1_score > 4 || this.pl2_score > 4) {
+        if (this.pl1_score > 4 || this.pl2_score > 4) { // if end of match then save the score and close the game
             this.game_must_stop = true;
             this.close_the_game();
             console.log("past close_game");
             return;
         }
+
+        // fill the game state
         this.gs.ballPosition = [{
             x: this.ball.x_position,
             y: this.ball.y_position,

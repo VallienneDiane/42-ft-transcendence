@@ -1,4 +1,4 @@
-import { Vec2 } from "./match/Vec2";
+import { Vec2 } from "./math/Vec2";
 
 export class Ball {
 
@@ -28,13 +28,17 @@ export class Ball {
 			this.inv_mass = 1 / this.mass;
 	}
 
+	/**
+	 * update the ball position and check if the ball is out of the screen, if so return a code
+	 * @returns 2 if the ball escapte to the left of the screen, 1 if rigth, 0 if no goal
+	 */
 	update_self_position(): number {
 		this.position = this.position.add(this.speed);
 		if (this.position.x - this.r < 0) {
 			this.alive = false;
             return 2;
 		}
-		else if (this.position.x + this.r > this.aspect_ratio) { //TODO register the goal
+		else if (this.position.x + this.r > this.aspect_ratio) {
             this.alive = false;
             return 1;
         }
