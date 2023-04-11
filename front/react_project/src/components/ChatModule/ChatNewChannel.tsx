@@ -10,8 +10,7 @@ function Popup(props: {handleClose: any}) {
         name: "",
         password: false,
         channelPass: "",
-        inviteOnly: false,
-        hidden: false } 
+        inviteOnly: false } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
     const [isPassword, setIsPassword] = useState<boolean>(false);
@@ -61,8 +60,7 @@ function Popup(props: {handleClose: any}) {
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            hidden: data.hidden,
+            inviteOnly: data.inviteOnly
         });
         props.handleClose();
     };
@@ -98,10 +96,6 @@ function Popup(props: {handleClose: any}) {
                         />
                     )}
                     {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
-                <section>
-                    <input type="checkbox" {...register("hidden")}/>
-                    <label className="labelName">Hidden</label>
-                </section>
                 <button className="button" type="submit">Create</button>
             </form>
         </div>
