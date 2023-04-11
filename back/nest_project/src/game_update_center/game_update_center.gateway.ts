@@ -192,49 +192,59 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   
   /**
    * find and remove the disconnected client from relevante struc,
-   * stop the current match if necessary, and remove the client from known loggin
+   * stop the current match if necessary, and remove the client from known socket
    * @param client the client disconnected
    */
   handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
-    this.logger.log('client Disconnected: ' + client.id);
+    this.logger.log('client Disconnected: ', client.id);
     this.find_and_remove(client);
-    this.socketID_UserEntity.delete(client.id);
+    if (this.socketID_UserEntity.delete(client.id) === false) {
+      this.logger.debug("Critical logic error, trying to removed a client that doesn't exist");
+    }
   }
 
   /**
-   * 
-   * @param client find the client and do the necessary clean-up
+   * find and remove the client from the correct struct, stopping the game if needed
+   * @param client the client who got disconnected
    * @returns 
   */
   find_and_remove(@ConnectedSocket() client: Socket) {
-    
-    // if the client is in a game
+    console.log("entering find_and_remove function");
+
+    // check if the client is in a ongoing game
     for (let i = 0; i < this.game_instance.length; i++) {
       const game = this.game_instance[i];
-      for (let j = 0; j < game.spectator.length; j++) {
-        const spec = game.spectator[j];
+
+      // if the client is a spectator
+      for (let j = 0; j < game.spectators.length; j++) { // TODO update the room if nessessary
+        const spec = game.spectators[j];
         if (client === spec) {
-          this.server.to(game.player[0].id).emit('spectateur disconnected');
-          game.spectator.splice(j, 1);
+          this.server.to(game.players[0].id).emit('spectator_disconnection');
+          game.spectators.splice(j, 1);
+          console.log("leaving find_and_remove function finding a spectator to be removed");
           return;
         }
       }
-      for (let j = 0; j < game.player.length; j++) {
-        const player = game.player[j];
+
+      // if the client is a player
+      for (let j = 0; j < game.players.length; j++) {
+        const player = game.players[j];
         if (player === client) {
-          this.server.to(game.player[0].id).emit('player_disconnection', this.socketID_UserEntity.get(player.id).login);
+          this.server.to(game.players[0].id).emit('player_disconnection', this.socketID_UserEntity.get(player.id).login);
           game.game_engine.stop_game();
           this.game_instance.splice(i, 1);
+          console.log("leaving find_and_remove function having found a player and stoping the ongoing game");
           return;
         }
       }
     }
     
-    // if the client was in pong_public_space
+    // if the client was in public_space
     for (let i = 0; i < this.public_space.length; i++) {
       const ws = this.public_space[i];
       if (ws.waiting_client_socket === client) {
         this.public_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in public_space");
         return;
       }
     }
@@ -244,44 +254,60 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       const ws = this.private_space[i];
       if (ws.waiting_client_socket === client) {
         this.private_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in private_space");
         return;
       }
     }
+
+    console.log("leaving find_and_remove function");
   }
   
   /**
-   * handle invitation to a pong/game game
-   * @param body of private_order type containing a target: string and a type: string
+   * handle private invitation
+   * @param body a PrivateGameRequestDTO containing a non empty target string and a super_game_mode boolean
    * @param client the client posting the request
    * @returns nothing
    */
   @SubscribeMessage('private matchmaking')
   handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
+    console.log("entering handlePrivateMatching function");
+
+    // check the existing waiting socket to find a potential match
     for (let i = 0; i < this.private_space.length; i++) {
       const private_waiting_socket = this.private_space[i];
+      // catch the same socket from playing with himself
       if (private_waiting_socket.waiting_client_socket === client) {
         this.logger.debug("socketID : ", private_waiting_socket.waiting_client_socket.id, "was already waiting");
         return;
       }
-      if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
+      // if match
+      else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
+        // creat the game instance
         this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
+
+        // remove the waiting socket from the waiting space
         this.private_space.splice(i, 1);
+        console.log("leaving handlePrivateMatching function");
         return;
       }
     }
+
+    // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
     let private_room = new Waiting_Socket();
     private_room.waiting_client_socket = client;
     private_room.target_client_login = body.target;
     private_room.super_game_mode = body.super_game_mode;
-    this.logger.debug("resulting in this object: game: ", private_room.super_game_mode, "\n", private_room.waiting_client_socket.id,"\n", private_room.target_client_login);
+    this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
     this.private_space.push(private_room);
+
+    console.log("leaving handlePrivateMatching function");
   }
 
   /**
    * process the input if the client is a player
-   * @param body the input of the client
+   * @param body the input of the client containg one non empty string
    * @param client the client
   */
   @SubscribeMessage('Game_Input')
@@ -289,8 +315,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // if the client is in game
     for (let i = 0; i < this.game_instance.length; i++) {
       const game = this.game_instance[i];
-      for (let j = 0; j < game.player.length; j++) {
-        const player = game.player[j];
+      for (let j = 0; j < game.players.length; j++) {
+        const player = game.players[j];
         if (player === client) {
           this.logger.debug("client.id : ", client.id, "inputed", body.input);
           game.game_engine.process_input(client, body.input);
@@ -300,6 +326,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
+  /**
+   * nicolas' function
+   * @param client 
+   * @returns 
+   */
   private extractUserId(client: Socket): string {
     let token = client.handshake.auth['token'];
     if (token != null) {
@@ -323,9 +354,21 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     return id;
   }
 
+  /**
+   * nicolas' function
+   * @param client 
+   * @returns 
+   */
   private tokenChecker(client: Socket): Promise<UserEntity> {
     let id = this.extractUserId(client);
     // this.logger.debug(`${id}`)
     return this.userservice.findById(id);    
+  }
+
+  /**
+   * just loging the initialization of the module
+   */
+  afterInit() {
+    this.logger.debug("GameupdateCenter correctly initialized");
   }
 }
