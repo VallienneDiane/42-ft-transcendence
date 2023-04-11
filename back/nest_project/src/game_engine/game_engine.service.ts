@@ -86,7 +86,7 @@ export class GameEngineService {
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
-		console.log("from game engine service player are :" + this.pl1 + "and" + this.pl2);
+		console.log("from game engine service player are :", this.pl1, "and", this.pl2);
 
 	}
 
@@ -107,6 +107,7 @@ export class GameEngineService {
 	set_player (player1: Socket, player2: Socket, userid1: UserEntity, userid2: UserEntity) {
 		this.userid1 = userid1;
 		this.userid2 = userid2;
+		console.log("first : ",userid1, "\n\nsecond :", userid2);
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
@@ -177,7 +178,6 @@ export class GameEngineService {
 	async close_the_game() {
 		console.log("entering close_the_game");
 		let match: CreateMatchDto = new CreateMatchDto();
-		console.log("heu :" + this.max(this.pl1_score, this.pl2_score));
 		match.score_winner = this.max(this.pl1_score, this.pl2_score);
 		match.score_loser = this.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
