@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { UserEntity } from "src/user/user.entity";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
 
@@ -39,8 +39,6 @@ export class ChannelEntity {
 	bannedUsers: UserEntity[];
 
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
-		cascade: true,
-		onDelete: "CASCADE",
 	})
 	messages: MessageChannelEntity[];
 
