@@ -13,6 +13,7 @@ import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { channel } from "diagnostics_channel";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
+import { FriendService } from "./relation/friend/friend.service";
 
 @Injectable({})
 export class ChatService {
@@ -20,7 +21,8 @@ export class ChatService {
         private messageChannelService: MessageChannelService,
         private messagePrivateService: MessagePrivateService,
         private channelService: ChannelService,
-        private userService: UserService
+        private userService: UserService,
+        private friendService: FriendService
     ) {}
 
     private goBackToGeneral(client: Socket) {
@@ -547,6 +549,34 @@ export class ChatService {
                     roomHandler.roomKill(channelId);
                 })
             }
+        })
+    }
+
+    public friendRequestEvent(client: Socket, senderId: string, receiverId: string, roomHandler: UserRoomHandler) {
+        this.friendService.checkRequest(senderId, receiverId)
+        .then((check: boolean) => {
+            if (check) {
+                this.userService.findById(senderId)
+                .then((sender: UserEntity) => {
+                    this.userService.findById(receiverId)
+                    .then((receiver: UserEntity) => {
+                        this.friendService.create(sender, receiver)
+                        .then(() => {
+                            let senderSockets = roomHandler.userMap.get(sender.id);
+                            if (senderSockets != undefined) {
+                                senderSockets.emit("notice", "Your request has been sent.");
+                                senderSockets.emit("newFriendRequestSent", receiver);
+                            }
+                            // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
+                            let receiverSockets = roomHandler.userMap.get(receiver.id);
+                            if (receiverSockets != undefined)
+                                receiverSockets.emit("newFriendRequestReceived", sender);
+                        })
+                    })
+                })
+            }
+            else 
+                client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
         })
     }
 }

@@ -1,7 +1,7 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
 import { Server, Socket, Namespace } from 'socket.io';
 import { Logger, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
-import { IChannelToEmit, IMessageChat, IToken } from "./chat.interface";
+import { IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
 import { ChatService } from "./chat.service";
 import { UserRoomHandler } from "./chat.classes";
@@ -9,7 +9,7 @@ import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
 import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
-import { addFriendDto } from "./relation/friend/friend.dto";
+import { friendDto } from "./relation/friend/friend.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -22,8 +22,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     constructor(
         private chatService: ChatService,
         private userService: UserService,
-        private jwtService: JwtService
-    ) 
+        private jwtService: JwtService ) 
     {}
 
     private extractUserId(client: Socket): string {
@@ -98,13 +97,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null) {
                 this.logger.debug('changeLoc event : ');
-<<<<<<< HEAD
-                // console.log(data, data.loc, data.isChannel);
-                this.chatService.changeLocEvent(client, user, data.loc, data.isChannel, this.chatRoomHandler);
-=======
-                console.log(data, data.loc, data.isChannel);
                 this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
->>>>>>> e0c1eda0e6c8e86c86d9866832870b9058291b3e
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -271,13 +264,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('friendRequest')
-    handleFriendRequest(@MessageBody() data: addFriendDto, @ConnectedSocket() client: Socket) {
+    handleFriendRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`${user.id} : listMyDMs`)
-                this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
+        .then((sender) => {
+            if (sender != null) {
+                this.chatService.friendRequestEvent(client, sender.id, data.userId, this.chatRoomHandler);
             }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
         })
     }
 
