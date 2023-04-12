@@ -211,7 +211,7 @@ export class ChannelService {
 		return await this.channelRepository
 			.createQueryBuilder("channel")
 			.innerJoinAndSelect("channel.bannedUsers", "banned")
-			.where("channed.id = :id", { id: channelId })
+			.where("channel.id = :id", { id: channelId })
 			.select("banned.id", "id")
 			.getRawMany();
 	}

@@ -39,7 +39,8 @@ export class ChannelEntity {
 	bannedUsers: UserEntity[];
 
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
-		eager: true,
+		cascade: true,
+		onDelete: "CASCADE",
 	})
 	messages: MessageChannelEntity[];
 
