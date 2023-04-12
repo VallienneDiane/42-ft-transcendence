@@ -71,10 +71,10 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 }
 
-export class MessageList extends React.Component<{history: IMessage[], handleHistory: any}, {usersBlocked: {id: string, name: string}[], block: boolean}> {
+export class MessageList extends React.Component<{history: IMessage[], handleHistory: any}, {usersBlocked: {id: string, name: string}[]}> {
     constructor(props: {history: IMessage[], handleHistory: any}) {
         super(props);
-        this.state = {usersBlocked: [], block: false};
+        this.state = {usersBlocked: []};
         this.checkBlock = this.checkBlock.bind(this);
     }
     static contextType = SocketContext;
@@ -106,18 +106,20 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     }
 
     checkBlock(senderName: string) {
-        console.log(senderName)
+        let block: boolean = false;
         for (let elt of this.state.usersBlocked) {
-            if (elt.name === senderName)
-                this.setState({block: true})
+            if (elt.name == senderName) {
+                block = true;
+            }
         }
+        return block;
     }
 
     render() {
         const tmpList: IMessage[] = this.props.history!;
-        const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
-            // this.checkBlock(message.senderName);
-            // if (this.state.block === false) {
+        let listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
+            const block = this.checkBlock(message.senderName);
+            if (block === false) {
                 const length: number = tmpList.length;
                 const prevSender: string = index < (length - 1) ? tmpList[index + 1].senderName! : '';
                 let lastMessage : boolean = false;
@@ -125,7 +127,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
                     lastMessage = true;
                 const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
                 acc.push(messageDisplay);
-            // }
+            }
             return acc;
         }, []);
 
