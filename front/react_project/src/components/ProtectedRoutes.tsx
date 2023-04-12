@@ -11,6 +11,7 @@ const ProtectedRoutes = () => {
     useEffect(() => {
         if (token !== null && socket === null) {
             createSocket();
+            console.log("hellllloooooo")
         }
     })
         
