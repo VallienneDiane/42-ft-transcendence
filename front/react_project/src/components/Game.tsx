@@ -37,7 +37,9 @@ const Game: React.FC = () => {
     const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
     const [waitMatch, setWaitMatch] = useState<boolean>(false); // A init à false
     const [matchInProgress, setMatchInProgress] = useState<boolean>(false); // A init à false
-    const [ready, setReady] = useState<boolean>(false); // A init à false
+    const [buttonReady, setButtonReady] = useState<boolean>(false); // A init à false
+    const [playerReady, setPlayerReady] = useState<boolean>(false);
+    let ready: boolean = false;
     const [timer, setTimer] = useState<boolean>(false); // A init à false
     const [countdown, setCountdown] = useState<number | string>(3);
     const countDownDiv = useRef<HTMLElement>(null);
@@ -58,7 +60,7 @@ const Game: React.FC = () => {
         // setTimer(true); ////////////// TO DELETE
         // countDownDiv.current!.classList.add('zoom')
 
-        if (socket !== null) {
+        if (socket !== null && !matchInProgress) {
             socket.emit('public matchmaking', "classic");
              setWaitMatch(true);
         }
@@ -66,7 +68,7 @@ const Game: React.FC = () => {
     
     const launchGame = () => {
         // On click on 'start' button, start the game
-        if (socket !== null) {
+        if (socket !== null && !matchInProgress) {
             socket.emit('public matchmaking', "game");
             setWaitMatch(true);
         }
@@ -77,6 +79,7 @@ const Game: React.FC = () => {
         if (socket !== null) {
             socket.emit('ready');
         }
+        setPlayerReady(true);
     }
 
 
@@ -95,15 +98,10 @@ const Game: React.FC = () => {
 
     // countdown handler
     useEffect(() => {
-        let intervalId: NodeJS.Timeout;
-        if (timer === true) {
+        if (timer === true && countDownDiv.current !== undefined) {
+            let intervalId: NodeJS.Timeout;
             intervalId = setInterval(() => {
                 countDownDiv.current!.classList.add('zoom')
-                setTimeout(() => {
-                    if (countDownDiv.current) {
-                        countDownDiv.current!.classList.remove('zoom')
-                    }
-                }, 1000);
                 if (countdown === "GO !") {
                     setTimer(false);
                 }
@@ -113,11 +111,11 @@ const Game: React.FC = () => {
                         setCountdown("GO !");
                     }
                 }
-            }, 1000)
+            }, 800)
+            return () => {
+                clearInterval(intervalId);
+            };
         }
-        return () => {
-            clearInterval(intervalId);
-        };
     }, [timer, countdown])
 
     useEffect(() => {
@@ -128,9 +126,11 @@ const Game: React.FC = () => {
             });
 
             socket.on('players', (players: Players) => {
+                console.log("Players : ", players);
                 setWaitMatch(false);
                 setMatchInProgress(true);
-                setReady(true);
+                setButtonReady(true);
+                ready = true;
                 setPlayers(players);
             })
 
@@ -139,11 +139,11 @@ const Game: React.FC = () => {
             // })
 
             socket.on('Game_Update', (gameState: gameState) => {
-                console.log(gameState);
                 if (ready === true) {
                     setTimer(true);
                 }
-                setReady(false);
+                setButtonReady(false);
+                ready = false;
                 setGameState(gameState);
                 setGameState((prevState) => ({
                     ...prevState,
@@ -161,7 +161,6 @@ const Game: React.FC = () => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
-        console.log('Keydown', event.key);
         if (event.key === "ArrowUp") {
             if (inputState.up === false) {
                 socket.emit('Game_Input', "ArrowUp");
@@ -186,7 +185,6 @@ const Game: React.FC = () => {
     
     const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
-        console.log('Keyup', event.key);
         if (event.key === "ArrowUp") {
             if (inputState.up === true) {
                 socket.emit('Game_Input', "ArrowUp");
@@ -241,20 +239,28 @@ const Game: React.FC = () => {
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-            <h1>Game Page</h1>
-            <MatchsInProgress socket={socket}/>
+            {/* <h1>Game Page</h1> */}
+            {/* <MatchsInProgress socket={socket}/> */}
             <div id="gamePanel">
                 {matchInProgress ? <div>{players?.login1} VS {players?.login2}</div> : null}
                 <div id="gameField">
-                    {/* {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null} */}
-                    {ready ? <button id="readyButton" onClick={informReady}>READY ?</button> : null}
+                    {matchInProgress || waitMatch ?
+                    null
+                    :
+                    <div id="gameSelector">
+                        <h2>Select your game</h2>
+                        <div id="gameButtons">
+                            <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
+                            <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
+                        </div>
+                    </div>
+                    
+                    }
+                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                    {buttonReady ? <button id="readyButton" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                     {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
                 </div>
-            </div>
-            <div id="gameButtons">
-                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`}onClick={launchClassic}>CLASSIC</button>
-                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`}onClick={launchGame}>SUPER</button>
             </div>
         </div>
     )
