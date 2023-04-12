@@ -9,7 +9,7 @@ import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
 import { friendDto } from "./relation/friend/friend.dto";
-import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, unbanUserDto } from "./chat.gateway.dto";
+import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, muteUserDto, unbanUserDto, unmuteUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -377,6 +377,39 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             if (user != null) {
                 this.logger.debug(`ban event`);
                 this.chatService.unbanUserEvent(client, user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("muteUser")
+    handleMuteUser(@MessageBody() data: muteUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`mute event`);
+                this.chatService.muteUserEvent(client, user.id, data.id, data.channelId, data.minutes);
+            }
+        })
+    }
+
+    @SubscribeMessage("unmuteUser")
+    handleUnmuteUser(@MessageBody() data: unmuteUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`mute event`);
+                this.chatService.unmuteUserEvent(client, user.id, data.id, data.channelId);
+            }
+        })
+    }
+
+    @SubscribeMessage("listMutedUsers")
+    handleListMutedUsers(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`listMuted Event`);
+                this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
             }
         })
     }
