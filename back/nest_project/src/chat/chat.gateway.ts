@@ -1,6 +1,6 @@
 import { MessageBody, SubscribeMessage, WebSocketGateway, ConnectedSocket, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from "@nestjs/websockets";
 import { Server, Socket, Namespace } from 'socket.io';
-import { Logger, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Logger, UsePipes, ValidationPipe } from "@nestjs/common";
 import { IToken } from "./chat.interface";
 import * as jsrsasign from 'jsrsasign';
 import { ChatService } from "./chat.service";
@@ -8,8 +8,8 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { addMessageDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
 import { friendDto } from "./relation/friend/friend.dto";
+import { addMessageDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -268,10 +268,82 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((sender) => {
             if (sender != null) {
-                this.chatService.friendRequestEvent(client, sender.id, data.userId, this.chatRoomHandler);
+                this.chatService.friendRequestEvent(client, sender, data.userId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+
+    @SubscribeMessage('acceptFriendRequest')
+    handleAcceptRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((receiver) => {
+            if (receiver != null) {
+                this.chatService.acceptFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+
+    @SubscribeMessage('rejectFriendRequest')
+    handleRejectRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((receiver) => {
+            if (receiver != null) {
+                this.chatService.rejectFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage('unfriend')
+    handleUnfriend(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((me) => {
+            if (me != null) {
+                this.chatService.unfriendEvent(me, data.userId, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
+    @SubscribeMessage("blockUser")
+    handleBlockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`block event`);
+                this.chatService.blockUserEvent(client, user, data.id, this.chatRoomHandler);
+                this.chatService.unfriendEvent(user, data.id, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("unblockUser")
+    handleUnblockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`block event`);
+                this.chatService.unblockUserEvent(client, user, data.id, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("listBlock")
+    handleListBlock(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`listBlock event`);
+                this.chatService.listBlockEvent(client, user.id);
+            }
         })
     }
 

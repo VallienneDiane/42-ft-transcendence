@@ -1,19 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { Socket, Namespace } from "socket.io";
 import { IChannelToEmit, IMessageToSend, IUserToEmit } from "./chat.interface";
-import { MessageChannelEntity } from "./messageChannel/messageChannel.entity";
 import { MessageChannelService } from "./messageChannel/messageChannel.service";
-import { MessagePrivateEntity } from "./messagePrivate/messagePrivate.entity";
 import { MessagePrivateService } from "./messagePrivate/messagePrivate.service";
 import { ChannelEntity } from "./channel/channel.entity";
 import { ChannelService } from "./channel/channel.service";
 import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
-import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
-import { channel } from "diagnostics_channel";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
 import { FriendService } from "./relation/friend/friend.service";
+import { FriendEntity } from "./relation/friend/friend.entity";
 
 @Injectable({})
 export class ChatService {
@@ -52,7 +49,7 @@ export class ChatService {
             socketMap.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
-                    roomHandler.joinRoom(userId, socket, '00000000-0000-0000-0000-000000000000', true, false, false);
+                    roomHandler.joinRoom(userId, socket, "00000000-0000-0000-0000-000000000000", true, false, false);
                     this.goBackToGeneral(socket);
                 }
             });
@@ -61,8 +58,8 @@ export class ChatService {
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
-        let newUser = roomHandler.addUser(user.id, client, "general", true, false, false, false);
-        client.emit("changeLocChannel", "general", []);
+        let newUser = roomHandler.addUser(user.id, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
+        this.goBackToGeneral(client);
         if (newUser) {
             chatNamespace.sockets.forEach( (socket) => {
                 socket.emit('userConnected', {userId: user.id, userLogin: user.login});
@@ -87,16 +84,13 @@ export class ChatService {
         if (room != undefined) {
             let toSend: IMessageToSend = {date: new Date(), senderId: user.id, senderName: user.login, content: message};
             if (room.isChannel) {
-                    if (room.room != "general") {
+                    if (room.room != "00000000-0000-0000-0000-000000000000") {
                         logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
                         .then((channId) => {
                             this.messageChannelService.addMessage(user, channId, message);
-                        })
+                        })}
                     roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
-                }
-                else
-                    client.emit('notice', 'only channel operator can talk in this channel');
             }
             else {
                 this.userService.findById(room.room)
@@ -552,26 +546,23 @@ export class ChatService {
         })
     }
 
-    public friendRequestEvent(client: Socket, senderId: string, receiverId: string, roomHandler: UserRoomHandler) {
-        this.friendService.checkRequest(senderId, receiverId)
+    public friendRequestEvent(client: Socket, sender: UserEntity, receiverId: string, roomHandler: UserRoomHandler) {
+        this.friendService.checkRequest(sender.id, receiverId)
         .then((check: boolean) => {
             if (check) {
-                this.userService.findById(senderId)
-                .then((sender: UserEntity) => {
-                    this.userService.findById(receiverId)
-                    .then((receiver: UserEntity) => {
-                        this.friendService.create(sender, receiver)
-                        .then(() => {
-                            let senderSockets = roomHandler.userMap.get(sender.id);
-                            if (senderSockets != undefined) {
-                                senderSockets.emit("notice", "Your request has been sent.");
-                                senderSockets.emit("newFriendRequestSent", receiver);
-                            }
-                            // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
-                            let receiverSockets = roomHandler.userMap.get(receiver.id);
-                            if (receiverSockets != undefined)
-                                receiverSockets.emit("newFriendRequestReceived", sender);
-                        })
+                this.userService.findById(receiverId)
+                .then((receiver: UserEntity) => {
+                    this.friendService.create(sender, receiver)
+                    .then(() => {
+                        let senderSockets = roomHandler.userMap.get(sender.id);
+                        if (senderSockets != undefined) {
+                            senderSockets.emit("notice", "Your request has been sent.");
+                            senderSockets.emit("newFriendRequestSent", receiver.id, receiver.login);
+                        }
+                        // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
+                        let receiverSockets = roomHandler.userMap.get(receiver.id);
+                        if (receiverSockets != undefined)
+                            receiverSockets.emit("newFriendRequestReceived", sender.id, receiver.login);
                     })
                 })
             }
@@ -579,4 +570,114 @@ export class ChatService {
                 client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
         })
     }
+
+    public acceptFriendRequestEvent(receiver: UserEntity, senderId: string, roomHandler: UserRoomHandler) {
+        this.friendService.findRequest(senderId, receiver.id)
+        .then((request: FriendEntity) => {
+            this.friendService.updateRequest(request.id)
+            .then(() => {
+                let receiverSockets = roomHandler.userMap.get(receiver.id);
+                if (receiverSockets != undefined) {
+                    this.userService.findById(senderId)
+                    .then((user) => {
+                        receiverSockets.emit("newFriend", user.id, user.login);
+                        // receiverSockets.emit("supressFriendRequestReceived", user.id, user.login);
+                    })
+                }
+                let senderSockets = roomHandler.userMap.get(senderId);
+                if (senderSockets != undefined) {
+                    senderSockets.emit("newFriend", receiver.id, receiver.login);
+                    // senderSockets.emit("supressFriendRequestSent", receiver.id, receiver.login);
+                }
+            })
+        })
+    }
+
+    public rejectFriendRequestEvent(receiver: UserEntity, senderId: string, roomHandler: UserRoomHandler) {
+        this.friendService.findRequest(senderId, receiver.id)
+        .then((request: FriendEntity) => {
+            this.friendService.deleteRequest(request.id)
+            .then(() => {
+                let receiverSockets = roomHandler.userMap.get(receiver.id);
+                if (receiverSockets != undefined) {
+                    this.userService.findById(senderId)
+                    .then((user) => {
+                        receiverSockets.emit("supressFriendRequest", user.id, user.login);
+                    })
+                }
+                let senderSockets = roomHandler.userMap.get(senderId);
+                if (senderSockets != undefined) {
+                    senderSockets.emit("supressFriendRequest", receiver.id, receiver.login);
+                }
+            })
+        })
+    }
+
+    public unfriendEvent(me: UserEntity, friendId: string, roomHandler: UserRoomHandler) {
+        this.friendService.getFriendsList(me.id)
+        .then((friends: {friendshipId: string, friendId: string, friendName: string}[]) => {
+            for (let elt of friends) {
+                if (elt.friendId === friendId) {
+                    this.friendService.deleteRequest(elt.friendshipId)
+                    .then(() => {
+                        this.userService.findById(friendId)
+                        .then((user) => {
+                            let meSockets = roomHandler.userMap.get(me.id);
+                            if (meSockets != undefined) {
+                                meSockets.emit("supressFriend", user.id, user.login);
+                            }
+                            let friendSockets = roomHandler.userMap.get(user.id);
+                            if (friendSockets != undefined) {
+                                friendSockets.emit("supressFriend", me.id, me.login);
+                            }
+                        })
+                    })
+                }
+            }
+        })
+    }
+
+    public listBlockEvent(client: Socket, userId: string) {
+        this.userService.getBlockList(userId)
+        .then((array) => {
+            client.emit("listBlock", array);
+        })
+    }
+
+    public blockUserEvent(client: Socket, user: UserEntity, userIdToBlock: string, roomHandler: UserRoomHandler) {
+        this.userService.findById(userIdToBlock)
+        .then((found) => {
+            if (found) {
+                this.userService.addUserToBlock(user.id, userIdToBlock)
+                .then(() => {
+                    let sockets = roomHandler.userMap.get(user.id);
+                    if (sockets != undefined)
+                    sockets.sockets.forEach(({}, socket) => {
+                        this.listBlockEvent(socket, user.id);
+                    })
+                })
+            }
+            else
+                client.emit("notice", "user not found");
+        })
+    }
+
+    public unblockUserEvent(client: Socket, user: UserEntity, userIdToUnblock: string, roomHandler: UserRoomHandler) {
+        this.userService.findById(userIdToUnblock)
+        .then((found) => {
+            if (found) {
+                this.userService.delUserToBlock(user.id, userIdToUnblock)
+                .then(() => {
+                    let sockets = roomHandler.userMap.get(user.id);
+                    if (sockets != undefined)
+                    sockets.sockets.forEach(({}, socket) => {
+                        this.listBlockEvent(socket, user.id);
+                    })
+                })
+            }
+            else
+                client.emit("notice", "user not found");
+        })
+    }
+
 }

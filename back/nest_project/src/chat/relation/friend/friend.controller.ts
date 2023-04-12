@@ -1,7 +1,5 @@
-import { Body, Controller, Get, Param, Post, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Controller, Get, Param, UseGuards, UsePipes, ValidationPipe } from "@nestjs/common";
 import { FriendService } from "./friend.service";
-import { UserService } from "src/user/user.service";
-import { UserEntity } from "src/user/user.entity";
 import { friendDto } from "./friend.dto";
 import { JwtAuthGuard } from "src/auth_strategies/jwt-auth.guard";
 
@@ -13,19 +11,24 @@ export class FriendController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listFriends/:user')
-	async listFriends(@Param('user') data: friendDto): Promise<UserEntity[]> {
-        return await this.friendService.getList(data.userId);
+	async listFriends(@Param('user') data: friendDto): Promise<{id: string, name: string}[]> {
+        const requestList: {friendshipId: string, friendId: string, friendName: string}[] = await this.friendService.getFriendsList(data.userId);
+		const friendList: {id: string, name: string}[] = [];
+		for (let elt of requestList) {
+			friendList.push({id: elt.friendId, name: elt.friendName});
+		}
+		return friendList;
     }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listRequestsPendingSend/:user')
-	async listRequestsPendingSend(@Param('user') data: friendDto): Promise<UserEntity[]> {
+	async listRequestsPendingSend(@Param('user') data: friendDto): Promise<{id: string, name: string}[]> {
         return await this.friendService.getRequestPendingSend(data.userId);
     }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listRequestsPendingReceived/:user')
-	async listRequestsPendingReceived(@Param('user') data: friendDto): Promise<UserEntity[]> {
+	async listRequestsPendingReceived(@Param('user') data: friendDto): Promise<{id: string, name: string}[]> {
         return await this.friendService.getRequestPendingReceived(data.userId);
     }
 }
