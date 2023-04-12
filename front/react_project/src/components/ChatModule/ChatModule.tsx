@@ -168,7 +168,15 @@ export default class ChatModule extends React.Component<{}, {
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.handleHistory = this.handleHistory.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
     
+    componentDidMount(): void {
+        if (this.context.socket != null) {
+            this.context.socket.emit("whereIam");
+        }
+    }
+
     changeLoc(newDest: IDest) {
         this.setState({ dest: newDest });
     }
@@ -187,28 +195,23 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     render() {
-        return (  
-            <SocketContext.Consumer>
-                { ({ socket }) => {
-                    if (socket != null) {
-                        return (
-                        <div id="chat_page">
-                            <div className="card">
-                                <div id="chatLeft">
-                                    <SearchChat handleHistory={this.handleHistory} changeLoc={this.changeLoc} />
-                                    <ChannelDMList />
-                                    <CreateChannel />
-                                </div>
-                                <div id="chatRight">
-                                    <Header dest={this.state.dest}/>
-                                    <MessageList history={this.state.history} handleHistory={this.handleNewMessageOnHistory} />
-                                    <SendMessageForm dest={this.state.dest} />
-                                </div>
-                            </div>
-                        </div>)}
-                    }
-                }
-            </SocketContext.Consumer>
-        )
+        if (this.context.socket != null) {
+            return (
+                <div id="chat_page">
+                    <div className="card">
+                         <div id="chatLeft">
+                            <SearchChat handleHistory={this.handleHistory} changeLoc={this.changeLoc} />
+                            <ChannelDMList />
+                            <CreateChannel />
+                        </div>
+                        <div id="chatRight">
+                            <Header dest={this.state.dest}/>
+                            <MessageList history={this.state.history} handleHistory={this.handleNewMessageOnHistory} />
+                            <SendMessageForm dest={this.state.dest} />
+                        </div>
+                    </div>
+                </div>
+            )
+        }
     }
 }

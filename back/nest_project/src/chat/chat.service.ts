@@ -671,6 +671,7 @@ export class ChatService {
             if (found) {
                 this.userService.addUserToBlock(user.id, userIdToBlock)
                 .then(() => {
+                    this.unfriendEvent(user, userIdToBlock, roomHandler);
                     let sockets = roomHandler.userMap.get(user.id);
                     if (sockets != undefined)
                     sockets.sockets.forEach(({}, socket) => {

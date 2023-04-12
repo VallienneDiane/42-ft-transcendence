@@ -71,18 +71,20 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 }
 
-export class MessageList extends React.Component<{history: IMessage[], handleHistory: any}, {}> {
+export class MessageList extends React.Component<{history: IMessage[], handleHistory: any}, {usersBlocked: {id: string, name: string}[], block: boolean}> {
     constructor(props: {history: IMessage[], handleHistory: any}) {
         super(props);
+        this.state = {usersBlocked: [], block: false};
+        this.checkBlock = this.checkBlock.bind(this);
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
 
     componentDidMount(): void {
-        // this.context.socket.emit("listBlock");
-        // this.context.socket.on("listBlock", (array: {id: string, name: string}[]) => {
-            
-        // })
+        this.context.socket.emit("listBlock");
+        this.context.socket.on("listBlock", (array: {id: string, name: string}[]) => {
+            this.setState({usersBlocked: array});
+        })
         this.context.socket.on("newMessage", (data: IMessageReceived) => {
             this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         });
@@ -103,16 +105,27 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
         this.context.socket.off('notice');
     }
 
+    checkBlock(senderName: string) {
+        console.log(senderName)
+        for (let elt of this.state.usersBlocked) {
+            if (elt.name === senderName)
+                this.setState({block: true})
+        }
+    }
+
     render() {
         const tmpList: IMessage[] = this.props.history!;
         const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
-            const length: number = tmpList.length;
-            const prevSender: string = index < (length - 1) ? tmpList[index + 1].senderName! : '';
-            let lastMessage : boolean = false;
-            if (index === 0 || (index > 0 && tmpList[index - 1].senderName !== tmpList[index].senderName))
-                lastMessage = true;
-            const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
-            acc.push(messageDisplay);
+            // this.checkBlock(message.senderName);
+            // if (this.state.block === false) {
+                const length: number = tmpList.length;
+                const prevSender: string = index < (length - 1) ? tmpList[index + 1].senderName! : '';
+                let lastMessage : boolean = false;
+                if (index === 0 || (index > 0 && tmpList[index - 1].senderName !== tmpList[index].senderName))
+                    lastMessage = true;
+                const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
+                acc.push(messageDisplay);
+            // }
             return acc;
         }, []);
 

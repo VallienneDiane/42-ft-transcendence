@@ -399,24 +399,31 @@
 									& > li {
 										display: flex;
 										flex-direction: row;
+										align-items: center;
 										justify-content: space-between;
 										background: transparent;
 										font-size: 15px;
 										width: 100%;
-										padding: 0.2rem 1.5rem;
+										padding: 0.3rem 1.5rem;
 										// border-bottom: 1px solid rgb(217, 223, 243);
 									}
 									& .inputChannel {
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: transparent;
+										background: #b0c1c4;
 										width: 60%;
-										padding-left: 1px;
-										// padding: 0.5rem 2rem 0.5rem 1rem;
-										// border-bottom: 1px solid rgb(42, 42, 43);
-										// border: none;
-										// outline: none;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
+									}
+									.inputPassword {
+										outline: 0;
+										border-width: 0 0 1px;
+										border-color: rgb(42, 42, 43, 0.5);
+										background: #b0c1c4;
+										width: 100%;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
 									}
 									& button {
 										background: transparent;

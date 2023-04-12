@@ -320,7 +320,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             if (user != null) {
                 this.logger.debug(`block event`);
                 this.chatService.blockUserEvent(client, user, data.id, this.chatRoomHandler);
-                this.chatService.unfriendEvent(user, data.id, this.chatRoomHandler);
             }
         })
     }
