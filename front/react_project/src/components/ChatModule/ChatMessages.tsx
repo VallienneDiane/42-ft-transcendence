@@ -4,26 +4,48 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { IMessageToSend, Message, IDest } from "../../models";
 
-class MessageDisplay extends React.Component<{sender: string, text: string}, {
-    playload: JwtPayload, me: boolean}> {
-    constructor(props: {sender: string, text: string}) {
+class MessageDisplay extends React.Component<{message: Message, prevSender: string, last: boolean}, {
+    playload: JwtPayload, me: boolean, sameSender: boolean}> {
+    constructor(props: {message: Message, prevSender: string, last: boolean}) {
         super(props);
         this.state = { playload: accountService.readPayload()!, 
-        me: false };
+        me: false, 
+        sameSender: false };
+        this.setTimeAgo = this.setTimeAgo.bind(this);
     }
 
     componentDidMount(): void {
-        if (this.state.playload.login === this.props.sender)
+        // console.log("prev", this.props.prevSender, "new", this.props.message.sender);
+        if (this.props.prevSender === this.props.message.sender)
+            this.setState({ sameSender: true });
+        if (this.state.playload.login === this.props.message.sender)
             this.setState({me: true});
+    }
+
+    setTimeAgo() {
+        const prev: Date = new Date(this.props.message.id);
+        const now: Date = new Date();
+        const secDiff: number = Math.round((now.getTime() - prev.getTime()) / 1000);
+        let diff: number = secDiff / (24 * 60 * 60);
+        if (diff > 1)
+            return Math.round(diff) + "d ago";
+        diff = secDiff / (60 * 60);
+        if (diff > 1)
+            return Math.round(diff) + "h ago";
+        diff = secDiff / 60;
+        if (diff > 1)
+            return Math.round(diff) + "m ago";
+        return("Now");
     }
 
     render() {
         return (
             <div className={this.state.me ? "message sent" : "message received"}>
-                <div className="messageUserName">{this.props.sender}</div>
+                {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.sender}</div>}
                 <div className="bubble">
-                    <div className="messageText">{this.props.text}</div>
+                    <div className="messageText">{this.props.message.text}</div>
                 </div>
+                {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
             </div>
         )
     }
@@ -35,17 +57,17 @@ export class MessageList extends React.Component<{history: Message[], action: an
     }
 
     componentDidMount(): void {
-        this.props.socket!.on("newMessage", (data: IMessageToSend) => {
+        this.props.socket.on("newMessage", (data: IMessageToSend) => {
             console.log('message from nest newMessage: ' + data.content + ', ' + data.sender);
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         });
 
-        this.props.socket!.on('selfMessage', (data: IMessageToSend) => {
+        this.props.socket.on('selfMessage', (data: IMessageToSend) => {
             console.log('message from nest selfMessage: ' + data.content + ', ' + data.sender);
             this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
         })
 
-        this.props.socket!.on('notice', (data: string) => {
+        this.props.socket.on('notice', (data: string) => {
             console.log(data);
             let date = new Date();
             this.props.action({id: date.toString(), text: data, sender: "Message from server :"});
@@ -53,17 +75,24 @@ export class MessageList extends React.Component<{history: Message[], action: an
     }
 
     componentWillUnmount(): void {
-        this.props.socket!.off('newMessage');
-        this.props.socket!.off('notice');
-        this.props.socket!.off('selfMessage');
+        this.props.socket.off('newMessage');
+        this.props.socket.off('notice');
+        this.props.socket.off('selfMessage');
     }
 
     render() {
         const tmpList: Message[] = this.props.history!;
-        const listItems: JSX.Element[] = tmpList.reverse().map(
-            (message) => <MessageDisplay key={message.id} sender={message.sender!} text={message.text} />
-        );
-        console.log("reverse");
+        const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: Message, index: number, tmpList: Message[]) => {
+            const length: number = tmpList.length;
+            const prevSender: string = index < (length - 1) ? tmpList[index + 1].sender! : '';
+            let lastMessage : boolean = false;
+            if (index === 0 || (index > 0 && tmpList[index - 1].sender !== tmpList[index].sender))
+                lastMessage = true;
+            const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
+            acc.push(messageDisplay);
+            return acc;
+        }, []);
+
         return (
             <div id="messageList">
                 {listItems}
@@ -88,9 +117,9 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
         event.preventDefault();
         if (this.state.text.trim() !== '') {
             let content: string = this.state.text;
-            let room: string = this.props.dest!.Loc;
-            let isChannel: boolean = this.props.dest!.isChannel;
-            this.props.socket!.emit('addMessage', content);
+            let room: string = this.props.dest.loc;
+            let isChannel: boolean = this.props.dest.isChannel;
+            this.props.socket.emit('addMessage', {message: content});
             this.setState({ text: '' });
         }
     }
