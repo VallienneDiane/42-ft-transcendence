@@ -78,7 +78,7 @@ const Game: React.FC = () => {
     const informReady = () => {
         // On click on 'ready' button, inform server that the player is ready
         if (socket !== null) {
-            socket.emit('ready');
+            socket.emit('Ready');
         }
         setPlayerReady(true);
     }
@@ -126,7 +126,7 @@ const Game: React.FC = () => {
                 console.log('Connected to server!');
             });
 
-            socket.on('players', (players: Players) => {
+            socket.on('Players', (players: Players) => {
                 console.log("Players : ", players);
                 setWaitMatch(false);
                 setMatchInProgress(true);
@@ -140,6 +140,7 @@ const Game: React.FC = () => {
             // })
 
             socket.on('Game_Update', (gameState: gameState) => {
+                console.log("JUST RECEIVED GAME UPDATE EVENT -------------------------------------------------------------------------------------");
                 if (ready === true) {
                     setTimer(true);
                 }
