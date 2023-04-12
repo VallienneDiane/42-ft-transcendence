@@ -1,6 +1,5 @@
-
 import * as yup from 'yup';
-import "../styles/Settings.scss"
+import "../styles/VerifyCode2fa.scss"
 import { VerifyCodeForm } from "../models";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -43,11 +42,12 @@ const VerifyCode2fa:React.FC = () => {
     }
     
 return (
-    <div className="toggle2fa">
+    <div className="verifycode">
         <form onSubmit={handleSubmit(verifySubmittedCode)}>
-        <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
-        {errors.code && <p className="errorsCode">{errors.code.message}</p>}
-        <button type="submit">Submit</button>
+        <h2>Check your Google Authentificator application</h2>
+            <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
+            {errors.code && <p className="errors">{errors.code.message}</p>}
+            <button type="submit">Submit</button>
         </form>
     </div>
     )
