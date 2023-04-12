@@ -1,15 +1,19 @@
-import React, { createRef, useContext, useState, useRef, useEffect } from "react";
+import React, { createRef, useContext, useState, useRef, useEffect, ContextType } from "react";
 import { Socket } from 'socket.io-client'
-import SocketContext from "../context";
+import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { ISearch, Message, IMessageEntity, IChannelEntity, IChannelToEmit, IMessageToSend } from "../../models";
+import { IChannel, ISearch, IMessage, IMessageReceived } from "./Chat_models";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelName: string}) {
     const {socket} = useContext(SocketContext);
     const [pass, setPass] = useState<string>('');
     const ref = useRef<HTMLDivElement>(null);
+    const [ incorrectCredentials, setIncorrectCredentials ] = useState<boolean>(false);
+    const [ offSocket, setOffSocket ] = useState<boolean>(false);
 
     const handleClickOutside = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
@@ -24,11 +28,23 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     }
 
     useEffect(() => {
+        socket.on("incorrectPassword", () => {
+            setIncorrectCredentials(true);
+        });
+        socket.on("correctPassword", () => {
+            setOffSocket(true);
+            setPass('');
+            props.handleClose('');
+        })
         document.addEventListener("mousedown", handleClickOutside);
         document.addEventListener("keydown", onKeyPress);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
+            if (offSocket) {
+                socket.off("wrong");
+                socket.off("true");
+            }
         }
     }, [ref]);
 
@@ -39,8 +55,6 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     const handlerJoinPass = (event: any) => {
         event.preventDefault();
         socket.emit('joinChannel', {channelId: props.channelId, channelPass: pass});
-        setPass('');
-        props.handleClose('');
     }
 
     return (
@@ -49,6 +63,7 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
                 <h1>{props.channelName}</h1>
                 <form onSubmit={handlerJoinPass}>
                     <input type="password" placeholder="Enter channel pass here..." value={pass} onChange={handlePass} />
+                    { incorrectCredentials && <div className="logError">Wrong password</div>}
                     <button type="submit">Enter</button>
                 </form>
             </div>
@@ -56,15 +71,18 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
     )
 }
 
-class SearchElement extends React.Component<{socket: Socket, popupAction: any, handleClose: any, elt: ISearch}> {
+class SearchElement extends React.Component<{popupAction: any, handleClose: any, elt: ISearch}> {
     constructor(props: {socket: Socket, popupAction: any, handleClose: any, elt: ISearch}) {
         super(props);
         this.onClickChatting = this.onClickChatting.bind(this);
         this.handlerJoinChannel = this.handlerJoinChannel.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
+
     handlerJoinChannel() {
         if (!this.props.elt.password) {
-            this.props.socket.emit('joinChannel', {channelId: this.props.elt.id, channelPass: null});
+            this.context.socket.emit('joinChannel', {channelId: this.props.elt.id, channelPass: null});
             this.props.handleClose();
         }
         else {
@@ -74,7 +92,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
     }
 
     onClickChatting() {
-        this.props.socket.emit('changeLoc', {loc: this.props.elt.id, isChannel: false});
+        this.context.socket.emit('changeLoc', {loc: this.props.elt.id, isChannel: false});
         this.props.handleClose();
     }
 
@@ -90,7 +108,7 @@ class SearchElement extends React.Component<{socket: Socket, popupAction: any, h
     }
 }
 
-class SearchChat extends React.Component<{action: any, action2: any, socket: Socket}, {
+class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
     text: string,
     popupIsOpen: boolean,
     channelToUnlock: ISearch,
@@ -99,7 +117,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
     filtered: ISearch[],
     isDropdown: boolean}
     > {
-    constructor(props:{action: any, action2: any, socket: Socket}) {
+    constructor(props:{handleHistory: any, changeLoc: any}) {
         super(props);
         this.state = {
             text: '',
@@ -118,6 +136,8 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         this.onClickPopup = this.onClickPopup.bind(this);
     }
     ref = createRef<HTMLUListElement>();
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
 
     onClickPopup(chan: ISearch) {
         this.setState({ popupIsOpen: !this.state.popupIsOpen, channelToUnlock: chan });
@@ -129,7 +149,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         }
     }
 
-    fetchUsers() { // récupération de tous les users, sauf moi-même
+    fetchUsers() { // récupération de tous les users, sauf moi-même, et les users que j'ai déjà DM
         userService.getAllUsers()
         .then(response => {
             const playload: JwtPayload = accountService.readPayload()!;
@@ -141,25 +161,23 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             })
             this.setState({users: newUserList});
+            this.context.socket.emit('myDM');
+            this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+                let newList: ISearch[] = [];
+                for (let user of this.state.users) {
+                    let ok: boolean = true;
+                    for (let elt of strs) {
+                        if (elt.userId == user.id)
+                            ok = false;
+                    }
+                    if (ok)
+                        newList.push(user);
+                }
+                this.setState({users: newList});
+            })
         })
         .catch(error => {
             console.log(error);
-        })
-        this.props.socket.emit('myDM');
-        this.props.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-            // console.log("dmi", strs);
-            let newList: ISearch[] = [];
-            for (let user of this.state.users) {
-                let ok: boolean = true;
-                for (let elt of strs) {
-                    if (elt.userId == user.id)
-                        ok = false;
-                }
-                if (ok)
-                    newList.push(user);
-            }
-            // console.log("blop", newList);
-            this.setState({users: newList});
         })
     }
     
@@ -184,7 +202,7 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
 
     showSearchList(event: any) {
         this.setState({ isDropdown: !this.state.isDropdown });
-        this.displayList(event); 
+        this.displayList(event);
     }
 
     displayList(event: any) {
@@ -220,64 +238,84 @@ class SearchChat extends React.Component<{action: any, action2: any, socket: Soc
         document.addEventListener("mousedown", this.closeSearchList);
         this.fetchUsers();
 
-        this.props.socket.emit('listChannel');
-        this.props.socket.on('listChannel', (strs: IChannelToEmit[]) => {
+        this.context.socket.emit('listChannel');
+        this.context.socket.on('listChannel', (strs: IChannel[]) => {
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
-                newChanList.push({id: str.id, name: str.name, password: str.password, isChannel: true, isClickable: true});
-            console.log("channels", newChanList);
-            this.setState({channels: newChanList})});
-            
-        this.props.socket.on('newUserConnected', () => {
+                newChanList.push({id: str.id!, name: str.name, password: str.password, isChannel: true, isClickable: true});
+            this.setState({channels: newChanList});
+            let newFiltered = this.compileFiltered(this.state.users, newChanList);
+            this.setState({filtered: newFiltered});
+        });
+        
+        this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
+            let nextState: ISearch[] = this.state.channels.filter(
+                elt => {return (elt.id != chann.channel.id)}
+                );
+            this.setState({channels: nextState});
+        })
+
+        this.context.socket.on('channelLeaved', (chann: IChannel) => {
+            let newChann: ISearch = {id: chann.id!, name: chann.name, password: chann.password, isChannel: true, isClickable: true};
+            let nextState: ISearch[] = [...this.state.channels, newChann];
+            nextState.sort((a, b) => {
+                return (a.name.localeCompare(b.name))
+            });
+            this.setState({channels: nextState});
+            let newFiltered: ISearch[] = this.compileFiltered(this.state.users, nextState);
+            this.setState({filtered: newFiltered});
+        })
+           
+        this.context.socket.on('newUserConnected', () => {
             this.fetchUsers()});
-        this.props.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
+        this.context.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
             let newList: ISearch[] = this.state.users.filter(
                 elt => {return (elt.id != room.id)}
                 );
             this.setState({users: newList});
-        })
+        });
 
-        this.props.socket.on('newLocChannel', (blop: {channel: IChannelEntity, status: string}, array: IMessageToSend[]) => {
-            let newHistory: Message[] = [];
-            // console.log("array :", array);
+        this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
+            let newHistory: IMessage[] = [];
             for (let elt of array) {
-                newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
             }
-            this.props.action(newHistory);
-            this.props.action2({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
-        })
+            this.props.handleHistory(newHistory);
+            this.props.changeLoc({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
+        }); // récupération du status ici !!
 
-        this.props.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageToSend[]) => {
-            // console.log(messages);
-            let newHistory: Message[] = [];
+        this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
+            let newHistory: IMessage[] = [];
             for (let elt of messages) {
-                newHistory.push({id: elt.date.toString(), text: elt.content, sender: elt.sender})
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
             }
-            this.props.action(newHistory);
-            this.props.action2({id: id, name: login, isChannel: false});
-        })
+            this.props.handleHistory(newHistory);
+            this.props.changeLoc({id: id, name: login, isChannel: false});
+        });
     }
 
     componentWillUnmount(): void {
         document.removeEventListener("mousedown", this.closeSearchList);
-        this.props.socket.off('listChannel');
-        this.props.socket.off('newUserConnected');
-        this.props.socket.off('newLocChannel');
-        this.props.socket.off('newLocPrivate');
+        this.context.socket.off('listChannel');
+        this.context.socket.off('listMyDM');
+        this.context.socket.off("channelJoined");
+        this.context.socket.off("channelLeaved");
+        this.context.socket.off('newUserConnected');
+        this.context.socket.off('newLocChannel');
+        this.context.socket.off('newLocPrivate');
     }
 
     render() {
-        // console.log(this.state.filtered);
         return (
             <div id="searchbarWrapper">
                 <div className="searchbar">
                     <input type="text" onChange={this.displayList} onClick={this.showSearchList} value={this.state.text} placeholder="Search"/>
-                    <svg className="svgSearch" viewBox="0 0 24 24"><path fill="#666666" d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z" />
-                    </svg>
+                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                 </div>
-                {(this.state.filtered.length != 0 && this.state.isDropdown) && <ul ref={this.ref}>
+                {(this.state.filtered.length != 0 && this.state.isDropdown) &&
+                <ul ref={this.ref}>
                     {this.state.filtered.map((elt: ISearch, id: number) => (
-                        <SearchElement  key={id} socket={this.props.socket} handleClose={this.resetFiltered}
+                        <SearchElement  key={id} handleClose={this.resetFiltered}
                                         popupAction={this.onClickPopup} elt={elt} />
                     ))}
                 </ul>}

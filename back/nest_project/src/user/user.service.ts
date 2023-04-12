@@ -7,6 +7,7 @@ import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
+import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
 @Injectable({})
 export class UserService {
@@ -24,9 +25,7 @@ export class UserService {
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
     async findById(id: string): Promise<UserEntity> {
-        // console.log(`${id}`)
         const toReturn = await this.usersRepository.findOneBy({id: id});
-        // console.log(`${id} apres ooooooooooooooooooooooooooooooooooooooooooo findById`)
         return toReturn
     }
     
@@ -98,18 +97,16 @@ export class UserService {
         const user = await this.findById(userId);
         let arrayOfChannels: {channel: ChannelEntity, status: string}[] = [{
             channel: {
-                id: "general",
+                id: "00000000-0000-0000-0000-000000000000",
                 date: new Date(),
                 name: "general",
                 password: false,
                 channelPass: null,
-                opNumber: 0,
                 inviteOnly: false,
-                persistant: true,
-                onlyOpCanTalk: false,
-                hidden: false,
                 normalUsers: [],
                 opUsers: [],
+                godUser: undefined,
+                bannedUsers: [],
                 messages: []
             },
             status: "normal"}];
@@ -195,5 +192,56 @@ export class UserService {
         await this.usersRepository.save(user);
     }
 
-    
+    async getAvatar(id : string): Promise<string> {
+        const userAvatar: string = await this.usersRepository.createQueryBuilder()
+            .where("user.id = :id", { id: id })
+            .select("user.avatarSvg")
+            .from(UserEntity, 'user')
+            .getRawOne();
+        return userAvatar;
+    }
+
+    async getFriendRequestsSend(id: string): Promise<FriendEntity[]> {
+        const requestsSend: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsSend", "send")
+            .select("send.*")
+            .getRawMany();
+        return requestsSend;
+    }
+
+    async getFriendRequestsReceived(id: string): Promise<FriendEntity[]> {
+        const requestsReceived: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsReceived", "receiv")
+            .select("receiv.*")
+            .getRawMany();
+        return requestsReceived;
+    }
+
+    async addUserToBlock(userId: string, userIdToBlock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .add(userIdToBlock);
+    }
+
+    async delUserToBlock(userId: string, userIdToUnblock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .remove(userIdToUnblock);
+    }
+
+    async getBlockList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockList", "blocked")
+            .select("blocked.id", "id")
+            .addSelect("blocked.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
 }

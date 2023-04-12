@@ -57,20 +57,20 @@
 						display: flex;
 						flex-wrap: wrap;
 						justify-content: space-around;
-						padding-top: 1rem;
+						align-items: center;
 					}
 					& section {
-						padding: 0 1.5rem;
-						& input {
-							border: 1px solid var(--second-color);
-        					border-radius: 50px;
-        					padding: 0.3rem 1rem;
-        					margin: 10px;
-        					// font-size: 1.2em;
-						}
+						padding: 0.5rem 1rem;
 						& .labelName {
 							padding: 0.3rem;
 						}
+					}
+					& input {
+						border: 1px solid var(--second-color);
+						border-radius: 50px;
+						padding: 0.3rem 1rem;
+						margin: 10px;
+						// font-size: 1.2em;
 					}
 					& .button {
 						color: var(--text-color);
@@ -137,8 +137,7 @@
 						outline: none;
 					}
 					& .svgSearch {
-						width: 1.5rem;
-						height: 1.5rem;
+						height: 1.1rem;
 						margin-left: -2rem;
 						opacity: 50%;
 						background-color: #eee;
@@ -322,6 +321,9 @@
 									padding: 0.4rem 1rem;
 									background: transparent;
 									border-bottom: 2px solid rgb(214, 214, 214);
+									& a {
+										background: transparent;
+									}
 									&:hover {
 										background:#ddd;
 										color:#000000;
@@ -329,52 +331,110 @@
 									}
 								}
 								& .memberList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									padding: 0.3rem 1.5rem;
 									& > li {
-										justify-content: flex-start;
+										display: flex;
+										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
 										background: transparent;
-										& svg {
+										& div {
+											background: transparent;
+										}
+										& .iconStatus {
 											background: transparent;
 											width: 15px;
 											padding-left: 6px;
 											opacity: 70%;
 										}
+										& button {
+											background: transparent;
+											& .iconAction {
+												background: transparent;
+												width: 15px;
+												padding-left: 6px;
+												opacity: 70%;
+												&:hover {
+													// outline: none;
+													// width: 20px;
+													color: #016d06;
+													// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+												}
+											}
+										}
+									}
+								}
+								& .searchbar {
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									background-color: #b9cbce;
+									padding: 0.5rem 1.5rem;
+									& input {
+										width: 100%;
+										background: rgb(238, 238, 238);
+										color: rgb(77, 77, 77);
+										padding: 0.3rem 2rem 0.3rem 1rem;
+										border-radius: 2rem;
+										border: none;
+										outline: none;
+									}
+									& .svgSearch {
+										height: 1.1rem;
+										margin-left: -2rem;
+										opacity: 50%;
+										background-color: #eee;
+										cursor: pointer;
 									}
 								}
 								& .settingList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									width: 100%;
+									padding: 0.5rem 0;
 									& > li {
 										display: flex;
 										flex-direction: row;
+										align-items: center;
 										justify-content: space-between;
 										background: transparent;
 										font-size: 15px;
 										width: 100%;
-										padding: 0.2rem 1.5rem;
-										// border-bottom: 1px solid rgb(150, 156, 177);
+										padding: 0.3rem 1.5rem;
+										// border-bottom: 1px solid rgb(217, 223, 243);
 									}
 									& .inputChannel {
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: transparent;
+										background: #b0c1c4;
 										width: 60%;
-										padding-left: 1px;
-										// padding: 0.5rem 2rem 0.5rem 1rem;
-										// border-bottom: 1px solid rgb(42, 42, 43);
-										// border: none;
-										// outline: none;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
+									}
+									.inputPassword {
+										outline: 0;
+										border-width: 0 0 1px;
+										border-color: rgb(42, 42, 43, 0.5);
+										background: #b0c1c4;
+										width: 100%;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
 									}
 									& button {
 										background: transparent;
-										color: #fa6969;
+										color: #088f03;
 										font-weight: bold;
 										font-size: 17px;
 									}
+								}
+								& .outChannel {
+									color: red;
+									background: transparent;
 								}	
 							}
 						}
@@ -404,10 +464,13 @@
 				flex-direction: column-reverse;
 				height: 70%;
 				background: rgb(231, 231, 231);
-				padding: 1.5rem;
+				// padding: 1.5rem;
+				padding: 1.5rem 1.5rem 1.5rem 1rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
+					display: flex;
+					flex-direction: row;
 					background: transparent;
 					vertical-align: top;
 					padding: 0.1rem 0;
@@ -437,6 +500,19 @@
 							background-color: rgb(2, 129, 214);
 							border-radius: .75rem 0 .75rem .75rem;
 						}
+					}
+				}
+				& .messageBlock {
+					background: transparent;
+				}
+				& .avatar {
+					width: 3.2rem;
+					background: transparent;
+					& #profilePicture {
+					border-radius: 50%;
+					margin-right: 0.5rem;
+					width: 3rem;
+					background: transparent;
 					}
 				}
 				& .messageUserName {
@@ -479,13 +555,16 @@
 						outline: none;
 					}
 					& .send {
+						display: flex;
+						justify-content: center;
+						align-items: center;
 						width: 1.3rem;
 						height: 2rem;
 						margin-left: -4rem;
-						margin-top: 0.3rem;
 						opacity: 40%;
 						background-color: transparent;
 						& .svgSend {
+							height: 70%;
 							background: rgb(238, 238, 238);
 						}
 					}
@@ -494,3 +573,8 @@
 		}
 	}
 }
+
+.logError {
+	color: red;
+  }
+  

@@ -14,8 +14,8 @@ export interface IMessageChat {
 export interface IMessageToSend {
     //room can be a channel or an user
     date: Date;
-    sender: string;
-    room: string;
+    senderName: string;
+    senderId: string;
     content: string;
 }
 
@@ -25,9 +25,6 @@ export interface IChannelToEmit {
     name: string;
     password: boolean;
     inviteOnly: boolean;
-    persistant: boolean;
-    onlyOpCanTalk: boolean;
-    hidden: boolean;
     normalUsers: IUserToEmit[];
     opUsers: IUserToEmit[];
     godUser?: IUserToEmit;

@@ -1,25 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { Socket } from 'socket.io-client';
+import React, { ContextType } from "react";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
-import { IMessageToSend, Message, IDest } from "../../models";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { IMessage, IDest, IMessageReceived } from "./Chat_models";
+import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { SocketContext } from "../context";
 
-class MessageDisplay extends React.Component<{message: Message, prevSender: string, last: boolean}, {
-    playload: JwtPayload, me: boolean, sameSender: boolean}> {
-    constructor(props: {message: Message, prevSender: string, last: boolean}) {
+class MessageDisplay extends React.Component<{message: IMessage, prevSender: string, last: boolean}, {
+    playload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
+    constructor(props: {message: IMessage, prevSender: string, last: boolean}) {
         super(props);
         this.state = { playload: accountService.readPayload()!, 
-        me: false, 
-        sameSender: false };
+        me: false,
+        sameSender: false, 
+        avatar: '' };
         this.setTimeAgo = this.setTimeAgo.bind(this);
+        this.getProfilePicture = this.getProfilePicture.bind(this);
     }
 
     componentDidMount(): void {
-        // console.log("prev", this.props.prevSender, "new", this.props.message.sender);
-        if (this.props.prevSender === this.props.message.sender)
+        if (this.props.prevSender === this.props.message.senderName)
             this.setState({ sameSender: true });
-        if (this.state.playload.login === this.props.message.sender)
+        if (this.state.playload.login === this.props.message.senderName)
             this.setState({me: true});
+        if (this.props.prevSender !== this.props.message.senderName && this.state.playload.login !== this.props.message.senderName)
+            this.getProfilePicture();
     }
 
     setTimeAgo() {
@@ -38,58 +43,89 @@ class MessageDisplay extends React.Component<{message: Message, prevSender: stri
         return("Now");
     }
 
+    getProfilePicture() {
+        if (this.props.message.senderName !== "WARNING") {
+            accountService.getAvatar(this.props.message.senderId!)
+                .then(response => { 
+                   this.setState({avatar: response.data.user_avatarSvg});
+                })
+                .catch(error => console.log(error));
+        }
+    }
+
     render() {
-        return (
-            <div className={this.state.me ? "message sent" : "message received"}>
-                {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.sender}</div>}
-                <div className="bubble">
-                    <div className="messageText">{this.props.message.text}</div>
+            return (
+                <div className={this.state.me ? "message sent" : "message received"}>
+                    {(this.state.me == false) && <div className="avatar">
+                        {(this.state.sameSender === false) && <img id="profilePicture" src={this.state.avatar} />}
+                        </div>}
+                    <div className="messageBlock">
+                        {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
+                        <div className="bubble">
+                            <div className="messageText">{this.props.message.content}</div>
+                        </div>
+                        {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
+                    </div>
                 </div>
-                {this.props.last && <div className="messageDate">{this.setTimeAgo()}</div>}
-            </div>
-        )
+            )
     }
 }
 
-export class MessageList extends React.Component<{history: Message[], action: any, socket: Socket}, {}> {
-    constructor(props: {history: Message[], action: any, socket: Socket}) {
+export class MessageList extends React.Component<{history: IMessage[], handleHistory: any}, {usersBlocked: {id: string, name: string}[], block: boolean}> {
+    constructor(props: {history: IMessage[], handleHistory: any}) {
         super(props);
+        this.state = {usersBlocked: [], block: false};
+        this.checkBlock = this.checkBlock.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
 
     componentDidMount(): void {
-        this.props.socket.on("newMessage", (data: IMessageToSend) => {
-            console.log('message from nest newMessage: ' + data.content + ', ' + data.sender);
-            this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
+        this.context.socket.emit("listBlock");
+        this.context.socket.on("listBlock", (array: {id: string, name: string}[]) => {
+            this.setState({usersBlocked: array});
+        })
+        this.context.socket.on("newMessage", (data: IMessageReceived) => {
+            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         });
 
-        this.props.socket.on('selfMessage', (data: IMessageToSend) => {
-            console.log('message from nest selfMessage: ' + data.content + ', ' + data.sender);
-            this.props.action({id: data.date.toString(), text: data.content, sender: data.sender});
+        this.context.socket.on('selfMessage', (data: IMessageReceived) => {
+            this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         })
 
-        this.props.socket.on('notice', (data: string) => {
-            console.log(data);
+        this.context.socket.on('notice', (data: string) => {
             let date = new Date();
-            this.props.action({id: date.toString(), text: data, sender: "Message from server :"});
+            this.props.handleHistory({id: date.toString(), content: data, senderName: "WARNING"});
         })
     }
 
     componentWillUnmount(): void {
-        this.props.socket.off('newMessage');
-        this.props.socket.off('notice');
-        this.props.socket.off('selfMessage');
+        this.context.socket.off('newMessage');
+        this.context.socket.off('selfMessage');
+        this.context.socket.off('notice');
+    }
+
+    checkBlock(senderName: string) {
+        console.log(senderName)
+        for (let elt of this.state.usersBlocked) {
+            if (elt.name === senderName)
+                this.setState({block: true})
+        }
     }
 
     render() {
-        const tmpList: Message[] = this.props.history!;
-        const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: Message, index: number, tmpList: Message[]) => {
-            const length: number = tmpList.length;
-            const prevSender: string = index < (length - 1) ? tmpList[index + 1].sender! : '';
-            let lastMessage : boolean = false;
-            if (index === 0 || (index > 0 && tmpList[index - 1].sender !== tmpList[index].sender))
-                lastMessage = true;
-            const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
-            acc.push(messageDisplay);
+        const tmpList: IMessage[] = this.props.history!;
+        const listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
+            // this.checkBlock(message.senderName);
+            // if (this.state.block === false) {
+                const length: number = tmpList.length;
+                const prevSender: string = index < (length - 1) ? tmpList[index + 1].senderName! : '';
+                let lastMessage : boolean = false;
+                if (index === 0 || (index > 0 && tmpList[index - 1].senderName !== tmpList[index].senderName))
+                    lastMessage = true;
+                const messageDisplay = <MessageDisplay key={message.id} message={message} prevSender={prevSender!} last={lastMessage}/>;
+                acc.push(messageDisplay);
+            // }
             return acc;
         }, []);
 
@@ -101,13 +137,15 @@ export class MessageList extends React.Component<{history: Message[], action: an
     }
 }
 
-export class SendMessageForm extends React.Component<{dest: IDest, socket: Socket}, {text: string}> {
-    constructor(props: {dest: IDest, socket: Socket}) {
+export class SendMessageForm extends React.Component<{dest: IDest}, {text: string}> {
+    constructor(props: {dest: IDest}) {
         super(props);
         this.state = { text: '' };
         this.handleMessage = this.handleMessage.bind(this);
         this.sendMessage = this.sendMessage.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
 
     handleMessage(event: React.ChangeEvent<HTMLInputElement>) {
         this.setState({ text: event.target.value });
@@ -117,9 +155,7 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
         event.preventDefault();
         if (this.state.text.trim() !== '') {
             let content: string = this.state.text;
-            let room: string = this.props.dest.loc;
-            let isChannel: boolean = this.props.dest.isChannel;
-            this.props.socket.emit('addMessage', {message: content});
+            this.context.socket.emit('addMessage', {message: content});
             this.setState({ text: '' });
         }
     }
@@ -130,7 +166,7 @@ export class SendMessageForm extends React.Component<{dest: IDest, socket: Socke
                 <form className="sendMessageForm" onSubmit={this.sendMessage}>
                     <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
                     <button className="send">
-                        <svg className="svgSend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M498.1 5.6c10.1 7 15.4 19.1 13.5 31.2l-64 416c-1.5 9.7-7.4 18.2-16 23s-18.9 5.4-28 1.6L284 427.7l-68.5 74.1c-8.9 9.7-22.9 12.9-35.2 8.1S160 493.2 160 480V396.4c0-4 1.5-7.8 4.2-10.7L331.8 202.8c5.8-6.3 5.6-16-.4-22s-15.7-6.4-22-.7L106 360.8 17.7 316.6C7.1 311.3 .3 300.7 0 288.9s5.9-22.8 16.1-28.7l448-256c10.7-6.1 23.9-5.5 34 1.4z"/></svg>
+                        <FontAwesomeIcon className="svgSend" icon={faPaperPlane} />
                     </button>
                 </form>
             </div>

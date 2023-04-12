@@ -8,13 +8,10 @@ export class ChannelDto {
 	@IsNotEmpty() @IsString() readonly name: string;
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
-	@IsNotEmpty() @IsNumber() readonly opNumber: number;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
-	@IsNotEmpty() @IsBoolean() readonly onlyOpCanTalk: boolean;
-	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
 	readonly normalUsers: UserDto[];
 	readonly opUsers: UserDto[];
-	readonly godUser?: UserDto;
+	readonly godUser: UserDto;
+	readonly bannedUsers: UserDto[];
 	readonly messages: MessageChannelDto[];
 }

@@ -1,21 +1,20 @@
 import { useContext, useState, useRef, useEffect } from "react";
-import SocketContext from "../context";
+import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
-import { IChannel } from "../../models";
+import { IChannel } from "./Chat_models";
 
 function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
-    const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
+    const { register, formState: { errors }, setValue, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
         name: "",
         password: false,
         channelPass: "",
-        inviteOnly: false,
-        persistant: false,
-        onlyOpCanTalk: false, 
-        hidden: false } 
+        inviteOnly: false } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
+    const [isPassword, setIsPassword] = useState<boolean>(false);
+    const [isInviteOnly, setIsInviteOnly] = useState<boolean>(false);
     const ref = useRef<HTMLDivElement>(null);
 
     const handleClickOutside = (e: any) => {
@@ -39,20 +38,28 @@ function Popup(props: {handleClose: any}) {
         }
     }, [ref]);
 
-    const changeState = (event: any) => {
+    const changeStatePassword = (event: any) => {
         setShowChannelPass(event.target.checked);
+        setIsPassword(event.target.checked);
+        setIsInviteOnly(false);
+        setValue("password", event.target.checked);
+        setValue("inviteOnly", false);
+    }
+
+    const changeStateInviteOnly = (event: any) => {
+        setShowChannelPass(false);
+        setIsPassword(false);
+        setIsInviteOnly(event.target.checked);
+        setValue("password", false);
+        setValue("inviteOnly", event.target.checked);
     }
 
     const onSubmit = (data: IChannel) => {
-        console.log(data)
         socket.emit('createChannel', {
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            persistant: data.persistant,
-            onlyOpCanTalk: data.onlyOpCanTalk,
-            hidden: data.hidden,
+            inviteOnly: data.inviteOnly
         });
         props.handleClose();
     };
@@ -70,9 +77,17 @@ function Popup(props: {handleClose: any}) {
                     />
                     {errors.name && <div className="logError">Channel name is required</div>}
                 </section>
-                <section>
-                    <label className="labelName">Password</label>
-                    <input type="checkbox" {...register("password")} onChange={changeState}/>
+                <div className="rawCheckbox">
+                    <section>
+                        <input type="checkbox" {...register("password")} checked={isPassword} onChange={changeStatePassword}/>
+                        <label className="labelName">Password</label>
+                    </section>
+                    <section>OR</section>
+                    <section>
+                        <input type="checkbox" {...register("inviteOnly")} checked={isInviteOnly} onChange={changeStateInviteOnly}/>
+                        <label className="labelName">Invite Only</label>
+                    </section>
+                </div>
                     {showChannelPass && (
                         <input {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                         type="password"
@@ -80,27 +95,6 @@ function Popup(props: {handleClose: any}) {
                         />
                     )}
                     {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
-                </section>
-                <div className="rawCheckbox">
-                    <section>
-                        <input type="checkbox" {...register("inviteOnly")}/>
-                        <label className="labelName">Invite Only</label>
-                    </section>
-                    <section>
-                        <input type="checkbox" {...register("persistant")}/>
-                        <label className="labelName">Persistant</label>
-                    </section>
-                </div>
-                <div className="rawCheckbox">
-                    <section>
-                        <input type="checkbox" {...register("onlyOpCanTalk")}/>
-                        <label className="labelName">Only OP can talk</label>
-                    </section>
-                    <section>
-                        <input type="checkbox" {...register("hidden")}/>
-                        <label className="labelName">Hidden</label>
-                    </section>
-                </div>
                 <button className="button" type="submit">Create</button>
             </form>
         </div>

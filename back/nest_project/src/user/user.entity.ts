@@ -2,6 +2,7 @@ import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
+import { FriendEntity } from '../chat/relation/friend/friend.entity';
 
 @Entity()
 export class UserEntity {
@@ -36,6 +37,9 @@ export class UserEntity {
   })
   channelsAsGod: ChannelEntity[];
 
+  @ManyToMany(() => ChannelEntity, (channel) => channel.bannedUsers)
+  channelsAsBanned: ChannelEntity[];
+
   @OneToMany(() => MessagePrivateEntity, (message) => message.receiver)
   messagesReceived: MessagePrivateEntity[];
 
@@ -56,5 +60,17 @@ export class UserEntity {
 
   @Column({nullable: true})
   avatarSvg: string;
-  
+
+  @OneToMany(() => FriendEntity, (request) => request.sender)
+  requestsSend : FriendEntity[];
+
+  @OneToMany(() => FriendEntity, (request) => request.receiver)
+  requestsReceived : FriendEntity[];
+
+  @ManyToMany(() => UserEntity, (user) => user.blockedMeList)
+  @JoinTable()
+  blockList: UserEntity[];
+
+  @ManyToMany(() => UserEntity, (user) => user.blockList)
+  blockedMeList: UserEntity[];
 }
