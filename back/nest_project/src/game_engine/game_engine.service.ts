@@ -13,7 +13,7 @@ import { GameInputDTO } from 'src/game_update_center/game_update_center.dto';
 /**
  * use to store info on a ball
  */
-interface ballpos {
+interface BallPosition {
 	x: number,
 	y: number,
 	r: number,
@@ -22,25 +22,35 @@ interface ballpos {
 /**
  * use to share the game state
  */
-interface gameState {
-	ballPosition: ballpos[],
+interface GameState {
+	BallPositionition: BallPosition[],
 	paddleOne: {x: number, y: number },
 	paddleTwo: {x: number, y:number },
+}
+
+interface MatchState {
+	player1_login: string;
+    player2_login: string;
+    player1_score: number;
+    player2_score: number;
+    super_game_mode: boolean;
+    game_has_started: boolean;
 }
 
 @Injectable()
 export class GameEngineService {
 
 	// game contente
-	gs: gameState;
+	gs: GameState;
+	ms: MatchState;
 	ballz: Ball[];
 	wallz: Wall[];
 
 	// player related data
 	pl1: Socket;
 	pl2: Socket;
-	userid1: UserEntity;
-	userid2: UserEntity;
+	user1: UserEntity;
+	user2: UserEntity;
 	pl1_ready: boolean;
 	pl2_ready: boolean;
 	pl1_score: number;
@@ -85,8 +95,8 @@ export class GameEngineService {
 		this.pl2_score = 0;
         this.cooldown_start = 0;
 
-		// filling the gamestate
-		this.gs = { ballPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
+		// filling the GameState
+		this.gs = { BallPositionition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
@@ -107,16 +117,20 @@ export class GameEngineService {
 	 * set how's gonna play the game
 	 * @param player1 
 	 * @param player2 
-	 * @param userid1 player1 data
-	 * @param userid2 player2 data
+	 * @param user1 player1 data
+	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, userid1: UserEntity, userid2: UserEntity) {
-		this.userid1 = userid1;
-		this.userid2 = userid2;
-		console.log("first : ", userid1, "\n\nsecond :", userid2);
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity) {
+		this.user1 = user1;
+		this.user2 = user2;
+		console.log("first : ", user1, "\n\nsecond :", user2);
 		this.pl1 = player1;
 		this.pl2 = player2;
 	}
+
+	update_match_state() {
+        this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
+    }
 
 	/**
 	 * tell the correct wall to process the input of the client
@@ -162,6 +176,7 @@ export class GameEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
+            server.emit("Match_Update", this.ms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     thiss.pl1_ready = false;
@@ -182,8 +197,8 @@ export class GameEngineService {
 		let match: CreateMatchDto = new CreateMatchDto();
 		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
 		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
-		match.winner = this.pl1_score > this.pl2_score ? this.userid1 : this.userid2;
-		match.loser = this.pl1_score < this.pl2_score ? this.userid1 : this.userid2;
+		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
+		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
 		let result = await this.matchservice.findMatch();
@@ -205,16 +220,16 @@ export class GameEngineService {
 			this.ballz[1] = big_ball;
 			this.wallz[0].reset_self_y_position();
 			this.wallz[1].reset_self_y_position();
-			// fill the gamestate
+			// fill the GameState
 			this.ballz.forEach((ball, index) => {
-				let bp: ballpos;
+				let bp: BallPosition;
 				bp = {
 					x: ball.position.x,
 					y: ball.position.y,
 					r: ball.r,
 				}
-				// console.log("test", this.gs.ballPosition[index]);
-				this.gs.ballPosition[index] = bp;
+				// console.log("test", this.gs.BallPositionition[index]);
+				this.gs.BallPositionition[index] = bp;
 			});
 			this.gs.paddleOne = {
 				x: this.wallz[0].x_position - 0.015,
@@ -239,9 +254,11 @@ export class GameEngineService {
 			// check for goal
 			if (r === 1) {
 				this.pl1_score++;
+				this.update_match_state();
 			}
 			else if (r === 2) {
 				this.pl2_score++;
+				this.update_match_state();
 			}
 			// if end of game save score and quit
 			if (this.pl1_score > 4 || this.pl2_score > 4) {
@@ -270,14 +287,14 @@ export class GameEngineService {
 
 		// update the state of the game
 		this.ballz.forEach((ball, index) => {
-			let bp: ballpos;
+			let bp: BallPosition;
 			bp = {
 				x: ball.position.x,
 				y: ball.position.y,
 				r: ball.r,
 			}
-			// console.log("test", this.gs.ballPosition[index]);
-			this.gs.ballPosition[index] = bp;
+			// console.log("test", this.gs.BallPositionition[index]);
+			this.gs.BallPositionition[index] = bp;
 		});
 		this.gs.paddleOne = {
             x: this.wallz[0].x_position - 0.015,

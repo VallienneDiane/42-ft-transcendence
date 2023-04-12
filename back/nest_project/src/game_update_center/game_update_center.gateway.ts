@@ -60,6 +60,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   game_instance: Game_Instance[]; // all gane instance
   private_space: Waiting_Socket[]; // waiting room for private matchmaking
   public_space: Waiting_Socket[]; // waiting room for public matchmaking
+  waiting_on_match: Set<string>;
 
   constructor(
     private userservice: UserService, // injecting instance of service to be use for token verification and match's goal storing purpuse
@@ -72,6 +73,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.game_instance = [];
     this.public_space = [];
     this.private_space = [];
+    this.waiting_on_match = new Set<string>();
   }
 
   /**
@@ -114,7 +116,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let players = new Login_Sharing();
     players.player1_login = this.socketID_UserEntity.get(player1.id).login;
     players.player2_login = this.socketID_UserEntity.get(player2.id).login;
-    this.server.to(player1.id).emit('players', players);
+    this.server.to(player1.id).emit('Players', players);
     this.logger.debug("a game room has been created");
     console.log("leaving StartGameRoom function");
   }
@@ -129,6 +131,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
     console.log("entering handlePublicMatchmaking function");
 
+    // check if client is already in a waiting queu or game
+    if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
+      this.server.to(client.id).emit("Already_On_Match");
+      return;
+    }
     // check if there is already a waiting socket for a potential matchmaking
     for (let index = 0; index < this.public_space.length; index++) {
       const element = this.public_space[index];
@@ -152,6 +159,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     ws.super_game_mode = body.super_game_mode;
     ws.waiting_client_socket = client;
     ws.target_client_login = "";
+    this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).id);
     console.log("the waiting socket to be added", ws);
     this.public_space.push(ws);
     console.log("leaving handlePublicMatchmaking function");
@@ -227,7 +235,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       for (let j = 0; j < game.spectators.length; j++) { // TODO update the room if nessessary
         const spec = game.spectators[j];
         if (client === spec) {
-          this.server.to(game.players[0].id).emit('spectator_disconnection');
+          this.server.to(game.players[0].id).emit('Spectator_Disconnection');
           game.spectators.splice(j, 1);
           console.log("leaving find_and_remove function finding a spectator to be removed");
           return;
@@ -238,7 +246,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       for (let j = 0; j < game.players.length; j++) {
         const player = game.players[j];
         if (player === client) {
-          this.server.to(game.players[0].id).emit('player_disconnection', this.socketID_UserEntity.get(player.id).login);
+          this.server.to(game.players[0].id).emit('Player_Disconnection', this.socketID_UserEntity.get(player.id).login);
           game.game_engine.stop_game(client);
           this.game_instance.splice(i, 1);
           console.log("leaving find_and_remove function having found a player and stoping the ongoing game");
@@ -280,6 +288,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
 
+    // check if client is already in a waiting queu or game
+    if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
+      this.server.to(client.id).emit("Already_On_Match");
+      return;
+    }
     // check the existing waiting socket to find a potential match
     for (let i = 0; i < this.private_space.length; i++) {
       const private_waiting_socket = this.private_space[i];
@@ -307,6 +320,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     private_room.waiting_client_socket = client;
     private_room.target_client_login = body.target;
     private_room.super_game_mode = body.super_game_mode;
+    this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).id);
     this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
     this.private_space.push(private_room);
 
