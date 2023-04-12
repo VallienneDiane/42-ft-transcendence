@@ -11,6 +11,7 @@ import { UserEntity } from "src/user/user.entity";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
 import { FriendService } from "./relation/friend/friend.service";
 import { FriendEntity } from "./relation/friend/friend.entity";
+import { MuteService } from "./mute/mute.service";
 
 @Injectable({})
 export class ChatService {
@@ -19,7 +20,8 @@ export class ChatService {
         private messagePrivateService: MessagePrivateService,
         private channelService: ChannelService,
         private userService: UserService,
-        private friendService: FriendService
+        private friendService: FriendService,
+        private muteService: MuteService
     ) {}
 
     private goBackToGeneral(client: Socket) {
@@ -34,6 +36,7 @@ export class ChatService {
             opUsers: [],
             godUser: undefined,
             bannedUsers: [],
+            usersMuted: [],
             messages: []
         }
         client.emit('newLocChannel', {channel: locGeneral, status: "normal"}, []);
@@ -538,6 +541,7 @@ export class ChatService {
                             normalUsers: [],
                             opUsers: [],
                             bannedUsers: [],
+                            usersMuted: [],
                             godUser: user
                         };
                         this.channelService.create(newChannel)
