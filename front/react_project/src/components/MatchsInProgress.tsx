@@ -3,11 +3,13 @@ import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 
 
-interface Match {
-    login1: string,
-    login2: string,
-    score1: number,
-    score2: number
+interface MatchState {
+    player1_login: string;
+    player2_login: string;
+    player1_score: number;
+    player2_score: number;
+    super_game_mode: boolean;
+    game_has_started: boolean;
 }
 
 interface inProgressProps {
@@ -15,10 +17,10 @@ interface inProgressProps {
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
-    const [matchs, setMatchs] = useState<Match[]>([
-        {login1: "JOUEUR1", login2: "JOUEUR2", score1: 3, score2: 1},
-        {login1: "Roger", login2: "Connard", score1: 2, score2: 0},
-        {login1: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", login2: "Oui", score1: 0, score2: 10},
+    const [matchs, setMatchs] = useState<MatchState[]>([
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
 
@@ -26,8 +28,9 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         // triggered when receiving socket data, update position of elements
         if (props.socket) {
 
-            props.socket.on('matchsInProgress', (matchs: Match[]) => {
-                setMatchs(matchs);
+            props.socket.on('Match_Update', (match: MatchState) => {
+                console.log("Match_Update ", match);
+                // setMatchs(matchs);
             })
 
         }
@@ -38,16 +41,16 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         <div id="matchsInProgress">
             <table>
                 <thead>
-                    <tr>
+                    {/* <tr>
                         <th colSpan="4">Matchs in progress</th>
                     </tr>
                     <tr>
                         <th colSpan="1">PLAYER 1</th>
                         <th colSpan="2">SCORE</th>
                         <th colSpan="1">PLAYER 2</th>
-                    </tr>
+                    </tr> */}
                 </thead>
-                <tbody>
+                {/* <tbody>
                     {matchs.map((match: Match) => {
                         return (
                             <tr>
@@ -58,7 +61,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                             </tr>
                         )
                     })}
-                </tbody>
+                </tbody> */}
             </table>
         </div>
     )

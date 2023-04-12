@@ -130,10 +130,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   @SubscribeMessage('public matchmaking')
   handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
     console.log("entering handlePublicMatchmaking function");
-
+    
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
       this.server.to(client.id).emit("Already_On_Match");
+      // console.log("Already in match");
       return;
     }
     // check if there is already a waiting socket for a potential matchmaking
@@ -145,8 +146,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("client : ", element.waiting_client_socket.id, "and client : ", client.id, "have been match together in a game instance with super_game_mode : ", body.super_game_mode);
 
         // create a game instance for them
-        this.StartGameRoom(element.waiting_client_socket, client, body.super_game_mode);
-
+        this.StartGameRoom(element.waiting_client_socket, client, body.super_game_mode)
         // remove the waiting socket from the queu
         this.public_space.splice(index, 1);
         this.logger.debug("game room created");
