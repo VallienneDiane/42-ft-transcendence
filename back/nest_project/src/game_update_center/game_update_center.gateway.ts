@@ -89,7 +89,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param super_game_mode the boolean representing the super_game_mode version of the game
    */
   StartGameRoom(@ConnectedSocket() player1: Socket, @ConnectedSocket() player2: Socket, super_game_mode: boolean) {
-    console.log("entering StartGameRoom function", player1, player2);
+    console.log("entering StartGameRoom function", player1.id);
     // make the player join the room of name player1.socket.id
     player1.join(player1.id);
     player2.join(player1.id);
@@ -102,7 +102,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     else { p.game_engine = new PongEngineService(this.userservice, this.matchservice); }
   
     // setting the player and UserEntity of player for the gameEngine
-    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id));
+    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server);
     p.players = [];
     p.spectators = [];
     p.players.push(player1);
@@ -117,6 +117,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     players.player1_login = this.socketID_UserEntity.get(player1.id).login;
     players.player2_login = this.socketID_UserEntity.get(player2.id).login;
     this.server.to(player1.id).emit('Players', players);
+    console.log("JUST EMITED PLAYERS EVENT -------------------------------------------------------------------------------------");
     this.logger.debug("a game room has been created");
     console.log("leaving StartGameRoom function");
   }
@@ -129,8 +130,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
   @SubscribeMessage("Public_Matchmaking")
   handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
-    console.log("entering handlePublicMatchmaking function");
     
+    console.log("JUST RECEIVED PUBLIC REQUEST EVENT -------------------------------------------------------------------------------------");
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
       this.server.to(client.id).emit("Already_On_Match");
@@ -139,6 +140,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if there is already a waiting socket for a potential matchmaking
     for (let index = 0; index < this.public_space.length; index++) {
       const element = this.public_space[index];
+      console.log("entering handlePublicMatchmaking function");
 
       // if a waiting socket with the same game_mode is already waiting
       if (element.super_game_mode === body.super_game_mode) {
@@ -181,14 +183,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    */
  @SubscribeMessage("Ready")
   handleReady(@ConnectedSocket() client: Socket) { // TODO check on the engine side what happen if the player send a ready message in a ongoing match
-    
+    console.log("JUST RECEIVED READY EVENT -------------------------------------------------------------------------------------");
+
     console.log("entering handleReady function");
     for (let i = 0; i < this.game_instance.length; i++) {
       const game = this.game_instance[i];
       for (let j = 0; j < game.players.length; j++) {
         const player = game.players[j];
         if (player === client) {
-          game.game_engine.set_player_ready(player, this.server);
+          game.game_engine.set_player_ready(player);
           return;
         }
       }
