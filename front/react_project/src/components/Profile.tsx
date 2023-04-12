@@ -40,7 +40,6 @@ export default function Profile() {
     
     useEffect(() => {
         console.log('user', user);
-        // console.log('svg user', user?.avatarSvg, typeof( user?.avatarSvg));
     }, [user])
     
     return (

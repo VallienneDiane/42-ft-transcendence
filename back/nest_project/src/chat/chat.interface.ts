@@ -1,5 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { Namespace, Socket } from "socket.io";
+import { UserEntity } from "src/user/user.entity";
+import { ChannelEntity } from "./channel/channel.entity";
 import { UserRoomHandler } from "./chat.classes";
 
 export interface IMessageChat {
@@ -17,30 +19,29 @@ export interface IMessageToSend {
     content: string;
 }
 
-export interface IChannel {
-    channelName: string;
+export interface IChannelToEmit {
+    id: string;
+    date: Date;
+    name: string;
     password: boolean;
     inviteOnly: boolean;
     persistant: boolean;
     onlyOpCanTalk: boolean;
     hidden: boolean;
-    channelPass?: string;
+    normalUsers: IUserToEmit[];
+    opUsers: IUserToEmit[];
+    godUser?: IUserToEmit;
+}
+
+export interface IUserToEmit {
+    id: string;
+    login: string;
 }
 
 //Trick to make typescript agree (typescript sucks a lot)
 export interface IToken {
     login?: string;
-    sub?: number;
+    sub?: string;
     iat?: number;
     exp?: number;
-}
-
-//Interface to pass as argument at each ChatModuleHandlers
-export interface IHandle {
-    chatNamespace: Namespace;
-    client: Socket;
-    roomHandler: UserRoomHandler;
-    logger: Logger;
-    message?: IMessageChat;
-    channelEntries?: IChannel;
 }

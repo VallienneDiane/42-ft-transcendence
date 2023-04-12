@@ -64,7 +64,7 @@ export class UserController {
     //update avatar picture
     @UseGuards(JwtAuthGuard)
     @Post('user/uploadAvatar')
-    async uploadAvatar(@Body() data: {id: number, file: string}, @Headers('Authorization') token: string): Promise<void> {
+    async uploadAvatar(@Body() data: {id: string, file: string}, @Headers('Authorization') token: string): Promise<void> {
         return this.userService.loadAvatar(data.id, data.file);
     }
 
