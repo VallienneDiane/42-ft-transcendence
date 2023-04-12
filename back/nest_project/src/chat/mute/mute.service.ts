@@ -41,6 +41,17 @@ export class MuteService {
         return false;
     }
 
+    async getCurrentMutedInChannel(channelId: string): Promise<string[]> {
+        const channelMute = await this.channelService.getMutedListWithJoin(channelId);
+        let array: string[] = [];
+        for (let elt of channelMute) {
+            const response = await this.checkMuteLine(elt.id);
+            if (response)
+                array.push(elt.user.id)
+        }
+        return array;
+    }
+
     async muteUser(userId: string, channelId: string, minutes: number) {
 		let muteDate = new Date(new Date().getTime() + (minutes * 60000));
         const user = await this.userService.findById(userId);
