@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { channel } from "diagnostics_channel";
 import { UserService } from "src/user/user.service";
@@ -11,7 +11,9 @@ export class MuteService {
     constructor (
         @InjectRepository(MuteEntity)
         private readonly muteRepository: Repository<MuteEntity>,
+        @Inject(UserService)
         private readonly userService: UserService,
+        @Inject(ChannelService)
         private readonly channelService: ChannelService
     ) {}
 

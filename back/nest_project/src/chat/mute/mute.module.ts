@@ -3,6 +3,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { UserModule } from "src/user/user.module";
 import { ChannelModule } from "../channel/channel.module";
 import { MuteEntity } from "./mute.entity";
+import { MuteService } from "./mute.service";
 
 @Module({
     imports: [
@@ -10,7 +11,7 @@ import { MuteEntity } from "./mute.entity";
         ChannelModule,
         UserModule
     ],
-    providers: [MuteEntity],
-    exports: [MuteEntity]
+    providers: [MuteService],
+    exports: [MuteService]
 })
 export class MuteModule {}
