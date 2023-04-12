@@ -25,7 +25,6 @@ function ModifyChannel(props: {channel: IChannel}) {
     }
 
     const onSubmit = (data: IChannel) => {
-        console.log(data)
         socket.emit('modifyChannel', {
             id: props.channel.id,
             name: data.name,
@@ -49,7 +48,7 @@ function ModifyChannel(props: {channel: IChannel}) {
             </li>
             {showChannelPass && (
                 <li>
-                    <input className="inputChannel" {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
+                    <input className="inputPassword" {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                         type="password"
                         placeholder=""
                     /> 
@@ -94,7 +93,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
      
     const kickUser = (e: any) => {
-        console.log(e.currentTarget.value, props.dest.id);
+        // console.log(e.currentTarget.value, props.dest.id);
         socket.emit("kickUser", {userToKick: e.currentTarget.value, channelId: props.dest.id});
     }
     
@@ -119,12 +118,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     const deOp = (e: any) => {
-        console.log("deOp!");
+        // console.log("deOp!");
         socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
     }
     
     const doOp = (e: any) => {
-        console.log("doOp!");
+        // console.log("doOp!");
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
@@ -145,11 +144,8 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     useEffect(() => {
-        console.log("status", props.dest.status)
-        console.log(props.dest.id)
         socket.emit('listUsersChann', {channelId: props.dest.id}); 
         socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string, connected: boolean}[]) => {
-            console.log("list", list);
             setMembers(list);
         })
         socket.on("userLeaveChannel", (userId: string) => {
@@ -297,7 +293,6 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game</li>
                     <li onClick={blockUser}>Block</li>
-                    {/* {props.dest.isChannel && props.dest.isOp && <li onClick={kickUser}>Kick</li>} */}
                 </ul>
             </div>
         </div>

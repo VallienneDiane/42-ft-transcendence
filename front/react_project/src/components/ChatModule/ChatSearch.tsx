@@ -276,7 +276,6 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
         });
 
         this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
-            console.log("channel", blop.channel)
             let newHistory: IMessage[] = [];
             for (let elt of array) {
                 newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
