@@ -1,7 +1,7 @@
 @import url("styles/Base.css");
 
 *:not(.react-switch-bg > div, .react-switch-bg > div > svg) {
-  background-color: var(--prim-color);
+  /* background-color: var(--prim-color); */
   box-sizing: border-box;
   margin:0;
   padding:0;
@@ -23,6 +23,7 @@ button:hover {
 }
 
 .App {
+  background-color: var(--prim-color);
   display: flex;
   /* background-color: rgb(75, 29, 138); */
   /* border: 2px black dotted; */
