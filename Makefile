@@ -10,7 +10,7 @@ run :
 down:
 	docker-compose -f docker-compose.yml down
 
-re : clean all
+re : prune all
 
 ps :
 	docker images
