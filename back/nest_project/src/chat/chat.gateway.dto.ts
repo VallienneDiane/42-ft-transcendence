@@ -52,3 +52,7 @@ export class modifyChannelDto {
     @IsOptional() @IsString() readonly channelPass: string;
     @IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
 }
+
+export class blockUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+}

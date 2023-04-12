@@ -3,6 +3,7 @@ import { ChannelDto } from "src/chat/channel/channel.dto";
 import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
+import { UserEntity } from "./user.entity";
 
 export class UserDto {
     @IsString() readonly id: string;
@@ -21,4 +22,6 @@ export class UserDto {
     @IsNotEmpty() avatarSvg: string;
     readonly requestsSend: FriendEntity[];
     readonly requestsReceived: FriendEntity[];
+    readonly blockList: UserEntity[];
+    readonly blockedMeList: UserEntity[];
 }
