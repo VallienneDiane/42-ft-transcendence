@@ -49,6 +49,14 @@ export class AuthService {
       access_token: this.jwtService.sign(payload)
     }
   }
+
+  async genToken42(id42: number){
+    const validUser = await this.userService.findById42(id42);
+    const payload = {login: validUser.login, sub: validUser.id};
+    return {
+      access_token: this.jwtService.sign(payload)
+    }
+  }
   // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
   //otp auth = one time password compatible with Google authentificator
   async decodeToken(fullToken: string): Promise<{ id: string, login: string }>{

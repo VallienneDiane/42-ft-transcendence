@@ -1,4 +1,4 @@
-import { Controller, Body, Post, Get, UseGuards, Headers, Query } from '@nestjs/common';
+import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
 import { UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
@@ -20,12 +20,10 @@ export class AuthController {
     const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.API_UID + "&redirect_uri=" + api_callback_url + "&response_type=code";
     return (url);
   }
-  //exchange code send by api42 against token 42 to get user infos, if user unknow create in db
-  //then generate access token to navigate on our website
+  //exchange code send by api42 against token 42 to get user infos
   @Get('/callback')
   async callback(@Query('code') code: string) {
     const tokenApi42 = await this.authService.validateFortyTwo(code);
-    console.log("token api " , tokenApi42);
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',
       headers: {
@@ -33,38 +31,21 @@ export class AuthController {
       } 
     });
     const data = await response.json();
-    if(!await this.userService.findByLogin(data.login)) {
-      const newUser42: UserEntity = {
-        id: <string>null,
-        login: data.login,
-        email: data.email,
-        password: <string>null,
-        twoFactorSecret: <string>null,
-        isTwoFactorEnabled: <boolean>null,
-        qrCode: <string>null,
-        avatarSvg: data.image.link,
-        channelsAsGod: [],
-        channelsAsNormal: [],
-        channelsAsOp: [],
-        channelsAsBanned: [],
-        messagesChannel: [],
-        messagesReceived: [],
-        messagesSend: [],
-        requestsSend: [], 
-        requestsReceived: [],
-        blockList: [],
-        blockedMeList: []
-      };
-      console.log("create user42", newUser42);
-      if(newUser42)
-        await this.userService.create(newUser42);
-    }
-    const access_token = await this.authService.genToken(data.login);
-    return { 
-      token: access_token,
+    return {
+      id42: data.id,
       login: data.login,
+      email: data.email,
+      avatarSvg: data.image?.link,
     }
   }
+
+  @Post('user/create')
+  async createUser(@Body() newUser: UserDto) {
+    await this.userService.create(newUser);
+    const token = this.authService.genToken(newUser.login);
+    return token;
+  }
+
   //check login and password with local stratgey of passport
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
@@ -75,6 +56,12 @@ export class AuthController {
   @Post('auth/generateToken')
   async generateToken(@Body() data: UserDto) {
     const token = await this.authService.genToken(data.login);
+    return token;
+  }
+
+  @Post('auth/generateToken42')
+  async generateToken42(@Body() data: UserDto) {
+    const token = await this.authService.genToken42(data.id42);
     return token;
   }
   //enable authenticate with two factor (google authenticator)
@@ -111,6 +98,16 @@ export class AuthController {
       isCodeValid,
     }
   }
+  @Post('auth/verifyCode42')
+  async verifyCode2fa42(@Body() data: VerifyCodeDto) {
+    const user = await this.userService.findById42(data.id42);
+    const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
+    const is2faActive = await this.userService.turnOn2fa(user);
+    return {
+      is2faActive,
+      isCodeValid,
+    }
+  }
   //disable two factor authentication
   @UseGuards(JwtAuthGuard)
   @Post('auth/disable2fa')
@@ -132,6 +129,12 @@ export class AuthController {
   @Post('auth/is2faActive')
   async is2faActive(@Body() user: UserDto) {
     const validUser = await this.userService.findByLogin(user.login);
+    const is2faActive = validUser.isTwoFactorEnabled;
+    return {is2faActive};
+  }
+  @Post('auth/is2faActive42')
+  async is2faActive42(@Body() user: UserDto) {
+    const validUser = await this.userService.findById42(user.id42);
     const is2faActive = validUser.isTwoFactorEnabled;
     return {is2faActive};
   }

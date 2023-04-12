@@ -8,14 +8,19 @@ import { Header } from "./ChatSidebar";
 import SearchChat from "./ChatSearch";
 import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 
 class ChannelDMList extends React.Component<{}, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
     dms: {userName: string, userId: string, connected: boolean}[], 
+    // waitingMsg: boolean,
+
     me: JwtPayload}> {
     constructor(props: {}) {
         super(props);
         this.state = {channels: [], dms: [], me: accountService.readPayload()!};
+        // this.state = {channels: [], dms: [], waitingMsg: false, me: accountService.readPayload()!};
         this.changeLoc = this.changeLoc.bind(this);
         this.initList = this.initList.bind(this);
         this.checkOnline = this.checkOnline.bind(this);
@@ -35,6 +40,9 @@ class ChannelDMList extends React.Component<{}, {
         this.context.socket.emit('myDM');
         this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
             this.setState({ dms: strs }) });
+        this.context.socket.on('pingedBy', (login: string) => {
+            // this.setState({ waitingMsg: true });
+        })
     }
 
     checkOnline() {
@@ -146,11 +154,22 @@ class ChannelDMList extends React.Component<{}, {
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
-                        { this.state.dms.map((dm, id) => { 
-                           if (this.state.me.login != dm.userName)
-                           { return (<li key={id}><button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})}>{dm.userName}</button><div className={dm.connected? "circle online" : "circle offline"}></div></li> ) }
-                        })}
-                    </ul>
+                    {this.state.dms.map((dm, id) => {
+                    if (this.state.me.login !== dm.userName) {
+                        return (
+                        <li key={id}>
+                            <button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})}>
+                            {/* <button onClick={() => this.changeLoc({Loc: dm.userName, isChannel: false})} className={this.state.waitingMsg ? "waitingMsg" : ""}> */}
+                                {dm.userName}
+                                {/* { this.state.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  } */}
+                            </button>
+                            <div className={dm.connected? "circle online" : "circle offline"}></div>
+                        </li>
+                        );
+                    }
+                    return null;
+                    })}
+                </ul>
                 </React.Fragment>
             )}
         </div>

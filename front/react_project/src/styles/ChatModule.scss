@@ -245,8 +245,17 @@
 						justify-content: space-between;
 						padding: 0.2rem 0.5rem;
 						& button {
+							width: 100%;
+							text-align: left;
 							cursor: pointer;
+							& #msg {
+								padding-left: 0.5em;
+							}
 						}
+						& .waitingMsg {
+							font-style: bold;
+						}
+						
 						& .circle {
 							width: 8px;
 							height: 8px;

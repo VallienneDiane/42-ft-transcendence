@@ -4,4 +4,5 @@ import { UserDto } from "src/user/user.dto";
 export class VerifyCodeDto {
     @IsNotEmpty() @IsString() code: string
     @IsNotEmpty() @IsString() login: string
+    @IsNotEmpty() @IsNumber() id42: number
   }
