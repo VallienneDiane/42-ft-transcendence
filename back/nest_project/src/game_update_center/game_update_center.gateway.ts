@@ -3,7 +3,7 @@
  */
 
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'; // socket event handling stuff
-import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
+import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SpectatorRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
 import { GameEngineService } from 'src/game_engine/game_engine.service'; // use to acces the gameEngine of the super mode
 import { PongEngineService } from 'src/pong_engine/pong_engine.service'; // use to acces the gameEngine of the classic mode
 import { MatchService } from 'src/match/Match.service'; // use to acces function for the MatchEntity in the gameEngine to store goal
@@ -127,7 +127,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param body a PublicGameRequestDTO containing the game type that the user want to play
    * @returns nothing
    */
-  @SubscribeMessage('public matchmaking')
+  @SubscribeMessage("Public_Matchmaking")
   handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
     console.log("entering handlePublicMatchmaking function");
 
@@ -165,11 +165,22 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handlePublicMatchmaking function");
   }
 
+  @SubscribeMessage("Spectator_Request")
+  handleSpectatorRequest(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
+    for (let index = 0; index < this.game_instance.length; index++) {
+      const game = this.game_instance[index];
+      if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
+        game.spectators.push(client);
+        client.join(game.players[0].id);
+      }
+    }
+  }
+
   /**
    * find in witch game instance the client is a player and toggle his ready state
    * @param client the Socket from Socket.io
    */
- @SubscribeMessage('ready')
+ @SubscribeMessage("Ready")
   handleReady(@ConnectedSocket() client: Socket) { // TODO check on the engine side what happen if the player send a ready message in a ongoing match
     
     console.log("entering handleReady function");
@@ -198,7 +209,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // if not remove him
     if (user_entity === null) { // TODO test if it work
       console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
-      client.leave(client.id);
+      client.disconnect();
     }
 
     // if token is ok then store the UserEntity for quick acces
@@ -284,7 +295,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the client posting the request
    * @returns nothing
    */
-  @SubscribeMessage('private matchmaking')
+  @SubscribeMessage("Private_Matchmaking")
   handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
 
@@ -332,7 +343,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param body the input of the client containg one non empty string
    * @param client the client
   */
-  @SubscribeMessage('Game_Input')
+  @SubscribeMessage("Game_Input")
   OnGame_Input(@MessageBody() body: GameInputDTO, @ConnectedSocket() client: Socket) {
     // if the client is in game
     for (let i = 0; i < this.game_instance.length; i++) {
