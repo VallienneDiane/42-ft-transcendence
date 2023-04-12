@@ -57,6 +57,7 @@ export class FriendService {
 
 	async getRequestPendingSend(id: string): Promise<UserEntity[]> {
 		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(id);
+		// if (requestsSend)
 		const list: UserEntity[] = [];
 		for (let link of requestsSend) {
 			if (link.state === "pending") {

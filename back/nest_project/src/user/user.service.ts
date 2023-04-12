@@ -197,7 +197,6 @@ export class UserService {
             .select("user.avatarSvg")
             .from(UserEntity, 'user')
             .getRawOne();
-        // console.log(userAvatar)
         return userAvatar;
     }
 

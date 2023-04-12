@@ -9,19 +9,7 @@ import { JwtAuthGuard } from "src/auth_strategies/jwt-auth.guard";
 @Controller()
 export class FriendController {
 	constructor(
-		private friendService: FriendService,
-		private userService: UserService) {}
-
-	// @UseGuards(JwtAuthGuard)
-	// @Post('friendRequest')
-	// async create(@Body() data: addFriendDto) {
-	// 	const check = await this.friendService.checkRequest(data.senderId, data.receiverId);
-	// 	if (check) {
-	// 		let sender: UserEntity = await this.userService.findById(data.senderId);
-	// 		let receiver: UserEntity = await this.userService.findById(data.receiverId);
-	// 		await this.friendService.create(sender, receiver);
-	// 	}
-	// }
+		private friendService: FriendService) {}
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listFriends/:user')
