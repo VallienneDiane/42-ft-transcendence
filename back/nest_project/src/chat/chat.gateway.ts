@@ -104,11 +104,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
-    @SubscribeMessage("WhereIam")
+    @SubscribeMessage("whereIam")
     handleWhereIam(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
+                this.logger.debug('whereIamEvent : ');
                 this.chatService.whereIamEvent(client, user.id, this.chatRoomHandler);
             }
             else

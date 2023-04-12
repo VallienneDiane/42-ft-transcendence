@@ -197,6 +197,7 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     changeLoc(newDest: IDest) {
+        console.log(newDest);
         this.setState({ dest: newDest });
     }
 

@@ -28,6 +28,7 @@ function App() {
       auth: { token: accountService.getToken() },
     });
     setSocket(newSocket);
+    newSocket.emit("whereIam");
   }
 
   function disconnect() {
