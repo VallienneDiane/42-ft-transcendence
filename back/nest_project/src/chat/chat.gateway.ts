@@ -104,6 +104,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage("WhereIam")
+    handleWhereIam(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.chatService.whereIamEvent(client, user.id, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
+
     /**
      * liste tous les channels dans lequels je ne suis pas enregistré.e
      * @param client 
