@@ -54,7 +54,6 @@ const LogSettings: React.FC = () => {
         schema.validate(data);
         accountService.verifyCode2faSettings(data)
             .then(response => {
-                ;
                 setActivate2fa(response.data.is2faActive);
             })
             .catch(error => console.log(error));
@@ -94,11 +93,13 @@ const LogSettings: React.FC = () => {
             {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
             {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ?
                 <div>
-                    <p>Scan the QRCode in your application </p>
+                    <p id="scan">Scan the QRCode in your application </p>
                     <form onSubmit={handleSubmit(verifySubmittedCode)}>
                         <input type="text" {...register("code")} name="code" placeholder="Enter the code" />
-                        {errors.code && <p className="errorsCode">{errors.code.message}</p>}
-                        <button type="submit">Submit</button>
+                        <div id="validateForm">
+                            {errors.code && <p className="errors">{errors.code.message}</p>}
+                            <button type="submit">Submit</button>
+                        </div>
                     </form>
                 </div> : null}
             {checked === true && is2faActive == true ? <p id="AuthActivate">Google Authentificator is activate</p> : null}
