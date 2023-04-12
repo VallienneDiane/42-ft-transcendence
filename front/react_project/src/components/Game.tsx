@@ -62,7 +62,7 @@ const Game: React.FC = () => {
         // countDownDiv.current!.classList.add('zoom')
 
         if (socket !== null && !matchInProgress) {
-            socket.emit('public matchmaking', {super_game_mode: false});
+            socket.emit('Public_Matchmaking', {super_game_mode: false});
              setWaitMatch(true);
         }
     }
@@ -70,7 +70,7 @@ const Game: React.FC = () => {
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socket !== null && !matchInProgress) {
-            socket.emit('public matchmaking', {super_game_mode: true});
+            socket.emit('Public_Matchmaking', {super_game_mode: true});
             setWaitMatch(true);
         }
     }

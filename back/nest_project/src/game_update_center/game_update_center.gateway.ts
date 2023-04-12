@@ -89,7 +89,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param super_game_mode the boolean representing the super_game_mode version of the game
    */
   StartGameRoom(@ConnectedSocket() player1: Socket, @ConnectedSocket() player2: Socket, super_game_mode: boolean) {
-    console.log("entering StartGameRoom function");
+    console.log("entering StartGameRoom function", player1, player2);
     // make the player join the room of name player1.socket.id
     player1.join(player1.id);
     player2.join(player1.id);
@@ -134,7 +134,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
       this.server.to(client.id).emit("Already_On_Match");
-      // console.log("Already in match");
       return;
     }
     // check if there is already a waiting socket for a potential matchmaking
