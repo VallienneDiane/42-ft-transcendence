@@ -21,3 +21,7 @@ export class PublicGameRequestDTO {
 export class GameInputDTO {
 	@IsString() @IsNotEmpty() input: string;
 }
+
+export class SpectatorRequestDTO {
+	@IsString() @IsNotEmpty() player1_login: string;
+}

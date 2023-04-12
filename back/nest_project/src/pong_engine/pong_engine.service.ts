@@ -26,6 +26,9 @@ interface GameState {
 	paddleTwo: {x: number, y:number },
 }
 
+/**
+ * use to store the match state
+ */
 interface MatchState {
     player1_login: string;
     player2_login: string;
@@ -33,6 +36,15 @@ interface MatchState {
     player2_score: number;
     super_game_mode: boolean;
     game_has_started: boolean;
+}
+
+/**
+ * use to send the match end state
+ */
+interface MatchEnd {
+    player1_login: string;
+    winner: string;
+    disconnection_occure: boolean;
 }
 
 @Injectable()
@@ -64,6 +76,8 @@ export class PongEngineService {
     loop: any; // set_interval function handle for stoping the game
     userservice;
     matchservice;
+    server: any;
+    match_state: MatchEnd;
 
     constructor (userservice: UserService, matchservice: MatchService) {
         // creating game object
@@ -86,6 +100,7 @@ export class PongEngineService {
         this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
+        this.match_state = {player1_login: "", winner: "", disconnection_occure: false};
         console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
     }
 
@@ -102,11 +117,13 @@ export class PongEngineService {
         this.user1 = user_entity1;
         this.user2 = user_entity2;
         this.update_match_state();
+        this.match_state.player1_login = this.user1.login;
         console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
     }
 
     update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
+        this.server.to(this.pl1.id).emit("Match_Update", this.ms);
     }
     
     /**
@@ -131,29 +148,18 @@ export class PongEngineService {
 		else {
 			this.pl2_score = -1;
 		}
+		this.match_state.disconnection_occure = true;
 		this.game_must_stop = true;
 		this.close_the_game();
     }
-
-	async close_the_game() {
-		console.log("entering close_the_game");
-		let match: CreateMatchDto = new CreateMatchDto();
-		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
-		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
-		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
-		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-		console.log("the match to be register should be : ", match);
-		await this.matchservice.createMatch(match);
-		let result = await this.matchservice.findMatch();
-		console.log("the score should be save and the match history is :", result);
-	}
-
+    
     /**
      * set the player ready
      * @param player the player clicking ready
      * @param server the server to emit to the room
-     */
+    */
     set_player_ready(player: Socket, server: any) {
+        this.server = server;
         if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -176,16 +182,34 @@ export class PongEngineService {
     }
 
     /**
+	 * save the players score in the data base
+	 */
+    async close_the_game() {
+        console.log("entering close_the_game");
+        let match: CreateMatchDto = new CreateMatchDto();
+        match.score_winner = Math.max(this.pl1_score, this.pl2_score);
+        match.score_loser = Math.min(this.pl1_score, this.pl2_score);
+        match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
+		this.match_state.winner = match.winner.login;
+        match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
+        console.log("the match to be register should be : ", match);
+        await this.matchservice.createMatch(match);
+		this.server.emit("Math_End", this.match_state);
+        let result = await this.matchservice.findMatch();
+        console.log("the score should be save and the match history is :", result);
+    }
+
+    /**
      * main loopm update ball position and game state
      * @returns nothing
-     */
-    main_loop() {
-        this.cooldown_start++; // increment the cooldown counter
-        if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
-            return;
-        if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
-            this.ball = new Simple_ball();
-            this.p1.reset_self_y_position();
+    */
+   main_loop() {
+       this.cooldown_start++; // increment the cooldown counter
+       if (this.cooldown_start - this.cooldown < 0) // don't do anything if on cooldown
+       return;
+       if (this.ball.alive === false) { // respawn a ball if there was a goal TODO register goal
+        this.ball = new Simple_ball();
+        this.p1.reset_self_y_position();
             this.p2.reset_self_y_position();
             this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
             paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},

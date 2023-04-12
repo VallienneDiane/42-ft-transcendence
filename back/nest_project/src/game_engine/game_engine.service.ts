@@ -28,6 +28,9 @@ interface GameState {
 	paddleTwo: {x: number, y:number },
 }
 
+/**
+ * use to store the match state
+ */
 interface MatchState {
 	player1_login: string;
     player2_login: string;
@@ -35,6 +38,15 @@ interface MatchState {
     player2_score: number;
     super_game_mode: boolean;
     game_has_started: boolean;
+}
+
+/**
+ * use to send the match end state
+ */
+interface MatchEnd {
+    player1_login: string;
+    winner: string;
+    disconnection_occure: boolean;
 }
 
 @Injectable()
@@ -65,6 +77,8 @@ export class GameEngineService {
     loop: any; // set_interval function handle for stoping the game
 	userservice;
 	matchservice;
+	server: any;
+	match_state: MatchEnd;
 
 	constructor(userservice: UserService, matchservice: MatchService) {
 		this.userservice = userservice;
@@ -100,6 +114,7 @@ export class GameEngineService {
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
+		this.match_state = {player1_login: "", winner: "", disconnection_occure: false};
 		console.log("from game engine service player are :", this.pl1, "and", this.pl2);
 
 	}
@@ -126,11 +141,14 @@ export class GameEngineService {
 		console.log("first : ", user1, "\n\nsecond :", user2);
 		this.pl1 = player1;
 		this.pl2 = player2;
+        this.update_match_state();
+        this.match_state.player1_login = this.user1.login;
 	}
 
 	update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-    }
+		this.server.to(this.pl1.id).emit("Match_Update", this.ms);
+	}
 
 	/**
 	 * tell the correct wall to process the input of the client
@@ -156,6 +174,7 @@ export class GameEngineService {
 		else {
 			this.pl2_score = -1;
 		}
+		this.match_state.disconnection_occure = true;
 		this.game_must_stop = true;
 		this.close_the_game();
 	}
@@ -166,8 +185,7 @@ export class GameEngineService {
 	 * @param server use to emit to the correct room
 	 */
 	async set_player_ready (player: Socket, server: any) {
-		let result = await this.matchservice.findMatch();
-		console.log("the score should be save", result);
+		this.server = server;
 		if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -198,9 +216,11 @@ export class GameEngineService {
 		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
 		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
+		this.match_state.winner = match.winner.login;
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
+		this.server.emit("Math_End", this.match_state);
 		let result = await this.matchservice.findMatch();
 		console.log("the score should be save and the match history is :", result);
 	}
