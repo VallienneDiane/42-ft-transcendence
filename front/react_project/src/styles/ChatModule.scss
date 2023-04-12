@@ -259,7 +259,7 @@
 						& .circle {
 							width: 8px;
 							height: 8px;
-							border-radius: 13px;
+							border-radius: 50%;
 							margin: 0 1rem;
 							&.online {
 								background-color: #8BC34A;
@@ -518,7 +518,9 @@
 					width: 3.2rem;
 					background: transparent;
 					& #profilePicture {
-					border-radius: 50%;
+					border-radius: 100%;
+					aspect-ratio: 1/1;
+					object-fit: cover;
 					margin-right: 0.5rem;
 					width: 3rem;
 					background: transparent;
