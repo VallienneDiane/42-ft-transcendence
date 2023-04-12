@@ -8,11 +8,25 @@
     --text-color: #4F200D;
     --ball-color: #ffd500; */
 
+<<<<<<< HEAD
     --prim-color: #ffffff;
     --second-color: #2a9d8f;
     --third-color: #4a214a;
     --text-color: #333333;
     --ball-color: #f4a261;
+=======
+    --prim-color: #272a3c;
+    --second-color: #dc7e21;
+    --third-color: #20eaf1;
+    --text-color: #ffffff;
+    --ball-color: #f28c39;
+
+    /* --prim-color: #495374;
+    --second-color: #068688;
+    --third-color: #4a214a;
+    --text-color: #ffffff;
+    --ball-color: #fd5000; */
+>>>>>>> 0bf0788e554672e00f7e2bf94acaaaae21c10855
 
     /* --prim-color: #5f0f40;
     --second-color: #1d8ca8;

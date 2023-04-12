@@ -1,4 +1,4 @@
-import { LogInForm, SignUpForm, VerifyCodeForm } from "../models";
+import { LogInForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -22,6 +22,17 @@ let getAvatar = (id: string) => {
     return Axios.get('getAvatar/' + id);
 }
 
+let getAllLogins = () => {
+    return Axios.post('user/getAllLogins');
+}
+let getAllIds42 = () => {
+    return Axios.post('user/getAllIds');
+}
+// Update name and avatar if first connection with 42
+let createUser = (credentials: SettingsForm ) => {
+    return Axios.post('user/create', credentials);
+}
+
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
 let isLogged = () => {
     let token = localStorage.getItem('token');
@@ -43,6 +54,11 @@ let isLogged = () => {
 let generateToken = (login: string) => {
     return Axios.post('auth/generateToken', {login});
 }
+
+let generateToken42 = (id42: number) => {
+    return Axios.post('auth/generateToken42', {id42});
+}
+
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
@@ -77,6 +93,9 @@ let readPayload = () => {
 let is2faActive = (login: string) => {
     return Axios.post('auth/is2faActive', {login});
 }
+let is2faActive42 = (id42: number) => {
+    return Axios.post('auth/is2faActive42', {id42});
+}
 //check if 2fa is active in settings to display the right setting and check token
 let is2faActiveSettings = (login: string) => {
     return Axios.post('auth/is2faActiveSettings', {login});
@@ -108,7 +127,8 @@ let callback = (code: string) => {
 }
 
 export const accountService = {
-    signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings, uploadAvatar, getAvatar, url42, callback
+    signUp, login, getAllLogins, getAllIds42, createUser, saveToken, logout, isLogged, 
+    getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
+    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar, 
+    url42, callback
 }

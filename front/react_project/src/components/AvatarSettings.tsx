@@ -31,11 +31,11 @@ const AvatarSettings: React.FC = () => {
         event.preventDefault();
         let reader = new FileReader();
         reader.onloadend = function () {
+            setAvatar(reader.result! as string);
             accountService.uploadAvatar(reader.result! as string)
-                .then(response => {
-                    console.log(response);
-                    setAvatar(reader.result! as string);
-                    setSelectedFile(null)
+            .then(response => {
+                console.log(response);
+                setSelectedFile(null)
                 })
                 .catch(error => {
                     console.log(error);
@@ -73,7 +73,7 @@ const AvatarSettings: React.FC = () => {
 
     return (
         <div id="avatarSetting">
-            <h2>Avatar settings</h2>
+            <h2>Upload a new Avatar</h2>
             <img id="profilePicture" src={avatar} />
             <form onSubmit={avatarSubmit}>
                 <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>

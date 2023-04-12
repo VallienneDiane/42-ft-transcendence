@@ -17,6 +17,7 @@ import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 import { SocketContextType } from './components/ChatModule/Chat_models';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
+import HomeSettings from './components/HomeSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
@@ -43,12 +44,9 @@ function App() {
         <SocketContext.Provider value={{ socket, createSocket, disconnect } as SocketContextType}>
           <Routes>
             <Route path="/callback/" element={<Callback />} />
-            <Route element={<ProtectedRoutes />}>
-              <Route path='/' element={<Home />} />
-            </Route>
+            <Route path='/homeSettings' element={<HomeSettings />} />
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
-              {/* <Route path='/login42' element={<Login42 />} /> */}
               <Route path='/signup' element={<SignupPage />} />
               <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
               <Route element={<ProtectedRoutes />}>

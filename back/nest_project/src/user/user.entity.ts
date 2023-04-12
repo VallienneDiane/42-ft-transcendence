@@ -9,6 +9,9 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({nullable: true})
+  id42: number;
+
   @Column(
     {type: 'varchar', 
      nullable: false,
@@ -52,7 +55,7 @@ export class UserEntity {
   @Column({nullable: true})
   twoFactorSecret: string;
 
-  @Column({nullable: true})
+  @Column({default: false})
   isTwoFactorEnabled: boolean;
 
   @Column({nullable: true})
