@@ -46,9 +46,14 @@ export class AuthController {
         channelsAsGod: [],
         channelsAsNormal: [],
         channelsAsOp: [],
+        channelsAsBanned: [],
         messagesChannel: [],
         messagesReceived: [],
-        messagesSend: []
+        messagesSend: [],
+        requestsSend: [], 
+        requestsReceived: [],
+        blockList: [],
+        blockedMeList: []
       };
       console.log("create user42", newUser42);
       if(newUser42)

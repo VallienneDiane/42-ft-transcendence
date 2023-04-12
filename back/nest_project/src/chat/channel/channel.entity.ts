@@ -20,19 +20,7 @@ export class ChannelEntity {
 	channelPass: string;
 
 	@Column()
-	opNumber: number;
-
-	@Column()
 	inviteOnly: boolean;
-
-	@Column()
-	persistant: boolean;
-
-	@Column()
-	onlyOpCanTalk: boolean;
-
-	@Column()
-	hidden: boolean;
 
 	@ManyToMany(() => UserEntity, (user) => user.channelsAsNormal)
 	@JoinTable()
@@ -44,11 +32,16 @@ export class ChannelEntity {
 
 	@ManyToOne(() => UserEntity, (user) => user.channelsAsGod)
 	@JoinTable()
-	godUser?: UserEntity;
+	godUser: UserEntity;
+
+	@ManyToMany(() => UserEntity, (user) => user.channelsAsBanned)
+	@JoinTable()
+	bannedUsers: UserEntity[];
 
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
 		eager: true,
 	})
 	messages: MessageChannelEntity[];
 
+	
 }

@@ -1,10 +1,9 @@
 import React from "react";
 import io from 'socket.io-client';
+import { SocketContextType } from "./ChatModule/Chat_models";
 
-const SocketContext = React.createContext({
+export const SocketContext = React.createContext<SocketContextType>({
 	socket: io(),
 	createSocket: () => {},
 	disconnect: () => {},
 });
-
-export default SocketContext;

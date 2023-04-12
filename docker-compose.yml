@@ -12,6 +12,9 @@ services:
       - .env
     networks:
       - transcendence_network
+    volumes:
+      - ./postgres:/var/lib/postgresql/users
+
 ########################################## BACK-END NEST JS ##################################
   back:
     image: nestjs_img
