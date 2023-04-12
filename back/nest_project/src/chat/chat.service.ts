@@ -80,17 +80,22 @@ export class ChatService {
 
     public whereIamEvent(client: Socket, userId: string, roomHandler: UserRoomHandler) {
         let room = roomHandler.socketMap.sockets.get(client);
+        console.log("room: ", room);
         if (room != undefined) {
             if (room.isChannel) {
-                this.userService.getChannelLink(userId, room.room)
-                .then((link) => {
-                    if (link) {
-                        this.channelService.getMessages(room.room)
-                        .then((messages) => {
-                            client.emit("NewLocChannel", link, messages);
-                        })
-                    }
-                })
+                if (room.room == "00000000-0000-0000-0000-000000000000")
+                    this.goBackToGeneral(client);
+                else {
+                    this.userService.getChannelLink(userId, room.room)
+                    .then((link) => {
+                        if (link) {
+                            this.channelService.getMessages(room.room)
+                            .then((messages) => {
+                                client.emit("newLocChannel", link, messages);
+                            })
+                        }
+                    })
+                }
             }
             else {
                 this.userService.findById(room.room)

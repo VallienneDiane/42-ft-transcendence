@@ -191,14 +191,13 @@ export default class ChatModule extends React.Component<{}, {
     declare context: ContextType<typeof SocketContext>;
     
     componentDidMount(): void {
-        console.log("lol")
         if (this.context.socket != null) {
-            console.log("emit");
             this.context.socket.emit("whereIam");
         }
     }
 
     changeLoc(newDest: IDest) {
+        // console.log(newDest);
         this.setState({ dest: newDest });
     }
 
