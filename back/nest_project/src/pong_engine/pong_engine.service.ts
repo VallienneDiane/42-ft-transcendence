@@ -8,23 +8,39 @@ import { MatchService } from 'src/match/Match.service';
 import { UserService } from 'src/user/user.service';
 import { GameInputDTO } from 'src/game_update_center/game_update_center.dto';
 
-interface ballpos {
+/**
+ * use to store info on a ball
+ */
+interface BallPosition {
 	x: number,
 	y: number,
 	r: number,
 }
 
-interface gameState {
-	ballPosition: ballpos[],
+/**
+ * use to share the game state
+ */
+interface GameState {
+	BallPositionition: BallPosition[],
 	paddleOne: {x: number, y: number },
 	paddleTwo: {x: number, y:number },
+}
+
+interface MatchState {
+    player1_login: string;
+    player2_login: string;
+    player1_score: number;
+    player2_score: number;
+    super_game_mode: boolean;
+    game_has_started: boolean;
 }
 
 @Injectable()
 export class PongEngineService {
 
     // gamestat related
-    gs: gameState;
+    gs: GameState;
+    ms: MatchState;
     ball: Simple_ball;
     p1: Simple_paddle;
     p2: Simple_paddle;
@@ -67,7 +83,7 @@ export class PongEngineService {
         // initialyzing game stuff
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
-        this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+        this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
         console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
@@ -85,7 +101,12 @@ export class PongEngineService {
         this.pl2 = player2;
         this.user1 = user_entity1;
         this.user2 = user_entity2;
+        this.update_match_state();
         console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
+    }
+
+    update_match_state() {
+        this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
     }
     
     /**
@@ -141,6 +162,7 @@ export class PongEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
+            server.emit("Match_Update", this.ms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     thiss.pl1_ready = false;
@@ -148,7 +170,7 @@ export class PongEngineService {
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
-                server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
+                server.to(thiss.pl1.id).emit("Game_Update", thiss.gs)
             }, 1000/60);
         }
     }
@@ -165,7 +187,7 @@ export class PongEngineService {
             this.ball = new Simple_ball();
             this.p1.reset_self_y_position();
             this.p2.reset_self_y_position();
-            this.gs = {ballPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+            this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
             paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
             paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p2.length/2}};
             this.cooldown_start = 0;
@@ -180,9 +202,11 @@ export class PongEngineService {
         let r = this.ball.update_self_position(this.p1, this.p2);
         if (r === 1) {
             this.pl1_score++;
+            this.update_match_state();
         }
         else if (r === 2) {
             this.pl2_score++;
+            this.update_match_state();
         }
         if (this.pl1_score > 4 || this.pl2_score > 4) { // if end of match then save the score and close the game
             this.game_must_stop = true;
@@ -192,7 +216,7 @@ export class PongEngineService {
         }
 
         // fill the game state
-        this.gs.ballPosition = [{
+        this.gs.BallPositionition = [{
             x: this.ball.x_position,
             y: this.ball.y_position,
             r: this.ball.r,
