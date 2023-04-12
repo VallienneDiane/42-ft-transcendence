@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client'
 import { accountService } from "../services/account.service";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import MatchsInProgress from "./MatchsInProgress"
+import SearchUserBar from "./SearchUserBar"
 
 interface ball {
     x: number,
@@ -26,8 +27,8 @@ interface inputState {
 }
 
 interface Players {
-    login1: string,
-    login2: string,
+    player1_login: string,
+    player2_login: string,
 }
 
 
@@ -61,7 +62,7 @@ const Game: React.FC = () => {
         // countDownDiv.current!.classList.add('zoom')
 
         if (socket !== null && !matchInProgress) {
-            socket.emit('public matchmaking', "classic");
+            socket.emit('public matchmaking', {super_game_mode: false});
              setWaitMatch(true);
         }
     }
@@ -69,7 +70,7 @@ const Game: React.FC = () => {
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socket !== null && !matchInProgress) {
-            socket.emit('public matchmaking', "game");
+            socket.emit('public matchmaking', {super_game_mode: true});
             setWaitMatch(true);
         }
     }
@@ -163,7 +164,7 @@ const Game: React.FC = () => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === false) {
-                socket.emit('Game_Input', "ArrowUp");
+                socket.emit('Game_Input', {input: "ArrowUp"});
             }
             // setInputState({ up: true, down: false });
             setInputState((prevState) => ({
@@ -173,7 +174,7 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === false) {
-                socket.emit('Game_Input', "ArrowDown");
+                socket.emit('Game_Input', {input: "ArrowDown"});
             }
             // setInputState({ up: false, down: true });
             setInputState((prevState) => ({
@@ -187,7 +188,7 @@ const Game: React.FC = () => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === true) {
-                socket.emit('Game_Input', "ArrowUp");
+                socket.emit('Game_Input', {input: "ArrowUp"});
             }
             setInputState((prevState) => ({
                 ...prevState,
@@ -196,7 +197,7 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === true) {
-                socket.emit('Game_Input', "ArrowDown");
+                socket.emit('Game_Input', {input: "ArrowDown"});
             }
             setInputState((prevState) => ({
                 ...prevState,
@@ -206,48 +207,69 @@ const Game: React.FC = () => {
         // socket.emit('Game_Input_Up', event.key);
     };
 
+    
+    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8);
+    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 / (16 / 9));
+    // Handle windows resizing
+    useEffect(() => {
+        function handleResize() {
+            // setContainerHeight(window.innerHeight);
+            setGameWidth(window.innerWidth * 0.8);
+            setGameHeight(window.innerWidth * 0.8 / (16 / 9));
+        }
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+    
     // Get css colors variables to use it in the canva
     const style = getComputedStyle(document.documentElement);
     const ballColor = style.getPropertyValue('--ball-color');
     const secondaryColor = style.getPropertyValue('--secondary-color');
 
     useEffect(() => {
-        // console.log('gamestate changed');
+        let paddleWidth: number = gameWidth * 0.014;
+        let paddleHeight: number = gameHeight * 0.17;
         const canvas = canvasRef.current;
         if (canvas && gameState) {
             const context = canvas.getContext("2d")!;
             if (context) {
-                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.clearRect(0, 0, gameWidth, gameHeight);
 
                 gameState!.ballPosition.forEach((ball) => {
-                    // console.log('ball', ball);
                     context.beginPath();
-                    context.arc(ball.x * canvas.width, ball.y * canvas.height, ball.r * canvas.height, 0, Math.PI * 2);
+                    context.arc(ball.x * gameWidth, ball.y * gameHeight, ball.r * gameHeight, 0, Math.PI * 2);
                     context.fillStyle = ballColor;
                     context.fill();
                     context.stroke()
                 })
 
                 context.fillStyle = secondaryColor;
-                context.fillRect(gameState!.paddleOne.x * canvas.width, gameState!.paddleOne.y * canvas.height - 25, 8, 50);
-                context.fillRect(gameState!.paddleTwo.x * canvas.width - 8, gameState!.paddleTwo.y * canvas.height - 25, 8, 50);
+                context.fillRect(gameState!.paddleOne.x * gameWidth, gameState!.paddleOne.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
+                context.fillRect(gameState!.paddleTwo.x * gameWidth - paddleWidth, gameState!.paddleTwo.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
             }
         }
-    }, [gameState]);
+    }, [gameState, gameWidth]);
 
-    const gameWidth = 600;
+
+
+
+    // const gameWidth = 600;
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
             {/* <MatchsInProgress socket={socket}/> */}
             <div id="gamePanel">
-                {matchInProgress ? <div>{players?.login1} VS {players?.login2}</div> : null}
+                {matchInProgress ? <div>{players?.player1_login} VS {players?.player2_login}</div> : null}
                 <div id="gameField">
                     {matchInProgress || waitMatch ?
                     null
                     :
                     <div id="gameSelector">
+                        {/* <h2>Select your opponent</h2>
+                        <SearchUserBar /> */}
                         <h2>Select your game</h2>
                         <div id="gameButtons">
                             <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
@@ -259,7 +281,7 @@ const Game: React.FC = () => {
                     {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
                     {buttonReady ? <button id="readyButton" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                     {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
-                    <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
+                    <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
                 </div>
             </div>
         </div>
@@ -267,3 +289,6 @@ const Game: React.FC = () => {
 }
 
 export default Game;
+
+// Match_Update
+// Match_End

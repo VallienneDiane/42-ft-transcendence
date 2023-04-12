@@ -119,6 +119,7 @@
             }
 
             & canvas {
+                max-width: 800px;
                 border-radius: 10px;
                 background-color: var(--second-color);
                 border: solid 5px var(--third-color);
