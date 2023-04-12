@@ -33,6 +33,7 @@ export class ChatService {
             normalUsers: [],
             opUsers: [],
             godUser: undefined,
+            bannedUsers: [],
             messages: []
         }
         client.emit('newLocChannel', {channel: locGeneral, status: "normal"}, []);
@@ -243,34 +244,40 @@ export class ChatService {
                 if (result != null)
                     client.emit("notice", 'already in channel');
                 else {
-                    this.channelService.getOneById(data.channelId)
-                        .then((channel) => {
-                            if (channel != null) {
-                                if (!channel.inviteOnly) {
-                                    if (!channel.password || data.channelPass == channel.channelPass) {
-                                        this.channelService.addNormalUser(user, channel.id)
-                                            .then(() => {
-                                                let room = roomHandler.roomMap.of(channel.id);
-                                                if (room != undefined) {
-                                                    room.emit("newUserInChannel", user.id, user.login, true);
-                                                }
-                                                let channelToEmit: IChannelToEmit = channel;
-                                                roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
-                                                this.changeLocEvent(client, user.id, data.channelId, true, roomHandler);
-                                                if (channel.password)
-                                                    client.emit("correctPassword");
-                                            })
+                    this.channelService.findUserInBannedList(user.id, data.channelId)
+                    .then((banned) => {
+                        if (banned)
+                            client.emit("notice", "You were banned from ths channel");
+                        else {
+                            this.channelService.getOneById(data.channelId)
+                                .then((channel) => {
+                                    if (channel != null) {
+                                        if (!channel.inviteOnly) {
+                                            if (!channel.password || data.channelPass == channel.channelPass) {
+                                                this.channelService.addNormalUser(user, channel.id)
+                                                    .then(() => {
+                                                        let room = roomHandler.roomMap.of(channel.id);
+                                                        if (room != undefined) {
+                                                            room.emit("newUserInChannel", user.id, user.login, true);
+                                                        }
+                                                        let channelToEmit: IChannelToEmit = channel;
+                                                        roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
+                                                        this.changeLocEvent(client, user.id, data.channelId, true, roomHandler);
+                                                        if (channel.password)
+                                                            client.emit("correctPassword");
+                                                    })
+                                            }
+                                            else
+                                                client.emit("incorrectPassword");
+                                        }
+                                        else
+                                            client.emit("notice", "This channel is on invite only");
                                     }
                                     else
-                                        client.emit("incorrectPassword");
-                                        // client.emit("notice", "Wrong password");
-                                }
-                                else
-                                    client.emit("notice", "This channel is on invite only");
-                            }
-                            else
-                                client.emit("notice", "no such channel");
-                        })
+                                        client.emit("notice", "no such channel");
+                                })
+                        }
+                    })
                 }
             })
     }
@@ -282,33 +289,39 @@ export class ChatService {
                 if (found.status != "normal") {
                     this.userService.findByLogin(userToInvite)
                     .then((userEntity) => {
-                        console.log(userEntity)
                         if (userEntity != null) {
-                            this.channelService.getUserInChannel(channelId, userEntity.id)
-                            .then(
-                                (alreadyHere) => {
-                                    if (alreadyHere == null) {
-                                        this.channelService.addNormalUser(userEntity, channelId)
-                                        .then( () => {
-                                            let room = roomHandler.roomMap.of(channelId);
-                                            if (room != undefined)
-                                                room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                            let logged = roomHandler.userMap.get(userEntity.id);
-                                            if (logged != undefined) {
-                                                this.channelService.getOneById(channelId)
-                                                .then((channelEntity) => {
-                                                    let channelToEmit: IChannelToEmit = channelEntity;
-                                                    logged.sockets.forEach(({}, socket) => {
-                                                        socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
-                                                    })
+                            this.channelService.findUserInBannedList(userEntity.id, channelId)
+                            .then((banned) => {
+                                if (banned)
+                                    client.emit("notice", `The user "${userEntity.login}" is banned here.`);
+                                else {
+                                    this.channelService.getUserInChannel(channelId, userEntity.id)
+                                    .then(
+                                        (alreadyHere) => {
+                                            if (alreadyHere == null) {
+                                                this.channelService.addNormalUser(userEntity, channelId)
+                                                .then( () => {
+                                                    let room = roomHandler.roomMap.of(channelId);
+                                                    if (room != undefined)
+                                                        room.emit("newUserInChannel", userEntity.id, userEntity.login);
+                                                    let logged = roomHandler.userMap.get(userEntity.id);
+                                                    if (logged != undefined) {
+                                                        this.channelService.getOneById(channelId)
+                                                        .then((channelEntity) => {
+                                                            let channelToEmit: IChannelToEmit = channelEntity;
+                                                            logged.sockets.forEach(({}, socket) => {
+                                                                socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
+                                                            })
+                                                        })
+                                                    }
                                                 })
                                             }
-                                        })
-                                    }
-                                    else
-                                        client.emit("notice", `The user ${userEntity.login} already belong to this channel.`);
+                                            else
+                                                client.emit("notice", `The user ${userEntity.login} already belong to this channel.`);
+                                        }
+                                    )
                                 }
-                            )
+                            })
                         }
                         else
                             client.emit('notice', `The user ${userToInvite} doesn't exists.`);
@@ -322,28 +335,35 @@ export class ChatService {
                                 this.userService.findByLogin(userToInvite)
                                 .then((userEntity) => {
                                     if (userEntity != null) {
-                                        this.channelService.getUserInChannel(channelId, userEntity.id)
-                                        .then(
-                                            (alreadyHere) => {
-                                                if (alreadyHere == null) {
-                                                    this.channelService.addNormalUser(userEntity, channelId)
-                                                    .then( () => {
-                                                        let room = roomHandler.roomMap.of(channelId);
-                                                        if (room != undefined)
-                                                            room.emit("newUserInChannel", userEntity.id, userEntity.login);
-                                                        let logged = roomHandler.userMap.get(userEntity.id);
-                                                        if (logged != undefined) {
-                                                            let channelToEmit: IChannelToEmit = chanOpts;
-                                                            logged.sockets.forEach(({}, socket) => {
-                                                                socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
+                                        this.channelService.findUserInBannedList(userEntity.id, channelId)
+                                        .then((banned) => {
+                                            if (banned)
+                                                client.emit("notice", `The user "${userEntity.login}" is banned here.`);
+                                            else {
+                                                this.channelService.getUserInChannel(channelId, userEntity.id)
+                                                .then(
+                                                    (alreadyHere) => {
+                                                        if (alreadyHere == null) {
+                                                            this.channelService.addNormalUser(userEntity, channelId)
+                                                            .then( () => {
+                                                                let room = roomHandler.roomMap.of(channelId);
+                                                                if (room != undefined)
+                                                                    room.emit("newUserInChannel", userEntity.id, userEntity.login);
+                                                                let logged = roomHandler.userMap.get(userEntity.id);
+                                                                if (logged != undefined) {
+                                                                    let channelToEmit: IChannelToEmit = chanOpts;
+                                                                    logged.sockets.forEach(({}, socket) => {
+                                                                        socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
+                                                                    })
+                                                                }
                                                             })
                                                         }
-                                                    })
-                                                }
-                                                else
-                                                    client.emit("notice", `The user ${userToInvite} already belong to this channel.`);
+                                                        else
+                                                            client.emit("notice", `The user ${userToInvite} already belong to this channel.`);
+                                                    }
+                                                )
                                             }
-                                        )
+                                        })
                                     }
                                     else
                                         client.emit('notice', `The user ${userToInvite} doesn't exists.`);
@@ -486,6 +506,7 @@ export class ChatService {
                             messages: [],
                             normalUsers: [],
                             opUsers: [],
+                            bannedUsers: [],
                             godUser: user
                         };
                         this.channelService.create(newChannel)
@@ -680,4 +701,64 @@ export class ChatService {
         })
     }
 
+    public banUserEvent(client: Socket, userId: string, userIdToBan: string, channelId: string, logger: Logger, roomHandler: UserRoomHandler) {
+        this.channelService.getUserInChannel(channelId, userId)
+        .then((link) => {
+            if (!link || link.status == "normal")
+                client.emit("notice", "You can't do that!");
+            else {
+                this.userService.findById(userIdToBan)
+                .then((userEntity) => {
+                    if (!userEntity)
+                        client.emit("notice", "User not found.");
+                    else {
+                        this.channelService.getUserInChannel(channelId, userIdToBan)
+                        .then((banLink) => {
+                            if (!banLink) {
+                                this.channelService.findUserInBannedList(userIdToBan, channelId)
+                                .then((bool) => {
+                                    if (bool)
+                                        client.emit("notice", "this user is already banned here.")
+                                    else
+                                        this.channelService.addBannedUser(userIdToBan, channelId);
+                                })
+                            }
+                            else if (banLink.status == "normal" || (banLink.status == "op" && link.status == "god")) {
+                                this.channelService.addBannedUser(userIdToBan, channelId)
+                                .then(() => {
+                                    this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId);
+                                })
+                            }
+                            else
+                                client.emit("notice", "Only the channel owner can do that");
+                        })
+                    }
+                })
+            }
+        })
+    }
+
+    public unbanUserEvent(client: Socket, userId: string, userNameToUnban: string, channelId: string, logger: Logger, roomHandler: UserRoomHandler) {
+        this.channelService.getUserInChannel(channelId, userId)
+        .then((link) => {
+            if (!link || link.status != "god")
+                client.emit("notice", "Only channel owner can unban");
+            else {
+                this.userService.findByLogin(userNameToUnban)
+                .then((userEntity) => {
+                    if (!userEntity)
+                        client.emit("notice", `user "${userNameToUnban}" not found`);
+                    else {
+                        this.channelService.findUserInBannedList(userEntity.id, channelId)
+                        .then((found) => {
+                            if (!found)
+                                client.emit("notice", `user "${userNameToUnban}" is not banned here.`)
+                            else
+                                this.channelService.delBannedUser(userEntity.id, channelId);
+                        })
+                    }
+                })
+            }
+        })
+    }
 }

@@ -225,6 +225,7 @@ export class UserRoomHandler {
             normalUsers: [],
             opUsers: [],
             godUser: undefined,
+            bannedUsers: [],
             messages: []
         }
         let room = this.roomMap.of(channelId);

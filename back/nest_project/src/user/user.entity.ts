@@ -37,6 +37,9 @@ export class UserEntity {
   })
   channelsAsGod: ChannelEntity[];
 
+  @ManyToMany(() => ChannelEntity, (channel) => channel.bannedUsers)
+  channelsAsBanned: ChannelEntity[];
+
   @OneToMany(() => MessagePrivateEntity, (message) => message.receiver)
   messagesReceived: MessagePrivateEntity[];
 
@@ -65,6 +68,7 @@ export class UserEntity {
   requestsReceived : FriendEntity[];
 
   @ManyToMany(() => UserEntity, (user) => user.blockedMeList)
+  @JoinTable()
   blockList: UserEntity[];
 
   @ManyToMany(() => UserEntity, (user) => user.blockList)
