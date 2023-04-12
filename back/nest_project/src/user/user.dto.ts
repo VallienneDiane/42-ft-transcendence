@@ -13,6 +13,7 @@ export class UserDto {
     readonly channelsAsNormal: ChannelDto[];
     readonly channelsAsOp: ChannelDto[];
     readonly channelsAsGod: ChannelDto[];
+    readonly channelsAsBanned: ChannelDto[];
     readonly messagesReceived: MessagePrivateEntity[];
     readonly messagesSend: MessagePrivateEntity[];
     readonly messagesChannel: MessageChannelEntity[];

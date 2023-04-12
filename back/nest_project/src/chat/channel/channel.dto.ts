@@ -12,5 +12,6 @@ export class ChannelDto {
 	readonly normalUsers: UserDto[];
 	readonly opUsers: UserDto[];
 	readonly godUser: UserDto;
+	readonly bannedUsers: UserDto[];
 	readonly messages: MessageChannelDto[];
 }

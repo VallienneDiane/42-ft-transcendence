@@ -106,6 +106,7 @@ export class UserService {
                 normalUsers: [],
                 opUsers: [],
                 godUser: undefined,
+                bannedUsers: [],
                 messages: []
             },
             status: "normal"}];

@@ -34,6 +34,10 @@ export class ChannelEntity {
 	@JoinTable()
 	godUser: UserEntity;
 
+	@ManyToMany(() => UserEntity, (user) => user.channelsAsBanned)
+	@JoinTable()
+	bannedUsers: UserEntity[];
+
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
 		eager: true,
 	})

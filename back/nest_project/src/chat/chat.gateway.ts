@@ -9,7 +9,7 @@ import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
 import { friendDto } from "./relation/friend/friend.dto";
-import { addMessageDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto } from "./chat.gateway.dto";
+import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, unbanUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -347,4 +347,25 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage("banUser")
+    handleBanUser(@MessageBody() data: banUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`ban event`);
+                this.chatService.banUserEvent(client, user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("unbanUser")
+    handleUnbanUser(@MessageBody() data: unbanUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`ban event`);
+                this.chatService.unbanUserEvent(client, user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
+            }
+        })
+    }
 }
