@@ -1,6 +1,7 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { UserDto } from "src/user/user.dto";
 import { MessageChannelDto } from "../messageChannel/messageChannel.dto";
+import { MuteEntity } from "../mute/mute.entity";
 
 export class ChannelDto {
 	@IsString() readonly id: string;
@@ -13,5 +14,6 @@ export class ChannelDto {
 	readonly opUsers: UserDto[];
 	readonly godUser: UserDto;
 	readonly bannedUsers: UserDto[];
+	readonly usersMuted: MuteEntity[];
 	readonly messages: MessageChannelDto[];
 }

@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { UserEntity } from "src/user/user.entity";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
+import { MuteEntity } from "../mute/mute.entity";
 
 @Entity()
 export class ChannelEntity {
@@ -42,5 +43,6 @@ export class ChannelEntity {
 	})
 	messages: MessageChannelEntity[];
 
-	
+	@OneToMany(() => MuteEntity, (muted) => muted.channel)
+	usersMuted: MuteEntity[];
 }
