@@ -1,9 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { ChannelEntity } from 'src/chat/channel/channel.entity';
+import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
+import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity()
 export class UserEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({nullable: true})
   id42: number;
@@ -21,6 +24,30 @@ export class UserEntity {
   @Column({nullable: true})
   password: string;
 
+  @ManyToMany(() => ChannelEntity, (channel) => channel.normalUsers, {
+    eager: true,
+  })
+  channelsAsNormal: ChannelEntity[];
+
+  @ManyToMany(() => ChannelEntity, (channel) => channel.opUsers, {
+    eager: true,
+  })
+  channelsAsOp: ChannelEntity[];
+
+  @OneToMany(() => ChannelEntity, (channel) => channel.godUser, {
+    eager: true
+  })
+  channelsAsGod: ChannelEntity[];
+
+  @OneToMany(() => MessagePrivateEntity, (message) => message.receiver)
+  messagesReceived: MessagePrivateEntity[];
+
+  @OneToMany(() => MessagePrivateEntity, (message) => message.sender)
+  messagesSend: MessagePrivateEntity[];
+
+  @OneToMany(() => MessageChannelEntity, (message) => message.user)
+  messagesChannel: MessageChannelEntity[];
+
   @Column({nullable: true})
   twoFactorSecret: string;
 
@@ -32,4 +59,5 @@ export class UserEntity {
 
   @Column({nullable: true})
   avatarSvg: string;
+  
 }

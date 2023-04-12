@@ -19,13 +19,13 @@ import HomeSettings from './components/HomeSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
-    {
-      autoConnect: false,
-      transports: ['websocket'],
-      auth: { token: 'undefined' },
-    }));
-  socket!.on("test", () => {
-    console.log("Id1", socket!.id);
+  {
+    autoConnect: false,
+    transports: ['websocket'],
+    auth: { token: 'undefined' },
+  }));
+  socket.on("test", () => {
+    console.log("Id1", socket.id);
   });
 
   function createSocket() {

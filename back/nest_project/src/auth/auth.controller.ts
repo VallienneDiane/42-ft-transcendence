@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto } from './verifyCode.dto';
 import { JwtService } from "@nestjs/jwt";
+import { UserEntity } from 'src/user/user.entity';
 
 // SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
 @Controller()
@@ -22,7 +23,6 @@ export class AuthController {
   //exchange code send by api42 against token 42 to get user infos
   @Get('/callback')
   async callback(@Query('code') code: string) {
-    // let newUser = false;
     const tokenApi42 = await this.authService.validateFortyTwo(code);
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',

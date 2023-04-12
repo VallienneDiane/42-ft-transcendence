@@ -1,11 +1,6 @@
 import "../styles/Home.scss"
 import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom"
-import { UserContext } from "../user/UserContext";
-import { User } from "../models";
-import { accountService } from "../services/account.service";
-import { JwtPayload } from "jsonwebtoken";
-//import { useSpring, animated } from "react-spring";
 
 interface BallProps {
     x: number,
@@ -13,6 +8,17 @@ interface BallProps {
     vx: number,
     vy: number,
     r: number,
+}
+
+interface BallContainerProps {
+    CONTAINER_WIDTH: number,
+    CONTAINER_HEIGHT: number,
+    balls: BallProps[],
+}
+
+interface PageElement {
+    element: DOMRect | null,
+    hit: boolean,
 }
 
 const DarkenColor = function (stringColor: string, percent: number) {
@@ -33,7 +39,7 @@ const ballShadowColor = DarkenColor(ballColor, 70);
 
 console.log(ballColor, ballShadowColor);
 
-const BallContainer = (props) => {
+const BallContainer = (props: BallContainerProps) => {
 
     const Ball = (ball: BallProps) => {
         return (
@@ -56,7 +62,7 @@ const BallContainer = (props) => {
     );
 }
 
-const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WIDTH: number, pageElements: { element: DOMRect, hit: boolean }[]) => {
+const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WIDTH: number, pageElements: { element: DOMRect | null, hit: boolean }[]) => {
     const gravity = 0.01;
     const frottement = 0.998;
     const restitution = 0.98;
@@ -76,8 +82,8 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         for (let j = 0; j < pageElements.length; j++) {
             if (pageElements[j].element !== null) {
                 /// TOP
-                if ((ball.y > pageElements[j].element.top - ball.r - 5 && ball.y < pageElements[j].element.top - ball.r + 15) && (ball.x > pageElements[j].element.left - CONTAINER_WIDTH / 2 - 7 && ball.x < pageElements[j].element.right - CONTAINER_WIDTH / 2 + 7)) {
-                    ball.y = pageElements[j].element.top - ball.r - 5;
+                if ((ball.y > pageElements[j].element!.top - ball.r - 5 && ball.y < pageElements[j].element!.top - ball.r + 15) && (ball.x > pageElements[j].element!.left - CONTAINER_WIDTH / 2 - 7 && ball.x < pageElements[j].element!.right - CONTAINER_WIDTH / 2 + 7)) {
+                    ball.y = pageElements[j].element!.top - ball.r - 5;
                     if (ball.vy > 1.5) {
                         pageElements[j].hit = true;
                     }
@@ -85,20 +91,26 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
                     ball.y += ball.vy;
                 }
                 /// BOTTOM
-                if ((ball.y < pageElements[j].element.bottom + ball.r && ball.y > pageElements[j].element.bottom + ball.r - 15) && (ball.x > pageElements[j].element.left - CONTAINER_WIDTH / 2 && ball.x < pageElements[j].element.right - CONTAINER_WIDTH / 2)) {
-                    ball.y = pageElements[j].element.bottom + ball.r;
+                if ((ball.y < pageElements[j].element!.bottom + ball.r && ball.y > pageElements[j].element!.bottom + ball.r - 15) && (ball.x > pageElements[j].element!.left - CONTAINER_WIDTH / 2 && ball.x < pageElements[j].element!.right - CONTAINER_WIDTH / 2)) {
+                    ball.y = pageElements[j].element!.bottom + ball.r;
                     ball.vy *= -restitution;
                     ball.y += ball.vy;
                 }
                 /// LEFT
-                if ((ball.y < pageElements[j].element.bottom && ball.y > pageElements[j].element.top - ball.r + 5) && (ball.x + ball.r > pageElements[j].element.left - CONTAINER_WIDTH / 2 + 5 && ball.x + ball.r < pageElements[j].element.left - CONTAINER_WIDTH / 2 + 0.1 * pageElements[j].element.width)) {
-                    ball.x = pageElements[j].element.left - CONTAINER_WIDTH / 2 + 5 - ball.r;
+                if ((ball.y < pageElements[j].element!.bottom && ball.y > pageElements[j].element!.top - ball.r + 5) && (ball.x + ball.r > pageElements[j].element!.left - CONTAINER_WIDTH / 2 + 5 && ball.x + ball.r < pageElements[j].element!.left - CONTAINER_WIDTH / 2 + 0.1 * pageElements[j].element!.width)) {
+                    ball.x = pageElements[j].element!.left - CONTAINER_WIDTH / 2 + 5 - ball.r;
+                    if (ball.vx > 1.5) {
+                        pageElements[j].hit = true;
+                    }
                     ball.vx *= -restitution;
                     ball.x += ball.vx;
                 }
                 /// RIGHT
-                if ((ball.y < pageElements[j].element.bottom && ball.y > pageElements[j].element.top - ball.r + 5) && (ball.x - ball.r < pageElements[j].element.right - CONTAINER_WIDTH / 2 - 5 && ball.x - ball.r > pageElements[j].element.right - CONTAINER_WIDTH / 2 - 0.1 * pageElements[j].element.width)) {
-                    ball.x = pageElements[j].element.right - CONTAINER_WIDTH / 2 - 5 + ball.r;
+                if ((ball.y < pageElements[j].element!.bottom && ball.y > pageElements[j].element!.top - ball.r + 5) && (ball.x - ball.r < pageElements[j].element!.right - CONTAINER_WIDTH / 2 - 5 && ball.x - ball.r > pageElements[j].element!.right - CONTAINER_WIDTH / 2 - 0.1 * pageElements[j].element!.width)) {
+                    ball.x = pageElements[j].element!.right - CONTAINER_WIDTH / 2 - 5 + ball.r;
+                    if (ball.vx < -1.5) {
+                        pageElements[j].hit = true;
+                    }
                     ball.vx *= -restitution;
                     ball.x += ball.vx;
                 }
@@ -171,9 +183,9 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
 
 const Home: React.FC = () => {
 
-    const h1_title = useRef(null);
-    const link_game = useRef(null);
-    const link_chat = useRef(null);
+    const h1_title = useRef<HTMLHeadingElement>(null);
+    const link_chat = useRef<HTMLAnchorElement>(null);
+    const link_game = useRef<HTMLAnchorElement>(null);
     const [time, setTime] = useState(performance.now());
 
     const [CONTAINER_HEIGHT, setContainerHeight] = useState<number>(window.innerHeight);
@@ -182,7 +194,7 @@ const Home: React.FC = () => {
     const [titleBox, setTitleBox] = useState<DOMRect>();
     const [linkGameBox, setLinkGameBox] = useState<DOMRect>();
     const [linkChatBox, setLinkChatBox] = useState<DOMRect>();
-    const [pageElements, setPageElements] = useState<{ element: DOMRect | null, hit: boolean }[]>([]);
+    const [pageElements, setPageElements] = useState<PageElement[]>([]);
 
     const [hover, setHover] = useState<number>(1);
 
@@ -208,9 +220,16 @@ const Home: React.FC = () => {
     }, [hover])
 
     useEffect(() => {
-        setPageElements([{ element: titleBox!, hit: pageElements !== undefined ? false : pageElements[0].hit },
-        { element: linkGameBox!, hit: pageElements !== undefined ? false : pageElements[1].hit },
-        { element: linkChatBox!, hit: pageElements !== undefined ? false : pageElements[2].hit }]);
+        // setPageElements([
+        //     { element: titleBox!, hit: pageElements !== undefined ? false : pageElements[0].hit },
+        //     { element: linkGameBox!, hit: pageElements !== undefined ? false : pageElements[1].hit },
+        //     { element: linkChatBox!, hit: pageElements !== undefined ? false : pageElements[2].hit }
+        // ]);
+        setPageElements([
+            { element: titleBox!, hit: false},
+            { element: linkGameBox!, hit: false},
+            { element: linkChatBox!, hit: false}
+        ]);
 
     }, [titleBox, linkGameBox, linkChatBox])
 
@@ -264,7 +283,7 @@ const Home: React.FC = () => {
                 h1_title.current.classList.add('hit');
                 setTimeout(() => {
                     
-                    h1_title.current.classList.remove('hit');
+                    h1_title.current!.classList.remove('hit');
                     pageElements[0].hit = false;
                 }, 120); 
             }
