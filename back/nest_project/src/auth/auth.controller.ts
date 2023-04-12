@@ -46,6 +46,7 @@ export class AuthController {
         channelsAsGod: [],
         channelsAsNormal: [],
         channelsAsOp: [],
+        channelsAsBanned: [],
         messagesChannel: [],
         messagesReceived: [],
         messagesSend: [],

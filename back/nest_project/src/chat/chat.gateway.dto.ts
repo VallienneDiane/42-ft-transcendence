@@ -56,3 +56,15 @@ export class modifyChannelDto {
 export class blockUserDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
 }
+
+export class banUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+
+}
+
+export class unbanUserDto {
+    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+
+}
