@@ -60,7 +60,6 @@ export class ChatService {
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
         let newUser = roomHandler.addUser(user.id, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
-        this.goBackToGeneral(client);
         if (newUser) {
             chatNamespace.sockets.forEach( (socket) => {
                 socket.emit('userConnected', {userId: user.id, userLogin: user.login});
@@ -76,6 +75,34 @@ export class ChatService {
                 socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
             })
             logger.log(`${user.login} as id ${user.id} is disconnected`);
+        }
+    }
+
+    public whereIamEvent(client: Socket, userId: string, roomHandler: UserRoomHandler) {
+        let room = roomHandler.socketMap.sockets.get(client);
+        if (room != undefined) {
+            if (room.isChannel) {
+                this.userService.getChannelLink(userId, room.room)
+                .then((link) => {
+                    if (link) {
+                        this.channelService.getMessages(room.room)
+                        .then((messages) => {
+                            client.emit("NewLocChannel", link, messages);
+                        })
+                    }
+                })
+            }
+            else {
+                this.userService.findById(room.room)
+                .then((other) => {
+                    if (other) {
+                        this.messagePrivateService.findConversation(userId, room.room)
+                        .then((messages) => {
+                            client.emit("newLocPrivate", other.id, other.login, messages);
+                        })
+                    }
+                })
+            }
         }
     }
 
@@ -128,7 +155,6 @@ export class ChatService {
         else
             client.emit('notice', 'You are nowhere');
     }
-
 
     public changeLocEvent(client: Socket, userId: string, loc: string, isChannel: boolean, roomHandler: UserRoomHandler) {
         if (isChannel)
@@ -762,4 +788,6 @@ export class ChatService {
             }
         })
     }
+
+    
 }
