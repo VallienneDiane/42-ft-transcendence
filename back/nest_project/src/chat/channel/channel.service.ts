@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { use } from "passport";
 import { UserDto } from "src/user/user.dto";
 import { UserEntity } from "src/user/user.entity";
 import { NotBrackets, Repository } from "typeorm";
@@ -188,6 +189,36 @@ export class ChannelService {
 			.of(channelId)
 			.remove(userId);
 		return false;
+	}
+
+	async addBannedUser(userId: string, channelId: string) {
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "bannedUsers")
+			.of(channelId)
+			.add(userId);
+	}
+
+	async delBannedUser(userId: string, channelId: string) {
+		await this.channelRepository
+			.createQueryBuilder()
+			.relation(ChannelEntity, "bannedUsers")
+			.of(channelId)
+			.remove(userId);
+	}
+
+	async getBannedList(channelId: string): Promise<{id: string}[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.bannedUsers", "banned")
+			.where("channed.id = :id", { id: channelId })
+			.select("banned.id", "id")
+			.getRawMany();
+	}
+
+	async findUserInBannedList(userId: string, channelId: string) : Promise<boolean> {
+		const arrayBanned: {id: string}[] = await this.getBannedList(channelId);
+		return arrayBanned.includes({id: userId});
 	}
 
 	async delUser(userId: string, channelId: string) {
