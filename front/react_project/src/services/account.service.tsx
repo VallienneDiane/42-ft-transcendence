@@ -129,6 +129,6 @@ let callback = (code: string) => {
 export const accountService = {
     signUp, login, getAllLogins, getAllIds42, createUser, saveToken, logout, isLogged, 
     getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar, 
-    url42, callback
+    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar,
+    getAvatar, url42, callback
 }
