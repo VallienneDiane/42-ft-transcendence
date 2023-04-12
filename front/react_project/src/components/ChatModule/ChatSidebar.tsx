@@ -155,7 +155,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         socket.on("userLeaveChannel", (userId: string) => {
             setMembers((members) => {
                 let newMembers = [...members].filter((member) => {
-                    return member.user.id != userId
+                    return member.user.id != userId;
                 });
                 return newMembers;
             });
@@ -268,16 +268,11 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const ref = useRef<HTMLDivElement>(null);
 
     const addFriend = () => {
-
+        socket.emit("friendRequest", {id: props.dest.id});
     }
 
     const blockUser = () => {
-
-    }
-
-    const kickUser = () => {
-        // search
-        socket.emit('kickUser', "nami", props.dest.name);
+        socket.emit("blockUser", {id: props.dest.id});
     }
 
     useEffect(() => {

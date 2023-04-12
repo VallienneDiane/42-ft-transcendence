@@ -457,7 +457,8 @@
 				flex-direction: column-reverse;
 				height: 70%;
 				background: rgb(231, 231, 231);
-				padding: 1.5rem;
+				// padding: 1.5rem;
+				padding: 1.5rem 1.5rem 1.5rem 1rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
