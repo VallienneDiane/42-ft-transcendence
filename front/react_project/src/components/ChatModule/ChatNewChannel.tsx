@@ -3,7 +3,7 @@ import SocketContext from "../context";
 import { useForm } from 'react-hook-form';
 import { IChannel } from "../../models";
 
-export function Popup(props: {handleClose: any}) {
+function Popup(props: {handleClose: any}) {
 	const {socket} = useContext(SocketContext);
     const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
@@ -108,11 +108,17 @@ export function Popup(props: {handleClose: any}) {
     );
 };
 
-export function CreateChannel(props: {onClick: any}) {
+export function CreateChannel() {
+    const [popupIsOpen, setPopupIsOpen] = useState<boolean>(false);
+
+    const onClickPopup = () => {
+        setPopupIsOpen(!popupIsOpen);
+    }
 
     return (
         <div id="createChannel">
-            <p className="btn" onClick={props.onClick}>Create new channel</p>    
+            {popupIsOpen && <Popup handleClose={onClickPopup} />}
+            <p className="btn" onClick={onClickPopup}>Create new channel</p>    
         </div>
     );
 }

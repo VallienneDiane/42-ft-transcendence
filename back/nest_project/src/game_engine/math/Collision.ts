@@ -1,11 +1,17 @@
 import { Vec2 } from "./Vec2";
 import { Ball } from "../Ball";
 import { Wall } from "../Wall";
-import { ConsoleLogger } from "@nestjs/common";
 
 export class Collision {
 
     /* Ball collision thing */
+
+    /**
+     * step 1 detecting a collision
+     * @param b1 
+     * @param b2 
+     * @returns 
+     */
     static coll_det_bb(b1: Ball, b2: Ball) {
 
         if (b1.r + b2.r >= (b1.position.sub(b2.position)).mag())
@@ -16,6 +22,11 @@ export class Collision {
         return false;
     }
     
+    /**
+     * step 2 repositioning the balls proportionnaly to their mass
+     * @param b1 
+     * @param b2 
+     */
     static penetration_resolution_bb(b1: Ball, b2: Ball) {
 
         let dist = b1.position.sub(b2.position);
@@ -25,6 +36,11 @@ export class Collision {
         b2.position = b2.position.add(penetration_resolution.mult(-b2.inv_mass));
     }
     
+    /**
+     * step 3 recalculating the correct velocity
+     * @param b1 
+     * @param b2 
+     */
     static collision_response_bb(b1: Ball, b2: Ball) {
 
         let normal = b1.position.sub(b2.position).normalize();
@@ -35,13 +51,19 @@ export class Collision {
         let vel_diff = new_separation_velocity + separation_velocity;
         let impulse = vel_diff / (b1.inv_mass + b2.inv_mass);
         let impulse_vec = normal.mult(impulse);
-        /////console.log(vel_diff);
     
         b1.speed = b1.speed.add(impulse_vec.mult(-b1.inv_mass));
         b2.speed = b2.speed.add(impulse_vec.mult(b2.inv_mass));
     }
 
     /* Wall collision thing */
+
+    /**
+     * step1 find the closest point from the ball center to the wall
+     * @param b 
+     * @param w 
+     * @returns 
+     */
     static closest_point_bw(b: Ball, w: Wall) {
 
         let ball_to_wall_start = w.start.sub(b.position);
@@ -57,16 +79,27 @@ export class Collision {
         return (w.start.sub(closest_vec));
     }
 
+    /**
+     * step 2 check if the collision hapenned
+     * @param b 
+     * @param w 
+     * @returns 
+     */
     static coll_det_bw(b: Ball, w: Wall) {
 
         let closest_dist_vec = Collision.closest_point_bw(b, w).sub(b.position);
         if (closest_dist_vec.mag() <= b.r) {
-            console.log("colission detected zith a wwall");
+            console.log("colission detected with a wall");
             return true;
         }
         return false;
     }
 
+    /**
+     * step 3 reposition the ball correctly
+     * @param b 
+     * @param w 
+     */
     static penetration_resolution_bw(b: Ball, w: Wall) {
 
         let closest_point = Collision.closest_point_bw(b, w);
@@ -76,11 +109,25 @@ export class Collision {
         b.position = b.position.add(resolution_vec_normal.mult(resolution_magnitude));
     }
 
+    /**
+     * step 4 recalculate the ball velocity
+     * @param b 
+     * @param w 
+     */
     static collision_resolution_bw(b:Ball, w: Wall) {
         let normal = b.position.sub(Collision.closest_point_bw(b, w)).normalize();
         let normal_velocity = Vec2.dot(normal, b.speed);
         let new_separation_velocity = -normal_velocity * b.elasticity;
         b.speed = b.speed.add(normal.mult(-normal_velocity + new_separation_velocity));
+        if (w.is_a_paddle) {
+            let ratio = (b.position.y - (w.y_position + w.length/2))/(w.length/2);
+            if (ratio >=0) {
+                b.speed.y = Math.min(ratio * 1/60, 1/60);
+            }
+            else {
+                b.speed.y = Math.max(ratio * 1/60, -1/60);
+            }
+        }
     }
 }
 

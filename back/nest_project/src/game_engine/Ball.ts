@@ -19,7 +19,7 @@ export class Ball {
 		this.r = r;
 		this.colision_number = 0;
 		this.friction = 0;
-		this.elasticity = 1.01;
+		this.elasticity = 1.02;
 		this.mass = Math.PI * r * r;
 		this.alive = true;
 		if (this.mass === 0)
@@ -28,12 +28,21 @@ export class Ball {
 			this.inv_mass = 1 / this.mass;
 	}
 
-	update_self_position() {
+	/**
+	 * update the ball position and check if the ball is out of the screen, if so return a code
+	 * @returns 2 if the ball escapte to the left of the screen, 1 if rigth, 0 if no goal
+	 */
+	update_self_position(): number {
 		this.position = this.position.add(this.speed);
-		if ((this.position.x - this.r < 0) || (this.position.x + this.r > this.aspect_ratio)) { //TODO register the goal
+		if (this.position.x - this.r < 0) {
+			this.alive = false;
+            return 2;
+		}
+		else if (this.position.x + this.r > this.aspect_ratio) {
             this.alive = false;
-            return;
+            return 1;
         }
+		return 0;
 	}
 
 }

@@ -52,7 +52,7 @@ export class AuthService {
   }
   // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
   //otp auth = one time password compatible with Google authentificator
-  async decodeToken(fullToken: string): Promise<{ id: number, login: string }>{
+  async decodeToken(fullToken: string): Promise<{ id: string, login: string }>{
     const token = fullToken.split(' ')[1];
     const decodedToken = await this.jwtService.verifyAsync(token);
     const login = decodedToken.login;
@@ -60,7 +60,8 @@ export class AuthService {
     return { id, login };
   }
   //generate secret use for google authentificator
-  async generateQRcode(id: number) {
+  //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
+  async generateQRcode(id: string) {
     const secretInfos = speakeasy.generateSecret( {
       name: "App Transcendence"
     });
