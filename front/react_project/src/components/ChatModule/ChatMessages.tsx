@@ -19,7 +19,6 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     }
 
     componentDidMount(): void {
-        // console.log("message", this.props.message)
         if (this.props.prevSender === this.props.message.senderName)
             this.setState({ sameSender: true });
         if (this.state.playload.login === this.props.message.senderName)
@@ -80,6 +79,10 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     declare context: ContextType<typeof SocketContext>;
 
     componentDidMount(): void {
+        // this.context.socket.emit("listBlock");
+        // this.context.socket.on("listBlock", (array: {id: string, name: string}[]) => {
+            
+        // })
         this.context.socket.on("newMessage", (data: IMessageReceived) => {
             this.props.handleHistory({id: data.date.toString(), content: data.content, senderName: data.senderName, senderId: data.senderId});
         });

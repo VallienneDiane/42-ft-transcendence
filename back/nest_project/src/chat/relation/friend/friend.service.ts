@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
-import { Repository } from "typeorm";
+import { Brackets, Repository } from "typeorm";
 import { FriendEntity } from "./friend.entity";
 
 @Injectable({})
@@ -39,42 +39,56 @@ export class FriendService {
 		return true;
 	}
 
-	async getList(id: string): Promise<UserEntity[]> {
+	async getFriendsList(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
 		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(id);
 		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(id);
 		const fullList: FriendEntity[] = [...requestsSend, ...requestsReceived];
-		const friendList: UserEntity[] = [];
+		const friendList: {friendshipId: string, friendId: string, friendName: string}[] = [];
 		for (let link of fullList) {
 			if (link.state === "friend") {
 				if (link.sender.id === id)
-					friendList.push(link.receiver);
+					friendList.push({friendshipId: link.id, friendId: link.receiver.id, friendName: link.receiver.login});
 				else
-					friendList.push(link.sender);
+					friendList.push({friendshipId: link.id, friendId: link.sender.id, friendName : link.sender.login});
 			}
 		}
 		return friendList;
 	}
 
-	async getRequestPendingSend(id: string): Promise<UserEntity[]> {
+	async getRequestPendingSend(id: string): Promise<{id: string, name: string}[]> {
 		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(id);
-		const list: UserEntity[] = [];
+		// if (requestsSend)
+		const list: {id: string, name: string}[] = [];
 		for (let link of requestsSend) {
 			if (link.state === "pending") {
-				list.push(link.receiver);
+				list.push({id: link.receiver.id, name: link.receiver.login});
 			}
 		}
 		return list;
 	}
 
-	async getRequestPendingReceived(id: string): Promise<UserEntity[]> {
+	async getRequestPendingReceived(id: string): Promise<{id: string, name: string}[]> {
 		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(id);
-		const list: UserEntity[] = [];
+		const list: {id: string, name: string}[] = [];
 		for (let link of requestsReceived) {
 			if (link.state === "pending") {
-				list.push(link.sender);
+				list.push({id: link.sender.id, name : link.sender.login});
 			}
 		}
 		return list;
 	}
 
+	async findRequest(senderId: string, receiverId: string): Promise<FriendEntity> {
+		const sender: UserEntity = await this.userService.findById(senderId);
+		const receiver: UserEntity = await this.userService.findById(receiverId);
+		return await this.friendRepository.findOne({where: {sender: sender, receiver: receiver}})
+	}
+
+	async updateRequest(requestToUpdate: string): Promise<void> {
+		this.friendRepository.update({id: requestToUpdate}, {state: "friend"});
+	}
+
+	async deleteRequest(requestToUpdate: string): Promise<void> {
+		this.friendRepository.delete({id: requestToUpdate});
+	}
 }
