@@ -134,6 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("JUST RECEIVED PUBLIC REQUEST EVENT -------------------------------------------------------------------------------------");
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
+      console.log("check is waiting true");
       this.server.to(client.id).emit("Already_On_Match");
       return;
     }
