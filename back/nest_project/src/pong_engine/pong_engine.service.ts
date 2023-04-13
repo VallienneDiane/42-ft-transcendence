@@ -111,7 +111,8 @@ export class PongEngineService {
      * @param user_entity1 player 1 data
      * @param user_entity2 player 2 data
      */
-    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity) {
+    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any) {
+        this.server = server;
         this.pl1 = player1;
         this.pl2 = player2;
         this.user1 = user_entity1;
@@ -123,7 +124,8 @@ export class PongEngineService {
 
     update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-        this.server.to(this.pl1.id).emit("Match_Update", this.ms);
+        console.log("in update match state this.pl1.id : ", this.pl1.id);
+        this.server.emit("Match_Update", this.ms);
     }
     
     /**
@@ -158,8 +160,7 @@ export class PongEngineService {
      * @param player the player clicking ready
      * @param server the server to emit to the room
     */
-    set_player_ready(player: Socket, server: any) {
-        this.server = server;
+    set_player_ready(player: Socket) {
         if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -168,7 +169,9 @@ export class PongEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
-            server.emit("Match_Update", this.ms);
+            console.log("room to emit", thiss.server);
+            thiss.server.emit("Match_Update", this.ms);
+            console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     thiss.pl1_ready = false;
@@ -176,7 +179,9 @@ export class PongEngineService {
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
-                server.to(thiss.pl1.id).emit("Game_Update", thiss.gs)
+                console.log("sending : ", thiss.gs);
+                thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
+                console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }
@@ -192,11 +197,11 @@ export class PongEngineService {
         match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
 		this.match_state.winner = match.winner.login;
         match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-        console.log("the match to be register should be : ", match);
+        //console.log("the match to be register should be : ", match);
         await this.matchservice.createMatch(match);
 		this.server.emit("Math_End", this.match_state);
         let result = await this.matchservice.findMatch();
-        console.log("the score should be save and the match history is :", result);
+        //console.log("the score should be save and the match history is :", result);
     }
 
     /**
