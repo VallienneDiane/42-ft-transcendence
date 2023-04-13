@@ -35,7 +35,7 @@ let createUser = (credentials: SettingsForm ) => {
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
 let isLogged = () => {
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
     if (token !== null)  { 
         let decodedToken: JwtPayload = accountService.readPayload()!;
         if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
@@ -60,16 +60,16 @@ let generateToken42 = (id42: number) => {
 }
 
 let saveToken = (token: string) => {
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
 }
 //get token from local storage
 let getToken = () => {
-    return localStorage.getItem('token');
+    return sessionStorage.getItem('token');
 }
 // Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
 let logout = () => {
     Axios.post('/auth/logout');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
 }
 // Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
 let readPayload = () => {
