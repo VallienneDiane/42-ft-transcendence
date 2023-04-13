@@ -377,6 +377,49 @@
 										}
 									}
 								}
+								& .mute {
+									display: flex;
+									flex-direction: column;
+									background: transparent;
+									&:hover {
+										background: rgba(223, 223, 223, 0.95);
+										color: var(--text-color);
+										cursor: initial;
+									}
+									& div {
+										display: flex;
+										justify-content: space-between;
+										background: transparent;
+										align-items: center;
+										& button {
+											// font-size: 2rem;
+											background: transparent;
+											padding:0 0.2rem;
+											margin: 0 0.2rem;
+											border-radius: 100%;
+											// box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .6);
+										}
+										& span {
+											width: 1.5rem;
+											font-size: 1.4rem;
+											font-weight: bold;
+											background: transparent;
+										}
+										& .muteButton {
+											color: var(--text-color);
+											width: 25%;
+											font-size: 1rem;
+											// font-size: 18px;
+											margin: 3px 0 5px 0;
+											// padding: 3px 0;
+											background-color:#b9cbce;
+											border-radius: 50px;
+											position: relative;
+											z-index: 1;
+											overflow: hidden;
+										}
+									}
+								}
 								& .searchbar {
 									display: flex;
 									align-items: center;
