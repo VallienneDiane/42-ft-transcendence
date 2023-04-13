@@ -66,12 +66,37 @@ function MemberList(props: {dest: IDest}) {
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMute, setOnClickMute] = useState<boolean>(false);
     const [userToMute, setUserToMute] = useState<string>("");
-    // const [minutes, setUserToMute] = useState<string>("");
-    // const [userToMute, setUserToMute] = useState<string>("");
+    const [minutes, setMinutes] = useState<number>(0);
+    const [hours, setHours] = useState<number>(0);
 
     const showMuteFor = (e: any) => {
         setUserToMute(e.currentTarget.value);
+        setMinutes(0);
+        setHours(0);
         setOnClickMute((onClickMute) => !onClickMute)
+    }
+
+    const increment = (e: any) => {
+        console.log("hii")
+        if (e.target.value == "minute") {
+            if (minutes < 59)
+                setMinutes(minutes + 1);
+        }
+        else {
+            if (hours < 23)
+                setHours(hours + 1);
+        }
+    }
+
+    const decrement = (e : any) => {
+        if (e.target.value == "minute") {
+            if (minutes > 0)
+                setMinutes(minutes - 1);
+        }
+        else {
+            if (hours > 0)
+                setHours(hours - 1);
+        }
     }
 
     const kickUser = (e: any) => {
@@ -83,7 +108,8 @@ function MemberList(props: {dest: IDest}) {
     }
 
     const mute = () => {
-        socket.emit("muteUser", {id: userToMute, channelId: props.dest.id, minutes: 10});
+        let time: number = (hours * 60) + minutes;
+        socket.emit("muteUser", {id: userToMute, channelId: props.dest.id, minutes: time});
     }
 
     const deOp = (e: any) => {
@@ -91,7 +117,7 @@ function MemberList(props: {dest: IDest}) {
     }
     
     const doOp = (e: any) => {
-        socket.emit("makeHi   mOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
+        socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
     useEffect(() => {
@@ -137,7 +163,7 @@ function MemberList(props: {dest: IDest}) {
     }, [])
 
     return (
-        <div>
+        <React.Fragment>
             <ul className="memberList">{
                 members.map(
                 (member, id) => {
@@ -179,13 +205,19 @@ function MemberList(props: {dest: IDest}) {
             </ul>
             {onClickMute && (
                 <React.Fragment>
-                    <li>
-                       Mute for
-                       <button onClick={mute}>Save</button>
-                       </li>
+                    <li className="mute">
+                        <div>
+                            Mute for:
+                        </div>
+                        <div>
+                            <div><button value="hour" onMouseDown={decrement}>-</button><span>{hours}</span>h<button value="hour" onMouseDown={increment}>+</button></div>
+                            <div><button value="minute" onMouseDown={decrement}>-</button><span>{minutes}</span>m<button value="minute" onMouseDown={increment}>+</button></div>
+                            <button className="muteButton" onClick={mute}>Save</button>
+                        </div>
+                    </li>
                 </React.Fragment>
            )}
-        </div>
+        </React.Fragment>
     )
 }
 
@@ -273,7 +305,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                          <li onClick={showUnban}>Unban</li>
                          {onClickUnban && (
                              <div className="searchbar">
-                                 <input type="text" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
+                                 <input type="text" id="unban" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
                                  <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={unban} />
                              </div>)
                          }
@@ -284,7 +316,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
                              <div className="searchbar">
-                                 <input type="text" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
+                                 <input type="text" id="invite" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
                                  <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={inviteUser} />
                              </div>)
                          }
