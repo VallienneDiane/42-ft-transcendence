@@ -170,6 +170,7 @@ export class PongEngineService {
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
             thiss.server.emit("Match_Update", this.ms);
+            console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     thiss.pl1_ready = false;
@@ -178,7 +179,7 @@ export class PongEngineService {
                 }
                 thiss.main_loop();
                 thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
-                console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+                //console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }
