@@ -30,7 +30,7 @@ export default function FriendList() {
     }, []);
 
     return (
-        <div>
+        <div className="friendList">
             {friends.length > 0 && <h3>My friend{friends.length > 1 && "s"}</h3>}
             <ul className="friendList">
                 {friends.map((elt, id) => (
