@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IMessage, IDest, IMessageReceived } from "./Chat_models";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { SocketContext } from "../context";
+import LogoOrdi from'../../assets/LogoOrdi.jpg';
 
 class MessageDisplay extends React.Component<{message: IMessage, prevSender: string, last: boolean}, {
     playload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
@@ -51,13 +52,15 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
                 })
                 .catch(error => console.log(error));
         }
+        else
+            this.setState({avatar: LogoOrdi})
     }
 
     render() {
             return (
                 <div className={this.state.me ? "message sent" : "message received"}>
                     {(this.state.me == false) && <div className="avatar">
-                        {(this.state.sameSender === false && this.props.message.senderName != "WARNING") && <img id="profilePicture" src={this.state.avatar} />}
+                        {(this.state.sameSender === false) && <img id="profilePicture" src={this.state.avatar} />}
                         </div>}
                     <div className="messageBlock">
                         {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
