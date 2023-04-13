@@ -57,7 +57,7 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
             return (
                 <div className={this.state.me ? "message sent" : "message received"}>
                     {(this.state.me == false) && <div className="avatar">
-                        {(this.state.sameSender === false) && <img id="profilePicture" src={this.state.avatar} />}
+                        {(this.state.sameSender === false && this.props.message.senderName != "WARNING") && <img id="profilePicture" src={this.state.avatar} />}
                         </div>}
                     <div className="messageBlock">
                         {(this.state.sameSender === false) && <div className="messageUserName">{this.props.message.senderName}</div>}
