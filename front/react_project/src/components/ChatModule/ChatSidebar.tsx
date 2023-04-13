@@ -311,7 +311,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const ref = useRef<HTMLDivElement>(null);
 
     const addFriend = () => {
-        socket.emit("friendRequest", {id: props.dest.id});
+        socket.emit("friendRequest", {userId: props.dest.id});
     }
 
     const blockUser = () => {
