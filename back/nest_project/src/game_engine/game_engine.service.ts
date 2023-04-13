@@ -135,7 +135,8 @@ export class GameEngineService {
 	 * @param user1 player1 data
 	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity) {
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any) {
+		this.server = server;
 		this.user1 = user1;
 		this.user2 = user2;
 		console.log("first : ", user1, "\n\nsecond :", user2);
@@ -147,7 +148,7 @@ export class GameEngineService {
 
 	update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-		this.server.to(this.pl1.id).emit("Match_Update", this.ms);
+		this.pl1.to(this.pl1.id).emit("Match_Update", this.ms);
 	}
 
 	/**
@@ -184,8 +185,7 @@ export class GameEngineService {
 	 * @param player the player sending the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	async set_player_ready (player: Socket, server: any) {
-		this.server = server;
+	async set_player_ready (player: Socket) {
 		if (player === this.pl1) {
             this.pl1_ready = !this.pl1_ready;
         }
@@ -194,7 +194,7 @@ export class GameEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
-            server.emit("Match_Update", this.ms);
+            thiss.server.emit("Match_Update", this.ms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     thiss.pl1_ready = false;
@@ -202,7 +202,7 @@ export class GameEngineService {
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
-                server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
+                thiss.server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
             }, 1000/60);
         }
 	}
