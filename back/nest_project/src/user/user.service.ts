@@ -5,7 +5,7 @@ import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.ent
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
-import { UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
@@ -16,8 +16,55 @@ export class UserService {
         private readonly usersRepository: Repository<UserEntity>
     ) {}
     // SIGN UP : CREATE NEW USER AND SAVE IT IN THE DATABASE
-    public create(newUser: UserEntity): Promise<UserEntity> {
-        return this.usersRepository.save(newUser);
+    async create(newUser: SignUpDto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: null,
+            login: newUser.login,
+            email: newUser.email,
+            password: newUser.password,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: null,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+        }
+        return await this.usersRepository.save(user);
+    }
+    async create42(newUser: SignUp42Dto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: newUser.id42,
+            login: newUser.login,
+            email: newUser.email,
+            password: null,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: newUser.avatarSvg,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+        }
+        return await this.usersRepository.save(user);
     }
     // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
     async findByLogin(login: string): Promise<UserEntity> {

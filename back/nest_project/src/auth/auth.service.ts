@@ -13,19 +13,18 @@ export class AuthService {
 
   //give to the api42 infos to get a token to access user infos
   async validateFortyTwo(code: string) {
-    const response = await fetch('https://api.intra.42.fr/oauth/token', {
+    const body = JSON.stringify({
+      grant_type: 'authorization_code',
+      client_id: process.env.API_UID,
+      client_secret: process.env.API_KEY,
+      code,
+      redirect_uri: process.env.API_CALLBACK_URL,
+    });
+    const response = await fetch(`https://api.intra.42.fr/oauth/token/`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        grant_type: 'authorization_code',
-        client_id: process.env.API_UID,
-        client_secret: process.env.API_KEY,
-        code: code,
-        redirect_uri: process.env.API_CALLBACK_URL,
-      }),
-    })
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
     const data = await response.json();
     return data.access_token;
   }

@@ -70,15 +70,13 @@ const LoginPage: React.FC = () => {
                     type="text"
                     placeholder="Enter your login ..."
                     />
-                    {/* {errors.login && <span>Login is required</span>} */}
                     <input className="form_element"
                     {...register("password", {required: true})}
                     type="password"
                     placeholder="Enter your password ..."
                     />
-                    {/* {errors.password && <span>Password is required</span>} */}
                     { incorrectCredentials && <div className="logError">Wrong user or password</div>}
-                    <button className="form_element" type="submit">Submit</button>
+                    <button className="form_element" type="submit">SUBMIT</button>
                 </form>
                 <button id="signin42" onClick={redirectToApi42}>
                     Sign in with 42 !

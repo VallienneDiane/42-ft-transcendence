@@ -14,28 +14,18 @@ const userSchema = yup.object().shape({
 const HomeSettings: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
     const id42 = location.state?.id42;
     const email = location.state?.email;
     const [avatar, setAvatar] = useState<string>(location.state?.avatar);
     const [login, setLogin] = useState<string>(location.state?.login);
-    const [logins, setLogins] = useState<{login: string}[]>([]);
-    const [duplicateLogin, setDupLogin] = useState<boolean>(false);
+    const [uniqueLogin, setIsUniqueLogin] = useState<boolean>(true);
+    const [uniqueId42, setIsUniqueId42] = useState<boolean>(true);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
-
     const { register, handleSubmit, formState: { errors }} = useForm<SettingsForm>({
         resolver: yupResolver(userSchema)
     });
 
-    useEffect(() => {
-        accountService.getAllLogins()
-        .then(res => {
-            setLogins(res.data);
-        })
-        .catch(error => {});
-    }, [])
-    
     useEffect(() => {
         if(selectedFile) {
             let reader = new FileReader();
@@ -53,7 +43,7 @@ const HomeSettings: React.FC = () => {
             setSelectedFile(files[0]);
         }
     }
-
+    
     const userSubmit = async () => {
         const user = {
             id42: id42,
@@ -61,19 +51,34 @@ const HomeSettings: React.FC = () => {
             email: email,
             avatarSvg: avatar,
         }
-        for(let i = 0; i < logins.length; i++) {
-            if(user.login == logins[i].login) {
-                setDupLogin(true);
-                return;
+        await accountService.isUniqueLogin(user.login)
+        .then(loginUnique => {
+            console.log("homesettings : login unique ? ", loginUnique.data);
+            if(loginUnique.data == true) {
+                accountService.isId42(user.id42)
+                .then(res_id42 => {
+                    console.log("homesettings : isId42 unique ? ", res_id42.data)
+                    if(res_id42.data == true) {
+                        setIsUniqueId42(false);
+                        return;
+                    }
+                    setIsUniqueId42(true);
+                    accountService.createUser(user)
+                    .then(token => {
+                        console.log("home settings : gen token ? ", token.data);
+                        accountService.saveToken(token.data.access_token);
+                        const from = (location.state as any)?.from || "/";
+                        navigate(from);
+                    })
+                    .catch(error => {console.log(error);});
+                })
+                .catch(error => {console.log(error);});
+            }  
+            else {
+                setIsUniqueLogin(false);
             }
-        }
-        await accountService.createUser(user)
-        .then(res_token => {
-            accountService.saveToken(res_token.data.access_token);
-            const from = (location.state as any)?.from || "/";
-            navigate(from);
         })
-        .catch(error => {});
+        .catch(error => {console.log(error);});
     }
 
     const handleDragOver = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,7 +110,7 @@ const HomeSettings: React.FC = () => {
 
     const onChangeLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLogin(event.target.value);
-        setDupLogin(false);
+        setIsUniqueLogin(true);
     }
 
     return (
@@ -131,10 +136,11 @@ const HomeSettings: React.FC = () => {
                         <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
                     </div>
                     <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                    <div id="test">
+                    <div id="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         {errors.login && <p className="error">{errors.login.message}</p>}
-                        { duplicateLogin ? <p className="error">This login already exist</p> : null }
+                        { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                        { uniqueId42 ? null : <p className="error">You are already register with 42</p> }
                     </div>
                 </div>
             </form>
