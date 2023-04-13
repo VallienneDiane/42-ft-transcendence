@@ -18,9 +18,9 @@ export default function BlockList() {
 
     return (
         <div className="requestList">
-            {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
+            {blocked.length > 0 && <h3>Request{blocked.length > 1 && "s"} I received</h3>}
             <ul>
-                {requests.map((elt, id) => (
+                {blocked.map((elt, id) => (
                     <li className="friendElement" key={id}>{elt.name}</li>
                 ))}
             </ul>
