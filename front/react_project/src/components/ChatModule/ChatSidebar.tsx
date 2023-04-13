@@ -66,6 +66,8 @@ function MemberList(props: {dest: IDest}) {
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMute, setOnClickMute] = useState<boolean>(false);
     const [userToMute, setUserToMute] = useState<string>("");
+    // const [minutes, setUserToMute] = useState<string>("");
+    // const [userToMute, setUserToMute] = useState<string>("");
 
     const showMuteFor = (e: any) => {
         setUserToMute(e.currentTarget.value);

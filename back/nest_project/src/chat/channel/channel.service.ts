@@ -237,7 +237,11 @@ export class ChannelService {
 
 	async findUserInBannedList(userId: string, channelId: string) : Promise<boolean> {
 		const arrayBanned: {id: string}[] = await this.getBannedList(channelId);
-		return arrayBanned.includes({id: userId});
+		for (let elt of arrayBanned) {
+			if (elt.id == userId)
+				return true;
+		}
+		return false;
 	}
 
 	async delUser(userId: string, channelId: string) {
