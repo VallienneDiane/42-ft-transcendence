@@ -2,6 +2,7 @@ import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean, IsNumber }
 import { ChannelDto } from "src/chat/channel/channel.dto";
 import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
+import { MuteEntity } from "src/chat/mute/mute.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
 import { UserEntity } from "./user.entity";
 
@@ -26,4 +27,5 @@ export class UserDto {
     readonly requestsReceived: FriendEntity[];
     readonly blockList: UserEntity[];
     readonly blockedMeList: UserEntity[];
+    readonly mutedList: MuteEntity[];
 }

@@ -1,6 +1,7 @@
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
+import { MuteEntity } from 'src/chat/mute/mute.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
 import { FriendEntity } from '../chat/relation/friend/friend.entity';
 
@@ -76,4 +77,7 @@ export class UserEntity {
 
   @ManyToMany(() => UserEntity, (user) => user.blockList)
   blockedMeList: UserEntity[];
+
+  @OneToMany(() => MuteEntity, (muted) => muted.user)
+  mutedList: MuteEntity[];
 }

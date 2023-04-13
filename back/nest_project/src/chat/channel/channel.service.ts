@@ -6,6 +6,7 @@ import { UserEntity } from "src/user/user.entity";
 import { NotBrackets, Repository } from "typeorm";
 import { modifyChannelDto } from "../chat.gateway.dto";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
+import { MuteEntity } from "../mute/mute.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
 
@@ -213,6 +214,24 @@ export class ChannelService {
 			.innerJoinAndSelect("channel.bannedUsers", "banned")
 			.where("channel.id = :id", { id: channelId })
 			.select("banned.id", "id")
+			.getRawMany();
+	}
+
+	async getMutedList(channelId: string): Promise<{id: string}[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.usersMuted", "mute")
+			.select("mute.id", "id")
+			.where("channel.id = :id", { id: channelId })
+			.getRawMany();
+	}
+
+	async getMutedListWithJoin(channelId: string): Promise<MuteEntity[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.usersMuted", "mute")
+			.select("mute.*")
+			.where("channel.id = :id", { id: channelId })
 			.getRawMany();
 	}
 
