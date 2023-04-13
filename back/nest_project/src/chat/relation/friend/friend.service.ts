@@ -72,6 +72,7 @@ export class FriendService {
 		const list: {id: string, name: string}[] = [];
 		for (let link of requestsReceived) {
 			if (link.state === "pending") {
+				console.log(link);
 				list.push({id: link.sender.id, name : link.sender.login});
 			}
 		}
