@@ -169,6 +169,7 @@ export class PongEngineService {
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
+            console.log("room to emit", thiss.server);
             thiss.server.emit("Match_Update", this.ms);
             console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
@@ -178,8 +179,9 @@ export class PongEngineService {
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
+                console.log("sending : ", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
-                //console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+                console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }
@@ -195,11 +197,11 @@ export class PongEngineService {
         match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
 		this.match_state.winner = match.winner.login;
         match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-        console.log("the match to be register should be : ", match);
+        //console.log("the match to be register should be : ", match);
         await this.matchservice.createMatch(match);
 		this.server.emit("Math_End", this.match_state);
         let result = await this.matchservice.findMatch();
-        console.log("the score should be save and the match history is :", result);
+        //console.log("the score should be save and the match history is :", result);
     }
 
     /**
