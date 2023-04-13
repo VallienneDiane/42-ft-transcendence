@@ -11,6 +11,7 @@ import { UserEntity } from "src/user/user.entity";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
 import { FriendService } from "./relation/friend/friend.service";
 import { FriendEntity } from "./relation/friend/friend.entity";
+import { MuteService } from "./mute/mute.service";
 
 @Injectable({})
 export class ChatService {
@@ -19,7 +20,8 @@ export class ChatService {
         private messagePrivateService: MessagePrivateService,
         private channelService: ChannelService,
         private userService: UserService,
-        private friendService: FriendService
+        private friendService: FriendService,
+        private muteService: MuteService
     ) {}
 
     private goBackToGeneral(client: Socket) {
@@ -34,6 +36,7 @@ export class ChatService {
             opUsers: [],
             godUser: undefined,
             bannedUsers: [],
+            usersMuted: [],
             messages: []
         }
         client.emit('newLocChannel', {channel: locGeneral, status: "normal"}, []);
@@ -121,9 +124,20 @@ export class ChatService {
                         logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
                         .then((channId) => {
-                            this.messageChannelService.addMessage(user, channId, message);
+                            this.muteService.findMuteRelation(user.id, room.room)
+                            .then((muted) => {
+                                if (!muted) {
+                                    this.messageChannelService.addMessage(user, channId, message)
+                                    .then(() => {
+                                        roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
+                                    });
+                                }
+                                else
+                                    client.emit("notice", "You has been muted!!");
+                            })
                         })}
-                    roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
+                    else
+                        roomHandler.roomMap.of(room.room).emit("newMessage", toSend);
             }
             else {
                 this.userService.findById(room.room)
@@ -538,6 +552,7 @@ export class ChatService {
                             normalUsers: [],
                             opUsers: [],
                             bannedUsers: [],
+                            usersMuted: [],
                             godUser: user
                         };
                         this.channelService.create(newChannel)
@@ -794,5 +809,53 @@ export class ChatService {
         })
     }
 
+    public muteUserEvent(client: Socket, userId: string, userIdToMute: string, channelId: string, minutes: number) {
+        this.userService.getChannelLink(userId, channelId)
+        .then((link) => {
+            if (!link || link.status == "normal")
+                client.emit("notice", "You can't do that!");
+            else {
+                this.userService.getChannelLink(userIdToMute, channelId)
+                .then((muteLink) => {
+                    if (!muteLink)
+                        client.emit("notice", "User not belong to this channel");
+                    else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
+                        this.muteService.muteUser(userIdToMute, channelId, minutes);
+                    }
+                    else
+                        client.emit("notice", "Only the channel owner can mute operators");
+                })
+            }
+        })
+    }
+
+    public unmuteUserEvent(client: Socket, userId: string, userIdToUnmute: string, channelId: string) {
+        this.userService.getChannelLink(userId, channelId)
+        .then((link) => {
+            if (!link || link.status == "normal")
+                client.emit("notice", "You can't do that!");
+            else {
+                this.userService.getChannelLink(userIdToUnmute, channelId)
+                .then((muteLink) => {
+                    if (!muteLink)
+                        client.emit("notice", "User not belong to this channel");
+                    else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
+                        this.muteService.unmuteUser(userIdToUnmute, channelId);
+                    }
+                    else
+                        client.emit("notice", "Only the channel owner can unmute operators");
+                })
+            }
+        })
+    }
     
+    public listMutedUsersEvent(client: Socket, roomHandler: UserRoomHandler) {
+        let room = roomHandler.socketMap.sockets.get(client);
+        if (room != undefined && room.isChannel) {
+            this.muteService.getCurrentMutedInChannel(room.room)
+            .then((array) => {
+                client.emit("mutedList", array);
+            })
+        }
+    }
 }

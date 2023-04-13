@@ -120,6 +120,7 @@ export class UserService {
                 opUsers: [],
                 godUser: undefined,
                 bannedUsers: [],
+                usersMuted: [],
                 messages: []
             },
             status: "normal"}];
@@ -254,6 +255,15 @@ export class UserService {
             .innerJoinAndSelect("user.blockList", "blocked")
             .select("blocked.id", "id")
             .addSelect("blocked.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getMuteList(userId: string): Promise<{id: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.mutedList", "mute")
+            .select("mute.id", "id")
             .where("user.id = :id", { id : userId })
             .getRawMany();
     }
