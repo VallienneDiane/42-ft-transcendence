@@ -11,6 +11,7 @@ import { SocketContext } from "../context";
 import FriendList from "./FriendList";
 import PendingList from "./PendingList";
 import RequestsList from "./RequestList";
+import BlockList from "./BlockList";
 
 export default function Profile() {
     const {socket} = useContext(SocketContext);
@@ -66,6 +67,7 @@ export default function Profile() {
                         <FriendList />
                         <PendingList />
                         <RequestsList />
+                        {socket && <BlockList />}
                     </div>
                     ): null}
             </aside>

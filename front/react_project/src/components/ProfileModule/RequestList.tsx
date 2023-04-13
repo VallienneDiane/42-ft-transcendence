@@ -26,7 +26,7 @@ export default function RequestsList() {
             {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
             <ul>
                 {requests.map((elt, id) => (
-                    <li className="friendElement" key={id}>{elt.name}</li>
+                    <li className="requestElement" key={id}>{elt.name}</li>
                 ))}
             </ul>
         </div>
