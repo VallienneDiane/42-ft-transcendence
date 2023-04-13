@@ -61,7 +61,7 @@ export default function Profile() {
                 </div>
 
                 {currentUser === undefined ? (
-                    <div id="friendList">
+                    <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
                         <FriendList />
                         <PendingList />

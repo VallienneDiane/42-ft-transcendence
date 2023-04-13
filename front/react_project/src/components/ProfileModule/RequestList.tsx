@@ -9,7 +9,7 @@ export default function RequestsList() {
     const me: JwtPayload = accountService.readPayload()!;
     const [requests, setRequests] = useState<{id: string, name: string}[]>([]);
 
-    const fetchFriends = () => {
+    const fetchRequests = () => {
         Axios.get("listRequestsPendingReceived/" + me.sub)
         .then((response) => {
             console.log(response.data);
@@ -18,13 +18,13 @@ export default function RequestsList() {
     }
 
     useEffect(() => {
-        fetchFriends();
+        fetchRequests();
     }, []);
 
     return (
-        <div>
-            {requests.length > 0 && <h3>My friend request{requests.length > 1 && "s"}</h3>}
-            <ul className="friendList">
+        <div className="requestList">
+            {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
+            <ul>
                 {requests.map((elt, id) => (
                     <li className="friendElement" key={id}>{elt.name}</li>
                 ))}

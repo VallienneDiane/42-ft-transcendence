@@ -9,7 +9,7 @@ export default function PendingList() {
     const me: JwtPayload = accountService.readPayload()!;
     const [pendings, setPendings] = useState<{id: string, name: string}[]>([]);
 
-    const fetchFriends = () => {
+    const fetchPending = () => {
         Axios.get("listRequestsPendingSend/" + me.sub)
         .then((response) => {
             setPendings(response.data);
@@ -17,13 +17,13 @@ export default function PendingList() {
     }
 
     useEffect(() => {
-        fetchFriends();
+        fetchPending();
     }, []);
 
     return (
-        <div>
+        <div className="pendingList">
             {pendings.length > 0 && <h3>My pending request{pendings.length > 1 && "s"}</h3>}
-            <ul className="friendList">
+            <ul>
                 {pendings.map((elt, id) => (
                     <li className="friendElement" key={id}>{elt.name}</li>
                 ))}
