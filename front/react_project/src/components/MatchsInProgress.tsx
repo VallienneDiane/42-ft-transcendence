@@ -50,18 +50,18 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                         <th colSpan="1">PLAYER 2</th>
                     </tr> */}
                 </thead>
-                {/* <tbody>
-                    {matchs.map((match: Match) => {
+                <tbody>
+                    {matchs.map((match: MatchState) => {
                         return (
                             <tr>
-                                <td>{match.login1}</td>
+                                {/* <td>{match.login1}</td>
                                 <td>{match.score1}</td>
                                 <td>{match.score2}</td>
-                                <td>{match.login2}</td>
+                                <td>{match.login2}</td> */}
                             </tr>
                         )
                     })}
-                </tbody> */}
+                </tbody>
             </table>
         </div>
     )
