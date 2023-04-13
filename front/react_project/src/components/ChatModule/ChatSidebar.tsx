@@ -66,8 +66,9 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const me: JwtPayload = accountService.readPayload()!;
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
-    const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
+    const [onClickMute, setOnClickMute] = useState<boolean>(false);
     const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
+    const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [userToInvit, setUserToInvit] = useState<string>("");
     const [userToUnban, setUserToUnban] = useState<string>("");
@@ -75,13 +76,17 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
     }
-    
-    const showSettings = () => {
-        setOnClickSettings((onClickSettings) => !onClickSettings)
-    }
 
+    const showMuteFor = () => {
+        setOnClickMute((onClickMute) => !onClickMute)
+    }
+    
     const showUnban = () => {
         setOnClickUnban((onClickUban) => !onClickUban)
+    }
+
+    const showSettings = () => {
+        setOnClickSettings((onClickSettings) => !onClickSettings)
     }
     
     const showInvite = () => {
@@ -132,7 +137,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
     
     const doOp = (e: any) => {
-        socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
+        socket.emit("makeHi   mOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
     const inviteUser = (event: any) => {
@@ -222,7 +227,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                                     if (member.status == "normal")
                                         return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                                                 <div>
-                                                    <button value={member.user.id} onClick={mute}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
+                                                    <button value={member.user.id} onClick={showMuteFor}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
                                                     <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
                                                     <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
                                                     </div></li>)
@@ -235,7 +240,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                                     { member.status == "op" ? 
                                     (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) :
                                     (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
-                                    <button value={member.user.id} onClick={mute}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
+                                    <button value={member.user.id} onClick={showMuteFor}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
                                     <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
                                     <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
                                     </div></li>)
