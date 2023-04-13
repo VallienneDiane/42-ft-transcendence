@@ -5,7 +5,7 @@ import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { IDest, IChannel } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBan, faBroom, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
+import { faBan, faBroom, faCommentSlash, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faRightFromBracket, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router-dom";
 
 function ModifyChannel(props: {channel: IChannel}) {
@@ -67,8 +67,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
+    const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [userToInvit, setUserToInvit] = useState<string>("");
+    const [userToUnban, setUserToUnban] = useState<string>("");
 
     const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
@@ -77,13 +79,21 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const showSettings = () => {
         setOnClickSettings((onClickSettings) => !onClickSettings)
     }
+
+    const showUnban = () => {
+        setOnClickUnban((onClickUban) => !onClickUban)
+    }
     
     const showInvite = () => {
         setOnClickInvite((onClickInvite) => !onClickInvite)
     }
     
-    const onChange = (e: any) => {
+    const onChangeInvite = (e: any) => {
         setUserToInvit(e.target.value);
+    }
+
+    const onChangeUnban = (e: any) => {
+        setUserToUnban(e.target.value);
     }
 
     const handleClickOutside = (e: any) => {
@@ -93,18 +103,18 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
      
     const kickUser = (e: any) => {
-        // console.log(e.currentTarget.value, props.dest.id);
         socket.emit("kickUser", {userToKick: e.currentTarget.value, channelId: props.dest.id});
     }
     
     const ban = (e: any) => {
-        console.log("ban!");
-
+        socket.emit("banUser", {id: e.currentTarget.value, channelId: props.dest.id});
     }
 
     const unban = (e: any) => {
-        console.log("unban!");
-
+        console.log(e.target.value, props.dest.id)
+        e.preventDefault();
+        socket.emit("unbanUser", {name: userToUnban, channelId: props.dest.id});
+        setUserToUnban("");
     }
 
     const mute = (e: any) => {
@@ -118,12 +128,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     const deOp = (e: any) => {
-        // console.log("deOp!");
         socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
     }
     
     const doOp = (e: any) => {
-        // console.log("doOp!");
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
@@ -213,7 +221,11 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                                 else if (props.dest.status == "op") {
                                     if (member.status == "normal")
                                         return (<li key={id}><div>{member.user.login}{iconStatus}</div>
-                                                <div><button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div></li>)
+                                                <div>
+                                                    <button value={member.user.id} onClick={mute}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
+                                                    <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
+                                                    <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
+                                                    </div></li>)
                                     else if (member.status == "op" || member.status == "god")
                                         return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
                                 }
@@ -223,8 +235,10 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                                     { member.status == "op" ? 
                                     (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) :
                                     (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
-                                    <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faBan} /></button></div>
-                                    </li>)
+                                    <button value={member.user.id} onClick={mute}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
+                                    <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
+                                    <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
+                                    </div></li>)
                             }
                             else
                                 return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
@@ -232,12 +246,23 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </ul>
                 )}
+                {(props.dest.status === "god") ? (
+                     <React.Fragment>
+                         <li onClick={showUnban}>Unban</li>
+                         {onClickUnban && (
+                             <div className="searchbar">
+                                 <input type="text" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
+                                 <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={unban} />
+                             </div>)
+                         }
+                     </React.Fragment>
+                ) : null }
                 {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
                      <React.Fragment>
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
                              <div className="searchbar">
-                                 <input type="text" onChange={onChange} value={userToInvit} placeholder="Search"/>
+                                 <input type="text" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
                                  <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={inviteUser} />
                              </div>)
                          }
