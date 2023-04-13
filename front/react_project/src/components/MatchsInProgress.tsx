@@ -41,23 +41,23 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         <div id="matchsInProgress">
             <table>
                 <thead>
-                    {/* <tr>
+                    <tr>
                         <th colSpan="4">Matchs in progress</th>
                     </tr>
                     <tr>
                         <th colSpan="1">PLAYER 1</th>
                         <th colSpan="2">SCORE</th>
                         <th colSpan="1">PLAYER 2</th>
-                    </tr> */}
+                    </tr>
                 </thead>
                 <tbody>
                     {matchs.map((match: MatchState) => {
                         return (
                             <tr>
-                                {/* <td>{match.login1}</td>
+                                <td>{match.login1}</td>
                                 <td>{match.score1}</td>
                                 <td>{match.score2}</td>
-                                <td>{match.login2}</td> */}
+                                <td>{match.login2}</td>
                             </tr>
                         )
                     })}
