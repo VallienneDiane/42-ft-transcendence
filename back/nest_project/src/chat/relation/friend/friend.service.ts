@@ -60,7 +60,7 @@ export class FriendService {
 		// if (requestsSend)
 		const list: {id: string, name: string}[] = [];
 		for (let link of requestsSend) {
-			console.log(link.receiver);
+			console.log("getRequestPendingSend :", link.sender);
 			// const receiver: UserEntity = await this.userService.findById(link.receiverId)
 			if (link.state === "pending") {
 				list.push({id: link.receiver.id, name: link.receiver.login});
@@ -73,7 +73,7 @@ export class FriendService {
 		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(id);
 		const list: {id: string, name: string}[] = [];
 		for (let link of requestsReceived) {
-			console.log("sender", link.sender);
+			console.log("getRequestPendingReceived", link);
 			if (link.state === "pending") {
 				console.log(link);
 				list.push({id: link.sender.id, name : link.sender.login});

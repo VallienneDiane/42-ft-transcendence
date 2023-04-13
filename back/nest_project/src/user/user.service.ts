@@ -219,7 +219,10 @@ export class UserService {
         const requestsSend: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
             .where("user.id = :id", { id: id })
             .innerJoinAndSelect("user.requestsSend", "send")
-            .select("send.*")
+            .select("send.id", "id")
+            .addSelect("send.receiver", "receiver")
+            .addSelect("send.sender", "sender")
+            .addSelect("send.state", "state")
             .getRawMany();
         return requestsSend;
     }
