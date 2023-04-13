@@ -27,3 +27,16 @@ export class UserDto {
     readonly blockList: UserEntity[];
     readonly blockedMeList: UserEntity[];
 }
+
+export class SignUpDto {
+    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsEmail() readonly email: string;
+    @IsNotEmpty() @IsString() @MinLength(8) password: string;
+}
+
+export class SignUp42Dto {
+    @IsNumber() id42: number;
+    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsEmail() readonly email: string;
+    @IsNotEmpty() avatarSvg: string;
+}

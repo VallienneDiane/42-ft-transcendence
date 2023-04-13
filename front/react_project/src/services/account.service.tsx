@@ -22,15 +22,22 @@ let getAvatar = (id: string) => {
     return Axios.get('getAvatar/' + id);
 }
 
-let getAllLogins = () => {
-    return Axios.post('user/getAllLogins');
+// let getAllLogins = () => {
+//     return Axios.post('user/getAllLogins');
+// }
+let isUniqueLogin = (login: string) => {
+    console.log("je suis dans la requete unique login", login);
+    return Axios.get('user/isUniqueLogin/' + login);
 }
-let getAllIds42 = () => {
-    return Axios.post('user/getAllIds');
+
+let isId42 = (id42: number) => {
+    console.log("je suis dans la requete id42", login);
+    return Axios.get('user/isId42/' + id42);
 }
 // Update name and avatar if first connection with 42
 let createUser = (credentials: SettingsForm ) => {
-    return Axios.post('user/create', credentials);
+    console.log("je suis dans la requete create user", credentials);
+    return Axios.post('user/signup42', credentials);
 }
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
@@ -127,7 +134,7 @@ let callback = (code: string) => {
 }
 
 export const accountService = {
-    signUp, login, getAllLogins, getAllIds42, createUser, saveToken, logout, isLogged, 
+    signUp, login, isUniqueLogin, isId42, createUser, saveToken, logout, isLogged, 
     getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
     is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar,
     getAvatar, url42, callback

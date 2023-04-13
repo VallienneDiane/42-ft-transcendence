@@ -38,9 +38,9 @@
 				margin: 0 auto;
 				margin-top: calc(100vh - 85vh - 20px);
 				font-size: 16px;
-				color: black;
-				background: #fff9fd;
-				border: 1px solid #d8d8d8;
+				color: var(--text-color);
+				background: var(--prim-color);
+				border: 1px solid var(--text-color);
 				border-radius: 4px;
 				overflow: auto;
 				& > h1 {
@@ -169,8 +169,9 @@
 						margin: 0 auto;
 						margin-top: calc(100vh - 85vh - 20px);
 						font-size: 16px;
-						background: #fff9fd;
-						border: 1px solid #d8d8d8;
+						color: var(--text-color);
+						background: var(--prim-color);
+						border: 1px solid var(--text-color);
 						border-radius: 4px;
 						& > h1 {
 							font-size: 23px;
@@ -525,6 +526,7 @@
 					}
 				}
 				& .messageUserName {
+					color: var(--prim-color);
 					background: transparent;
 				}
 				& .messageText {

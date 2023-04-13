@@ -1,6 +1,5 @@
 import "../styles/LoginPage.scss"
 import React, { useContext, useState } from 'react';
-import ReactDOM from 'react-dom';
 import ReactDOMServer from 'react-dom/server';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -22,7 +21,7 @@ const SignupPage: React.FC = () => {
   const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
   });
-  
+
   const signUp = async (data: SignUpForm) => {
     const avatar = generateRandomAvatarOptions();
     const svgString = ReactDOMServer.renderToString(avatar);
@@ -38,7 +37,6 @@ const SignupPage: React.FC = () => {
     })
   }
 
-
   return (
     <div id='signup_page'>
       <div className="card">
@@ -49,19 +47,19 @@ const SignupPage: React.FC = () => {
             type="text" 
             placeholder="Login"
             />
-            {errors.login && <p className='errorsSignup'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
+            {errors.login && <p className='logError'>{errors.login.message}</p>}   {/* optionnal fields : errors */}
             <input className="form_element" 
             {...register("email")}
             type="email" 
             placeholder="Email"
             />
-            {errors.email && <p className='errorsSignup'>{errors.email.message}</p>}
+            {errors.email && <p className='logError'>{errors.email.message}</p>}
             <input className="form_element" 
             {...register("password")}
             type="password" 
             placeholder="Password"
             />
-            {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
+            {errors.password && <p className='logError'>{errors.password.message}</p>}
           <button className="form_element" type="submit">SIGN UP</button>
         </form>
         <a href="/login">Already registered ? Log In</a>

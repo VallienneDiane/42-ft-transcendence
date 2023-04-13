@@ -12,7 +12,6 @@ import { UserEntity } from 'src/user/user.entity';
 @Controller()
 export class AuthController {
   constructor(private authService: AuthService, private userService: UserService, private jwtService: JwtService) {}
-
   //sign in with 42 : get url to authorize connexion to api 42
   @Get('/')
   async getUrl42() {
@@ -27,7 +26,7 @@ export class AuthController {
     const response = await fetch('https://api.intra.42.fr/v2/me/', {
       method: 'GET',
       headers: {
-        'Authorization' : `Bearer ${tokenApi42}`,
+        'Authorization': `Bearer ${tokenApi42}`,
       } 
     });
     const data = await response.json();
@@ -38,14 +37,6 @@ export class AuthController {
       avatarSvg: data.image?.link,
     }
   }
-
-  @Post('user/create')
-  async createUser(@Body() newUser: UserDto) {
-    await this.userService.create(newUser);
-    const token = this.authService.genToken(newUser.login);
-    return token;
-  }
-
   //check login and password with local stratgey of passport
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
@@ -58,7 +49,6 @@ export class AuthController {
     const token = await this.authService.genToken(data.login);
     return token;
   }
-
   @Post('auth/generateToken42')
   async generateToken42(@Body() data: UserDto) {
     const token = await this.authService.genToken42(data.id42);

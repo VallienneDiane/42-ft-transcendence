@@ -9,7 +9,7 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({nullable: true})
+  @Column({nullable: true, unique: true})
   id42: number;
 
   @Column(

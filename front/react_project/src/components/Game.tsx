@@ -194,7 +194,7 @@ const Game: React.FC = () => {
             <div id="gamePanel">
                 {matchInProgress ? <div>{players?.login1} VS {players?.login2}</div> : null}
                 <div id="gameField">
-                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponent ...</div> : null}
                     <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameWidth / (16 / 9)}></canvas>
                 </div>
             </div>

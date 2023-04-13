@@ -10,19 +10,16 @@ export interface VerifyCodeForm {
 }
 
 export interface SignUpForm { 
-    id?: number,
     login: string,
     email: string,
     password: string,
-    errors?: string,
-    avatarSvg?: string
   }
   
-  export interface SettingsForm { 
+  export interface SettingsForm {
+    id42: number,
     login: string,
     email: string,
     avatarSvg: string
-    errors?: string,
 }
 
 export interface User {
