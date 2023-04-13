@@ -122,6 +122,11 @@ const Game: React.FC = () => {
     useEffect(() => {
         // triggered when receiving socket data, update position of elements
         if (socket) {
+            socket.on('Allready_On_Match', () => {
+                console.log('Already on match');
+                document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
+            });
+
             socket.on('connect', () => {
                 console.log('Connected to server!');
             });
@@ -253,15 +258,10 @@ const Game: React.FC = () => {
         }
     }, [gameState, gameWidth]);
 
-
-
-
-    // const gameWidth = 600;
-
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            {/* <MatchsInProgress socket={socket}/> */}
+            <MatchsInProgress socket={socket}/>
             <div id="gamePanel">
                 {matchInProgress ? <div>{players?.player1_login} VS {players?.player2_login}</div> : null}
                 <div id="gameField">
