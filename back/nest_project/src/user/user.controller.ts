@@ -22,6 +22,7 @@ export class UserController {
         newUser.password = hash;
         await this.userService.create(newUser);
         const payload = {login: newUser.login, sub: newUser.id};
+        console.log("user: ", newUser);
         return {
             access_token: this.jwtService.sign(payload)
         }

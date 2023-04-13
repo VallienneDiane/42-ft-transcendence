@@ -250,6 +250,7 @@
 							cursor: pointer;
 							& #msg {
 								padding-left: 0.5em;
+								opacity: 70%;
 							}
 						}
 						& .waitingMsg {
@@ -364,7 +365,7 @@
 											& .iconAction {
 												background: transparent;
 												width: 15px;
-												padding-left: 6px;
+												padding-left: 12px;
 												opacity: 70%;
 												&:hover {
 													// outline: none;
