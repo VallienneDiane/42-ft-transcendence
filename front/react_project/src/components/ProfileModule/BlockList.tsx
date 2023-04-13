@@ -13,15 +13,24 @@ export default function BlockList() {
         socket.emit("listBlock");
     }
 
+    const unblockEvent = (e : any) => {
+        socket.emit("unblockUser", {id: e.target.value})
+    }
+
     useEffect(() => {
+        console.log("socket: ", socket);
+        fetchBlocked();
+        socket.on("listBlock", (data: {id: string, name: string}[]) => {
+            setBlocked(data);
+        })
     }, []);
 
     return (
-        <div className="requestList">
-            {blocked.length > 0 && <h3>Request{blocked.length > 1 && "s"} I received</h3>}
+        <div className="blockList">
+            {blocked.length > 0 && <h3>User{blocked.length > 1 && "s"} I blocked</h3>}
             <ul>
                 {blocked.map((elt, id) => (
-                    <li className="friendElement" key={id}>{elt.name}</li>
+                    <li className="blockElement" key={id}>{elt.name}<button className="unblockButton" value={elt.id} onClick={unblockEvent}>unblock</button></li>
                 ))}
             </ul>
         </div>

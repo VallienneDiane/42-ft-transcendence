@@ -147,29 +147,6 @@ export class UserService {
         });
         return arrayOfChannels;
     }
-
-    // async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
-    //     let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
-    //     const msgSendDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesSend", "send")
-    //         .select("send.receiver")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     const msgReceivedDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesReceived", "received")
-    //         .select("received.sender")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     msgSendDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     msgReceivedDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     return sorted;
-    // }
     
     //set secret code for 2fa in user entity
     async set2faSecret(secret: string, id: string) {
