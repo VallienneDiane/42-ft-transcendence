@@ -18,6 +18,7 @@ const schema = yup.object().shape({
 
 const LogSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
+    const id = decodedToken.sub;
     const [checked, setchecked] = useState<boolean>(false);
     const [qrcode, setQrcode] = useState<string>("null");
     const [qrLoad, setQrLoad] = useState<boolean>(false)
@@ -28,8 +29,8 @@ const LogSettings: React.FC = () => {
         resolver: yupResolver(schema)
     });
 
-    const isGoogleActivate = () => {
-        accountService.is2faActiveSettings(decodedToken.login)
+    const isGoogleAuthActivate = () => {
+        accountService.is2faActiveSettings(id!)
             .then(response => {
                 setActivate2fa(response.data.is2faActive);
                 setchecked(response.data.is2faActive);
@@ -39,15 +40,15 @@ const LogSettings: React.FC = () => {
     }
 
     useEffect(() => {
-        isGoogleActivate();
-        userService.getUser(decodedToken.login)
+        isGoogleAuthActivate();
+        userService.getUser(id!)
             .then(response => {
                 setUser(response.data);
             })
             .catch(error => {
                 console.log(error);
             });
-        console.log("user", user);
+            console.log("(Log settings) 2fa user", user);
     }, [])
 
     const verifySubmittedCode = (data: VerifyCodeForm) => {

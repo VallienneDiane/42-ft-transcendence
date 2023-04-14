@@ -41,35 +41,34 @@ export class AuthService {
     return validUser;
   }
   
-  async genToken(login: string){
-    const validUser = await this.userService.findByLogin(login);
-    const payload = {login: validUser.login, sub: validUser.id};
+  async genToken(id: string){
+    const validUser = await this.userService.findById(id);
+    const payload = {sub: validUser.id};
     return {
       access_token: this.jwtService.sign(payload)
     }
   }
 
-  async genToken42(id42: number){
+  async genToken42(id42: string){
     const validUser = await this.userService.findById42(id42);
-    const payload = {login: validUser.login, sub: validUser.id};
+    const payload = {sub: validUser.id};
     return {
       access_token: this.jwtService.sign(payload)
     }
   }
   // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
   //otp auth = one time password compatible with Google authentificator
-  async decodeToken(fullToken: string): Promise<{ id: string, login: string }>{
+  async decodeToken(fullToken: string): Promise<{ id: string }>{
     const token = fullToken.split(' ')[1];
     const decodedToken = await this.jwtService.verifyAsync(token);
-    const login = decodedToken.login;
     const id = decodedToken.sub;
-    return { id, login };
+    return { id };
   }
   //generate secret use for google authentificator
   //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
   async generateQRcode(id: string) {
     const secretInfos = speakeasy.generateSecret( {
-      name: "App Transcendence"
+      name: "ft_Transcendence"
     });
     await this.userService.set2faSecret(secretInfos.ascii, id);
     const QRcode = await qrcode.toDataURL(secretInfos.otpauth_url);

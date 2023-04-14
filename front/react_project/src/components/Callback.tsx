@@ -11,7 +11,6 @@ const Callback: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
-    // let newUser:boolean = true;
 
     useEffect(() => {
         setLoading(true);

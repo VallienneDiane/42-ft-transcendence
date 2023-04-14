@@ -7,7 +7,7 @@ import { UserEntity } from "./user.entity";
 
 export class UserDto {
     readonly id: string;
-    @IsNumber() id42: number;
+    readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(8) password: string; //@IsOptionnal
@@ -35,8 +35,22 @@ export class SignUpDto {
 }
 
 export class SignUp42Dto {
-    @IsNumber() id42: number;
+    readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() avatarSvg: string;
+}
+
+export class UpdateUserDto {
+    readonly id: string;
+    @IsNotEmpty() @IsString() login: string;
+    @IsNotEmpty() avatarSvg: string;
+}
+
+export class idDto {
+    readonly id: string;
+}
+
+export class id42Dto {
+    readonly id42: string;
 }

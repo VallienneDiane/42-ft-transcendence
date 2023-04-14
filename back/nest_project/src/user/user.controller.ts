@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { SignUp42Dto, SignUpDto, UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UpdateUserDto, UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -25,21 +25,26 @@ export class UserController {
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;
         const user = await this.userService.create(newUser);
-        console.log("user = ", user);
-        const payload = {login: user.login, sub: user.id};
-        console.log("user: ", newUser);
+        console.log("(user.controller) user/signup, user create = ", user);
+        const payload = {sub: user.id};
         return {
             access_token: this.jwtService.sign(payload)
         }
     }
-
+    
     @Post('user/signup42')
     async createUser42(@Body() newUser: SignUp42Dto) {
-        console.log("usercontroller: user/create newUser ", newUser);
-        const user = await this.userService.create42(newUser);
-        console.log("user create = " , user);
-        const token = this.authService.genToken(newUser.login);
-        return token;
+        const user42 = await this.userService.create42(newUser);
+        console.log("(user.controller) user/signup42, user 42 create = ", user42);
+        return this.authService.genToken(user42.id);
+    }
+    
+    @UseGuards(JwtAuthGuard)
+    @Post('user/updateUser')
+    async updateUser(@Body() user: UpdateUserDto) {
+        const updateUser = await this.userService.update(user);
+        console.log("(user.controller) user/updateUser, user update = ", updateUser);
+        return updateUser;
     }
   
     @Get('user/isUniqueLogin/:login')
@@ -55,8 +60,8 @@ export class UserController {
     }
     
     @Get('user/isId42/:id42')
-    async isId42(@Param('id42') id42: number):Promise<boolean> {
-        const allIds42: {id42: number;}[] = await this.userService.findAllIds42() as { id42: number; }[];
+    async isId42(@Param('id42') id42: string):Promise<boolean> {
+        const allIds42: {id42: string;}[] = await this.userService.findAllIds42() as { id42: string; }[];
         console.log("allIds42 = ", allIds42);
         if(allIds42) {
             for(let i = 0; i < allIds42.length; i++) {
@@ -77,21 +82,21 @@ export class UserController {
     }
     //get profile
     @UseGuards(JwtAuthGuard)
-    @Get('user/:login')
-    async displayUserByLogin(@Param('login') login: string): Promise<UserEntity> {
-        return await this.userService.findByLogin(login);
+    @Get('user/:id')
+    async displayUserByLogin(@Param('id') id: string): Promise<UserEntity> {
+        return await this.userService.findById(id);
     }
     //update account params
-    @UseGuards(JwtAuthGuard)
-    @Patch('user/:login')
-    async update(@Param('login') login: string, @Body() user: UserDto): Promise<void> {
-        return await this.userService.update(login, user);
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Patch('user/:login')
+    // async update(@Param('login') login: string, @Body() user: UserDto): Promise<void> {
+    //     return await this.userService.update(login, user);
+    // }
     //delete user account
     @UseGuards(JwtAuthGuard)
-    @Delete('user/:login')
-    async delete(@Param('login') login: string) {
-        return this.userService.delete(login);
+    @Delete('user/:id')
+    async delete(@Param('id') id: string) {
+        return this.userService.delete(id);
     }
 
     //update avatar picture

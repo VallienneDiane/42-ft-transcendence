@@ -5,7 +5,7 @@ import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.ent
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
-import { SignUp42Dto, SignUpDto, UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UpdateUserDto, UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
@@ -73,14 +73,14 @@ export class UserService {
     // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
     async findById(id: string): Promise<UserEntity> {
         const toReturn = await this.usersRepository.findOneBy({id: id});
-        return toReturn
+        return toReturn;
     }
     
     public findOne(options?: object): Promise<UserEntity> {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
     }
-    public findById42(id42: number): Promise<UserEntity> {
+    public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});
     }
     // DISPLAY ALL USERS
@@ -94,15 +94,17 @@ export class UserService {
           .select(['user.login'])
           .getMany();
     }
-    async findAllIds42(): Promise<{ id42: number }[]> {
+    async findAllIds42(): Promise<{ id42: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
           .select(['user.id42'])
           .getMany();
     }
     // UPDATE USER INFOS
-    async update(login: string, User: UserEntity): Promise<void> {
-        this.usersRepository.update(login, User);
+    async update(userToUpdate: UpdateUserDto) {
+        console.log("user to update = ", userToUpdate);
+        return await this.usersRepository.update({id: userToUpdate.id}, {login: userToUpdate.login, avatarSvg: userToUpdate.avatarSvg});
     }
+
     // DELETE USER ACCOUNT BY ID
     async delete(login: string): Promise<void> {
         this.usersRepository.delete(login);

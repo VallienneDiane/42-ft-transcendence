@@ -26,9 +26,9 @@ const DarkenColor = function (stringColor: string, percent: number) {
     let g: number = parseInt(stringColor.substring(4, 6), 16) * percent / 100;
     let b: number = parseInt(stringColor.substring(6, 8), 16) * percent / 100;
 
-    console.log('r', Math.round(r).toString(16).padStart(2, '0'));
-    console.log('g', Math.round(g).toString(16).padStart(2, '0'));
-    console.log('b', Math.round(b).toString(16).padStart(2, '0'));
+    // console.log('r', Math.round(r).toString(16).padStart(2, '0'));
+    // console.log('g', Math.round(g).toString(16).padStart(2, '0'));
+    // console.log('b', Math.round(b).toString(16).padStart(2, '0'));
 
     return (`#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`);
 }
@@ -37,7 +37,7 @@ const style = getComputedStyle(document.documentElement);
 const ballColor = style.getPropertyValue('--ball-color');
 const ballShadowColor = DarkenColor(ballColor, 70);
 
-console.log(ballColor, ballShadowColor);
+// console.log(ballColor, ballShadowColor);
 
 const BallContainer = (props: BallContainerProps) => {
 
