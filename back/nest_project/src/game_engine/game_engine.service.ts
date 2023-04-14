@@ -78,7 +78,7 @@ export class GameEngineService {
 	userservice;
 	matchservice;
 	server: any;
-	match_state: MatchEnd;
+	match_end_state: MatchEnd;
 	waiting: Set<string>;
 
 	constructor(userservice: UserService, matchservice: MatchService) {
@@ -115,7 +115,7 @@ export class GameEngineService {
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
-		this.match_state = {player1_login: "", winner: "", disconnection_occure: false};
+		this.match_end_state = {player1_login: "", winner: "", disconnection_occure: false};
 		console.log("from game engine service player are :", this.pl1, "and", this.pl2);
 
 	}
@@ -136,7 +136,7 @@ export class GameEngineService {
 	 * @param user1 player1 data
 	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>) {
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>, match: MatchState) {
 		this.server = server;
 		this.user1 = user1;
 		this.user2 = user2;
@@ -144,8 +144,9 @@ export class GameEngineService {
 		this.pl1 = player1;
 		this.pl2 = player2;
 		this.waiting = waiting;
+		this.ms = match;
         this.update_match_state();
-        this.match_state.player1_login = this.user1.login;
+        this.match_end_state.player1_login = this.user1.login;
 	}
 
 	update_match_state() {
@@ -177,7 +178,7 @@ export class GameEngineService {
 		else {
 			this.pl2_score = -1;
 		}
-		this.match_state.disconnection_occure = true;
+		this.match_end_state.disconnection_occure = true;
 		this.game_must_stop = true;
 		this.close_the_game();
 	}
@@ -219,16 +220,16 @@ export class GameEngineService {
 		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
 		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
-		this.match_state.winner = match.winner.login;
+		this.match_end_state.winner = match.winner.login;
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-		console.log("the match to be register should be : ", match);
+		// console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
 		if (this.waiting.delete(this.user1.id)) {
 			console.log("removed from waiting in game close_the_game function");
 		}
-		this.server.emit("Match_End", this.match_state);
+		this.server.emit("Match_End", this.match_end_state);
 		let result = await this.matchservice.findMatch();
-		console.log("the score should be save and the match history is :", result);
+		// console.log("the score should be save and the match history is :", result);
 	}
 
 	main_loop() {
