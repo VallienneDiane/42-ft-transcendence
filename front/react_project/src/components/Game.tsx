@@ -16,7 +16,7 @@ interface ball {
 }
 
 interface gameState {
-    ballPosition: ball[],
+    BallPosition: ball[],
     paddleOne: { x: number, y: number },
     paddleTwo: { x: number, y: number }
 }
@@ -88,7 +88,7 @@ const Game: React.FC = () => {
         // Set the initial position of elements based on the width and height of the canvas element
         if (canvasRef.current) {
             setGameState({
-                ballPosition: [
+                BallPosition: [
                     { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
                 ],
                 paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
@@ -145,7 +145,6 @@ const Game: React.FC = () => {
             // })
 
             socket.on('Game_Update', (gameState: gameState) => {
-                console.log("JUST RECEIVED GAME UPDATE EVENT -------------------------------------------------------------------------------------");
                 if (ready === true) {
                     setTimer(true);
                 }
@@ -154,7 +153,7 @@ const Game: React.FC = () => {
                 setGameState(gameState);
                 setGameState((prevState) => ({
                     ...prevState,
-                    ballPosition: gameState.ballPosition.map((ball) => ({
+                    BallPosition: gameState.BallPosition.map((ball) => ({
                         x: ball.x / (16 / 9),
                         y: ball.y,
                         r: ball.r
@@ -243,7 +242,7 @@ const Game: React.FC = () => {
             if (context) {
                 context.clearRect(0, 0, gameWidth, gameHeight);
 
-                gameState!.ballPosition.forEach((ball) => {
+                gameState!.BallPosition.forEach((ball) => {
                     context.beginPath();
                     context.arc(ball.x * gameWidth, ball.y * gameHeight, ball.r * gameHeight, 0, Math.PI * 2);
                     context.fillStyle = ballColor;
