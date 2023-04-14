@@ -363,7 +363,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const player = game.players[j];
         if (player === client) {
           this.logger.debug("client.id : ", client.id, "inputed", body.input);
-          game.game_engine.process_input(client, body.input);
+          game.game_engine.process_input(client, body);
           return;
         }
       }
