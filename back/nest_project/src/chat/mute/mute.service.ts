@@ -27,6 +27,14 @@ export class MuteService {
         }
         return true;
     }
+    
+    async getTimeLeftMuteLine(muteId: string): Promise<number> {
+        const found = await this.muteRepository.findOne({where: {id: muteId}});
+        if (!found)
+            return 0;
+        let secondLeft = found.deletedAt.getSeconds() - new Date().getSeconds();
+        return (secondLeft > 0 ? secondLeft : 0);
+    }
 
     async findMuteRelation(userId: string, channelId: string): Promise<boolean> {
         const userMute = await this.userService.getMuteList(userId);
@@ -41,19 +49,26 @@ export class MuteService {
         return false;
     }
 
-    async getCurrentMutedInChannel(channelId: string): Promise<string[]> {
+    async getCurrentMutedInChannel(channelId: string): Promise<{id: string, time: number}[]> {
         const channelMute = await this.channelService.getMutedListWithJoin(channelId);
-        let array: string[] = [];
+        let array: {id: string, time: number}[] = [];
         for (let elt of channelMute) {
-            const response = await this.checkMuteLine(elt.id);
-            if (response)
-                array.push(elt.user.id)
+            const response = await this.getTimeLeftMuteLine(elt.id);
+            if (response) {
+                array.push({id: elt.user.id, time: response});
+            }
         }
         return array;
     }
 
     async muteUser(userId: string, channelId: string, minutes: number) {
-		let muteDate = new Date(new Date().getTime() + (minutes * 60000));
+        const channelMute = await this.channelService.getMutedListWithJoin(channelId);
+        let muteDate = new Date(new Date().getTime() + (minutes * 60000));
+        for (let elt of channelMute) {
+            if (elt.user.id == userId) {
+                this.muteRepository.update({id: elt.id}, {deletedAt: muteDate});
+            }
+        }
         const user = await this.userService.findById(userId);
         const channel = await this.channelService.getOneById(channelId);
         let mute: MuteEntity = {
