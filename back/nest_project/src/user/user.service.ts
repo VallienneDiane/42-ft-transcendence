@@ -30,6 +30,15 @@ export class UserService {
         return toReturn
     }
     
+    /**
+     * this one is to be able to do some tricks with typeORM.
+     * typescript sucks.
+     */
+    async findByIdAsAny(id: any): Promise<UserEntity> {
+        const toReturn = await this.usersRepository.findOneBy({id: id});
+        return toReturn;
+    }
+
     public findOne(options?: object): Promise<UserEntity> {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
