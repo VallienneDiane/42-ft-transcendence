@@ -89,7 +89,15 @@ export class FriendService {
 	async findRequest(senderId: string, receiverId: string): Promise<FriendEntity> {
 		const sender: UserEntity = await this.userService.findById(senderId);
 		const receiver: UserEntity = await this.userService.findById(receiverId);
-		return await this.friendRepository.findOne({where: {sender: sender, receiver: receiver}})
+		console.log(sender.id, receiver.id);
+		this.friendRepository.createQueryBuilder("friend")
+		.leftJoinAndSelect("friend.sender", "sender")
+		.leftJoinAndSelect("friend.receiver", "receiver")
+		.select("sender.id", "senderId")
+		.addSelect("receiver.id", "receiverId")
+		.getRawMany()
+		.then((all) => console.log(all));
+		return await this.friendRepository.findOne({where: {sender: sender, receiver: receiver}});
 	}
 
 	async updateRequest(requestToUpdate: string): Promise<void> {

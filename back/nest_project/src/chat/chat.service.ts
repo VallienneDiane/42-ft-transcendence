@@ -25,6 +25,10 @@ export class ChatService {
         private muteService: MuteService
     ) {}
 
+    private retypeAsId(entity : any): string {
+        return entity.userId;
+    } 
+
     private goBackToGeneral(client: Socket) {
         let locGeneral: ChannelEntity = {
             id: "00000000-0000-0000-0000-000000000000",
@@ -691,6 +695,7 @@ export class ChatService {
     public acceptFriendRequestEvent(receiver: UserEntity, senderId: string, roomHandler: UserRoomHandler) {
         this.friendService.findRequest(senderId, receiver.id)
         .then((request: FriendEntity) => {
+            console.log("request = ", request);
             this.friendService.updateRequest(request.id)
             .then(() => {
                 let receiverSockets = roomHandler.userMap.get(receiver.id);
