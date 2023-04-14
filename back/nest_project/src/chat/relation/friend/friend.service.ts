@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { IRequest } from "src/chat/chat.interface";
 import { UserEntity } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
 import { Brackets, Repository } from "typeorm";
@@ -25,58 +26,61 @@ export class FriendService {
 	}
 
 	async checkRequest(idA: string, idB: string): Promise<boolean> {
-		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(idA);
-		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(idB);
+		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
+		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idB);
 		
 		requestsSend.forEach((request) => {
-			if (request.receiver.id === idB)
+			if (request.receiverId === idB)
 				return false;
 		})
 		requestsReceived.forEach((request) => {
-			if (request.sender.id === idB)
+			if (request.senderId === idB)
 				return false;
 		})
 		return true;
 	}
 
 	async getFriendsList(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
-		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(id);
-		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(id);
-		const fullList: FriendEntity[] = [...requestsSend, ...requestsReceived];
+		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(id);
+		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(id);
+		const fullList: IRequest[] = [...requestsSend, ...requestsReceived];
 		const friendList: {friendshipId: string, friendId: string, friendName: string}[] = [];
 		for (let link of fullList) {
 			if (link.state === "friend") {
-				if (link.sender.id === id)
-					friendList.push({friendshipId: link.id, friendId: link.receiver.id, friendName: link.receiver.login});
-				else
-					friendList.push({friendshipId: link.id, friendId: link.sender.id, friendName : link.sender.login});
+				if (link.senderId === id) {
+					const receiver: UserEntity = await this.userService.findById(link.receiverId);
+					friendList.push({friendshipId: link.id, friendId: receiver.id, friendName: receiver.login});
+				}
+				else {
+					const sender: UserEntity = await this.userService.findById(link.senderId);
+					friendList.push({friendshipId: link.id, friendId: sender.id, friendName : sender.login});
+				}
 			}
 		}
 		return friendList;
 	}
 
 	async getRequestPendingSend(id: string): Promise<{id: string, name: string}[]> {
-		const requestsSend: FriendEntity[] = await this.userService.getFriendRequestsSend(id);
+		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(id);
 		// if (requestsSend)
 		const list: {id: string, name: string}[] = [];
 		for (let link of requestsSend) {
-			console.log("getRequestPendingSend :", link.sender);
-			// const receiver: UserEntity = await this.userService.findById(link.receiverId)
+			// console.log(link)
+			const receiver: UserEntity = await this.userService.findById(link.receiverId);
 			if (link.state === "pending") {
-				list.push({id: link.receiver.id, name: link.receiver.login});
+				list.push({id: receiver.id, name : receiver.login});
 			}
 		}
 		return list;
 	}
 
 	async getRequestPendingReceived(id: string): Promise<{id: string, name: string}[]> {
-		const requestsReceived: FriendEntity[] = await this.userService.getFriendRequestsReceived(id);
+		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(id);
 		const list: {id: string, name: string}[] = [];
 		for (let link of requestsReceived) {
-			console.log("getRequestPendingReceived", link);
+			const sender: UserEntity = await this.userService.findById(link.senderId);
 			if (link.state === "pending") {
-				console.log(link);
-				list.push({id: link.sender.id, name : link.sender.login});
+				list.push({id: sender.id, name : sender.login});
 			}
 		}
 		return list;
