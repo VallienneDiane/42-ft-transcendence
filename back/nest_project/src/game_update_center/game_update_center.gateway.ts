@@ -231,7 +231,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the client disconnected
    */
   handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
-    this.logger.log('client Disconnected: ', client.id);
+    this.logger.log('------------------------------client Disconnected: ', client.id, "---------------------------");
     this.find_and_remove(client);
     if (this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).id)) {
       this.logger.debug("client wzs removed from waiting on game due to disconnection");

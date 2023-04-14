@@ -150,7 +150,7 @@ export class GameEngineService {
 
 	update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-		this.pl1.to(this.pl1.id).emit("Match_Update", this.ms);
+		this.server.to(this.pl1.id).emit("Match_Update", this.ms);
 	}
 
 	/**
