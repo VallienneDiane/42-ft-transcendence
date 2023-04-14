@@ -23,7 +23,7 @@ interface BallPosition {
  * use to share the game state
  */
 interface GameState {
-	BallPositionition: BallPosition[],
+	BallPosition: BallPosition[],
 	paddleOne: {x: number, y: number },
 	paddleTwo: {x: number, y:number },
 }
@@ -111,7 +111,7 @@ export class GameEngineService {
         this.cooldown_start = 0;
 
 		// filling the GameState
-		this.gs = { BallPositionition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
+		this.gs = { BallPosition: [	{x: this.ballz[0].position.x, y: this.ballz[0].position.y, r: this.ballz[0].r},
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
@@ -197,11 +197,14 @@ export class GameEngineService {
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
             thiss.server.emit("Match_Update", this.ms);
+			console.log();
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     clearInterval(thiss.loop);
+
                 }
                 thiss.main_loop();
+				console.log("sending", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
             }, 1000/60);
         }
@@ -223,7 +226,7 @@ export class GameEngineService {
 		if (this.waiting.delete(this.user1.id)) {
 			console.log("removed from waiting in game close_the_game function");
 		}
-		this.server.emit("Math_End", this.match_state);
+		this.server.emit("Match_End", this.match_state);
 		let result = await this.matchservice.findMatch();
 		console.log("the score should be save and the match history is :", result);
 	}
@@ -252,7 +255,7 @@ export class GameEngineService {
 					r: ball.r,
 				}
 				// console.log("test", this.gs.BallPositionition[index]);
-				this.gs.BallPositionition[index] = bp;
+				this.gs.BallPosition[index] = bp;
 			});
 			this.gs.paddleOne = {
 				x: this.wallz[0].x_position - 0.015,
@@ -317,7 +320,7 @@ export class GameEngineService {
 				r: ball.r,
 			}
 			// console.log("test", this.gs.BallPositionition[index]);
-			this.gs.BallPositionition[index] = bp;
+			this.gs.BallPosition[index] = bp;
 		});
 		this.gs.paddleOne = {
             x: this.wallz[0].x_position - 0.015,

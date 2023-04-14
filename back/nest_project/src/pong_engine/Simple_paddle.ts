@@ -1,3 +1,4 @@
+import { GameInputDTO } from "src/game_update_center/game_update_center.dto";
 
 
 export class Simple_paddle {
@@ -44,15 +45,15 @@ export class Simple_paddle {
      * set the up and down flag correctly in a XOR way
      * @param body the key pressed in string format
      */
-    process_input (body: any) {
+    process_input (body: GameInputDTO) {
         console.log("process input : " + body);
-        if (body === "ArrowUp" || body === "w") {
+        if (body.input === "ArrowUp" || body.input === "w") {
             this.up = !this.up;
             if (this.up) {
                 this.down = false;
             }
         }
-		if (body === "ArrowDown" || body === "s") {
+		if (body.input === "ArrowDown" || body.input === "s") {
             this.down = !this.down;
             if (this.down) {
                 this.up = false;
