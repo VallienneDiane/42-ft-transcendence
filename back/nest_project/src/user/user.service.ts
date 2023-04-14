@@ -8,6 +8,7 @@ import { Repository } from "typeorm";
 import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
+import { IRequest } from "src/chat/chat.interface";
 
 @Injectable({})
 export class UserService {
@@ -192,20 +193,17 @@ export class UserService {
         return userAvatar;
     }
 
-    async getFriendRequestsSend(id: string): Promise<FriendEntity[]> {
-        const requestsSend: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+    async getFriendRequestsSend(id: string): Promise<IRequest[]> {
+        const requestsSend: IRequest[] = await this.usersRepository.createQueryBuilder("user")
             .where("user.id = :id", { id: id })
             .innerJoinAndSelect("user.requestsSend", "send")
-            .select("send.id", "id")
-            .addSelect("send.receiver", "receiver")
-            .addSelect("send.sender", "sender")
-            .addSelect("send.state", "state")
+            .select("send.*")
             .getRawMany();
         return requestsSend;
     }
 
-    async getFriendRequestsReceived(id: string): Promise<FriendEntity[]> {
-        const requestsReceived: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+    async getFriendRequestsReceived(id: string): Promise<IRequest[]> {
+        const requestsReceived: IRequest[] = await this.usersRepository.createQueryBuilder("user")
             .where("user.id = :id", { id: id })
             .innerJoinAndSelect("user.requestsReceived", "receiv")
             .select("receiv.*")

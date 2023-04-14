@@ -3,6 +3,7 @@ import { FriendService } from "./friend.service";
 import { friendDto } from "./friend.dto";
 import { JwtAuthGuard } from "src/auth_strategies/jwt-auth.guard";
 import { isValidationOptions } from "class-validator";
+import { UserEntity } from "src/user/user.entity";
 
 @UsePipes(ValidationPipe)
 @Controller()
