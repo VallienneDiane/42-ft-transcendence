@@ -12,6 +12,7 @@ export default function PendingList() {
     const fetchPending = () => {
         Axios.get("listRequestsPendingSend/" + me.sub)
         .then((response) => {
+            console.log("blop",response.data)
             setPendings(response.data);
         });
     }
