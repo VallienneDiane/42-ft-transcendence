@@ -220,7 +220,7 @@ export class GameEngineService {
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
-		this.server.emit("Math_End", this.match_state);
+		this.server.emit("Match_End", this.match_state);
 		let result = await this.matchservice.findMatch();
 		console.log("the score should be save and the match history is :", result);
 	}
