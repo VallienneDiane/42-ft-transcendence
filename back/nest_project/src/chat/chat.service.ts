@@ -715,13 +715,22 @@ export class ChatService {
         this.userService.findById(userIdToBlock)
         .then((found) => {
             if (found) {
-                this.userService.addUserToBlock(user.id, userIdToBlock)
-                .then(() => {
-                    this.unfriendEvent(user, userIdToBlock, roomHandler);
-                    let sockets = roomHandler.userMap.get(user.id);
-                    if (sockets != undefined)
-                    sockets.sockets.forEach(({}, socket) => {
-                        this.listBlockEvent(socket, user.id);
+                this.userService.getBlockList(user.id)
+                .then((blocked) => {
+                    for (let elt of blocked) {
+                        if (elt.id == userIdToBlock) {
+                            client.emit("notice", `You already blocked ${elt.name}.`);
+                            return;
+                        }
+                    }
+                    this.userService.addUserToBlock(user.id, userIdToBlock)
+                    .then(() => {
+                        this.unfriendEvent(user, userIdToBlock, roomHandler);
+                        let sockets = roomHandler.userMap.get(user.id);
+                        if (sockets != undefined)
+                        sockets.sockets.forEach(({}, socket) => {
+                            this.listBlockEvent(socket, user.id);
+                        })
                     })
                 })
             }
