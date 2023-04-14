@@ -124,7 +124,7 @@ export class PongEngineService {
 
     update_match_state() {
         this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-        console.log("in update match state this.pl1.id : ", this.pl1.id);
+        // console.log("in update match state this.pl1.id : ", this.pl1.id);
         this.server.emit("Match_Update", this.ms);
     }
     
@@ -162,26 +162,24 @@ export class PongEngineService {
     */
     set_player_ready(player: Socket) {
         if (player === this.pl1) {
-            this.pl1_ready = !this.pl1_ready;
+            this.pl1_ready = true;
         }
         else if (player === this.pl2) {
-            this.pl2_ready = !this.pl2_ready;
+            this.pl2_ready = true;
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
-            console.log("room to emit", thiss.server);
+            // console.log("room to emit", thiss.server);
             thiss.server.emit("Match_Update", this.ms);
             console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
-                    thiss.pl1_ready = false;
-                    thiss.pl2_ready = false;
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
-                console.log("sending : ", thiss.gs);
+                // console.log("sending : ", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
-                console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+                // console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }

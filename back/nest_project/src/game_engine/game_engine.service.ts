@@ -187,18 +187,16 @@ export class GameEngineService {
 	 */
 	async set_player_ready (player: Socket) {
 		if (player === this.pl1) {
-            this.pl1_ready = !this.pl1_ready;
+            this.pl1_ready = true;
         }
         else if (player === this.pl2) {
-            this.pl2_ready = !this.pl2_ready;
+            this.pl2_ready = true;
         }
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
             thiss.server.emit("Match_Update", this.ms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
-                    thiss.pl1_ready = false;
-                    thiss.pl2_ready = false;
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();

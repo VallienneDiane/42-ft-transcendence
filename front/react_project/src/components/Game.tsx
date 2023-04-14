@@ -122,7 +122,7 @@ const Game: React.FC = () => {
     useEffect(() => {
         // triggered when receiving socket data, update position of elements
         if (socket) {
-            socket.on('Allready_On_Match', () => {
+            socket.on('Already_On_Match', () => {
                 console.log('Already on match');
                 document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
             });
