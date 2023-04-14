@@ -392,17 +392,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
-    @SubscribeMessage("unmuteUser")
-    handleUnmuteUser(@MessageBody() data: unmuteUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`mute event`);
-                this.chatService.unmuteUserEvent(client, user.id, data.id, data.channelId);
-            }
-        })
-    }
-
     @SubscribeMessage("listMutedUsers")
     handleListMutedUsers(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
