@@ -202,7 +202,7 @@ export class PongEngineService {
         if (this.waiting.delete(this.user1.id)) {
             console.log("removed from waiting in pong engin close_the_game function");
         }
-		this.server.emit("Math_End", this.match_state);
+		this.server.emit("Match_End", this.match_state);
         let result = await this.matchservice.findMatch();
         //console.log("the score should be save and the match history is :", result);
     }
