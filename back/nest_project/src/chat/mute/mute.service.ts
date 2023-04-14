@@ -17,6 +17,10 @@ export class MuteService {
         private readonly channelService: ChannelService
     ) {}
 
+    private retypeAsId(entity : any): string {
+        return entity;
+    }
+
     async checkMuteLine(muteId: string): Promise<boolean> {
         const found = await this.muteRepository.findOne({where: {id: muteId}});
         if (!found)
@@ -53,9 +57,10 @@ export class MuteService {
         const channelMute = await this.channelService.getMutedListWithJoin(channelId);
         let array: {id: string, time: number}[] = [];
         for (let elt of channelMute) {
+            const eltId = this.retypeAsId(elt);
             const response = await this.getTimeLeftMuteLine(elt.id);
             if (response) {
-                array.push({id: elt.user.id, time: response});
+                array.push({id: eltId, time: response});
             }
         }
         return array;
@@ -65,8 +70,9 @@ export class MuteService {
         const channelMute = await this.channelService.getMutedListWithJoin(channelId);
         let muteDate = new Date(new Date().getTime() + (minutes * 60000));
         for (let elt of channelMute) {
-            if (elt.user.id == userId) {
-                this.muteRepository.update({id: elt.id}, {deletedAt: muteDate});
+            const eltId = this.retypeAsId(elt);
+            if (eltId == userId) {
+                this.muteRepository.update({id: eltId}, {deletedAt: muteDate});
             }
         }
         const user = await this.userService.findById(userId);
