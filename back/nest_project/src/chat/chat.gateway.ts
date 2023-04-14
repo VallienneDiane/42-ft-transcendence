@@ -55,7 +55,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     private async tokenChecker(client: Socket): Promise<{user: UserEntity, exp: number}> {
         let idAndExp = this.extractUserId(client);
         if (idAndExp)
-            return ({user: await this.userService.findById(idAndExp.id), exp: idAndExp.exp});
+        {
+            const userEntity = await this.userService.findById(idAndExp.id);
+            if (userEntity)
+                return ({user: userEntity, exp: idAndExp.exp});
+        }
         return null;
     }
 
@@ -89,17 +93,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() data: addMessageDto, @ConnectedSocket() client: Socket) {
+        if (client.data.user != undefined)
             this.chatService.newMessageEvent(client, client.data.user , this.chatRoomHandler, this.logger, data.message);
     }
 
     @SubscribeMessage('changeLoc')
     handleChangeLoc(@MessageBody() data: changeLocDto, @ConnectedSocket() client: Socket) {
+        if (client.data.user != undefined)
             this.chatService.changeLocEvent(client, client.data.user, data.loc, data.isChannel, this.chatRoomHandler);
     }
 
     @SubscribeMessage("whereIam")
     handleWhereIam(@ConnectedSocket() client: Socket) {
-                this.chatService.whereIamEvent(client, client.data.user.id, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.whereIamEvent(client, client.data.user.id, this.chatRoomHandler);
     }
 
     /**
@@ -108,57 +115,68 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('listChannel')
     handlelistChannel(@ConnectedSocket() client: Socket) {
-        this.chatService.listChannelEvent(client, client.data.user.id);
+        if (client.data.user != undefined)
+            this.chatService.listChannelEvent(client, client.data.user.id);
     }
 
     @SubscribeMessage('listUsersChann')
     handlelistUsersChann(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.chatService.listUsersInChannel(client, data.channelId, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.listUsersInChannel(client, data.channelId, this.chatRoomHandler);
     }
     
     @SubscribeMessage('joinChannel')
     handleJoinChannel(@MessageBody() data: joinChannelDto, @ConnectedSocket() client: Socket) {
-        this.chatService.joinChannelEvent(client, client.data.user, data, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.joinChannelEvent(client, client.data.user, data, this.chatRoomHandler);
     }
 
     @SubscribeMessage('inviteUser')
     handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.inviteUserEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
+        if (client.data.user != undefined)
+            this.chatService.inviteUserEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
     }
 
     @SubscribeMessage('createChannel')
     handleCreateChannel(@MessageBody() data: createChannelDto, @ConnectedSocket() client: Socket) {
-        this.chatService.createChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
+        if (client.data.user != undefined)
+            this.chatService.createChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
     }
 
     @SubscribeMessage('modifyChannel')
     handleModifyChannel(@MessageBody() data: modifyChannelDto, @ConnectedSocket() client: Socket) {
-        this.chatService.modifyChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
+        if (client.data.user != undefined)
+            this.chatService.modifyChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
     }
 
     @SubscribeMessage('leaveChannel')
     handleLeaveChannel(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.chatService.leaveChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.channelId);
+        if (client.data.user != undefined)  
+            this.chatService.leaveChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.channelId);
     }
 
     @SubscribeMessage('destroyChannel')
     handleDestroyChannel(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.chatService.destroyChannelEvent(client, client.data.user, data.channelId, this.chatRoomHandler);
+        if (client.data.user != undefined)  
+            this.chatService.destroyChannelEvent(client, client.data.user, data.channelId, this.chatRoomHandler);
     }
 
     @SubscribeMessage('kickUser')
     handleKickUser(@MessageBody() data: kickUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.kickUserEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
+        if (client.data.user != undefined)  
+            this.chatService.kickUserEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
     }
 
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
-        this.chatService.makeHimOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
+        if (client.data.user != undefined)  
+            this.chatService.makeHimOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
     }
 
     @SubscribeMessage('makeHimNoOp')
     handleMakeHimNoOp(@MessageBody() data: makeHimNoOpDto, @ConnectedSocket() client: Socket) {
-        this.chatService.makeHimNoOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
+        if (client.data.user != undefined)  
+            this.chatService.makeHimNoOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
     }
 
     /**
@@ -167,7 +185,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('myChannels')
     handleMyChannels(@ConnectedSocket() client: Socket) {
-        this.chatService.listMyChannelEvent(client, client.data.user.id);
+        if (client.data.user != undefined)  
+            this.chatService.listMyChannelEvent(client, client.data.user.id);
     }
 
     /**
@@ -176,68 +195,81 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('myDM')
     handleListMyDM(@ConnectedSocket() client: Socket) {
-        this.chatService.listMyDMEvent(client, client.data.user, this.chatRoomHandler);
+        if (client.data.user != undefined)  
+            this.chatService.listMyDMEvent(client, client.data.user, this.chatRoomHandler);
     }
 
     @SubscribeMessage('friendRequest')
     handleFriendRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.chatService.friendRequestEvent(client, client.data.user, data.userId, this.chatRoomHandler);
+        if (client.data.user != undefined)  
+            this.chatService.friendRequestEvent(client, client.data.user, data.userId, this.chatRoomHandler);
     }
 
 
     @SubscribeMessage('acceptFriendRequest')
     handleAcceptRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.chatService.acceptFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.acceptFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
 
     @SubscribeMessage('rejectFriendRequest')
     handleRejectRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.chatService.rejectFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
+        if (client.data.user != undefined) 
+            this.chatService.rejectFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
     @SubscribeMessage('unfriend')
     handleUnfriend(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.chatService.unfriendEvent(client.data.user, data.userId, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.unfriendEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
     @SubscribeMessage("blockUser")
     handleBlockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.blockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.blockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
     }
 
     @SubscribeMessage("unblockUser")
     handleUnblockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.unblockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
+        if (client.data.user != undefined)  
+            this.chatService.unblockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
     }
 
     @SubscribeMessage("listBlock")
     handleListBlock(@ConnectedSocket() client: Socket) {
-        this.chatService.listBlockEvent(client, client.data.user.id);
+        if (client.data.user != undefined)
+            this.chatService.listBlockEvent(client, client.data.user.id);
     }
 
     @SubscribeMessage("banUser")
     handleBanUser(@MessageBody() data: banUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.banUserEvent(client, client.data.user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
+        if (client.data.user != undefined) 
+            this.chatService.banUserEvent(client, client.data.user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
     }
 
     @SubscribeMessage("unbanUser")
     handleUnbanUser(@MessageBody() data: unbanUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.unbanUserEvent(client, client.data.user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.unbanUserEvent(client, client.data.user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
     }
 
     @SubscribeMessage("muteUser")
     handleMuteUser(@MessageBody() data: muteUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.muteUserEvent(client, client.data.user.id, data.id, data.channelId, data.minutes);
+        if (client.data.user != undefined)
+            this.chatService.muteUserEvent(client, client.data.user.id, data.id, data.channelId, data.minutes);
     }
 
     @SubscribeMessage("unmuteUser")
     handleUnmuteUser(@MessageBody() data: unmuteUserDto, @ConnectedSocket() client: Socket) {
-        this.chatService.unmuteUserEvent(client, client.data.user.id, data.id, data.channelId);
+        if (client.data.user != undefined)
+            this.chatService.unmuteUserEvent(client, client.data.user.id, data.id, data.channelId);
     }
 
     @SubscribeMessage("listMutedUsers")
     handleListMutedUsers(@ConnectedSocket() client: Socket) {
-        this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
+        if (client.data.user != undefined)
+            this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
     }
 }
