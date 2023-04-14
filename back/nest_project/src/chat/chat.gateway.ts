@@ -100,7 +100,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('changeLoc')
     handleChangeLoc(@MessageBody() data: changeLocDto, @ConnectedSocket() client: Socket) {
         if (client.data.user != undefined)
-            this.chatService.changeLocEvent(client, client.data.user, data.loc, data.isChannel, this.chatRoomHandler);
+            this.chatService.changeLocEvent(client, client.data.user.id, data.loc, data.isChannel, this.chatRoomHandler);
     }
 
     @SubscribeMessage("whereIam")
