@@ -79,6 +79,7 @@ export class GameEngineService {
 	matchservice;
 	server: any;
 	match_state: MatchEnd;
+	waiting: Set<string>;
 
 	constructor(userservice: UserService, matchservice: MatchService) {
 		this.userservice = userservice;
@@ -135,13 +136,14 @@ export class GameEngineService {
 	 * @param user1 player1 data
 	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any) {
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>) {
 		this.server = server;
 		this.user1 = user1;
 		this.user2 = user2;
 		console.log("first : ", user1, "\n\nsecond :", user2);
 		this.pl1 = player1;
 		this.pl2 = player2;
+		this.waiting = waiting;
         this.update_match_state();
         this.match_state.player1_login = this.user1.login;
 	}
@@ -218,6 +220,9 @@ export class GameEngineService {
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		console.log("the match to be register should be : ", match);
 		await this.matchservice.createMatch(match);
+		if (this.waiting.delete(this.user1.id)) {
+			console.log("removed from waiting in game close_the_game function");
+		}
 		this.server.emit("Math_End", this.match_state);
 		let result = await this.matchservice.findMatch();
 		console.log("the score should be save and the match history is :", result);

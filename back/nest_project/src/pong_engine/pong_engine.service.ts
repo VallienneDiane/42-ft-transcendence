@@ -78,6 +78,7 @@ export class PongEngineService {
     matchservice;
     server: any;
     match_state: MatchEnd;
+    waiting: Set<string>;
 
     constructor (userservice: UserService, matchservice: MatchService) {
         // creating game object
@@ -111,12 +112,13 @@ export class PongEngineService {
      * @param user_entity1 player 1 data
      * @param user_entity2 player 2 data
      */
-    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any) {
+    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any, waiting: Set<string>) {
         this.server = server;
         this.pl1 = player1;
         this.pl2 = player2;
         this.user1 = user_entity1;
         this.user2 = user_entity2;
+        this.waiting = waiting;
         this.update_match_state();
         this.match_state.player1_login = this.user1.login;
         console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
@@ -197,6 +199,9 @@ export class PongEngineService {
         match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
         //console.log("the match to be register should be : ", match);
         await this.matchservice.createMatch(match);
+        if (this.waiting.delete(this.user1.id)) {
+            console.log("removed from waiting in pong engin close_the_game function");
+        }
 		this.server.emit("Math_End", this.match_state);
         let result = await this.matchservice.findMatch();
         //console.log("the score should be save and the match history is :", result);
