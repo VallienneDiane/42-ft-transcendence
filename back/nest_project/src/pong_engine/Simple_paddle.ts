@@ -46,7 +46,7 @@ export class Simple_paddle {
      * @param body the key pressed in string format
      */
     process_input (body: GameInputDTO) {
-        console.log("process input : ", body);
+        //console.log("process input : ", body);
         if (body.input === "ArrowUp" || body.input === "w") {
             this.up = !this.up;
             if (this.up) {
