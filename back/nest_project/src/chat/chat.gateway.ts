@@ -22,10 +22,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     constructor(
         private chatService: ChatService,
         private userService: UserService,
-        private jwtService: JwtService ) 
+        private jwtService: JwtService
+        ) 
     {}
 
-    private extractUserId(client: Socket): string {
+    private extractUserId(client: Socket): {id: string, exp: number} {
         let token = client.handshake.auth['token'];
         if (token != null) {
             try {
@@ -45,13 +46,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             return null;
         }
         let id: string = object.sub;
-        return id;
+        let time = object.exp;
+        if (new Date(time * 1000) < new Date())
+            return null;
+        return {id: id, exp: time};
     }
 
-    private tokenChecker(client: Socket): Promise<UserEntity> {
-        let id = this.extractUserId(client);
-        // this.logger.debug(`${id}`)
-        return this.userService.findById(id);    
+    private async tokenChecker(client: Socket): Promise<{user: UserEntity, exp: number}> {
+        let idAndExp = this.extractUserId(client);
+        if (idAndExp)
+            return ({user: await this.userService.findById(idAndExp.id), exp: idAndExp.exp});
+        return null;
     }
 
     afterInit() {
@@ -65,56 +70,36 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then( (user) => {
             // this.logger.debug(`${client.id} est connecté`)
-            if (user != null)
-                this.chatService.connectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger);
-            else
+            if (user != null) {
+                this.chatService.connectEvent(client, user.user, this.chatNamespace, this.chatRoomHandler, this.logger);
+                client.data.user = user.user;
+                client.data.expire = user.exp;
+            }
+            else {
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
+                client.disconnect(true);
+            }
         })
     }
 
     handleDisconnect(client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.disconnectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger)
-        })
+        if (client.data.user != undefined)
+            this.chatService.disconnectEvent(client, client.data.user, this.chatNamespace, this.chatRoomHandler, this.logger)
     }
 
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() data: addMessageDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.newMessageEvent(client, user, this.chatRoomHandler, this.logger, data.message);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+            this.chatService.newMessageEvent(client, client.data.user , this.chatRoomHandler, this.logger, data.message);
     }
 
     @SubscribeMessage('changeLoc')
     handleChangeLoc(@MessageBody() data: changeLocDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug('changeLoc event : ');
-                this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+            this.chatService.changeLocEvent(client, client.data.user, data.loc, data.isChannel, this.chatRoomHandler);
     }
 
     @SubscribeMessage("whereIam")
     handleWhereIam(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug('whereIamEvent : ');
-                this.chatService.whereIamEvent(client, user.id, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+                this.chatService.whereIamEvent(client, client.data.user.id, this.chatRoomHandler);
     }
 
     /**
@@ -123,127 +108,57 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('listChannel')
     handlelistChannel(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`${client.id} : listChannel`)
-                this.chatService.listChannelEvent(client, user.id);
-            }
-        })
+        this.chatService.listChannelEvent(client, client.data.user.id);
     }
 
     @SubscribeMessage('listUsersChann')
     handlelistUsersChann(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.listUsersInChannel(client, data.channelId, this.chatRoomHandler);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.listUsersInChannel(client, data.channelId, this.chatRoomHandler);
     }
     
     @SubscribeMessage('joinChannel')
     handleJoinChannel(@MessageBody() data: joinChannelDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.joinChannelEvent(client, user, data, this.chatRoomHandler);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.joinChannelEvent(client, client.data.user, data, this.chatRoomHandler);
     }
 
     @SubscribeMessage('inviteUser')
     handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-        console.log(data);
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.inviteUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.inviteUserEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.userToInvite, data.channelId);
     }
 
     @SubscribeMessage('createChannel')
     handleCreateChannel(@MessageBody() data: createChannelDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.createChannelEvent(client, user, this.chatRoomHandler, this.logger, data);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.createChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
     }
 
     @SubscribeMessage('modifyChannel')
     handleModifyChannel(@MessageBody() data: modifyChannelDto, @ConnectedSocket() client: Socket) {
-        this.logger.debug(`modifyChannel Event`);
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.modifyChannelEvent(client, user, this.chatRoomHandler, this.logger, data);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.modifyChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data);
     }
 
     @SubscribeMessage('leaveChannel')
     handleLeaveChannel(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.leaveChannelEvent(client, user, this.chatRoomHandler, this.logger, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.leaveChannelEvent(client, client.data.user, this.chatRoomHandler, this.logger, data.channelId);
     }
 
     @SubscribeMessage('destroyChannel')
     handleDestroyChannel(@MessageBody() data: channelIdDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.destroyChannelEvent(client, user, data.channelId, this.chatRoomHandler);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.destroyChannelEvent(client, client.data.user, data.channelId, this.chatRoomHandler);
     }
 
     @SubscribeMessage('kickUser')
     handleKickUser(@MessageBody() data: kickUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.kickUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.kickUserEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
     }
 
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
-        this.logger.debug("OP");
-        console.log(data);
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.makeHimOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.makeHimOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToOp, data.channelId);
     }
 
     @SubscribeMessage('makeHimNoOp')
     handleMakeHimNoOp(@MessageBody() data: makeHimNoOpDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null)
-                this.chatService.makeHimNoOpEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.makeHimNoOpEvent(client, client.data.user.id, this.chatRoomHandler, this.logger, data.userToNoOp, data.channelId);
     }
 
     /**
@@ -252,13 +167,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('myChannels')
     handleMyChannels(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`${user.id} : listMyChannels`)
-                this.chatService.listMyChannelEvent(client, user.id);
-            }
-        })
+        this.chatService.listMyChannelEvent(client, client.data.user.id);
     }
 
     /**
@@ -267,150 +176,68 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('myDM')
     handleListMyDM(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`${user.id} : listMyDMs`)
-                this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
-            }
-        })
+        this.chatService.listMyDMEvent(client, client.data.user, this.chatRoomHandler);
     }
 
     @SubscribeMessage('friendRequest')
     handleFriendRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((sender) => {
-            if (sender != null) {
-                this.chatService.friendRequestEvent(client, sender, data.userId, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.friendRequestEvent(client, client.data.user, data.userId, this.chatRoomHandler);
     }
 
 
     @SubscribeMessage('acceptFriendRequest')
     handleAcceptRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((receiver) => {
-            if (receiver != null) {
-                this.chatService.acceptFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.acceptFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
 
     @SubscribeMessage('rejectFriendRequest')
     handleRejectRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((receiver) => {
-            if (receiver != null) {
-                this.chatService.rejectFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.rejectFriendRequestEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
     @SubscribeMessage('unfriend')
     handleUnfriend(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((me) => {
-            if (me != null) {
-                this.chatService.unfriendEvent(me, data.userId, this.chatRoomHandler);
-            }
-            else
-                client.emit('notice', 'Your token is invalid, please log out then sign in');
-        })
+        this.chatService.unfriendEvent(client.data.user, data.userId, this.chatRoomHandler);
     }
 
     @SubscribeMessage("blockUser")
     handleBlockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`block event`);
-                this.chatService.blockUserEvent(client, user, data.id, this.chatRoomHandler);
-            }
-        })
+        this.chatService.blockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
     }
 
     @SubscribeMessage("unblockUser")
     handleUnblockUser(@MessageBody() data: blockUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`block event`);
-                this.chatService.unblockUserEvent(client, user, data.id, this.chatRoomHandler);
-            }
-        })
+        this.chatService.unblockUserEvent(client, client.data.user, data.id, this.chatRoomHandler);
     }
 
     @SubscribeMessage("listBlock")
     handleListBlock(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`listBlock event`);
-                this.chatService.listBlockEvent(client, user.id);
-            }
-        })
+        this.chatService.listBlockEvent(client, client.data.user.id);
     }
 
     @SubscribeMessage("banUser")
     handleBanUser(@MessageBody() data: banUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`ban event`);
-                this.chatService.banUserEvent(client, user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
-            }
-        })
+        this.chatService.banUserEvent(client, client.data.user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
     }
 
     @SubscribeMessage("unbanUser")
     handleUnbanUser(@MessageBody() data: unbanUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`ban event`);
-                this.chatService.unbanUserEvent(client, user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
-            }
-        })
+        this.chatService.unbanUserEvent(client, client.data.user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
     }
 
     @SubscribeMessage("muteUser")
     handleMuteUser(@MessageBody() data: muteUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`mute event`);
-                this.chatService.muteUserEvent(client, user.id, data.id, data.channelId, data.minutes);
-            }
-        })
+        this.chatService.muteUserEvent(client, client.data.user.id, data.id, data.channelId, data.minutes);
     }
 
     @SubscribeMessage("unmuteUser")
     handleUnmuteUser(@MessageBody() data: unmuteUserDto, @ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`mute event`);
-                this.chatService.unmuteUserEvent(client, user.id, data.id, data.channelId);
-            }
-        })
+        this.chatService.unmuteUserEvent(client, client.data.user.id, data.id, data.channelId);
     }
 
     @SubscribeMessage("listMutedUsers")
     handleListMutedUsers(@ConnectedSocket() client: Socket) {
-        this.tokenChecker(client)
-        .then((user) => {
-            if (user != null) {
-                this.logger.debug(`listMuted Event`);
-                this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
-            }
-        })
+        this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
     }
 }
