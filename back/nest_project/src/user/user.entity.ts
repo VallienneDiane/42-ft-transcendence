@@ -10,7 +10,7 @@ export class UserEntity {
   id: string;
 
   @Column({nullable: true, unique: true})
-  id42: number;
+  id42: string;
 
   @Column(
     {type: 'varchar', 

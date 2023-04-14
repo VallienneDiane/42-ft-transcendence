@@ -1,4 +1,4 @@
-import { LogInForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
+import { AvatarSettingsForm, LogInForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -22,15 +22,12 @@ let getAvatar = (id: string) => {
     return Axios.get('getAvatar/' + id);
 }
 
-// let getAllLogins = () => {
-//     return Axios.post('user/getAllLogins');
-// }
 let isUniqueLogin = (login: string) => {
     console.log("je suis dans la requete unique login", login);
     return Axios.get('user/isUniqueLogin/' + login);
 }
 
-let isId42 = (id42: number) => {
+let isId42 = (id42: string) => {
     console.log("je suis dans la requete id42", login);
     return Axios.get('user/isId42/' + id42);
 }
@@ -38,6 +35,11 @@ let isId42 = (id42: number) => {
 let createUser = (credentials: SettingsForm ) => {
     console.log("je suis dans la requete create user", credentials);
     return Axios.post('user/signup42', credentials);
+}
+
+let updateUser = (credentials: AvatarSettingsForm ) => {
+    console.log("je suis dans la requete UPDATE user", credentials);
+    return Axios.post('user/updateUser', credentials);//return 
 }
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
@@ -58,11 +60,11 @@ let isLogged = () => {
     }
 }
 // Request to generate token
-let generateToken = (login: string) => {
-    return Axios.post('auth/generateToken', {login});
+let generateToken = (id: string) => {
+    return Axios.post('auth/generateToken', {id});
 }
 
-let generateToken42 = (id42: number) => {
+let generateToken42 = (id42: string) => {
     return Axios.post('auth/generateToken42', {id42});
 }
 
@@ -97,15 +99,15 @@ let readPayload = () => {
 }
 ////////////////// TWO FACTOR AUTHENTIFICATOR ////////////////////
 //check if 2fa / google auth is active when login
-let is2faActive = (login: string) => {
-    return Axios.post('auth/is2faActive', {login});
+let is2faActive = (id: string) => {
+    return Axios.post('auth/is2faActive', {id});
 }
-let is2faActive42 = (id42: number) => {
+let is2faActive42 = (id42: string) => {
     return Axios.post('auth/is2faActive42', {id42});
 }
 //check if 2fa is active in settings to display the right setting and check token
-let is2faActiveSettings = (login: string) => {
-    return Axios.post('auth/is2faActiveSettings', {login});
+let is2faActiveSettings = (id: string) => {
+    return Axios.post('auth/is2faActiveSettings', {id});
 }
 //enable 2fa
 let enable2fa = () => {
@@ -137,5 +139,5 @@ export const accountService = {
     signUp, login, isUniqueLogin, isId42, createUser, saveToken, logout, isLogged, 
     getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
     is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar,
-    getAvatar, url42, callback
+    getAvatar, url42, callback, updateUser
 }

@@ -1,4 +1,5 @@
 export interface LogInForm {
+    id: string,
     login: string,
     password: string
 }
@@ -16,14 +17,20 @@ export interface SignUpForm {
   }
   
   export interface SettingsForm {
-    id42: number,
+    id42: string,
     login: string,
     email: string,
     avatarSvg: string
-}
+  }
+
+  export interface AvatarSettingsForm {
+    id: string,
+    login: string,
+    avatarSvg: string
+  }
 
 export interface User {
-  id?: number,
+  id?: string,
   login: string,
   email: string,
   avatarSvg?: string

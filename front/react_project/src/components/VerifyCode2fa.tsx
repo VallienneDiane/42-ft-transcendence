@@ -16,19 +16,18 @@ const schema = yup.object().shape({
 const VerifyCode2fa:React.FC = () => {
     
     const location = useLocation();
-    const login = location.state?.login;
+    const id = location.state?.id;
     let navigate = useNavigate();
     const {register, handleSubmit, formState: {errors}} = useForm<VerifyCodeForm>({
         resolver: yupResolver(schema)
     });
 
     const verifySubmittedCode = (data: VerifyCodeForm) => {
-        data.login = login;
         schema.validate(data);
         accountService.verifyCode2fa(data)
         .then(response => {
             if(response.data.isCodeValid == true) {
-                accountService.generateToken(login)
+                accountService.generateToken(id)
                 .then(response_token => {
                     accountService.saveToken(response_token.data.access_token);
                     navigate('/');

@@ -1,10 +1,10 @@
 import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
-import { UserDto } from 'src/user/user.dto';
+import { id42Dto, idDto, UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
-import { VerifyCodeDto } from './verifyCode.dto';
+import { VerifyCodeDto, VerifyCodeDto42 } from './verifyCode.dto';
 import { JwtService } from "@nestjs/jwt";
 import { UserEntity } from 'src/user/user.entity';
 
@@ -46,7 +46,7 @@ export class AuthController {
   //generate token when register or login
   @Post('auth/generateToken')
   async generateToken(@Body() data: UserDto) {
-    const token = await this.authService.genToken(data.login);
+    const token = await this.authService.genToken(data.id);
     return token;
   }
   @Post('auth/generateToken42')
@@ -69,7 +69,7 @@ export class AuthController {
   @Post('auth/verifyCodeSettings')
   async verifyCode2faSettings(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {
     const userInfos = await this.authService.decodeToken(token);
-    const user = await this.userService.findByLogin(userInfos.login);
+    const user = await this.userService.findById(userInfos.id);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
     const is2faActive = await this.userService.turnOn2fa(user);
     return {
@@ -80,7 +80,7 @@ export class AuthController {
   //check if the code entered is valid when signin and 2fa was activate in settings
   @Post('auth/verifyCode')
   async verifyCode2fa(@Body() data: VerifyCodeDto) {
-    const user = await this.userService.findByLogin(data.login);
+    const user = await this.userService.findById(data.id);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
     const is2faActive = await this.userService.turnOn2fa(user);
     return {
@@ -89,7 +89,7 @@ export class AuthController {
     }
   }
   @Post('auth/verifyCode42')
-  async verifyCode2fa42(@Body() data: VerifyCodeDto) {
+  async verifyCode2fa42(@Body() data: VerifyCodeDto42) {
     const user = await this.userService.findById42(data.id42);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
     const is2faActive = await this.userService.turnOn2fa(user);
@@ -109,22 +109,22 @@ export class AuthController {
   //check if two factor auth is activate and generate qrcode in settings
   @UseGuards(JwtAuthGuard)
   @Post('auth/is2faActiveSettings')
-  async is2faActiveSettings(@Body() user: UserDto) {
-    const validUser = await this.userService.findByLogin(user.login);
+  async is2faActiveSettings(@Body() data: idDto) {
+    const validUser = await this.userService.findById(data.id);
     const is2faActive = validUser.isTwoFactorEnabled;
     const qrcode = validUser.qrCode;
     return {is2faActive, qrcode};
   }
   //check if two factor auth is active
   @Post('auth/is2faActive')
-  async is2faActive(@Body() user: UserDto) {
-    const validUser = await this.userService.findByLogin(user.login);
+  async is2faActive(@Body() data: idDto) {
+    const validUser = await this.userService.findById(data.id);
     const is2faActive = validUser.isTwoFactorEnabled;
     return {is2faActive};
   }
   @Post('auth/is2faActive42')
-  async is2faActive42(@Body() user: UserDto) {
-    const validUser = await this.userService.findById42(user.id42);
+  async is2faActive42(@Body() data: id42Dto) {
+    const validUser = await this.userService.findById42(data.id42);
     const is2faActive = validUser.isTwoFactorEnabled;
     return {is2faActive};
   }

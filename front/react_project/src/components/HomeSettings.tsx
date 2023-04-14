@@ -43,6 +43,13 @@ const HomeSettings: React.FC = () => {
             setSelectedFile(files[0]);
         }
     }
+
+    useEffect(() => {
+        if(id42 == undefined) {
+            navigate("/");
+            return;
+        }    
+    }, [])
     
     const userSubmit = async () => {
         const user = {
