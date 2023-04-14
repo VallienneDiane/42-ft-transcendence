@@ -837,26 +837,6 @@ export class ChatService {
             }
         })
     }
-
-    public unmuteUserEvent(client: Socket, userId: string, userIdToUnmute: string, channelId: string) {
-        this.userService.getChannelLink(userId, channelId)
-        .then((link) => {
-            if (!link || link.status == "normal")
-                client.emit("notice", "You can't do that!");
-            else {
-                this.userService.getChannelLink(userIdToUnmute, channelId)
-                .then((muteLink) => {
-                    if (!muteLink)
-                        client.emit("notice", "User not belong to this channel");
-                    else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
-                        this.muteService.unmuteUser(userIdToUnmute, channelId);
-                    }
-                    else
-                        client.emit("notice", "Only the channel owner can unmute operators");
-                })
-            }
-        })
-    }
     
     public listMutedUsersEvent(client: Socket, roomHandler: UserRoomHandler) {
         let room = roomHandler.socketMap.sockets.get(client);
