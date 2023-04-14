@@ -35,7 +35,7 @@ const DarkenColor = function (stringColor: string, percent: number) {
 
 const style = getComputedStyle(document.documentElement);
 const ballColor = style.getPropertyValue('--ball-color');
-const ballShadowColor = DarkenColor(ballColor, 70);
+const ballShadowColor = DarkenColor(ballColor, 80);
 
 console.log(ballColor, ballShadowColor);
 
