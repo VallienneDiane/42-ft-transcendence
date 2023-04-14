@@ -68,6 +68,8 @@ function MemberList(props: {dest: IDest}) {
     const [userToMute, setUserToMute] = useState<string>("");
     const [minutes, setMinutes] = useState<number>(0);
     const [hours, setHours] = useState<number>(0);
+    const [mouseOn, setMouseOn] = useState<boolean>(false);
+    const [time, setTime] = useState<string>("");
 
     const showMuteFor = (e: any) => {
         setUserToMute(e.currentTarget.value);
@@ -76,9 +78,11 @@ function MemberList(props: {dest: IDest}) {
         setOnClickMute((onClickMute) => !onClickMute)
     }
 
-    const increment = (e: any) => {
-        console.log("hii")
-        if (e.target.value == "minute") {
+    // const setInterval = () => {
+    //     if (mouseOn)
+    // }
+    const increment = () => {
+        if (time == "minute") {
             if (minutes < 59)
                 setMinutes(minutes + 1);
         }
@@ -88,8 +92,8 @@ function MemberList(props: {dest: IDest}) {
         }
     }
 
-    const decrement = (e : any) => {
-        if (e.target.value == "minute") {
+    const decrement = () => {
+        if (time == "minute") {
             if (minutes > 0)
                 setMinutes(minutes - 1);
         }
@@ -118,6 +122,20 @@ function MemberList(props: {dest: IDest}) {
     
     const doOp = (e: any) => {
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
+    }
+
+    const handleEvent = (e: any) => {
+        if (e.type === "mousedown") {
+            setMouseOn(true);
+            if (e.target.value == "minute")
+                setTime("minute");
+            else
+                setTime("hours");
+        } 
+        else {
+            setMouseOn(false);
+            setTime("");
+        }
     }
 
     useEffect(() => {
@@ -210,7 +228,7 @@ function MemberList(props: {dest: IDest}) {
                             Mute for:
                         </div>
                         <div>
-                            <div><button value="hour" onMouseDown={decrement}>-</button><span>{hours}</span>h<button value="hour" onMouseDown={increment}>+</button></div>
+                            <div><button value="hour" onMouseDown={decrement} onMouseUp={handleEvent}>-</button><span>{hours}</span>h<button value="hour" onMouseDown={increment}>+</button></div>
                             <div><button value="minute" onMouseDown={decrement}>-</button><span>{minutes}</span>m<button value="minute" onMouseDown={increment}>+</button></div>
                             <button className="muteButton" onClick={mute}>Save</button>
                         </div>
@@ -304,10 +322,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                      <React.Fragment>
                          <li onClick={showUnban}>Unban</li>
                          {onClickUnban && (
-                             <div className="searchbar">
+                             <form className="searchbar" onSubmit={unban}>
                                  <input type="text" id="unban" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
-                                 <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={unban} />
-                             </div>)
+                                 <button>
+                                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
+                                 </button>
+                             </form>)
                          }
                      </React.Fragment>
                 ) : null }
@@ -315,10 +335,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                      <React.Fragment>
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
-                             <div className="searchbar">
+                             <form className="searchbar" onSubmit={inviteUser}>
                                  <input type="text" id="invite" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
-                                 <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} onClick={inviteUser} />
-                             </div>)
+                                 <button>
+                                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
+                                 </button>
+                             </form>)
                          }
                      </React.Fragment>
                 ) : null }

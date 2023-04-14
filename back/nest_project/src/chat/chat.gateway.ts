@@ -392,6 +392,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+<<<<<<< HEAD
     @SubscribeMessage("unmuteUser")
     handleUnmuteUser(@MessageBody() data: unmuteUserDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
@@ -403,6 +404,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+=======
+>>>>>>> cfc120306789409e67925b56e7f0c31416331503
     @SubscribeMessage("listMutedUsers")
     handleListMutedUsers(@ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
