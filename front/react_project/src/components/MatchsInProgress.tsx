@@ -1,3 +1,6 @@
+import "../styles/Base.css"
+import "../styles/MatchInProgress.scss"
+
 import React, { useState, useEffect } from 'react'
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
@@ -23,9 +26,9 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
-    useEffect(() => {
-        console.log("display matchs", matchs);
-    }, [matchs])
+    // useEffect(() => {
+    //     console.log("display matchs", matchs);
+    // }, [matchs])
 
 
     useEffect(() => {
@@ -33,51 +36,35 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         if (props.socket) {
 
             props.socket.on('Match_Update', (matchUpdate: MatchState) => {
-                // console.log("Match_Update ", matchUpdate);
-                // console.log(matchs);
-                // setMatchs(matchs);
-                // const index = matchs.findIndex((prevMatch) => prevMatch.player1_login === match.player1_login);
-                // console.log("index", index, match.player1_login);
+                console.log('match update', matchUpdate);
                 matchs.map((match) => {
                     console.log(match.player1_login, matchUpdate.player1_login);
                 })
-
+                
                 setMatchs(prevMatchs => {
                     const updatedMatchs = prevMatchs.map(match => {
                       if (match.player1_login === matchUpdate.player1_login) {
-                        return {
-                          ...match,
-                          player1_score: matchUpdate.player1_score,
-                          player2_score: matchUpdate.player2_score,
-                        };
-                      }
-                      return match;
+                          return {
+                              ...match,
+                              player1_score: matchUpdate.player1_score,
+                              player2_score: matchUpdate.player2_score,
+                            };
+                        }
+                        return match;
                     });
                     if (!updatedMatchs.some(match => match.player1_login === matchUpdate.player1_login)) {
-                      return [...updatedMatchs, matchUpdate];
+                        return [...updatedMatchs, matchUpdate];
                     }
                     return updatedMatchs;
-                  });
-                
-                // if (matchs.some((match) => match.player1_login == matchUpdate.player1_login) === false) {
-                //     console.log("ADD TO LIST");
-                //     console.log(matchs);
-                //     setMatchs((prevState) => [...prevState, matchUpdate]);
-                // }
-                // else {
-                //     console.log("UPDATE");
-                //     setMatchs((prevState) => prevState.map((match) => {
-                //         if (match.player1_login === matchUpdate.player1_login) {
-                //             return {
-                //                 ...match,
-                //                 player1_score: matchUpdate.player1_score,
-                //                 player2_score: matchUpdate.player2_score,
-                //             };
-                //         }
-                //         return match;
-                //     }))
-                // }
+                });
             })
+
+            props.socket.on('Match_End', (matchUpdate: MatchState) =>  {
+                console.log('match end', matchUpdate);
+                setMatchs(matchs.filter(match => match.player1_login === matchUpdate.player1_login));
+            })
+
+
 
         }
     }, [props.socket]);
