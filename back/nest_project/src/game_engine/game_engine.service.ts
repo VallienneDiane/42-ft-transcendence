@@ -204,7 +204,7 @@ export class GameEngineService {
 
                 }
                 thiss.main_loop();
-				console.log("sending", thiss.gs);
+				// console.log("sending", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
             }, 1000/60);
         }
