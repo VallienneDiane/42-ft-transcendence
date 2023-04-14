@@ -52,7 +52,7 @@ export class PongEngineService {
 
     // gamestat related
     gs: GameState;
-    ms: MatchState;
+    ms: MatchState[];
     ball: Simple_ball;
     p1: Simple_paddle;
     p2: Simple_paddle;
@@ -112,7 +112,7 @@ export class PongEngineService {
      * @param user_entity1 player 1 data
      * @param user_entity2 player 2 data
      */
-    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any, waiting: Set<string>, match: MatchState) {
+    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any, waiting: Set<string>, match: MatchState[]) {
         this.server = server;
         this.pl1 = player1;
         this.pl2 = player2;
@@ -126,9 +126,10 @@ export class PongEngineService {
     }
 
     update_match_state() {
-        this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
+        let match = this.find_the_match_the_client_is_in(this.user1.login);
+        match = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
         // console.log("in update match state this.pl1.id : ", this.pl1.id);
-        this.server.emit("Match_Update", this.ms);
+        this.server.emit("Match_Update", match);
     }
     
     /**
@@ -187,6 +188,15 @@ export class PongEngineService {
         }
     }
 
+    find_the_match_the_client_is_in(client_login: string): MatchState {
+        for (let index = 0; index < this.ms.length; index++) {
+          const element = this.ms[index];
+          if (element.player1_login === client_login) {
+            return element;
+          }
+        }
+      }
+    
     /**
 	 * save the players score in the data base
 	 */

@@ -54,7 +54,7 @@ export class GameEngineService {
 
 	// game contente
 	gs: GameState;
-	ms: MatchState;
+	ms: MatchState[];
 	ballz: Ball[];
 	wallz: Wall[];
 
@@ -136,7 +136,7 @@ export class GameEngineService {
 	 * @param user1 player1 data
 	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>, match: MatchState) {
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>, match: MatchState[]) {
 		this.server = server;
 		this.user1 = user1;
 		this.user2 = user2;
@@ -150,8 +150,9 @@ export class GameEngineService {
 	}
 
 	update_match_state() {
-        this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-		this.server.to(this.pl1.id).emit("Match_Update", this.ms);
+		let match = this.find_the_match_the_client_is_in(this.user1.login);
+        match = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
+		this.server.to(this.pl1.id).emit("Match_Update", match);
 	}
 
 	/**
@@ -188,7 +189,7 @@ export class GameEngineService {
 	 * @param player the player sending the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	async set_player_ready (player: Socket) {
+	set_player_ready (player: Socket) {
 		if (player === this.pl1) {
             this.pl1_ready = true;
         }
@@ -211,6 +212,15 @@ export class GameEngineService {
         }
 	}
 
+	find_the_match_the_client_is_in(client_login: string): MatchState {
+		for (let index = 0; index < this.ms.length; index++) {
+		  const element = this.ms[index];
+		  if (element.player1_login === client_login) {
+			return element;
+		  }
+		}
+	  }
+	
 	/**
 	 * save the players score in the data base
 	 */
@@ -223,12 +233,12 @@ export class GameEngineService {
 		this.match_end_state.winner = match.winner.login;
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		// console.log("the match to be register should be : ", match);
-		await this.matchservice.createMatch(match);
 		if (this.waiting.delete(this.user1.id)) {
 			console.log("removed from waiting in game close_the_game function");
 		}
 		this.server.emit("Match_End", this.match_end_state);
-		let result = await this.matchservice.findMatch();
+		await this.matchservice.createMatch(match);
+		// let result = await this.matchservice.findMatch();
 		// console.log("the score should be save and the match history is :", result);
 	}
 

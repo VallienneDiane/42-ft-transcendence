@@ -257,6 +257,10 @@ const Game: React.FC = () => {
         }
     }, [gameState, gameWidth]);
 
+    const TEST = () => {
+        socket.emit('Test');
+    }
+
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
@@ -283,6 +287,7 @@ const Game: React.FC = () => {
                     {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
                 </div>
+                <button onClick={TEST}>TEST</button>
             </div>
         </div>
     )

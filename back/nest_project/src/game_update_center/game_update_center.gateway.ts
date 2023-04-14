@@ -130,13 +130,28 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
-  find_the_match_the_client_is_in(client_login: string): MatchState {
-    for (let index = 0; index < this.all_the_match.length; index++) {
-      const element = this.all_the_match[index];
-      if (element.player1_login === client_login) {
-        return element;
+  second_loop() {
+    let i = 0;
+    while (true) {
+      i++;
+      if (i === 1000000000) {
+        console.log("out of second loop");
+        break;
       }
     }
+  }
+
+  @SubscribeMessage("Test")
+  test_function() {
+    let i = 0;
+    while (true) {
+      i++;
+      if (i === 1000000000) {
+        console.log("out of first loop");
+        break;
+      }
+    }
+    this.second_loop();
   }
 
   /**
@@ -163,7 +178,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // setting the player and UserEntity of player for the gameEngine
     let match: MatchState = {player1_login: player1_login, player2_login: player2_login, player1_score: 0, player2_score: 0, super_game_mode: super_game_mode, game_has_started: false};
     this.all_the_match.push(match);
-    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server, this.waiting_on_match);
+    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server, this.waiting_on_match, this.all_the_match);
     p.players = [];
     p.spectators = [];
     p.players.push(player1);
@@ -443,6 +458,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
     this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
     this.find_and_remove(client);
+
     if (this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).id)) {
       this.logger.debug("client wzs removed from waiting on game due to disconnection");
     }
