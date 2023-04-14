@@ -102,7 +102,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     else { p.game_engine = new PongEngineService(this.userservice, this.matchservice); }
   
     // setting the player and UserEntity of player for the gameEngine
-    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server);
+    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server, this.waiting_on_match);
     p.players = [];
     p.spectators = [];
     p.players.push(player1);
@@ -167,6 +167,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handlePublicMatchmaking function");
   }
 
+  @SubscribeMessage("Game_Update")
+  test(@ConnectedSocket() test: Socket, @MessageBody() body: any) {
+    console.log("test", body);
+  }
+
   @SubscribeMessage("Spectator_Request")
   handleSpectatorRequest(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
     for (let index = 0; index < this.game_instance.length; index++) {
@@ -228,6 +233,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
     this.logger.log('client Disconnected: ', client.id);
     this.find_and_remove(client);
+    if (this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).id)) {
+      this.logger.debug("client wzs removed from waiting on game due to disconnection");
+    }
     if (this.socketID_UserEntity.delete(client.id) === false) {
       this.logger.debug("Critical logic error, trying to removed a client that doesn't exist");
     }
