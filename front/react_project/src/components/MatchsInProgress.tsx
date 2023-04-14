@@ -22,8 +22,16 @@ interface inProgressProps {
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     const [matchs, setMatchs] = useState<MatchState[]>([
         {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
     // useEffect(() => {
@@ -61,7 +69,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
             props.socket.on('Match_End', (matchUpdate: MatchState) =>  {
                 console.log('match end', matchUpdate);
-                setMatchs(matchs.filter(match => match.player1_login === matchUpdate.player1_login));
+                setMatchs(matchs.filter(match => match.player1_login !== matchUpdate.player1_login));
             })
 
 
@@ -72,7 +80,34 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
     return (
         <div id="matchsInProgress">
-            <table>
+            <div id="header">
+                <div>Matchs in progress</div>
+                <div id="colHeader">
+                    <div>PLAYER 1</div>
+                    <div>SCORE</div>
+                    <div>PLAYER 2</div>
+                </div>
+            </div>
+            <div id="content">
+            {matchs.length > 0 ?
+                    
+                    matchs.map((match: MatchState) => {
+                        return (
+                            <div className="match">
+                                <div>{match.player1_login}</div>
+                                <div>{match.player1_score}</div>
+                                <div>{match.player2_score}</div>
+                                <div>{match.player2_login}</div>
+                            </div>
+                        )
+                    })
+                :
+                <div id="noMatch">
+                    No Match in progress
+                </div>
+                }
+            </div>
+            {/* <table>
                 <thead>
                     <tr>
                         <th colSpan={4}>Matchs in progress</th>
@@ -84,7 +119,9 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {matchs.map((match: MatchState) => {
+                    {matchs.length > 0 ?
+                    
+                    matchs.map((match: MatchState) => {
                         return (
                             <tr>
                                 <td>{match.player1_login}</td>
@@ -93,9 +130,14 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                                 <td>{match.player2_login}</td>
                             </tr>
                         )
-                    })}
+                    })
+                :
+                <div id="noMatch">
+                    No Match in progress
+                </div>
+                }
                 </tbody>
-            </table>
+            </table> */}
         </div>
     )
 }
