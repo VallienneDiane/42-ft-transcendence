@@ -26,7 +26,7 @@ export default function PendingList() {
             {pendings.length > 0 && <h3>My pending request{pendings.length > 1 && "s"}</h3>}
             <ul>
                 {pendings.map((elt, id) => (
-                    <li className="friendElement" key={id}>{elt.name}</li>
+                    <li className="pendingElement" key={id}>{elt.name}</li>
                 ))}
             </ul>
         </div>
