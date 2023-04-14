@@ -21,7 +21,7 @@ interface BallPosition {
  * use to share the game state
  */
 interface GameState {
-	BallPositionition: BallPosition[],
+	BallPosition: BallPosition[],
 	paddleOne: {x: number, y: number },
 	paddleTwo: {x: number, y:number },
 }
@@ -97,7 +97,7 @@ export class PongEngineService {
         // initialyzing game stuff
         this.cooldown_start = 0;
         this.p2.x_position = this.aspect_ratio - 0.025;
-        this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+        this.gs = {BallPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
         this.match_state = {player1_login: "", winner: "", disconnection_occure: false};
@@ -214,7 +214,7 @@ export class PongEngineService {
         this.ball = new Simple_ball();
         this.p1.reset_self_y_position();
             this.p2.reset_self_y_position();
-            this.gs = {BallPositionition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
+            this.gs = {BallPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
             paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
             paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p2.length/2}};
             this.cooldown_start = 0;
@@ -243,7 +243,7 @@ export class PongEngineService {
         }
 
         // fill the game state
-        this.gs.BallPositionition = [{
+        this.gs.BallPosition = [{
             x: this.ball.x_position,
             y: this.ball.y_position,
             r: this.ball.r,
