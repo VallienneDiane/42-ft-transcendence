@@ -77,3 +77,7 @@ export class unmuteUserDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
 }
+
+export class isConnectedDto {
+    @IsNotEmpty() @IsUUID() readonly userId: string;
+}

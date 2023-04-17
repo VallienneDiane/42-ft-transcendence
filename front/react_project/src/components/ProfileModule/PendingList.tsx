@@ -7,7 +7,7 @@ import { accountService } from "../../services/account.service";
 export default function PendingList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [pendings, setPendings] = useState<{id: string, name: string}[]>([]);
+    const [pendings, setPendings] = useState<{friendshipId: string, id: string, name: string}[]>([]);
 
     const fetchPending = () => {
         Axios.get("listRequestsPendingSend/" + me.sub)
@@ -18,26 +18,26 @@ export default function PendingList() {
     }
 
     const cancelHandler = (e: any) => {
-        socket.emit("cancelFriendRequest", e.target.value);
+        socket.emit("cancelFriendRequest", {friendshipId: e.target.value});
     }
 
     useEffect(() => {
         fetchPending();
-        socket.on("newFriendRequestSent", (id: string, name: string) => {
-            let newPendings = [...pendings, {id: id, name: name}];
+        socket.on("newFriendRequestSent", (friendshipId: string, id: string, name: string) => {
+            let newPendings = [...pendings, {friendshipId: friendshipId, id: id, name: name}];
             newPendings.sort((a, b) => {
                 return a.name.localeCompare(b.name);
             })
             setPendings(newPendings);
         })
-        socket.on("newFriend", (id: string, login: string) => {
+        socket.on("newFriend", (friendshipId: string, id: string, login: string) => {
             setPendings(pendings.filter((elt) => {
-                return elt.id != id;
+                return elt.friendshipId != friendshipId;
             }))
         })
-        socket.on("supressFriendRequest", (id: string, login: string) => {
+        socket.on("supressFriendRequest", (friendshipId: string) => {
             setPendings(pendings.filter((elt) => {
-                return elt.id != id;
+                return elt.friendshipId != friendshipId;
             }))
         })
         return () => {

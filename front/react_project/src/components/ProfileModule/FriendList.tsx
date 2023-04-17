@@ -20,13 +20,14 @@ export default function FriendList() {
                     friendId: elt.friendId,
                     friendName: elt.friendName,
                     isConnected: false});
+                    socket.emit("isConnected", elt.friendId);
             }
             setFriend(friendsArray);
         });
     }
 
     const unfriendHandler = (e: any) => {
-        socket.emit("unfriend", {userId: e.target.value});
+        socket.emit("unfriend", {friendshipId: e.target.value});
     }
 
     const inviteToGameHandler = (e:any) => {
@@ -35,17 +36,54 @@ export default function FriendList() {
 
     useEffect(() => {
         fetchFriends();
-        socket.on("newFriend", (id: string, name: string) => {
-
-        })
-        socket.on("supressFriend", (id: string, name: string) => {
+        socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+            let newFriendList = [...friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
+            newFriendList.sort((a, b) => {
+                return (a.friendName.localeCompare(b.friendName));
+            });
+            setFriend(newFriendList);
+        });
+        socket.on("supressFriend", (friendshipId: string) => {
             setFriend(friends.filter(friend => {
-                return friend.friendId != id;
+                return friend.friendshipId != friendshipId;
             }))
-        })
+        });
+        socket.on("userIsConnected", (userId: string) => {
+            let newFriendList = friends;
+            let found = newFriendList.find((friend) => {
+                return friend.friendId == userId;
+            });
+            if (found != undefined) {
+                found.isConnected = true;
+                setFriend(newFriendList);
+            }
+        });
+        socket.on("userConnected", (userId: string, userName: string) => {
+            let newFriendList = friends;
+            let found = newFriendList.find((friend) => {
+                return friend.friendId == userId;
+            });
+            if (found != undefined) {
+                found.isConnected = true;
+                setFriend(newFriendList);
+            }
+        });
+        socket.on("userDisconnected", (userId: string, userName: string) => {
+            let newFriendList = friends;
+            let found = newFriendList.find((friend) => {
+                return friend.friendId == userId;
+            });
+            if (found != undefined) {
+                found.isConnected = false;
+                setFriend(newFriendList);
+            }
+        });
         return () => {
             socket.off("newFriend");
             socket.off("supressFriend");
+            socket.off("userIsConnected");
+            socket.off("userConnected");
+            socket.off("userDisconnected");
         }
     }, []);
 
@@ -55,10 +93,11 @@ export default function FriendList() {
             <ul className="friendList">
                 {friends.map((elt, id) => (
                     <li className="friendElement" key={id}>{elt.friendName}
-                    <button value={elt.friendId} className="unfriendButton" onClick={unfriendHandler}>unfriend</button>
+                    <button value={elt.friendshipId} className="unfriendButton" onClick={unfriendHandler}>unfriend</button>
                     <NavLink to={`/chat/${elt.friendId}`}>Chatting</NavLink>
                     <button value={elt.friendId} className="inviteToGame" onClick={inviteToGameHandler}>invite to game</button>
-                    <NavLink to={`/profile/${elt.friendId}`}>See profile</NavLink>
+                    <NavLink to={`/profile/${elt.friendName}`}>See profile</NavLink>
+                    <div className={elt.isConnected? "circle online" : "circle offline"}></div>
                     </li>
                     ))}
             </ul>
