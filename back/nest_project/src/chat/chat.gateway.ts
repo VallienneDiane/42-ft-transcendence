@@ -8,7 +8,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { friendDto } from "./relation/friend/friend.dto";
+import { friendDto, friendshipDto } from "./relation/friend/friend.dto";
 import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, muteUserDto, unbanUserDto, unmuteUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
@@ -290,11 +290,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
     @SubscribeMessage('acceptFriendRequest')
-    handleAcceptRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleAcceptRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((receiver) => {
             if (receiver != null) {
-                this.chatService.acceptFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+                this.chatService.acceptFriendRequestEvent(data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -303,11 +303,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
     @SubscribeMessage('rejectFriendRequest')
-    handleRejectRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleRejectRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((receiver) => {
             if (receiver != null) {
-                this.chatService.rejectFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+                this.chatService.rejectFriendRequestEvent(data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -315,11 +315,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('unfriend')
-    handleUnfriend(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleUnfriend(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((me) => {
             if (me != null) {
-                this.chatService.unfriendEvent(me, data.userId, this.chatRoomHandler);
+                this.chatService.unfriendEvent(me, data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');

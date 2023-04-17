@@ -25,6 +25,10 @@ export class FriendService {
 		return await this.friendRepository.save(newFriend);
 	}
 
+	async findById(id: string): Promise<FriendEntity> {
+		return await this.friendRepository.findOne({where: {id: id}});
+	}
+
 	async checkRequest(idA: string, idB: string): Promise<boolean> {
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
 		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idB);
