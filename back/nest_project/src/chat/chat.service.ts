@@ -299,10 +299,11 @@ export class ChatService {
                                 .then((channel) => {
                                     if (channel != null) {
                                         if (!channel.inviteOnly) {
-                                            bcrypt.compare(data.channelPass, channel.channelPass)
-                                            .then((ok: boolean) => {
-                                                if (!channel.password || ok) {
-                                                    this.channelService.addNormalUser(user, channel.id)
+                                            if (channel.password === true) {
+                                                bcrypt.compare(data.channelPass, channel.channelPass)
+                                                .then((ok: boolean) => {
+                                                    if (ok) {
+                                                        this.channelService.addNormalUser(user, channel.id)
                                                         .then(() => {
                                                             let room = roomHandler.roomMap.of(channel.id);
                                                             if (room != undefined) {
@@ -311,13 +312,25 @@ export class ChatService {
                                                             let channelToEmit: IChannelToEmit = channel;
                                                             roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
                                                             this.changeLocEvent(client, user.id, data.channelId, true, roomHandler);
-                                                            if (channel.password)
-                                                                client.emit("correctPassword");
+                                                            client.emit("correctPassword");
                                                         })
-                                                }
-                                                else
-                                                    client.emit("incorrectPassword");
-                                            })
+                                                    }
+                                                    else
+                                                        client.emit("incorrectPassword");
+                                                })
+                                            }
+                                            else {
+                                                this.channelService.addNormalUser(user, channel.id)
+                                                .then(() => {
+                                                    let room = roomHandler.roomMap.of(channel.id);
+                                                    if (room != undefined) {
+                                                        room.emit("newUserInChannel", user.id, user.login, true);
+                                                    }
+                                                    let channelToEmit: IChannelToEmit = channel;
+                                                    roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
+                                                    this.changeLocEvent(client, user.id, data.channelId, true, roomHandler);
+                                                })
+                                            }
                                         }
                                         else
                                             client.emit("notice", "This channel is on invite only");
