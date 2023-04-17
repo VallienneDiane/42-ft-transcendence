@@ -29,6 +29,15 @@ export class FriendService {
 		return await this.friendRepository.findOne({where: {id: id}});
 	}
 
+	async findByIdWithRelation(id: string): Promise<FriendEntity> {
+		return await this.friendRepository
+			.createQueryBuilder("friend")
+			.innerJoinAndSelect("friend.sender", "sender")
+			.innerJoinAndSelect("friend.receiver", "receiver")
+			.where("friend.id = :id", { id: id })
+			.getOne();
+	}
+
 	async checkRequest(idA: string, idB: string): Promise<boolean> {
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
 		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idB);
