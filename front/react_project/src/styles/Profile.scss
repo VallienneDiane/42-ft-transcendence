@@ -58,6 +58,15 @@
                     }
                 }
             }
+
+            & #friendName {
+                border-radius: 20px;
+                text-shadow: 3cm;
+                position: relative;
+                z-index: 1;
+                font-size: larger;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+            }
         }
         
     }
