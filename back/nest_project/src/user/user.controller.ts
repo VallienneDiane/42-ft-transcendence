@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { SignUp42Dto, SignUpDto, UpdateUserDto, UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -35,16 +35,22 @@ export class UserController {
     @Post('user/signup42')
     async createUser42(@Body() newUser: SignUp42Dto) {
         const user42 = await this.userService.create42(newUser);
-        console.log("(user.controller) user/signup42, user 42 create = ", user42);
         return this.authService.genToken(user42.id);
     }
     
     @UseGuards(JwtAuthGuard)
-    @Post('user/updateUser')
-    async updateUser(@Body() user: UpdateUserDto) {
-        const updateUser = await this.userService.update(user);
-        console.log("(user.controller) user/updateUser, user update = ", updateUser);
-        return updateUser;
+    @Post('user/updateLogin')
+    async updateLogin(@Body() user: UpdateLoginDto) {
+        const updatedLogin = await this.userService.updateLogin(user);
+        return (updatedLogin);
+    }
+    
+    @UseGuards(JwtAuthGuard)
+    @Post('user/updateAvatar')
+    async updateAvatar(@Body() user: UpdateAvatarDto) {
+        console.log("(user controller) USER update avatar ", user);
+        const updatedAvatar = await this.userService.updateAvatar(user);
+        return (updatedAvatar);
     }
   
     @Get('user/isUniqueLogin/:login')
