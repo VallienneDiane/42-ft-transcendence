@@ -728,7 +728,7 @@ export class ChatService {
         })
     }
 
-    public rejectFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
+    public supressRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
         this.friendService.findById(friendshipId)
         .then((request: FriendEntity) => {
             this.friendService.deleteRequest(request.id)
@@ -756,9 +756,9 @@ export class ChatService {
                 let meSockets = roomHandler.userMap.get(me.id);
                 if (meSockets != undefined)
                     meSockets.emit("supressFriend", friendshipId);
-                    let friendSockets = roomHandler.userMap.get(friend.id);
-                    if (friendSockets != undefined)
-                        friendSockets.emit("supressFriend", me.id, me.login);
+                let friendSockets = roomHandler.userMap.get(friend.id);
+                if (friendSockets != undefined)
+                    friendSockets.emit("supressFriend", friendshipId);
             })
         })
     }
