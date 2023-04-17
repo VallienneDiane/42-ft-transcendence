@@ -119,6 +119,13 @@ export class ChatService {
         }
     }
 
+    public isConnectedEvent(client: Socket, user: UserEntity, connectedId: string, roomHandler: UserRoomHandler) {
+        let guy = roomHandler.userMap.get(connectedId);
+        if (guy != undefined) {
+            client.emit("userIsConnected", connectedId);
+        }
+    }
+
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
         logger.debug(`${user.login} send : ${message}`);
         let room = roomHandler.socketMap.sockets.get(client);

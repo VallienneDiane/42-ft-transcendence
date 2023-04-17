@@ -7,7 +7,7 @@ import { accountService } from "../../services/account.service";
 export default function RequestsList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [requests, setRequests] = useState<{id: string, name: string}[]>([]);
+    const [requests, setRequests] = useState<{friendshipId: string, id: string, name: string}[]>([]);
 
     const fetchRequests = () => {
         Axios.get("listRequestsPendingReceived/" + me.sub)
@@ -18,30 +18,30 @@ export default function RequestsList() {
     }
 
     const acceptHandler = (e: any) => {
-        socket.emit("acceptFriendRequest", {userId: e.target.value});
+        socket.emit("acceptFriendRequest", {friendshipId: e.target.value});
     }
 
     const declineHandler = (e:any) => {
-        socket.emit('rejectFriendRequest', {userId: e.target.value});
+        socket.emit('rejectFriendRequest', {friendshipId: e.target.value});
     }
 
     useEffect(() => {
         fetchRequests();
-        socket.on("newFriendRequestReceived", (id: string, name: string) => {
-            let newRequests = [...requests, {id: id, name: name}];
+        socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
+            let newRequests = [...requests, {friendshipId: friendshipId, id: id, name: name}];
             newRequests.sort((a, b) => {
                 return a.name.localeCompare(b.name);
             })
             setRequests(newRequests);
         })
-        socket.on("newFriend", (id: string, login: string) => {
+        socket.on("newFriend", (friendshipId: string, id: string, login: string) => {
             setRequests(requests.filter((elt) => {
-                return elt.id != id;
+                return elt.friendshipId != friendshipId;
             }))
         })
-        socket.on("supressFriendRequest", (id: string, login: string) => {
+        socket.on("supressFriendRequest", (friendshipId: string) => {
             setRequests(requests.filter((elt) => {
-                return elt.id != id;
+                return elt.friendshipId != friendshipId;
             }))
         })
         return () => {
@@ -57,8 +57,8 @@ export default function RequestsList() {
             <ul>
                 {requests.map((elt, id) => (
                     <li className="requestElement" key={id}>{elt.name}
-                    <button value={elt.id} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
-                    <button value={elt.id} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
+                    <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
+                    <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
                 ))}
             </ul>
         </div>
