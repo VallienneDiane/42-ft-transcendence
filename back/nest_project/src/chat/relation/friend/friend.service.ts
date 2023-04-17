@@ -39,18 +39,21 @@ export class FriendService {
 	}
 
 	async checkRequest(idA: string, idB: string): Promise<boolean> {
+		let state: boolean = true;
+		console.log(idA, idB)
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
 		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idB);
-		
+		console.log("send: ", requestsSend, "received: ", requestsReceived);
 		requestsSend.forEach((request) => {
 			if (request.receiverId === idB)
-				return false;
+				state = false;
 		})
 		requestsReceived.forEach((request) => {
 			if (request.senderId === idB)
-				return false;
+				state = false;
 		})
-		return true;
+		console.log(state);
+		return state;
 	}
 
 	async getFriendsList(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {

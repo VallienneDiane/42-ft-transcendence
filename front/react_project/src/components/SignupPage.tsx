@@ -5,7 +5,7 @@ import ReactDOMServer from 'react-dom/server';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from "yup";
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
 import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
@@ -64,7 +64,7 @@ const SignupPage: React.FC = () => {
             {errors.password && <p className='errorsSignup'>{errors.password.message}</p>}
           <button className="form_element" type="submit">SIGN UP</button>
         </form>
-        <a href="/login">Already registered ? Log In</a>
+        <NavLink to="/login">Already registered ? Log In</NavLink>
       </div>
     </div>
   );
