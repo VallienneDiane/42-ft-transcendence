@@ -39,10 +39,16 @@ export default function PendingList() {
                 return elt.friendshipId != friendshipId;
             }))
         })
+        socket.on("supressFriend", (friendshipId: string) => {
+            setPendings(pendings.filter((elt) => {
+                return elt.friendshipId != friendshipId;
+            }))
+        })
         return () => {
             socket.off("newFriendRequestSent");
             socket.off("newFriend");
             socket.off("supressFriendRequest");
+            socket.off("supressFriend");
         }
     }, []);
 

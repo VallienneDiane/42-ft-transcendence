@@ -246,6 +246,20 @@ export class UserService {
             .getRawMany();
     }
 
+    async getBlockedMeList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockedMeList", "blockedMe")
+            .select("blockedMe.id", "id")
+            .addSelect("blockedMe.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getAllBlockRelations(userId: string): Promise<{id: string, name: string}[]> {
+        return [...await this.getBlockList(userId), ...await this.getBlockedMeList(userId)];
+    }
+
     async getMuteList(userId: string): Promise<{id: string}[]> {
         return await this.usersRepository
             .createQueryBuilder("user")

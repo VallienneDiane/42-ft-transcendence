@@ -217,6 +217,16 @@ export class ChannelService {
 			.getRawMany();
 	}
 
+	async getBannedListWithLogin(channelId: string): Promise<{id: string, login: string}[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.bannedUsers", "banned")
+			.where("channel.id = :id", { id: channelId })
+			.select("banned.id", "id")
+			.addSelect("banned.login", "login")
+			.getRawMany();
+	}
+
 	async getMutedList(channelId: string): Promise<{id: string}[]> {
 		return await this.channelRepository
 			.createQueryBuilder("channel")
