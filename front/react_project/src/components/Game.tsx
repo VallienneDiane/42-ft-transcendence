@@ -21,6 +21,21 @@ interface gameState {
     paddleTwo: { x: number, y: number }
 }
 
+interface MatchState {
+    player1_login: string;
+    player2_login: string;
+    player1_score: number;
+    player2_score: number;
+    super_game_mode: boolean;
+    game_has_started: boolean;
+}
+
+interface MatchEnd {
+    player1_login: string;
+    winner: string;
+    disconnection_occure: boolean;
+}
+
 interface inputState {
     up: boolean,
     down: boolean
@@ -29,6 +44,8 @@ interface inputState {
 interface Players {
     player1_login: string,
     player2_login: string,
+    player1_score: number,
+    player2_score: number,
 }
 
 
@@ -45,6 +62,8 @@ const Game: React.FC = () => {
     const [countdown, setCountdown] = useState<number | string>(3);
     const countDownDiv = useRef<HTMLElement>(null);
     const [players, setPlayers] = useState<Players>();
+    // const [players, setPlayers] = useState<Players>({ player1_login: "", player1_score: 0, player2_score: 0, player2_login: "" });
+    const playersRef = useRef<Players>();
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
 
@@ -56,21 +75,21 @@ const Game: React.FC = () => {
         }));
     }
 
-     const launchClassic = () => {
+    const launchClassic = () => {
         // On click on 'start' button, start the game
         // setTimer(true); ////////////// TO DELETE
         // countDownDiv.current!.classList.add('zoom')
 
         if (socket !== null && !matchInProgress) {
-            socket.emit('Public_Matchmaking', {super_game_mode: false});
-             setWaitMatch(true);
+            socket.emit('Public_Matchmaking', { super_game_mode: false });
+            setWaitMatch(true);
         }
     }
-    
+
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socket !== null && !matchInProgress) {
-            socket.emit('Public_Matchmaking', {super_game_mode: true});
+            socket.emit('Public_Matchmaking', { super_game_mode: true });
             setWaitMatch(true);
         }
     }
@@ -81,21 +100,22 @@ const Game: React.FC = () => {
             socket.emit('Ready');
         }
         setPlayerReady(true);
+        document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
 
 
-    useEffect(() => {
-        // Set the initial position of elements based on the width and height of the canvas element
-        if (canvasRef.current) {
-            setGameState({
-                BallPosition: [
-                    { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
-                ],
-                paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
-                paddleTwo: { x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
-            });
-        }
-    }, []);
+    // useEffect(() => {
+    //     // Set the initial position of elements based on the width and height of the canvas element
+    //     if (canvasRef.current) {
+    //         setGameState({
+    //             BallPosition: [
+    //                 { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
+    //             ],
+    //             paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
+    //             paddleTwo: { x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
+    //         });
+    //     }
+    // }, []);
 
     // countdown handler
     useEffect(() => {
@@ -131,18 +151,22 @@ const Game: React.FC = () => {
                 console.log('Connected to server!');
             });
 
-            socket.on('Players', (players: Players) => {
-                console.log("Players : ", players);
+            socket.on('Players', (gamePlayers: Players) => {
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(true);
                 ready = true;
-                setPlayers(players);
+                setPlayers(prevPlayers => {
+                    return {
+                        ...prevPlayers!,
+                        player1_login: gamePlayers.player1_login,
+                        player2_login: gamePlayers.player2_login,
+                        player1_score: 0,
+                        player2_score: 0
+                    }
+                })
+                playersRef.current = gamePlayers;;
             })
-
-            // socket.on('matchsInProgress', (matchs: Match[]) => {
-            //     setMatchs(matchs);
-            // })
 
             socket.on('Game_Update', (gameState: gameState) => {
                 if (ready === true) {
@@ -162,6 +186,26 @@ const Game: React.FC = () => {
                     paddleTwo: { x: gameState.paddleTwo.x / (16 / 9), y: gameState.paddleTwo.y }
                 }));
             });
+
+            socket.on('Match_Update', (matchUpdate: MatchState) => {
+                if (playersRef.current?.player1_login === matchUpdate.player1_login) {
+                    setPlayers(prevPlayers => {
+                        return {
+                            ...prevPlayers!,
+                            player1_score: matchUpdate.player1_score,
+                            player2_score: matchUpdate.player2_score,
+                        }
+                    })
+                }
+            })
+
+            socket.on('Match_End', (matchEnd: MatchEnd) => {
+                setWaitMatch(false);
+                setMatchInProgress(false);
+                setCountdown(3);
+                setPlayerReady(false)
+                ready = false;
+            })
         }
     }, [socket]);
 
@@ -169,7 +213,7 @@ const Game: React.FC = () => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === false) {
-                socket.emit('Game_Input', {input: "ArrowUp"});
+                socket.emit('Game_Input', { input: "ArrowUp" });
             }
             // setInputState({ up: true, down: false });
             setInputState((prevState) => ({
@@ -179,7 +223,7 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === false) {
-                socket.emit('Game_Input', {input: "ArrowDown"});
+                socket.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
             setInputState((prevState) => ({
@@ -188,12 +232,12 @@ const Game: React.FC = () => {
             }));
         }
     };
-    
+
     const handleKeyUp = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === true) {
-                socket.emit('Game_Input', {input: "ArrowUp"});
+                socket.emit('Game_Input', { input: "ArrowUp" });
             }
             setInputState((prevState) => ({
                 ...prevState,
@@ -202,32 +246,30 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === true) {
-                socket.emit('Game_Input', {input: "ArrowDown"});
+                socket.emit('Game_Input', { input: "ArrowDown" });
             }
             setInputState((prevState) => ({
                 ...prevState,
                 down: false
             }));
         }
-        // socket.emit('Game_Input_Up', event.key);
     };
 
-    
+
     const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8);
     const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 / (16 / 9));
     // Handle windows resizing
     useEffect(() => {
         function handleResize() {
-            // setContainerHeight(window.innerHeight);
-            setGameWidth(window.innerWidth * 0.8);
-            setGameHeight(window.innerWidth * 0.8 / (16 / 9));
+            setGameWidth(document.getElementById('gamePanel')!.getBoundingClientRect().width);
+            setGameHeight(document.getElementById('gamePanel')!.getBoundingClientRect().width / (16 / 9));
         }
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-    
+
     // Get css colors variables to use it in the canva
     const style = getComputedStyle(document.documentElement);
     const ballColor = style.getPropertyValue('--ball-color');
@@ -264,30 +306,42 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socket}/>
+            <MatchsInProgress socket={socket} />
             <div id="gamePanel">
-                {matchInProgress ? <div>{players?.player1_login} VS {players?.player2_login}</div> : null}
-                <div id="gameField">
-                    {matchInProgress || waitMatch ?
-                    null
-                    :
-                    <div id="gameSelector">
-                        {/* <h2>Select your opponent</h2>
-                        <SearchUserBar /> */}
-                        <h2>Select your game</h2>
-                        <div id="gameButtons">
-                            <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
-                            <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
+                {matchInProgress ?
+                    <div id="players">
+                        <div className="player">
+                            <div>{players?.player1_login}</div>
+                            <div>{players?.player1_score}</div>
+                        </div>
+                        <div id="separator"></div>
+                        <div className="player">
+                            <div>{players?.player2_score}</div>
+                            <div>{players?.player2_login}</div>
                         </div>
                     </div>
-                    
+                    : null}
+                <div id="gameField">
+                    {matchInProgress || waitMatch ?
+                        null
+                        :
+                        <div id="gameSelector">
+                            {/* <h2>Select your opponent</h2>
+                        <SearchUserBar /> */}
+                            <h2>Select your game</h2>
+                            <div id="gameButtons">
+                                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
+                                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
+                            </div>
+                        </div>
+
                     }
                     {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
-                    {buttonReady ? <button id="readyButton" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
+                    {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                     {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
                 </div>
-                <button onClick={TEST}>TEST</button>
+                {/* <button onClick={TEST}>TEST</button> */}
             </div>
         </div>
     )
