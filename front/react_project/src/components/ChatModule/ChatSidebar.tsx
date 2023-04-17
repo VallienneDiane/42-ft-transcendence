@@ -166,7 +166,7 @@ function MuteFor(props: {user: string, dest: IDest}) {
 function MemberList(props: {dest: IDest}) {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
+    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string}[]>([]);
     const [onClickMute, setOnClickMute] = useState<boolean>(false);
     const [userToMute, setUserToMute] = useState<string>("");
 
@@ -193,12 +193,8 @@ function MemberList(props: {dest: IDest}) {
 
     useEffect(() => {
         socket.emit('listUsersChann', {channelId: props.dest.id}); 
-        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string, connected: boolean}[]) => {
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
             setMembers(list);
-        })
-        socket.emit('listMutedUsers');
-        socket.on('mutedList', (mutes: {id: string, time: number}[]) => {
-            
         })
         socket.on("userLeaveChannel", (userId: string) => {
             setMembers((members) => {
@@ -208,15 +204,14 @@ function MemberList(props: {dest: IDest}) {
                 return newMembers;
             });
         })
-        socket.on("newUserInChannel", (id: string, login: string, connected: boolean) => {
+        socket.on("newUserInChannel", (id: string, login: string) => {
             setMembers(members => {
-                let user: {user: {id: string, login: string}, status: string, connected: boolean} = {
+                let user: {user: {id: string, login: string}, status: string} = {
                     user: {
                         id: id,
                         login: login
                     },
-                    status: "normal",
-                    connected: connected
+                    status: "normal"
                 }
                 let newMembers = [...members, user];
                 newMembers.sort((a, b) => {
