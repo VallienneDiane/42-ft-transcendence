@@ -24,6 +24,8 @@ button:hover {
 
 .App {
   background-color: var(--prim-color);
+  /* background: url(./assets/background1.png) no-repeat center center fixed;
+  background-size: cover; */
   display: flex;
   /* background-color: rgb(75, 29, 138); */
   /* border: 2px black dotted; */

@@ -12,12 +12,53 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-end;
+        width: 80vw;
+        max-width: 1000px;
+        height: calc(80vw / (16 /9) + 7vh);
+
+        & #players {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            height: 6vh;
+            background-color: rgb(141, 94, 74);
+            
+            & .player {
+                height: 100%;
+                width: 45%;
+                display: flex;
+                align-items: center;
+
+                & > div {
+                    width: 50%;
+                    text-align: center;
+                    text-transform: uppercase;
+                    font-size: 1.2em;
+                    font-weight: 900;
+                    overflow: hidden;
+                }
+
+                &:first-child {
+                    background-color: rgb(101, 177, 164);
+                    // clip-path: polygon(0 0, 100% 0, 30% 100%, 0% 100%);
+                }
+            }
+
+            & #separator {
+                width: 10%;
+                background-color: rgb(101, 177, 164);
+                clip-path: polygon(0 0, 100% 0, 0 100%, 0% 100%);
+
+            }
+        }
 
         & #gameField {
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 1vh;
 
             & #gameSelector {
                 position: absolute;
@@ -87,9 +128,18 @@
                 border-radius: 10px;
                 font-size: 7cqw;
                 position: absolute;
-                background-color: transparent;
-                // background-color: var(--second-color);
-                animation: ready 1000ms infinite ease-in;
+                background-color: var(--second-color);
+            }
+            
+            & .notReady {
+                animation: notReady 1000ms infinite ease-in-out;
+                
+            }
+            
+            & .ready {
+                animation: ready 200ms ease-in-out;
+                // animation-iteration-count: 5;
+                filter: brightness(1.3);
             }
             
             & #countDown {
@@ -125,11 +175,35 @@
     }
 }
 
+@keyframes notReady {
+    0% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.3);
+    }
+    100% {
+        filter: brightness(1.0);
+    }
+}
+
 @keyframes ready {
     0% {
         filter: brightness(1);
     }
-    90% {
+    20% {
+        filter: brightness(1.3);
+    }
+    40% {
+        filter: brightness(1.0);
+    }
+    60% {
+        filter: brightness(1.3);
+    }
+    70% {
+        filter: brightness(1.0);
+    }
+    80% {
         filter: brightness(1.3);
     }
     100% {

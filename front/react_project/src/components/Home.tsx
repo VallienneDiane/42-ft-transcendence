@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { NavLink } from "react-router-dom"
 
 interface BallProps {
+    id: number,
     x: number,
     y: number,
     vx: number,
@@ -26,10 +27,6 @@ const DarkenColor = function (stringColor: string, percent: number) {
     let g: number = parseInt(stringColor.substring(4, 6), 16) * percent / 100;
     let b: number = parseInt(stringColor.substring(6, 8), 16) * percent / 100;
 
-    console.log('r', Math.round(r).toString(16).padStart(2, '0'));
-    console.log('g', Math.round(g).toString(16).padStart(2, '0'));
-    console.log('b', Math.round(b).toString(16).padStart(2, '0'));
-
     return (`#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`);
 }
 
@@ -37,13 +34,12 @@ const style = getComputedStyle(document.documentElement);
 const ballColor = style.getPropertyValue('--ball-color');
 const ballShadowColor = DarkenColor(ballColor, 80);
 
-console.log(ballColor, ballShadowColor);
 
 const BallContainer = (props: BallContainerProps) => {
 
     const Ball = (ball: BallProps) => {
         return (
-            <circle className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad)" /> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
+            <circle key={ball.id} className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad)" /> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
         );
     }
     return (
@@ -80,7 +76,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
 
         ///////// COLLISION WITH ELEMENTS
         for (let j = 0; j < pageElements.length; j++) {
-            if (pageElements[j].element !== null) {
+            if (pageElements[j].element !== undefined && pageElements[j].element !== null) {
                 /// TOP
                 if ((ball.y > pageElements[j].element!.top - ball.r - 5 && ball.y < pageElements[j].element!.top - ball.r + 15) && (ball.x > pageElements[j].element!.left - CONTAINER_WIDTH / 2 - 7 && ball.x < pageElements[j].element!.right - CONTAINER_WIDTH / 2 + 7)) {
                     ball.y = pageElements[j].element!.top - ball.r - 5;
@@ -133,6 +129,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         //////// WHEN BALL OUT OF SCREEN, DELETE IT AND RECREATE ANOTHER
         if (ball.y > CONTAINER_HEIGHT + ball.r / 2) {
             balls.splice(i, 1);
+            let id = ball.id;
             let x = (Math.random() - 0.5) * (CONTAINER_WIDTH - ball.r / 2) + ball.r / 2;
             let y = Math.random() * -500;
             let vx = (Math.random() - 0.5) * 8;
@@ -145,7 +142,7 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
             // let vx = 6;
             // let vy = 0;
             // let r = 15;
-            balls.push({ x, y, vx, vy, r });
+            balls.push({id, x, y, vx, vy, r });
         }
     }
 
@@ -251,13 +248,14 @@ const Home: React.FC = () => {
         const initBalls: BallProps[] = [];
 
         for (let i = 0; i < 15; i++) {
+            let id = i;
             let x = (Math.random() - 0.5) * CONTAINER_WIDTH;
             let y = Math.random() * -1000;
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
             let r = (Math.random() * 5) + 15;
             // let vy = 0;
-            initBalls.push({ x, y, vx, vy, r });
+            initBalls.push({id, x, y, vx, vy, r });
         }
         setBalls(initBalls);
     }, []);
