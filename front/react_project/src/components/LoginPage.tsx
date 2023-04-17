@@ -1,7 +1,7 @@
 import "../styles/LoginPage.scss"
 import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { accountService } from "../services/account.service";
 import { LogInForm } from "../models";
 
@@ -83,7 +83,7 @@ const LoginPage: React.FC = () => {
                 <button id="signin42" onClick={redirectToApi42}>
                     Sign in with 42 !
                 </button>
-                <a href="/signup">Not registered ? Sign In !</a>
+                <NavLink to="/signup">Not registered ? Sign In !</NavLink>
             </div>
         </div>
     )
