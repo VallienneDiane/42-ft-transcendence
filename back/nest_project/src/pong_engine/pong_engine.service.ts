@@ -39,6 +39,16 @@ interface MatchState {
 }
 
 /**
+ * struct use to store all game instance
+ */
+class Game_Instance {
+    game_engine: any;
+    players: Socket[];
+    spectators: Socket[];
+    game_has_ended: boolean;
+  }
+
+/**
  * use to send the match end state
  */
 interface MatchEnd {
@@ -79,6 +89,7 @@ export class PongEngineService {
     server: any;
     match_end_state: MatchEnd;
     waiting: Set<string>;
+    game_instance: Game_Instance;
 
     constructor (userservice: UserService, matchservice: MatchService) {
         // creating game object
@@ -112,7 +123,7 @@ export class PongEngineService {
      * @param user_entity1 player 1 data
      * @param user_entity2 player 2 data
      */
-    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any, waiting: Set<string>, match: MatchState[]) {
+    set_player(player1: Socket, player2: Socket, user_entity1: UserEntity, user_entity2: UserEntity, server: any, waiting: Set<string>, match: MatchState[], GI: Game_Instance) {
         this.server = server;
         this.pl1 = player1;
         this.pl2 = player2;
@@ -120,6 +131,7 @@ export class PongEngineService {
         this.user2 = user_entity2;
         this.waiting = waiting;
         this.ms = match;
+        this.game_instance = GI;
         this.update_match_state();
         this.match_end_state.player1_login = this.user1.login;
         console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
@@ -178,12 +190,13 @@ export class PongEngineService {
             console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
+                    console.log("clear pong");
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
                 // console.log("sending : ", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
-                // console.log("JUST EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+                //console.log("JUST PONG EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }
@@ -209,12 +222,16 @@ export class PongEngineService {
 		this.match_end_state.winner = match.winner.login;
         match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
         //console.log("the match to be register should be : ", match);
-        await this.matchservice.createMatch(match);
+		this.game_instance.game_has_ended = true;
         if (this.waiting.delete(this.user1.id)) {
             console.log("removed from waiting in pong engin close_the_game function");
         }
+        if (this.waiting.delete(this.user2.id)) {
+            console.log("removed from waiting in pong engin close_the_game function");
+        }
 		this.server.emit("Match_End", this.match_end_state);
-        let result = await this.matchservice.findMatch();
+        await this.matchservice.createMatch(match);
+        //let result = await this.matchservice.findMatch();
         //console.log("the score should be save and the match history is :", result);
     }
 
