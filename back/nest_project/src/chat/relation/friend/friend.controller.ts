@@ -14,20 +14,20 @@ export class FriendController {
 	@UseGuards(JwtAuthGuard)
 	@Get('listFriends/:user')
 	async listFriends(@Param('user', ParseUUIDPipe) data: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
-		console.log("listUsers: ", data);
+		// console.log("listUsers: ", data);
         const friendList: {friendshipId: string, friendId: string, friendName: string}[] = await this.friendService.getFriendsList(data);
 		return friendList;
     }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listRequestsPendingSend/:user')
-	async listRequestsPendingSend(@Param('user', ParseUUIDPipe) data: string): Promise<{id: string, name: string}[]> {
+	async listRequestsPendingSend(@Param('user', ParseUUIDPipe) data: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
         return await this.friendService.getRequestPendingSend(data);
     }
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listRequestsPendingReceived/:user')
-	async listRequestsPendingReceived(@Param('user', ParseUUIDPipe) data: string): Promise<{id: string, name: string}[]> {
+	async listRequestsPendingReceived(@Param('user', ParseUUIDPipe) data: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
         return await this.friendService.getRequestPendingReceived(data);
     }
 }

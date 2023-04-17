@@ -687,16 +687,16 @@ export class ChatService {
                 this.userService.findById(receiverId)
                 .then((receiver: UserEntity) => {
                     this.friendService.create(sender, receiver)
-                    .then(() => {
+                    .then((friendship: FriendEntity) => {
                         let senderSockets = roomHandler.userMap.get(sender.id);
                         if (senderSockets != undefined) {
                             senderSockets.emit("notice", "Your request has been sent.");
-                            senderSockets.emit("newFriendRequestSent", receiver.id, receiver.login);
+                            senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
                         }
                         // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
                         let receiverSockets = roomHandler.userMap.get(receiver.id);
                         if (receiverSockets != undefined)
-                            receiverSockets.emit("newFriendRequestReceived", sender.id, receiver.login);
+                            receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, receiver.login);
                     })
                 })
             }
@@ -705,70 +705,54 @@ export class ChatService {
         })
     }
 
-    public acceptFriendRequestEvent(receiver: UserEntity, senderId: string, roomHandler: UserRoomHandler) {
-        this.friendService.findRequest(senderId, receiver.id)
+    public acceptFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
+        this.friendService.findById(friendshipId)
         .then((request: FriendEntity) => {
             console.log("request = ", request);
             this.friendService.updateRequest(request.id)
             .then(() => {
-                let receiverSockets = roomHandler.userMap.get(receiver.id);
-                if (receiverSockets != undefined) {
-                    this.userService.findById(senderId)
-                    .then((user) => {
-                        receiverSockets.emit("newFriend", user.id, user.login);
-                        // receiverSockets.emit("supressFriendRequestReceived", user.id, user.login);
-                    })
-                }
-                let senderSockets = roomHandler.userMap.get(senderId);
-                if (senderSockets != undefined) {
-                    senderSockets.emit("newFriend", receiver.id, receiver.login);
-                    // senderSockets.emit("supressFriendRequestSent", receiver.id, receiver.login);
-                }
+                let receiverSockets = roomHandler.userMap.get(request.receiver.id);
+                if (receiverSockets != undefined)
+                    receiverSockets.emit("newFriend", request.id, request.sender.id, request.sender.login);
+                let senderSockets = roomHandler.userMap.get(request.sender.id);
+                if (senderSockets != undefined)
+                    senderSockets.emit("newFriend", request.id, request.receiver.id, request.receiver.login);
             })
         })
     }
 
-    public rejectFriendRequestEvent(receiver: UserEntity, senderId: string, roomHandler: UserRoomHandler) {
-        this.friendService.findRequest(senderId, receiver.id)
+    public rejectFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
+        this.friendService.findById(friendshipId)
         .then((request: FriendEntity) => {
             this.friendService.deleteRequest(request.id)
             .then(() => {
-                let receiverSockets = roomHandler.userMap.get(receiver.id);
-                if (receiverSockets != undefined) {
-                    this.userService.findById(senderId)
-                    .then((user) => {
-                        receiverSockets.emit("supressFriendRequest", user.id, user.login);
-                    })
-                }
-                let senderSockets = roomHandler.userMap.get(senderId);
-                if (senderSockets != undefined) {
-                    senderSockets.emit("supressFriendRequest", receiver.id, receiver.login);
-                }
+                let receiverSockets = roomHandler.userMap.get(request.receiver.id);
+                if (receiverSockets != undefined)
+                    receiverSockets.emit("supressFriendRequest", friendshipId);
+                let senderSockets = roomHandler.userMap.get(request.sender.id);
+                if (senderSockets != undefined)
+                    senderSockets.emit("supressFriendRequest", friendshipId);
             })
         })
     }
 
-    public unfriendEvent(me: UserEntity, friendId: string, roomHandler: UserRoomHandler) {
-        this.friendService.getFriendsList(me.id)
-        .then((friends: {friendshipId: string, friendId: string, friendName: string}[]) => {
-            for (let elt of friends) {
-                if (elt.friendId === friendId) {
-                    this.friendService.deleteRequest(elt.friendshipId)
-                    .then(() => {
-                        this.userService.findById(friendId)
-                        .then((user) => {
-                            let meSockets = roomHandler.userMap.get(me.id);
-                            if (meSockets != undefined) {
-                                meSockets.emit("supressFriend", user.id, user.login);
-                            }
-                            let friendSockets = roomHandler.userMap.get(user.id);
-                            if (friendSockets != undefined) {
-                                friendSockets.emit("supressFriend", me.id, me.login);
-                            }
-                        })
-                    })
-                }
-            }
+    public unfriendEvent(me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
+        this.friendService.findById(friendshipId)
+        .then((request: FriendEntity) => {
+            let friend: UserEntity = null;
+            if (request.sender == me)
+                friend = request.receiver;
+            else
+                friend = request.sender;
+            this.friendService.deleteRequest(friendshipId)
+            .then(() => {
+                let meSockets = roomHandler.userMap.get(me.id);
+                if (meSockets != undefined)
+                    meSockets.emit("supressFriend", friendshipId);
+                    let friendSockets = roomHandler.userMap.get(friend.id);
+                    if (friendSockets != undefined)
+                        friendSockets.emit("supressFriend", me.id, me.login);
+            })
         })
     }
 
