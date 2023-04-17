@@ -245,7 +245,7 @@
 						justify-content: space-between;
 						padding: 0.2rem 0.5rem;
 						& button {
-							width: 100%;
+							width: 85%;
 							text-align: left;
 							cursor: pointer;
 							& #msg {
@@ -258,6 +258,7 @@
 						}
 						
 						& .circle {
+							width: 15%;
 							width: 8px;
 							height: 8px;
 							border-radius: 50%;

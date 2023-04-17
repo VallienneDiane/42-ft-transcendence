@@ -729,7 +729,7 @@ export class ChatService {
     }
 
     public supressRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
-        this.friendService.findById(friendshipId)
+        this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             this.friendService.deleteRequest(request.id)
             .then(() => {
@@ -744,7 +744,7 @@ export class ChatService {
     }
 
     public unfriendEvent(me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
-        this.friendService.findById(friendshipId)
+        this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             let friend: UserEntity = null;
             if (request.sender == me)
