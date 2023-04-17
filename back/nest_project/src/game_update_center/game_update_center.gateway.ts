@@ -59,7 +59,7 @@ interface MatchState {
 /**
  * main class regrouping all thing related to soket receiving and sending stuff
  */
-@UsePipes(ValidationPipe)
+@UsePipes(new ValidationPipe({enableDebugMessages: true, forbidNonWhitelisted: true, stopAtFirstError: true}))
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -213,6 +213,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       const element = this.game_instance[index];
       if (element.game_has_ended) {
         console.log("game of : ", element.players[0], "and : ", element.players[1], "are trashed");
+        for (let spec = 0; spec < element.spectators.length; spec++) {
+          const spectateur = element.spectators[spec];
+          spectateur.leave(element.players[0].id);
+        }
+        element.players[1].leave(element.players[0].id);
         this.game_instance.splice(index, 1);
       }
     }
