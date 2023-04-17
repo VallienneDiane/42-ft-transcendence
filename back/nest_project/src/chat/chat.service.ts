@@ -280,20 +280,9 @@ export class ChatService {
      * @param roomHandler 
      */
     async listUsersInChannel(client: Socket, channelId: string, roomHandler: UserRoomHandler) {
-        let usersArray: {user: IUserToEmit, status: string, connected: boolean}[] = [];
-        const rawArray = await this.channelService.listUsersInChannel(channelId, true);
-        for (let elt of rawArray) {
-            usersArray.push({
-                user: {
-                    id: elt.user.id,
-                    login: elt.user.login
-                },
-                status: elt.status,
-                connected: roomHandler.userMap.get(elt.user.id) != undefined
-            })
+        const usersArray = await this.channelService.listUsersInChannel(channelId, true);
         client.emit("listUsersChann", usersArray);
         }
-    }
 
     public joinChannelEvent(client: Socket, user: UserEntity, data: {channelId: string, channelPass: string}, roomHandler: UserRoomHandler) {
         this.channelService.getUserInChannel(data.channelId, user.id)
@@ -318,7 +307,7 @@ export class ChatService {
                                                         .then(() => {
                                                             let room = roomHandler.roomMap.of(channel.id);
                                                             if (room != undefined) {
-                                                                room.emit("newUserInChannel", user.id, user.login, true);
+                                                                room.emit("newUserInChannel", user.id, user.login);
                                                             }
                                                             let channelToEmit: IChannelToEmit = channel;
                                                             roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});
@@ -335,7 +324,7 @@ export class ChatService {
                                                 .then(() => {
                                                     let room = roomHandler.roomMap.of(channel.id);
                                                     if (room != undefined) {
-                                                        room.emit("newUserInChannel", user.id, user.login, true);
+                                                        room.emit("newUserInChannel", user.id, user.login);
                                                     }
                                                     let channelToEmit: IChannelToEmit = channel;
                                                     roomHandler.emitToUserHavingThisSocket(client, "channelJoined", {channel: channelToEmit, status: "normal"});

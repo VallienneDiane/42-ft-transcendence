@@ -99,7 +99,7 @@ export class ChannelService {
 	 * @returns an array or UserEntity belong to this channel with theyre grade in this channel, a connected: boolean is available 
 	 * to set it up later, it can be ignored either
 	 */
-	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
+	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string}[]> {
 		const godUser = await this.channelRepository
 			.createQueryBuilder("channel")
 			.leftJoinAndSelect("channel.godUser", "god")
@@ -126,17 +126,17 @@ export class ChannelService {
 				return (a.login.localeCompare(b.login))
 			});
 		}
-		let toReturn: {user: UserEntity, status: string, connected: boolean}[] = [];
+		let toReturn: {user: UserEntity, status: string}[] = [];
 		if (godUser)
-		toReturn.push({user: godUser, status: "god", connected: false});
+		toReturn.push({user: godUser, status: "god"});
 		opUsers.forEach(
 			(user) => {
-				toReturn.push({user: user, status: "op", connected: false});
+				toReturn.push({user: user, status: "op"});
 			}
 		);
 		normalUsers.forEach(
 			(user) => {
-				toReturn.push({user: user, status: "normal", connected: false});
+				toReturn.push({user: user, status: "normal"});
 			}
 		)
 		return toReturn;

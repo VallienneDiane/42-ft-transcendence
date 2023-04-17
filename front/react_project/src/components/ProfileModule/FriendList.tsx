@@ -88,16 +88,16 @@ export default function FriendList() {
     }, []);
 
     return (
-        <div className="friendList">
+        <div id="friend">
             {friends.length > 0 && <h3>My friend{friends.length > 1 && "s"}</h3>}
-            <ul className="friendList">
+            <ul id="friendList">
                 {friends.map((elt, id) => (
-                    <li className="friendElement" key={id}>{elt.friendName}
-                    <button value={elt.friendshipId} className="unfriendButton" onClick={unfriendHandler}>unfriend</button>
+                    <li id="friendElement" key={id}><span id="friendName">{elt.friendName}</span>
+                    <button value={elt.friendshipId} id="unfriendButton" onClick={unfriendHandler}>unfriend</button>
                     <NavLink to={`/chat/${elt.friendId}`}>Chatting</NavLink>
-                    <button value={elt.friendId} className="inviteToGame" onClick={inviteToGameHandler}>invite to game</button>
+                    <button value={elt.friendId} id="inviteToGame" onClick={inviteToGameHandler}>invite to game</button>
                     <NavLink to={`/profile/${elt.friendName}`}>See profile</NavLink>
-                    <div className={elt.isConnected? "circle online" : "circle offline"}></div>
+                    <div id={elt.isConnected? "circle online" : "circle offline"}></div>
                     </li>
                     ))}
             </ul>
