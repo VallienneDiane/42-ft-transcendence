@@ -29,6 +29,16 @@ interface GameState {
 }
 
 /**
+ * struct use to store all game instance
+ */
+class Game_Instance {
+	game_engine: any;
+	players: Socket[];
+	spectators: Socket[];
+	game_has_ended: boolean;
+  }
+
+/**
  * use to store the match state
  */
 interface MatchState {
@@ -54,7 +64,7 @@ export class GameEngineService {
 
 	// game contente
 	gs: GameState;
-	ms: MatchState;
+	ms: MatchState[];
 	ballz: Ball[];
 	wallz: Wall[];
 
@@ -78,8 +88,9 @@ export class GameEngineService {
 	userservice;
 	matchservice;
 	server: any;
-	match_state: MatchEnd;
+	match_end_state: MatchEnd;
 	waiting: Set<string>;
+	game_instance: Game_Instance;
 
 	constructor(userservice: UserService, matchservice: MatchService) {
 		this.userservice = userservice;
@@ -115,7 +126,7 @@ export class GameEngineService {
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
-		this.match_state = {player1_login: "", winner: "", disconnection_occure: false};
+		this.match_end_state = {player1_login: "", winner: "", disconnection_occure: false};
 		console.log("from game engine service player are :", this.pl1, "and", this.pl2);
 
 	}
@@ -136,7 +147,7 @@ export class GameEngineService {
 	 * @param user1 player1 data
 	 * @param user2 player2 data
 	 */
-	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>) {
+	set_player (player1: Socket, player2: Socket, user1: UserEntity, user2: UserEntity, server: any, waiting: Set<string>, match: MatchState[], GI: Game_Instance) {
 		this.server = server;
 		this.user1 = user1;
 		this.user2 = user2;
@@ -144,13 +155,16 @@ export class GameEngineService {
 		this.pl1 = player1;
 		this.pl2 = player2;
 		this.waiting = waiting;
+		this.ms = match;
+		this.game_instance = GI;
         this.update_match_state();
-        this.match_state.player1_login = this.user1.login;
+        this.match_end_state.player1_login = this.user1.login;
 	}
 
 	update_match_state() {
-        this.ms = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-		this.pl1.to(this.pl1.id).emit("Match_Update", this.ms);
+		let match = this.find_the_match_the_client_is_in(this.user1.login);
+        match = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
+		this.server.to(this.pl1.id).emit("Match_Update", match);
 	}
 
 	/**
@@ -177,7 +191,7 @@ export class GameEngineService {
 		else {
 			this.pl2_score = -1;
 		}
-		this.match_state.disconnection_occure = true;
+		this.match_end_state.disconnection_occure = true;
 		this.game_must_stop = true;
 		this.close_the_game();
 	}
@@ -187,7 +201,7 @@ export class GameEngineService {
 	 * @param player the player sending the ready signal
 	 * @param server use to emit to the correct room
 	 */
-	async set_player_ready (player: Socket) {
+	set_player_ready (player: Socket) {
 		if (player === this.pl1) {
             this.pl1_ready = true;
         }
@@ -197,19 +211,29 @@ export class GameEngineService {
         if (this.pl1_ready && this.pl2_ready) {
             let thiss = this;
             thiss.server.emit("Match_Update", this.ms);
-			console.log();
+			//console.log();
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
+					console.log("clear game");
                     clearInterval(thiss.loop);
-
                 }
                 thiss.main_loop();
 				// console.log("sending", thiss.gs);
                 thiss.server.to(thiss.pl1.id).emit('Game_Update', thiss.gs)
-            }, 1000/60);
+                //console.log("JUST GAME EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+			}, 1000/60);
         }
 	}
 
+	find_the_match_the_client_is_in(client_login: string): MatchState {
+		for (let index = 0; index < this.ms.length; index++) {
+		  const element = this.ms[index];
+		  if (element.player1_login === client_login) {
+			return element;
+		  }
+		}
+	  }
+	
 	/**
 	 * save the players score in the data base
 	 */
@@ -219,16 +243,20 @@ export class GameEngineService {
 		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
 		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
 		match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
-		this.match_state.winner = match.winner.login;
+		this.match_end_state.winner = match.winner.login;
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-		console.log("the match to be register should be : ", match);
-		await this.matchservice.createMatch(match);
+		// console.log("the match to be register should be : ", match);
+		this.game_instance.game_has_ended = true;
 		if (this.waiting.delete(this.user1.id)) {
 			console.log("removed from waiting in game close_the_game function");
 		}
-		this.server.emit("Match_End", this.match_state);
-		let result = await this.matchservice.findMatch();
-		console.log("the score should be save and the match history is :", result);
+		if (this.waiting.delete(this.user2.id)) {
+            console.log("removed from waiting in pong engin close_the_game function");
+        }
+		this.server.emit("Match_End", this.match_end_state);
+		await this.matchservice.createMatch(match);
+		// let result = await this.matchservice.findMatch();
+		// console.log("the score should be save and the match history is :", result);
 	}
 
 	main_loop() {
