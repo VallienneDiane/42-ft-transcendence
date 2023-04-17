@@ -677,27 +677,40 @@ export class ChatService {
     }
 
     public friendRequestEvent(client: Socket, sender: UserEntity, receiverId: string, roomHandler: UserRoomHandler) {
-        this.friendService.checkRequest(sender.id, receiverId)
-        .then((check: boolean) => {
-            if (check) {
-                this.userService.findById(receiverId)
-                .then((receiver: UserEntity) => {
-                    this.friendService.create(sender, receiver)
-                    .then((friendship: FriendEntity) => {
-                        let senderSockets = roomHandler.userMap.get(sender.id);
-                        if (senderSockets != undefined) {
-                            senderSockets.emit("notice", "Your request has been sent.");
-                            senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
-                        }
-                        // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
-                        let receiverSockets = roomHandler.userMap.get(receiver.id);
-                        if (receiverSockets != undefined)
-                            receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, receiver.login);
-                    })
+        this.userService.getAllBlockRelations(sender.id)
+        .then((relations) => {
+            let found = false;
+            for (let elt of relations) {
+                if (elt.id == receiverId) {
+                    found = true;
+                    client.emit("notice", "You can't add him as friend, it seems that you are upset");
+                    break;
+                }
+            }
+            if (!found) {
+                this.friendService.checkRequest(sender.id, receiverId)
+                .then((check: boolean) => {
+                    if (check) {
+                        this.userService.findById(receiverId)
+                        .then((receiver: UserEntity) => {
+                            this.friendService.create(sender, receiver)
+                            .then((friendship: FriendEntity) => {
+                                let senderSockets = roomHandler.userMap.get(sender.id);
+                                if (senderSockets != undefined) {
+                                    senderSockets.emit("notice", "Your request has been sent.");
+                                    senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
+                                }
+                                // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
+                                let receiverSockets = roomHandler.userMap.get(receiver.id);
+                                if (receiverSockets != undefined)
+                                    receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, receiver.login);
+                            })
+                        })
+                    }
+                    else 
+                        client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
                 })
             }
-            else 
-                client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
         })
     }
 
@@ -736,7 +749,7 @@ export class ChatService {
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             let friend: UserEntity = null;
-            if (request.sender == me)
+            if (request.sender.id == me.id)
                 friend = request.receiver;
             else
                 friend = request.sender;
@@ -773,7 +786,29 @@ export class ChatService {
                     }
                     this.userService.addUserToBlock(user.id, userIdToBlock)
                     .then(() => {
-                        this.unfriendEvent(user, userIdToBlock, roomHandler);
+                        this.userService.getFriendRequestsSend(user.id)
+                        .then((sends) => {
+                            if (sends) {
+                                let foundInSend = false;
+                                for (let elt of sends) {
+                                    if (elt.receiverId == userIdToBlock) {
+                                        this.unfriendEvent(user, elt.id, roomHandler)
+                                        foundInSend = true;
+                                        break;
+                                    }
+                                }
+                                if (!foundInSend)
+                                this.userService.getFriendRequestsReceived(user.id)
+                                .then((receivs) => {
+                                    for (let elt of receivs) {
+                                        if (elt.senderId == userIdToBlock) {
+                                            this.unfriendEvent(user, elt.id, roomHandler)
+                                            break;
+                                        }
+                                    }
+                                })
+                            }
+                        })
                         let sockets = roomHandler.userMap.get(user.id);
                         if (sockets != undefined)
                         sockets.sockets.forEach(({}, socket) => {
@@ -842,25 +877,39 @@ export class ChatService {
         })
     }
 
-    public unbanUserEvent(client: Socket, userId: string, userNameToUnban: string, channelId: string, logger: Logger, roomHandler: UserRoomHandler) {
+    public unbanUserEvent(client: Socket, userId: string, userIdToUnban: string, channelId: string, logger: Logger, roomHandler: UserRoomHandler) {
         this.channelService.getUserInChannel(channelId, userId)
         .then((link) => {
             if (!link || link.status != "god")
                 client.emit("notice", "Only channel owner can unban");
             else {
-                this.userService.findByLogin(userNameToUnban)
+                this.userService.findById(userIdToUnban)
                 .then((userEntity) => {
                     if (!userEntity)
-                        client.emit("notice", `user "${userNameToUnban}" not found`);
+                        client.emit("notice", `user not found`);
                     else {
                         this.channelService.findUserInBannedList(userEntity.id, channelId)
                         .then((found) => {
                             if (!found)
-                                client.emit("notice", `user "${userNameToUnban}" is not banned here.`)
+                                client.emit("notice", `user "${userEntity.login}" is not banned here.`)
                             else
                                 this.channelService.delBannedUser(userEntity.id, channelId);
                         })
                     }
+                })
+            }
+        })
+    }
+
+    public getBanListEvent(client: Socket, user: UserEntity, channelId: string) {
+        this.userService.getChannelLink(user.id, channelId)
+        .then((link) => {
+            if (!link || link.status == "normal")
+                client.emit("notice", "You cannot.");
+            else {
+                this.channelService.getBannedListWithLogin(channelId)
+                .then((lesBats) => {
+                    client.emit("banList", lesBats);
                 })
             }
         })
