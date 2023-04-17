@@ -13,7 +13,7 @@ import { UserEntity } from "src/user/user.entity"; // use to access UserEntity t
 import { IToken } from 'src/chat/chat.interface'; // use for token
 import { Server, Socket } from 'socket.io'; // use to manage socket and emit message
 import { JwtService } from '@nestjs/jwt'; // use for token
-import { Logger } from '@nestjs/common'; // use for log
+import { Logger, UsePipes, ValidationPipe } from '@nestjs/common'; // use for log
 import * as jsrsasign from 'jsrsasign'; // use for token validation
 import { Client } from 'socket.io/dist/client';
 
@@ -59,6 +59,7 @@ interface MatchState {
 /**
  * main class regrouping all thing related to soket receiving and sending stuff
  */
+@UsePipes(ValidationPipe)
 @WebSocketGateway({
   cors: {
     origin: '*',
