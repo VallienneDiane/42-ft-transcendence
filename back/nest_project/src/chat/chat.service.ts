@@ -859,13 +859,17 @@ export class ChatService {
                                     if (bool)
                                         client.emit("notice", "this user is already banned here.")
                                     else
-                                        this.channelService.addBannedUser(userIdToBan, channelId);
-                                })
-                            }
-                            else if (banLink.status == "normal" || (banLink.status == "op" && link.status == "god")) {
+                                        this.channelService.addBannedUser(userIdToBan, channelId)
+                                        .then(() => {
+                                            roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
+                                        });
+                                    })
+                                }
+                                else if (banLink.status == "normal" || (banLink.status == "op" && link.status == "god")) {
                                 this.channelService.addBannedUser(userIdToBan, channelId)
                                 .then(() => {
                                     this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId);
+                                    roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
                                 })
                             }
                             else
@@ -893,7 +897,10 @@ export class ChatService {
                             if (!found)
                                 client.emit("notice", `user "${userEntity.login}" is not banned here.`)
                             else
-                                this.channelService.delBannedUser(userEntity.id, channelId);
+                                this.channelService.delBannedUser(userEntity.id, channelId)
+                                .then(() => {
+                                    roomHandler.roomMap.of(channelId).emit("newUnban", userEntity.id);
+                                });
                         })
                     }
                 })
@@ -904,7 +911,7 @@ export class ChatService {
     public getBanListEvent(client: Socket, user: UserEntity, channelId: string) {
         this.userService.getChannelLink(user.id, channelId)
         .then((link) => {
-            if (!link || link.status == "normal")
+            if (!link)
                 client.emit("notice", "You cannot.");
             else {
                 this.channelService.getBannedListWithLogin(channelId)
