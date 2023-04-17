@@ -36,9 +36,30 @@
             margin: 0 15px;
         }
 
-        & #friendList {
+        & #FriendManagement {
             padding: 10px 0;
+
+            & #requestList {
+                padding: 15px 0;
+
+                & li {
+                    padding: 2px 0;
+
+                    & button {
+                        color: var(--text-color);
+                        margin: 2px 0;
+                        padding-left: 1em;
+						padding-right: 1em;
+                        background-color: var(--second-color);
+                        border-radius: 50px;
+                        position: relative;
+                        z-index: 1;
+                        overflow: hidden;
+                    }
+                }
+            }
         }
+        
     }
 
     

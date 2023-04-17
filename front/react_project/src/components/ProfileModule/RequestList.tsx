@@ -17,16 +17,48 @@ export default function RequestsList() {
         });
     }
 
+    const acceptHandler = (e: any) => {
+        socket.emit("acceptFriendRequest", {userId: e.target.value});
+    }
+
+    const declineHandler = (e:any) => {
+        socket.emit('rejectFriendRequest', {userId: e.target.value});
+    }
+
     useEffect(() => {
         fetchRequests();
+        socket.on("newFriendRequestReceived", (id: string, name: string) => {
+            let newRequests = [...requests, {id: id, name: name}];
+            newRequests.sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            })
+            setRequests(newRequests);
+        })
+        socket.on("newFriend", (id: string, login: string) => {
+            setRequests(requests.filter((elt) => {
+                return elt.id != id;
+            }))
+        })
+        socket.on("supressFriendRequest", (id: string, login: string) => {
+            setRequests(requests.filter((elt) => {
+                return elt.id != id;
+            }))
+        })
+        return () => {
+            socket.off("newFriendRequestReceived");
+            socket.off("newFriend");
+            socket.off("supressFriendRequest");
+        }
     }, []);
 
     return (
-        <div className="requestList">
+        <div id="requestList">
             {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
             <ul>
                 {requests.map((elt, id) => (
-                    <li className="requestElement" key={id}>{elt.name}</li>
+                    <li className="requestElement" key={id}>{elt.name}
+                    <button value={elt.id} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
+                    <button value={elt.id} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
                 ))}
             </ul>
         </div>

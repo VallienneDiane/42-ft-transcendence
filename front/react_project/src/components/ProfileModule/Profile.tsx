@@ -64,9 +64,9 @@ export default function Profile() {
                 {currentUser === undefined ? (
                     <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
-                        <FriendList />
-                        <PendingList />
-                        <RequestsList />
+                        {socket && <FriendList />}
+                        {socket && <PendingList />}
+                        {socket && <RequestsList />}
                         {socket && <BlockList />}
                     </div>
                     ): null}
