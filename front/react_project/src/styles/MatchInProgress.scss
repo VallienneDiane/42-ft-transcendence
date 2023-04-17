@@ -1,12 +1,14 @@
 @import url("Base.css");
 
 #matchsInProgress {
-    border: 2px solid antiquewhite;
+    border: 1px solid var(--ball-color);
     width: 80vw;
     max-width: 1000px;
     height: 20%;
     min-height: 200px;
     font-size: 1.5cqh;
+    font-weight: 900;
+    color: var(--text-color);
 
     & #header {
         height: 30%;
@@ -14,6 +16,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        background-color: var(--second-color);
 
         & > div {
             height: 50%;
@@ -38,7 +41,7 @@
         & .match {
             height: 20%;
             display: flex;
-            background-color: rgb(49, 49, 42);
+            background-color: rgb(101, 177, 164);
             
             & > div {
                 text-align: center;
@@ -47,7 +50,7 @@
             }
             
             &:nth-child(even) {
-                background-color: rgb(65, 65, 55);
+                background-color: rgb(141, 94, 74);
             }
         }
 

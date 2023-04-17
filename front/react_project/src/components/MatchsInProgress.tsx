@@ -15,23 +15,22 @@ interface MatchState {
     game_has_started: boolean;
 }
 
+interface MatchEnd {
+    player1_login: string;
+    winner: string;
+    disconnection_occure: boolean;
+}
+
 interface inProgressProps {
     socket: Socket<DefaultEventsMap, DefaultEventsMap>,
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
+
     const [matchs, setMatchs] = useState<MatchState[]>([
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
     // useEffect(() => {
@@ -44,10 +43,10 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         if (props.socket) {
 
             props.socket.on('Match_Update', (matchUpdate: MatchState) => {
-                console.log('match update', matchUpdate);
-                matchs.map((match) => {
-                    console.log(match.player1_login, matchUpdate.player1_login);
-                })
+                // console.log('match update', matchUpdate);
+                // matchs.map((match) => {
+                //     console.log(match.player1_login, matchUpdate.player1_login);
+                // })
                 
                 setMatchs(prevMatchs => {
                     const updatedMatchs = prevMatchs.map(match => {
@@ -67,9 +66,9 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                 });
             })
 
-            props.socket.on('Match_End', (matchUpdate: MatchState) =>  {
-                console.log('match end', matchUpdate);
-                setMatchs(matchs.filter(match => match.player1_login !== matchUpdate.player1_login));
+            props.socket.on('Match_End', (matchEnd: MatchEnd) =>  {
+                console.log('match end', matchEnd);
+                setMatchs(matchs.filter(match => match.player1_login !== matchEnd.player1_login));
             })
 
 
@@ -93,7 +92,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                     
                     matchs.map((match: MatchState) => {
                         return (
-                            <div className="match">
+                            <div className="match" key={match.player1_login}>
                                 <div>{match.player1_login}</div>
                                 <div>{match.player1_score}</div>
                                 <div>{match.player2_score}</div>
