@@ -10,6 +10,7 @@ import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
+import { useParams } from "react-router-dom";
 
 class ChannelDMList extends React.Component<{}, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
@@ -19,7 +20,12 @@ class ChannelDMList extends React.Component<{}, {
     me: JwtPayload}> {
     constructor(props: {}) {
         super(props);
-        this.state = {channels: [], dms: [], waitingMsg: false, me: accountService.readPayload()!};
+        this.state = {
+            channels: [],
+            dms: [],
+            waitingMsg: false,
+            me: accountService.readPayload()!,
+        };
         this.changeLoc = this.changeLoc.bind(this);
         this.initList = this.initList.bind(this);
         this.checkOnline = this.checkOnline.bind(this);
