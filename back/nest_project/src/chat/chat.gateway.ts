@@ -297,6 +297,17 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage('cancelFriendRequest')
+    handleCancelRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((me) => {
+            if (me != null) {
+                this.chatService.supressRequestEvent(data.friendshipId, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
 
     @SubscribeMessage('acceptFriendRequest')
     handleAcceptRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
@@ -316,7 +327,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((receiver) => {
             if (receiver != null) {
-                this.chatService.rejectFriendRequestEvent(data.friendshipId, this.chatRoomHandler);
+                this.chatService.supressRequestEvent(data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
