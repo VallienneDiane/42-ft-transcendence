@@ -7,7 +7,7 @@ import { accountService } from "../../services/account.service";
 export default function RequestsList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [requests, setRequests] = useState<{friendshipId: string, id: string, name: string}[]>([]);
+    const [requests, setRequests] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
 
     const fetchRequests = () => {
         Axios.get("listRequestsPendingReceived/" + me.sub)
@@ -28,9 +28,9 @@ export default function RequestsList() {
     useEffect(() => {
         fetchRequests();
         socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
-            let newRequests = [...requests, {friendshipId: friendshipId, id: id, name: name}];
+            let newRequests = [...requests, {friendshipId: friendshipId, friendId: id, friendName: name}];
             newRequests.sort((a, b) => {
-                return a.name.localeCompare(b.name);
+                return a.friendName.localeCompare(b.friendName);
             })
             setRequests(newRequests);
         })
@@ -56,7 +56,7 @@ export default function RequestsList() {
             {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
             <ul>
                 {requests.map((elt, id) => (
-                    <li className="requestElement" key={id}>{elt.name}
+                    <li className="requestElement" key={id}>{elt.friendName}
                     <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
                     <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
                 ))}

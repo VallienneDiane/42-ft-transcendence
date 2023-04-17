@@ -713,7 +713,7 @@ export class ChatService {
     }
 
     public acceptFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
-        this.friendService.findById(friendshipId)
+        this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             console.log("request = ", request);
             this.friendService.updateRequest(request.id)
