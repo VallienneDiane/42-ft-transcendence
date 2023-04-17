@@ -247,10 +247,10 @@ export class GameEngineService {
 		match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
 		// console.log("the match to be register should be : ", match);
 		this.game_instance.game_has_ended = true;
-		if (this.waiting.delete(this.user1.id)) {
+		if (this.waiting.delete(this.user1.login)) {
 			console.log("removed from waiting in game close_the_game function");
 		}
-		if (this.waiting.delete(this.user2.id)) {
+		if (this.waiting.delete(this.user2.login)) {
             console.log("removed from waiting in pong engin close_the_game function");
         }
 		this.server.emit("Match_End", this.match_end_state);
