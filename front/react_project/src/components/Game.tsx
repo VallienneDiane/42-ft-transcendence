@@ -254,10 +254,9 @@ const Game: React.FC = () => {
             }));
         }
     };
-
-
-    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8);
-    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 / (16 / 9));
+    
+    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8 * 0.8);
+    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 * 0.8 / (16 / 9));
     // Handle windows resizing
     useEffect(() => {
         function handleResize() {
@@ -269,11 +268,11 @@ const Game: React.FC = () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-
+    
     // Get css colors variables to use it in the canva
-    const style = getComputedStyle(document.documentElement);
-    const ballColor = style.getPropertyValue('--ball-color');
-    const secondaryColor = style.getPropertyValue('--secondary-color');
+    const styleColor = getComputedStyle(document.documentElement);
+    const ballColor = styleColor.getPropertyValue('--ball-color');
+    const secondaryColor = styleColor.getPropertyValue('--secondary-color');
 
     useEffect(() => {
         let paddleWidth: number = gameWidth * 0.014;
@@ -307,41 +306,46 @@ const Game: React.FC = () => {
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
             <MatchsInProgress socket={socket} />
-            <div id="gamePanel">
-                {matchInProgress ?
-                    <div id="players">
-                        <div className="player">
-                            <div>{players?.player1_login}</div>
-                            <div>{players?.player1_score}</div>
-                        </div>
-                        <div id="separator"></div>
-                        <div className="player">
-                            <div>{players?.player2_score}</div>
-                            <div>{players?.player2_login}</div>
-                        </div>
-                    </div>
-                    : null}
-                <div id="gameField">
-                    {matchInProgress || waitMatch ?
-                        null
-                        :
-                        <div id="gameSelector">
-                            {/* <h2>Select your opponent</h2>
-                        <SearchUserBar /> */}
-                            <h2>Select your game</h2>
-                            <div id="gameButtons">
-                                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
-                                <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
+            <div id="gameContainer">
+                <div id="gamePanel">
+                    {matchInProgress ?
+                        <div id="players">
+                            <div className="player">
+                                <div>{players?.player1_login}</div>
+                                <div>{players?.player1_score}</div>
+                            </div>
+                            <div id="separator"></div>
+                            <div className="player">
+                                <div>{players?.player2_score}</div>
+                                <div>{players?.player2_login}</div>
                             </div>
                         </div>
+                        : null}
+                    <div id="gameField">
+                        <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
+                        {matchInProgress || waitMatch ?
+                            null
+                            :
+                            <div id="gameSelector">
+                                {/* <h2>Select your opponent</h2>
+                            <SearchUserBar /> */}
+                                <h2>Select your game</h2>
+                                <div id="gameButtons">
+                                    <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
+                                    <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
+                                </div>
+                            </div>
 
-                    }
-                    {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
-                    {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
-                    {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
-                    <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
+                        }
+                        {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                        {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
+                        {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
+                    </div>
+                    {/* <button onClick={TEST}>TEST</button> */}
                 </div>
-                {/* <button onClick={TEST}>TEST</button> */}
+                <div id="instructions">
+
+                </div>
             </div>
         </div>
     )

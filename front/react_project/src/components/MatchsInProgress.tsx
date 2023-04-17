@@ -30,12 +30,12 @@ interface inProgressProps {
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
     const [matchs, setMatchs] = useState<MatchState[]>([
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
         // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
         // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiiifez", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
         // {player1_login: "Michellangelloooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
     
@@ -112,7 +112,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                     })
                 :
                 <div id="noMatch">
-                    No Match in progress
+                    <p>No Match in progress</p>
                 </div>
                 }
             </div>

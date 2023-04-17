@@ -1,168 +1,185 @@
 @import url("Base.css");
 
 #Game {
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
 
-
-
-    & #gamePanel {
+    & #gameContainer {
+        border: 3px solid green;
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-        width: 80vw;
+        
+        width: 90%;
         max-width: 1000px;
-        height: calc(80vw / (16 /9) + 7vh);
-
-        & #players {
-            width: 100%;
+        // height: calc(80vw / (16 /9) + 7vh);
+        height: 70%;
+        
+        & #gamePanel {
+            width: 80%;
+            border: 3px solid white;
             display: flex;
-            justify-content: space-between;
-            height: 6vh;
-            background-color: rgb(141, 94, 74);
-            
-            & .player {
-                height: 100%;
-                width: 45%;
-                display: flex;
-                align-items: center;
-
-                & > div {
-                    width: 50%;
-                    text-align: center;
-                    text-transform: uppercase;
-                    font-size: 1.2em;
-                    font-weight: 900;
-                    overflow: hidden;
-                }
-
-                &:first-child {
-                    background-color: rgb(101, 177, 164);
-                    // clip-path: polygon(0 0, 100% 0, 30% 100%, 0% 100%);
-                }
-            }
-
-            & #separator {
-                width: 10%;
-                background-color: rgb(101, 177, 164);
-                clip-path: polygon(0 0, 100% 0, 0 100%, 0% 100%);
-
-            }
-        }
-
-        & #gameField {
-            position: relative;
-            display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            margin-top: 1vh;
-
-            & #gameSelector {
-                position: absolute;
+            justify-content: flex-end;
+            
+            & #players {
+                width: 100%;
                 display: flex;
-                flex-direction: column;
-                align-items: center;
-
-                & > h2 {
-                    letter-spacing: 10px;
-                }
-
-                & #gameButtons {
-
-                    & .gameButton {
-                        border-radius: 8px;
-                        border: 1px solid;
-                        margin: 15px 30px;
-                        height: 45px;
-                        width: 120px;
+                justify-content: space-between;
+                height: 6vh;
+                background-color: var(--fourth-color);
+                
+                & .player {
+                    height: 100%;
+                    width: 45%;
+                    display: flex;
+                    align-items: center;
+    
+                    & > div {
+                        width: 50%;
+                        text-align: center;
+                        text-transform: uppercase;
+                        font-size: 1.2em;
                         font-weight: 900;
-                        // transition: all ease-out 0.1s;
-                        position: relative;
-                        transition: all 150ms ease-in-out;
-                        z-index: 0;
-                
-                        &::after {
-                            content: '';
-                            position: absolute;
-                            border-radius: 8px;
-                            background-color: var(--second-color);
-                            top: 50%;
-                            left: 50%;
-                            height: 0;
-                            width: 0;
-                            transform: translate(-50%, -50%);
-                            transition: all 0.2s ease-in-out;
-                            z-index: -1;
-                        }
-                
-                        &:hover::after {
-                            width: 100%;
-                            height: 100%;
-                        }
-                
-                        &:hover {
-                            transition-delay: 100ms;
-                            box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.75);
-                        }
+                        overflow: hidden;
+                    }
+    
+                    &:first-child {
+                        background-color: var(--third-color);
+                        // clip-path: polygon(0 0, 100% 0, 30% 100%, 0% 100%);
                     }
                 }
                 
-            
-                & .locked {
-                    pointer-events: none;
-                    background-color: rgb(170, 170, 170);
+                & #separator {
+                    width: 10%;
+                    background-color: var(--third-color);
+                    clip-path: polygon(0 0, 100% 0, 0 100%, 0% 100%);
+    
                 }
             }
-
-            & #waitingMsg {
-                position: absolute;
-                background-color: transparent;
-            }
-
-            & #readyButton {
-                width: 100%;
-                height: 100%;
-                border-radius: 10px;
-                font-size: 7cqw;
-                position: absolute;
-                background-color: var(--second-color);
-            }
-            
-            & .notReady {
-                animation: notReady 1000ms infinite ease-in-out;
+    
+            & #gameField {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-top: 1vh;
+                margin-bottom: 3vh;
                 
-            }
-            
-            & .ready {
-                animation: ready 200ms ease-in-out;
-                // animation-iteration-count: 5;
-                filter: brightness(1.3);
-            }
-            
-            & #countDown {
-                background-color: green;
-                position: absolute;
-                background-color: transparent;
-                font-size: 2em;
-                transition: all 0ms ease;
-                animation: countdown 800ms infinite;
-            }
-
-            & canvas {
-                max-width: 1000px;
-                border-radius: 10px;
-                background-color: var(--second-color);
-                border: solid 5px var(--third-color);
-
-                &:focus {
-                    outline: none;
+                & #gameSelector {
+                    position: absolute;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+    
+                    & > h2 {
+                        letter-spacing: 10px;
+                    }
+                    
+                    & #gameButtons {
+    
+                        & .gameButton {
+                            border-radius: 8px;
+                            border: 1px solid;
+                            margin: 15px 30px;
+                            height: 45px;
+                            width: 120px;
+                            font-weight: 900;
+                            // transition: all ease-out 0.1s;
+                            position: relative;
+                            transition: all 150ms ease-in-out;
+                            z-index: 0;
+                            
+                            &::after {
+                                content: '';
+                                position: absolute;
+                                border-radius: 8px;
+                                background-color: var(--second-color);
+                                top: 50%;
+                                left: 50%;
+                                height: 0;
+                                width: 0;
+                                transform: translate(-50%, -50%);
+                                transition: all 0.2s ease-in-out;
+                                z-index: -1;
+                            }
+                    
+                            &:hover::after {
+                                width: 100%;
+                                height: 100%;
+                            }
+                    
+                            &:hover {
+                                transition-delay: 100ms;
+                                box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.75);
+                            }
+                        }
+                    }
+                    
+                
+                    & .locked {
+                        pointer-events: none;
+                        background-color: rgb(170, 170, 170);
+                    }
+                }
+    
+                & #waitingMsg {
+                    position: absolute;
+                    background-color: transparent;
+                }
+    
+                & #readyButton {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 10px;
+                    font-size: 7cqw;
+                    position: absolute;
+                    background-color: var(--second-color);
+                }
+                
+                & .notReady {
+                    animation: notReady 1000ms infinite ease-in-out;
+                    
+                }
+                
+                & .ready {
+                    animation: ready 200ms ease-in-out;
+                    // animation-iteration-count: 5;
+                    filter: brightness(1.3);
+                }
+                
+                & #countDown {
+                    position: absolute;
+                    background-color: transparent;
+                    font-size: 2em;
+                    transition: all 0ms ease;
+                    animation: countdown 800ms infinite;
+                }
+                
+                & canvas {
+                    max-width: 1000px;
+                    border-radius: 10px;
+                    background-color: var(--second-color);
+                    border: solid 5px var(--third-color);
+                    backdrop-filter: blur(7px);
+    
+                    &:focus {
+                        outline: none;
+                    }
                 }
             }
         }
+
+        & #instructions {
+            border: 3px solid yellow;
+            flex: 1;
+            height: 100%;
+        }
     }
+
+
 
 }
 

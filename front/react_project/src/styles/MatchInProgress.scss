@@ -1,8 +1,8 @@
 @import url("Base.css");
 
 #matchsInProgress {
-    border: 1px solid var(--ball-color);
-    width: 80vw;
+    border: 3px solid var(--ball-color);
+    width: 60%;
     max-width: 1000px;
     height: 20%;
     min-height: 200px;
@@ -17,9 +17,17 @@
         flex-direction: column;
         align-items: center;
         background-color: var(--second-color);
-
+        backdrop-filter: blur(5px);
+        
         & > div {
+            text-align: center;
+            width: 100%;
             height: 50%;
+            background-color: var(--second-color);
+
+            &:first-child {
+                font-size: 1.5em;
+            }
         }
     }
     
@@ -37,12 +45,12 @@
     & #content {
         overflow-y: auto;
         height: 70%;
+        backdrop-filter: blur(7px);
 
         & .match {
             cursor: pointer;
             height: 20%;
             display: flex;
-            background-color: rgb(101, 177, 164);
             
             & > div:not(.watchMatch) {
                 
@@ -64,8 +72,12 @@
                 }
             }
             
-            &:nth-child(even) {
-                background-color: rgb(141, 94, 74);
+            &:nth-child(odd) > div:not(.watchMatch) {
+                background-color: var(--third-color);
+            }
+            
+            &:nth-child(even) > div:not(.watchMatch) {
+                background-color: var(--fourth-color);
             }
 
             & .redDot {
@@ -80,7 +92,7 @@
                 justify-content: center;
                 width: 0%;
                 overflow: hidden;
-                background-color: rgb(187, 168, 60);
+                background-color: var(--second-color);
                 white-space: nowrap;
                 transition: all 200ms ease-in-out;
             }
@@ -91,9 +103,17 @@
         }
 
         & #noMatch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             width: 100%;
-            text-align: center;
-            margin: 5% 0;
+            height: 100%;
+
+            & > p {
+                font-size: 2em;
+                font-weight: 900;
+                color: var(--second-color);
+            }
         }
 
         &::-webkit-scrollbar {
