@@ -5,7 +5,7 @@ import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.ent
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
-import { SignUp42Dto, SignUpDto, UpdateUserDto, UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { FriendEntity } from "../chat/relation/friend/friend.entity";
 
@@ -100,9 +100,11 @@ export class UserService {
           .getMany();
     }
     // UPDATE USER INFOS
-    async update(userToUpdate: UpdateUserDto) {
-        console.log("user to update = ", userToUpdate);
-        return await this.usersRepository.update({id: userToUpdate.id}, {login: userToUpdate.login, avatarSvg: userToUpdate.avatarSvg});
+    async updateLogin(userToUpdate: UpdateLoginDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {login: userToUpdate.login});
+    }
+    async updateAvatar(userToUpdate: UpdateAvatarDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {avatarSvg: userToUpdate.avatarSvg});
     }
 
     // DELETE USER ACCOUNT BY ID

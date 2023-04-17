@@ -23,10 +23,14 @@ export interface SignUpForm {
     avatarSvg: string
   }
 
+  export interface LoginSettingsForm {
+    id?: string,
+    login?: string,
+  }
+
   export interface AvatarSettingsForm {
-    id: string,
-    login: string,
-    avatarSvg: string
+    id?: string,
+    avatarSvg?: string,
   }
 
 export interface User {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../services/account.service";
 import { userService } from "../services/user.service";
-import { AvatarSettingsForm } from "../models";
+import { AvatarSettingsForm, LoginSettingsForm } from "../models";
 import { useForm } from "react-hook-form";
 
 const AvatarSettings: React.FC = () => {
@@ -14,7 +14,7 @@ const AvatarSettings: React.FC = () => {
     const [login, setLogin] = useState<string>();
     const [error, setError] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
-    const { handleSubmit } = useForm<AvatarSettingsForm>({});
+    const { handleSubmit } = useForm<LoginSettingsForm>({}); 
 
     useEffect(() => {
         userService.getUser(id!)
@@ -72,30 +72,34 @@ const AvatarSettings: React.FC = () => {
         }
     }
 
-    const avatarSubmit = async () => {
+    const loginSubmit = async () => {
         const user = {
             id: id,
             login: login,
-            avatarSvg: avatar,
         }
-        if(login && login?.length < 3) {
-           setError(true);
-           return;
+        if(login && login.length < 3) {
+            setError(true);
+            return;
         }
         await accountService.isUniqueLogin(login!)
         .then(loginUnique => {
-
-            // si le login est unique mais que c'est lui meme on ne fait rien
-            // si le login est unique et que ce n'est pas lui meme on update
-            // si le login est unique mais que c'est lui meme mais que l'avatar a change alors update
-
             if(loginUnique.data == true) {
-                accountService.updateUser(user);
+                accountService.updateLogin(user)
+                .catch(error => {console.log(error);});
             }
             else {
                 setIsUniqueLogin(false);
             }
         })
+        .catch(error => {console.log(error);});
+    }
+    
+    const avatarSubmit = async () => {
+        const user = {
+            id: id,
+            avatarSvg: avatar,
+        }
+        accountService.updateAvatar(user)
         .catch(error => {console.log(error);});
     }
 
@@ -108,16 +112,22 @@ const AvatarSettings: React.FC = () => {
 
     return (
         <div id="homeSettings">
-            <form onSubmit={handleSubmit(avatarSubmit)}>
+            <form onSubmit={handleSubmit(loginSubmit)}>
                 <div id="name">
                     <h2>Change your login </h2>
-                        <input className="form_element" 
-                            // {...register("login")}
+                        <input className="form_element"
                             value={login}
                             type="text"
                             onChange={onChangeLogin}
                         />
                 </div>
+                <div className="saveZone">
+                    <button id="save" type="submit">SAVE</button>
+                    { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                    { error ? <p className="error">Login must be at least 3 characters </p> : null }
+                </div>
+            </form>
+            <form onSubmit={avatarSubmit}>
                 <div id="avatar">
                     <div id="picture">
                         <h2>Upload a new avatar </h2>
@@ -129,10 +139,8 @@ const AvatarSettings: React.FC = () => {
                         <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
                     </div>
                     <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                    <div id="saveZone">
+                    <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
-                        { uniqueLogin ? null : <p className="error">This login already exist</p> }
-                        { error ? <p className="error">Login must be at least 3 characters </p> : null }
                     </div>
                 </div>
             </form>

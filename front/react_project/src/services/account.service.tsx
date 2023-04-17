@@ -1,4 +1,4 @@
-import { AvatarSettingsForm, LogInForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
+import { AvatarSettingsForm, LogInForm, LoginSettingsForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
@@ -23,23 +23,24 @@ let getAvatar = (id: string) => {
 }
 
 let isUniqueLogin = (login: string) => {
-    console.log("je suis dans la requete unique login", login);
     return Axios.get('user/isUniqueLogin/' + login);
 }
 
 let isId42 = (id42: string) => {
-    console.log("je suis dans la requete id42", login);
     return Axios.get('user/isId42/' + id42);
 }
 // Update name and avatar if first connection with 42
 let createUser = (credentials: SettingsForm ) => {
-    console.log("je suis dans la requete create user", credentials);
     return Axios.post('user/signup42', credentials);
 }
 
-let updateUser = (credentials: AvatarSettingsForm ) => {
-    console.log("je suis dans la requete UPDATE user", credentials);
-    return Axios.post('user/updateUser', credentials);//return 
+let updateLogin = (credentials: LoginSettingsForm ) => {
+    return Axios.post('user/updateLogin', credentials);//return 
+}
+
+let updateAvatar = (credentials: AvatarSettingsForm ) => {
+    console.log("je suis dans la requete UPDATE avatar", credentials);
+    return Axios.post('user/updateAvatar', credentials);//return 
 }
 
 // Fonction qui check si user est connecté. Et que le token n'est pas expiré
@@ -139,5 +140,5 @@ export const accountService = {
     signUp, login, isUniqueLogin, isId42, createUser, saveToken, logout, isLogged, 
     getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
     is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar,
-    getAvatar, url42, callback, updateUser
+    getAvatar, url42, callback, updateLogin, updateAvatar
 }

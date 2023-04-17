@@ -41,10 +41,14 @@ export class SignUp42Dto {
     @IsNotEmpty() avatarSvg: string;
 }
 
-export class UpdateUserDto {
+export class UpdateLoginDto {
     readonly id: string;
     @IsNotEmpty() @IsString() login: string;
-    @IsNotEmpty() avatarSvg: string;
+}
+
+export class UpdateAvatarDto {
+    readonly id: string;
+    @IsNotEmpty() @IsString()  avatarSvg: string;
 }
 
 export class idDto {
