@@ -13,13 +13,9 @@ export class FriendController {
 
 	@UseGuards(JwtAuthGuard)
 	@Get('listFriends/:user')
-	async listFriends(@Param('user', ParseUUIDPipe) data: string): Promise<{id: string, name: string}[]> {
+	async listFriends(@Param('user', ParseUUIDPipe) data: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
 		console.log("listUsers: ", data);
-        const requestList: {friendshipId: string, friendId: string, friendName: string}[] = await this.friendService.getFriendsList(data);
-		const friendList: {id: string, name: string}[] = [];
-		for (let elt of requestList) {
-			friendList.push({id: elt.friendId, name: elt.friendName});
-		}
+        const friendList: {friendshipId: string, friendId: string, friendName: string}[] = await this.friendService.getFriendsList(data);
 		return friendList;
     }
 

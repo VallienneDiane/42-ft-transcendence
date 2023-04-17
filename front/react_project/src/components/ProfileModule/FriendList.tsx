@@ -58,7 +58,7 @@ export default function FriendList() {
                     <button value={elt.friendId} className="unfriendButton" onClick={unfriendHandler}>unfriend</button>
                     <NavLink to={`/chat/${elt.friendId}`}>Chatting</NavLink>
                     <button value={elt.friendId} className="inviteToGame" onClick={inviteToGameHandler}>invite to game</button>
-                    <NavLink to={`/profile/${elt.friendId}`}>See profile</NavLink>
+                    <NavLink to={`/profile/${elt.friendName}`}>See profile</NavLink>
                     </li>
                     ))}
             </ul>

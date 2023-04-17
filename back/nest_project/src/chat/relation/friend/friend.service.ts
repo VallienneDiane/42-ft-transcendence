@@ -60,27 +60,26 @@ export class FriendService {
 		return friendList;
 	}
 
-	async getRequestPendingSend(id: string): Promise<{id: string, name: string}[]> {
+	async getRequestPendingSend(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(id);
 		// if (requestsSend)
-		const list: {id: string, name: string}[] = [];
+		const list: {friendshipId: string, friendId: string, friendName: string}[] = [];
 		for (let link of requestsSend) {
-			// console.log(link)
 			const receiver: UserEntity = await this.userService.findById(link.receiverId);
 			if (link.state === "pending") {
-				list.push({id: receiver.id, name : receiver.login});
+				list.push({friendshipId: link.id, friendId: receiver.id, friendName : receiver.login});
 			}
 		}
 		return list;
 	}
 
-	async getRequestPendingReceived(id: string): Promise<{id: string, name: string}[]> {
+	async getRequestPendingReceived(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
 		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(id);
-		const list: {id: string, name: string}[] = [];
+		const list: {friendshipId: string, friendId: string, friendName: string}[] = [];
 		for (let link of requestsReceived) {
 			const sender: UserEntity = await this.userService.findById(link.senderId);
 			if (link.state === "pending") {
-				list.push({id: sender.id, name : sender.login});
+				list.push({friendshipId: link.id, friendId: sender.id, friendName : sender.login});
 			}
 		}
 		return list;
