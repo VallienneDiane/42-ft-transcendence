@@ -121,7 +121,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.debug("a game room has been created");
     console.log("leaving StartGameRoom function");
   }
-  
+
   /**
    * match two player according to the game type they want to play
    * @param client the client Socket
