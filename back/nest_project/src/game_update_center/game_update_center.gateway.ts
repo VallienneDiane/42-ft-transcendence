@@ -13,8 +13,9 @@ import { UserEntity } from "src/user/user.entity"; // use to access UserEntity t
 import { IToken } from 'src/chat/chat.interface'; // use for token
 import { Server, Socket } from 'socket.io'; // use to manage socket and emit message
 import { JwtService } from '@nestjs/jwt'; // use for token
-import { Logger } from '@nestjs/common'; // use for log
+import { Logger, UsePipes, ValidationPipe } from '@nestjs/common'; // use for log
 import * as jsrsasign from 'jsrsasign'; // use for token validation
+import { Client } from 'socket.io/dist/client';
 
 /**
  * use for storing waiting client
@@ -32,6 +33,7 @@ class Game_Instance {
   game_engine: any;
   players: Socket[];
   spectators: Socket[];
+  game_has_ended: boolean;
 }
 
 /**
@@ -43,8 +45,21 @@ class Login_Sharing {
 }
 
 /**
+ * use to store the match state
+ */
+interface MatchState {
+  player1_login: string;
+  player2_login: string;
+  player1_score: number;
+  player2_score: number;
+  super_game_mode: boolean;
+  game_has_started: boolean;
+}
+
+/**
  * main class regrouping all thing related to soket receiving and sending stuff
  */
+@UsePipes(ValidationPipe)
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -61,6 +76,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   private_space: Waiting_Socket[]; // waiting room for private matchmaking
   public_space: Waiting_Socket[]; // waiting room for public matchmaking
   waiting_on_match: Set<string>;
+  all_the_match: MatchState[];
+
+  /**
+   * the big socket manager thing
+   */
+  @WebSocketServer()
+  server: Server;
 
   constructor(
     private userservice: UserService, // injecting instance of service to be use for token verification and match's goal storing purpuse
@@ -74,13 +96,66 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.public_space = [];
     this.private_space = [];
     this.waiting_on_match = new Set<string>();
+    this.all_the_match = [];
+  }
+  
+  /**
+   * just loging the initialization of the module
+   */
+  afterInit() {
+    this.logger.debug("GameupdateCenter correctly initialized");
   }
 
   /**
-   * the big socket manager thing
+   * happend on connection to the game page
+   * @param client the socket connecting
    */
-  @WebSocketServer()
-  server: Server;
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    
+    // checking if the socket have a valid token
+    let user_entity = await this.tokenChecker(client);
+  
+    // if not remove him
+    if (user_entity === null) { // TODO test if it work
+      console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
+      client.disconnect();
+    }
+
+    // if token is ok then store the UserEntity for quick acces
+    this.socketID_UserEntity.set(client.id, user_entity);
+    this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
+  }
+
+  transfer_all_match(@ConnectedSocket() client: Socket) {
+    for (let index = 0; index < this.all_the_match.length; index++) {
+      const match = this.all_the_match[index];
+      this.server.to(client.id).emit("Match_Update", match);
+    }
+  }
+
+  second_loop() {
+    let i = 0;
+    while (true) {
+      i++;
+      if (i === 1000000000) {
+        console.log("out of second loop");
+        break;
+      }
+    }
+  }
+
+  @SubscribeMessage("Test")
+  test_function() {
+    let i = 0;
+    while (true) {
+      i++;
+      if (i === 1000000000) {
+        console.log("out of first loop");
+        break;
+      }
+    }
+    this.second_loop();
+  }
 
   /**
    * start a game instance for the player 1 and 2 to play together
@@ -93,6 +168,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // make the player join the room of name player1.socket.id
     player1.join(player1.id);
     player2.join(player1.id);
+    let player1_login = this.socketID_UserEntity.get(player1.id).login;
+    let player2_login = this.socketID_UserEntity.get(player2.id).login;
 
     // Start ---------- set a game instance for the player and add it to the game instance [] ----------
   
@@ -102,24 +179,43 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     else { p.game_engine = new PongEngineService(this.userservice, this.matchservice); }
   
     // setting the player and UserEntity of player for the gameEngine
-    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server, this.waiting_on_match);
+    let match: MatchState = {player1_login: player1_login, player2_login: player2_login, player1_score: 0, player2_score: 0, super_game_mode: super_game_mode, game_has_started: false};
+    this.all_the_match.push(match);
     p.players = [];
     p.spectators = [];
+    p.game_has_ended = false;
     p.players.push(player1);
     p.players.push(player2);
-    console.log("the game instance added to the game instance : ", p);
+    // console.log("the game instance added to the game instance : ", p);
     this.game_instance.push(p);
+    p.game_engine.set_player(player1, player2, this.socketID_UserEntity.get(player1.id), this.socketID_UserEntity.get(player2.id), this.server, this.waiting_on_match, this.all_the_match, p);
     // End ---------- set a game instance for the player and add it to the game instance [] ----------
 
 
     // emit the Player struct to the front to display the player login
     let players = new Login_Sharing();
-    players.player1_login = this.socketID_UserEntity.get(player1.id).login;
-    players.player2_login = this.socketID_UserEntity.get(player2.id).login;
+    // test vector move
+    // console.log("test in p", p.game_has_ended);
+    // console.log("test in instance[]", this.game_instance[this.game_instance.length - 1].game_has_ended);
+    // p.game_has_ended = true;
+    // console.log("test in p after change", p.game_has_ended);
+    // console.log("test in instance[] after change", this.game_instance[this.game_instance.length - 1].game_has_ended);
+    players.player1_login = player1_login;
+    players.player2_login = player2_login;
     this.server.to(player1.id).emit('Players', players);
     console.log("JUST EMITED PLAYERS EVENT -------------------------------------------------------------------------------------");
     this.logger.debug("a game room has been created");
     console.log("leaving StartGameRoom function");
+  }
+
+  clean_match() {
+    for (let index = this.game_instance.length -1; index >= 0; index--) {
+      const element = this.game_instance[index];
+      if (element.game_has_ended) {
+        console.log("game of : ", element.players[0], "and : ", element.players[1], "are trashed");
+        this.game_instance.splice(index, 1);
+      }
+    }
   }
 
   /**
@@ -129,10 +225,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @returns nothing
    */
   @SubscribeMessage("Public_Matchmaking")
-  handlePublicMatchmaking(@ConnectedSocket() client: Socket,@MessageBody() body: PublicGameRequestDTO) {
+  handlePublicMatchmaking(@ConnectedSocket() client: Socket, @MessageBody() body: PublicGameRequestDTO) {
     
     console.log("JUST RECEIVED PUBLIC REQUEST EVENT -------------------------------------------------------------------------------------");
     // check if client is already in a waiting queu or game
+    this.clean_match();
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
       console.log("check is waiting true");
       this.server.to(client.id).emit("Already_On_Match");
@@ -162,7 +259,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     ws.waiting_client_socket = client;
     ws.target_client_login = "";
     this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).id);
-    console.log("the waiting socket to be added", ws);
+    // console.log("the waiting socket to be added", ws);
     this.public_space.push(ws);
     console.log("leaving handlePublicMatchmaking function");
   }
@@ -198,48 +295,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const player = game.players[j];
         if (player === client) {
           game.game_engine.set_player_ready(player);
+          console.log("leaving handleReady function");
           return;
         }
       }
     }
     console.log("leaving handleReady function");
   }
-
-  /**
-   * happend on connection to the game page
-   * @param client the socket connecting
-   */
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    
-    // checking if the socket have a valid token
-    let user_entity = await this.tokenChecker(client);
   
-    // if not remove him
-    if (user_entity === null) { // TODO test if it work
-      console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
-      client.disconnect();
-    }
-
-    // if token is ok then store the UserEntity for quick acces
-    this.socketID_UserEntity.set(client.id, user_entity);
-    this.logger.debug("client Connected, socket id : ", client.id, "\n client login", user_entity.login);
-  }
-  
-  /**
-   * find and remove the disconnected client from relevante struc,
-   * stop the current match if necessary, and remove the client from known socket
-   * @param client the client disconnected
-   */
-  handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
-    this.logger.log('client Disconnected: ', client.id);
-    this.find_and_remove(client);
-    if (this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).id)) {
-      this.logger.debug("client wzs removed from waiting on game due to disconnection");
-    }
-    if (this.socketID_UserEntity.delete(client.id) === false) {
-      this.logger.debug("Critical logic error, trying to removed a client that doesn't exist");
-    }
-  }
 
   /**
    * find and remove the client from the correct struct, stopping the game if needed
@@ -309,7 +372,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   @SubscribeMessage("Private_Matchmaking")
   handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
-
+    this.clean_match();
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).id)) {
       this.server.to(client.id).emit("Already_On_Match");
@@ -343,7 +406,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     private_room.target_client_login = body.target;
     private_room.super_game_mode = body.super_game_mode;
     this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).id);
-    this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
+    //this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
     this.private_space.push(private_room);
 
     console.log("leaving handlePrivateMatching function");
@@ -362,7 +425,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       for (let j = 0; j < game.players.length; j++) {
         const player = game.players[j];
         if (player === client) {
-          this.logger.debug("client.id : ", client.id, "inputed", body.input);
+          //this.logger.debug("client.id : ", client.id, "inputed", body.input);
           game.game_engine.process_input(client, body);
           return;
         }
@@ -410,9 +473,23 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
 
   /**
-   * just loging the initialization of the module
+   * find and remove the disconnected client from relevante struc,
+   * stop the current match if necessary, and remove the client from known socket
+   * @param client the client disconnected
    */
-  afterInit() {
-    this.logger.debug("GameupdateCenter correctly initialized");
+  handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
+    this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
+    this.find_and_remove(client);
+
+    if (this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).id)) {
+      this.logger.debug("client was removed from waiting on game due to disconnection");
+    }
+    else {
+      console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
+    }
+    if (this.socketID_UserEntity.delete(client.id) === false) {
+      this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
+    }
   }
+
 }
