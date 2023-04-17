@@ -103,6 +103,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     }
 
     componentWillUnmount(): void {
+        this.context.socket.off('listBlock');
         this.context.socket.off('newMessage');
         this.context.socket.off('selfMessage');
         this.context.socket.off('notice');

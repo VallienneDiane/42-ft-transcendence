@@ -42,8 +42,8 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
             if (offSocket) {
-                socket.off("wrong");
-                socket.off("true");
+                socket.off("wincorrectPasswordrong");
+                socket.off("incorrectPassword");
             }
         }
     }, [ref]);
@@ -301,6 +301,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
         this.context.socket.off('newUserConnected');
+        this.context.socket.off('checkNewDM');
         this.context.socket.off('newLocChannel');
         this.context.socket.off('newLocPrivate');
     }

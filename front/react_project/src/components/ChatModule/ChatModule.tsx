@@ -130,6 +130,7 @@ class ChannelDMList extends React.Component<{}, {
         this.context.socket.off('listMyChannels');
         this.context.socket.off('listMyDM');
         this.context.socket.off('checkNewDM');
+        this.context.socket.off('pingedBy');
         this.context.socket.off("userConnected");
         this.context.socket.off("userDisconnected");
         this.context.socket.off("channelJoined");

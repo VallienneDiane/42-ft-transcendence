@@ -60,47 +60,119 @@ function ModifyChannel(props: {channel: IChannel}) {
     )
 }
 
+function MuteFor(props: {user: string, dest: IDest}) {
+    const {socket} = useContext(SocketContext);
+    const [minutes, setMinutes] = useState<number>(0);
+    const [hours, setHours] = useState<number>(0);
+    const [mouseOn, setMouseOn] = useState<boolean>(false);
+    const [time, setTime] = useState<string>("");
+    const [plus, setPlus] = useState<boolean>(false);
+
+    const increment = (timi: string) => {
+        if (timi == "minute") {
+            if (minutes < 59)
+                setMinutes(minutes => minutes + 1);
+        }
+        else {
+            if (hours < 23)
+                setHours(hours => hours + 1);
+        }
+    }
+
+    const decrement = (timi: string) => {
+        if (timi == "minute") {
+            if (minutes > 0)
+                setMinutes(minutes => minutes - 1);
+        }
+        else {
+            if (hours > 0)
+                setHours(hours => hours - 1);
+        }
+    }
+
+    const handleMouse = (e: any) => {
+        const tmp: string = e.target.value;
+        const values: string[] = tmp.split(", ");
+        if (e.type === "mousedown") {
+            setMouseOn(true);
+            if (values[0] == "minute")
+                setTime("minute");
+            if (values[0] == "hour")
+                setTime("hours");
+            if (values[1] == "-")
+                setPlus(false);
+            if (values[1] == "+")
+                setPlus(true);
+        } 
+        else if (e.type === "mouseup") {
+            setMouseOn(false);
+            setTime("");
+        }
+    }
+
+    const handleClick = (e: any) => {
+        const tmp: string = e.target.value;
+        const values: string[] = tmp.split(", ");
+        if (values[1] == "+")
+            increment(values[0]);
+        else
+            decrement(values[0]);
+    }
+
+    const mute = () => {
+        let time: number = (hours * 60) + minutes;
+        socket.emit("muteUser", {id: props.user, channelId: props.dest.id, minutes: time});
+    }
+
+    useEffect(() => { 
+        let intervalPlus: NodeJS.Timer;
+        let intervalMinus: NodeJS.Timer;
+        if (mouseOn && plus) {
+            intervalPlus = setInterval(() => increment(time), 100);
+        }
+        if (mouseOn && !plus) {
+            intervalMinus = setInterval(() => decrement(time), 100);
+        }
+        return () => {
+            clearInterval(intervalPlus);
+            clearInterval(intervalMinus);
+        }
+    }, [mouseOn, hours, minutes])
+
+    return (
+        <React.Fragment>
+            <li className="mute">
+                <div>
+                    Mute for:
+                </div>
+                <div>
+                    <div>
+                        <button value="hour, -" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>-</button>
+                            <span>{hours}</span>h
+                        <button value="hour, +" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>+</button>
+                    </div>
+                    <div>
+                        <button value="minute, -" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>-</button>
+                            <span>{minutes}</span>m
+                        <button value="minute, +" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>+</button>
+                    </div>
+                    <button className="muteButton" onClick={mute}>Save</button>
+                </div>
+            </li>
+        </React.Fragment>
+    )
+}
+
 function MemberList(props: {dest: IDest}) {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [members, setMembers] = useState<{user: {id: string, login: string}, status: string, connected: boolean}[]>([]);
     const [onClickMute, setOnClickMute] = useState<boolean>(false);
     const [userToMute, setUserToMute] = useState<string>("");
-    const [minutes, setMinutes] = useState<number>(0);
-    const [hours, setHours] = useState<number>(0);
-    const [mouseOn, setMouseOn] = useState<boolean>(false);
-    const [time, setTime] = useState<string>("");
 
     const showMuteFor = (e: any) => {
         setUserToMute(e.currentTarget.value);
-        setMinutes(0);
-        setHours(0);
         setOnClickMute((onClickMute) => !onClickMute)
-    }
-
-    // const setInterval = () => {
-    //     if (mouseOn)
-    // }
-    const increment = () => {
-        if (time == "minute") {
-            if (minutes < 59)
-                setMinutes(minutes + 1);
-        }
-        else {
-            if (hours < 23)
-                setHours(hours + 1);
-        }
-    }
-
-    const decrement = () => {
-        if (time == "minute") {
-            if (minutes > 0)
-                setMinutes(minutes - 1);
-        }
-        else {
-            if (hours > 0)
-                setHours(hours - 1);
-        }
     }
 
     const kickUser = (e: any) => {
@@ -111,11 +183,6 @@ function MemberList(props: {dest: IDest}) {
         socket.emit("banUser", {id: e.currentTarget.value, channelId: props.dest.id});
     }
 
-    const mute = () => {
-        let time: number = (hours * 60) + minutes;
-        socket.emit("muteUser", {id: userToMute, channelId: props.dest.id, minutes: time});
-    }
-
     const deOp = (e: any) => {
         socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
     }
@@ -124,24 +191,14 @@ function MemberList(props: {dest: IDest}) {
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
-    const handleEvent = (e: any) => {
-        if (e.type === "mousedown") {
-            setMouseOn(true);
-            if (e.target.value == "minute")
-                setTime("minute");
-            else
-                setTime("hours");
-        } 
-        else {
-            setMouseOn(false);
-            setTime("");
-        }
-    }
-
     useEffect(() => {
         socket.emit('listUsersChann', {channelId: props.dest.id}); 
         socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string, connected: boolean}[]) => {
             setMembers(list);
+        })
+        socket.emit('listMutedUsers');
+        socket.on('mutedList', (mutes: {id: string, time: number}[]) => {
+            
         })
         socket.on("userLeaveChannel", (userId: string) => {
             setMembers((members) => {
@@ -178,6 +235,11 @@ function MemberList(props: {dest: IDest}) {
                 return newMembers;
             });
         })
+        return () => {
+            socket.off('listUsersChann');
+            socket.off('userLeaveChannel');
+            socket.off('newUserInChannel');
+        }
     }, [])
 
     return (
@@ -221,20 +283,7 @@ function MemberList(props: {dest: IDest}) {
                 }
                 )}
             </ul>
-            {onClickMute && (
-                <React.Fragment>
-                    <li className="mute">
-                        <div>
-                            Mute for:
-                        </div>
-                        <div>
-                            <div><button value="hour" onMouseDown={decrement} onMouseUp={handleEvent}>-</button><span>{hours}</span>h<button value="hour" onMouseDown={increment}>+</button></div>
-                            <div><button value="minute" onMouseDown={decrement}>-</button><span>{minutes}</span>m<button value="minute" onMouseDown={increment}>+</button></div>
-                            <button className="muteButton" onClick={mute}>Save</button>
-                        </div>
-                    </li>
-                </React.Fragment>
-           )}
+            {onClickMute && <MuteFor user={userToMute} dest={props.dest} />}
         </React.Fragment>
     )
 }
