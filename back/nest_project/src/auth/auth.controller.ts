@@ -1,25 +1,29 @@
 import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
-import { id42Dto, idDto, UserDto } from 'src/user/user.dto';
+import { codeApiDto, id42Dto, idDto, UserDto } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
 import { VerifyCodeDto, VerifyCodeDto42 } from './verifyCode.dto';
-import { JwtService } from "@nestjs/jwt";
-import { UserEntity } from 'src/user/user.entity';
 
-// SIGN IN, LOGIN AND PASSWORD VERIFICATION, NEW TOKEN
-@Controller()
+@Controller()  
 export class AuthController {
-  constructor(private authService: AuthService, private userService: UserService, private jwtService: JwtService) {}
-  //sign in with 42 : get url to authorize connexion to api 42
+  constructor(private authService: AuthService, private userService: UserService) {}
+  /**
+   * Sign in with 42 : get url to authorize connexion to the api 42
+   * @returns url
+   */
   @Get('/')
   async getUrl42() {
     const api_callback_url = encodeURIComponent(process.env.API_CALLBACK_URL);
     const url = "https://api.intra.42.fr/oauth/authorize?client_id=" + process.env.API_UID + "&redirect_uri=" + api_callback_url + "&response_type=code";
     return (url);
   }
-  //exchange code send by api42 against token 42 to get user infos
+  /**
+   * Exchange code send by api42 (in url) against token 42 to get user42 infos
+   * @param code 
+   * @returns infos user42
+   */
   @Get('/callback')
   async callback(@Query('code') code: string) {
     const tokenApi42 = await this.authService.validateFortyTwo(code);
@@ -37,13 +41,20 @@ export class AuthController {
       avatarSvg: data.image?.link,
     }
   }
-  //check login and password with local stratgey of passport
+  /**
+   * Check login and password with local strategy of Passport and return true if UseGuards says that login and passwd match data in bdd
+   * @returns true
+   */
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async isValidUser() {
     return (true);
   }
-  //generate token when register or login
+  /**
+   * Generate a jwt token when register or login successfully
+   * @param data 
+   * @returns token
+   */
   @Post('auth/generateToken')
   async generateToken(@Body() data: UserDto) {
     const token = await this.authService.genToken(data.id);
@@ -54,7 +65,11 @@ export class AuthController {
     const token = await this.authService.genToken42(data.id42);
     return token;
   }
-  //enable authenticate with two factor (google authenticator)
+  /**
+   * Enable authenticate with two factor (google authenticator)
+   * @param token 
+   * @returns qrcode
+   */
   @UseGuards(JwtAuthGuard)
   @Post('auth/enable2fa')
   async enable2fa(@Headers('Authorization') token: string) {
@@ -64,7 +79,12 @@ export class AuthController {
       qrcode,
     }
   }
-  //check if the code entered to activate 2fa is valid in settings
+  /**
+   * Check if the code entered to activate 2fa is valid when configure settings
+   * @param data (code)
+   * @param token 
+   * @returns is2faActive, isCodeValid
+   */
   @UseGuards(JwtAuthGuard)
   @Post('auth/verifyCodeSettings')
   async verifyCode2faSettings(@Body() data: VerifyCodeDto, @Headers('Authorization') token: string) {

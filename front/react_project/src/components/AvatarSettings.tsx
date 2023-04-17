@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../services/account.service";
 import { userService } from "../services/user.service";
-import { AvatarSettingsForm, LoginSettingsForm } from "../models";
+import { LoginSettingsForm } from "../models";
 import { useForm } from "react-hook-form";
 
 const AvatarSettings: React.FC = () => {
@@ -102,7 +102,6 @@ const AvatarSettings: React.FC = () => {
         accountService.updateAvatar(user)
         .catch(error => {console.log(error);});
     }
-
 
     const onChangeLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLogin(event.target.value);

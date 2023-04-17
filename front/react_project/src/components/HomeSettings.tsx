@@ -53,7 +53,7 @@ const HomeSettings: React.FC = () => {
     
     const userSubmit = async () => {
         const user = {
-            id42: id42,
+            id42: id42.toString(),
             login: login,
             email: email,
             avatarSvg: avatar,
