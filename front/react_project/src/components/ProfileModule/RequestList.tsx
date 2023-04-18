@@ -27,6 +27,9 @@ export default function RequestsList() {
 
     useEffect(() => {
         fetchRequests();
+    }, [])
+
+    useEffect(() => {
         socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
             console.log(name, "send me a friend request");
             let newRequests = [...requests, {friendshipId: friendshipId, friendId: id, friendName: name}];
@@ -56,7 +59,7 @@ export default function RequestsList() {
             socket.off("supressFriendRequest");
             socket.off("supressFriend");
         }
-    }, []);
+    }, [requests]);
 
     return (
         <div id="request">
