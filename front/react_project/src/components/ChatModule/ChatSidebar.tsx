@@ -15,7 +15,7 @@ function ModifyChannel(props: {channel: IChannel}) {
         id: props.channel.id,
         name: props.channel.name,
         password: props.channel.password,
-        channelPass: props.channel.channelPass,
+        channelPass: "",
         inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
@@ -60,7 +60,7 @@ function ModifyChannel(props: {channel: IChannel}) {
     )
 }
 
-function MuteFor(props: {user: string, dest: IDest}) {
+function MuteFor(props: {user: string, dest: IDest, handleClose: () => void}) {
     const {socket} = useContext(SocketContext);
     const [minutes, setMinutes] = useState<number>(0);
     const [hours, setHours] = useState<number>(0);
@@ -122,6 +122,7 @@ function MuteFor(props: {user: string, dest: IDest}) {
     const mute = () => {
         let time: number = (hours * 60) + minutes;
         socket.emit("muteUser", {id: props.user, channelId: props.dest.id, minutes: time});
+        props.handleClose();
     }
 
     useEffect(() => { 
@@ -191,6 +192,10 @@ function MemberList(props: {dest: IDest}) {
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
     }
 
+    const handleCloseMuteFor = () => {
+        setOnClickMute((onClickMute) => !onClickMute);
+    }
+
     useEffect(() => {
         socket.emit('listUsersChann', {channelId: props.dest.id}); 
         socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
@@ -230,6 +235,7 @@ function MemberList(props: {dest: IDest}) {
                 return newMembers;
             });
         })
+
         return () => {
             socket.off('listUsersChann');
             socket.off('userLeaveChannel');
@@ -255,22 +261,38 @@ function MemberList(props: {dest: IDest}) {
                             if (member.status == "normal")
                                 return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                                         <div>
-                                            <button value={member.user.id} onClick={showMuteFor}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
-                                            <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
-                                            <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
-                                            </div></li>)
+                                            <button className="muteFor" value={member.user.id} onClick={showMuteFor}>
+                                                <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
+                                            </button>
+                                            <button className="kick" value={member.user.id} onClick={kickUser}>
+                                                <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
+                                            </button>
+                                            <button className="ban" value={member.user.id} onClick={ban}>
+                                                <FontAwesomeIcon className="iconAction" icon={faBan} />
+                                            </button>
+                                        </div></li>)
                             else if (member.status == "op" || member.status == "god")
                                 return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
                         }
                         else if (props.dest.status == "god")
                             return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                             <div>
-                            { member.status == "op" ? 
-                            (<button value={member.user.id} onClick={deOp}><FontAwesomeIcon className="iconAction" icon={faBroom} /></button>) :
-                            (<button value={member.user.id} onClick={doOp}><FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} /></button>) }
-                            <button value={member.user.id} onClick={showMuteFor}><FontAwesomeIcon className="iconAction" icon={faCommentSlash} /></button>
-                            <button value={member.user.id} onClick={kickUser}><FontAwesomeIcon className="iconAction" icon={faRightFromBracket} /></button>
-                            <button value={member.user.id} onClick={ban}><FontAwesomeIcon className="iconAction" icon={faBan} /></button>
+                                { member.status == "op" ? 
+                                (<button className="downgrade" value={member.user.id} onClick={deOp}>
+                                    <FontAwesomeIcon className="iconAction" icon={faBroom} />
+                                </button>) :
+                                (<button className="upgrade" value={member.user.id} onClick={doOp}>
+                                    <FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} />
+                                </button>) }
+                                <button className="muteFor" value={member.user.id} onClick={showMuteFor}>
+                                    <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
+                                </button>
+                                <button className="kick" value={member.user.id} onClick={kickUser}>
+                                    <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
+                                </button>
+                                <button className="ban" value={member.user.id} onClick={ban}>
+                                    <FontAwesomeIcon className="iconAction" icon={faBan} />
+                                </button>
                             </div></li>)
                     }
                     else
@@ -278,7 +300,7 @@ function MemberList(props: {dest: IDest}) {
                 }
                 )}
             </ul>
-            {onClickMute && <MuteFor user={userToMute} dest={props.dest} />}
+            {onClickMute && <MuteFor user={userToMute} dest={props.dest} handleClose={handleCloseMuteFor} />}
         </React.Fragment>
     )
 }
@@ -287,18 +309,15 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
-    const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [userToInvit, setUserToInvit] = useState<string>("");
+    const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
     const [userToUnban, setUserToUnban] = useState<string>("");
+    const [bans, setBans] = useState<{ban: {id: string, login: string}}[]>([]);
 
     const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
-    }
-    
-    const showUnban = () => {
-        setOnClickUnban((onClickUban) => !onClickUban)
     }
 
     const showSettings = () => {
@@ -308,20 +327,13 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const showInvite = () => {
         setOnClickInvite((onClickInvite) => !onClickInvite)
     }
+
+    const showUnban = () => {
+        setOnClickUnban((onClickUban) => !onClickUban)
+    }
     
     const onChangeInvite = (e: any) => {
         setUserToInvit(e.target.value);
-    }
-
-    const onChangeUnban = (e: any) => {
-        setUserToUnban(e.target.value);
-    }
-
-    const unban = (e: any) => {
-        console.log(e.target.value, props.dest.id)
-        e.preventDefault();
-        socket.emit("unbanUser", {name: userToUnban, channelId: props.dest.id});
-        setUserToUnban("");
     }
 
     const handleClickOutside = (e: any) => {
@@ -336,6 +348,17 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         setUserToInvit("");
     }
 
+    const onChangeUnban = (e: any) => {
+        setUserToUnban(e.target.value);
+    }
+
+    const unban = (e: any) => {
+        console.log(e.target.value, props.dest.id)
+        e.preventDefault();
+        socket.emit("unbanUser", {name: userToUnban, channelId: props.dest.id});
+        setUserToUnban("");
+    }
+
     const leaveChannel = () => {
         socket.emit('leaveChannel', {channelId: props.dest.id});
         props.handleClose();
@@ -347,10 +370,15 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
 
     useEffect(() => {
+        socket.emit("getBanList", {channelId: props.dest.id});
+        socket.on("banList", (array: {ban: {id: string, login: string}}[]) => {
+            setBans(array);
+        })
+        
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-            socket.off('listUsersChann');
+            socket.off('banList');
         }
     }, [ref]);
 
@@ -362,12 +390,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
             <ul className="paramMenu">
                 <li onClick={showMembers}>Members</li>
                 {onClickMembers && <MemberList dest={props.dest} />}
-                {(props.dest.status === "god") ? (
+                {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
                      <React.Fragment>
-                         <li onClick={showUnban}>Unban</li>
-                         {onClickUnban && (
-                             <form className="searchbar" onSubmit={unban}>
-                                 <input type="text" id="unban" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
+                         <li onClick={showInvite}>Invite</li>
+                         {onClickInvite && (
+                             <form className="searchbar" onSubmit={inviteUser}>
+                                 <input type="text" id="invite" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
                                  <button>
                                     <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                                  </button>
@@ -375,12 +403,12 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                          }
                      </React.Fragment>
                 ) : null }
-                {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
+                {(props.dest.status === "god" && bans.length != 0) ? (
                      <React.Fragment>
-                         <li onClick={showInvite}>Invite</li>
-                         {onClickInvite && (
-                             <form className="searchbar" onSubmit={inviteUser}>
-                                 <input type="text" id="invite" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
+                         <li onClick={showUnban}>Unban</li>
+                         {onClickUnban && (
+                             <form className="searchbar" onSubmit={unban}>
+                                 <input type="text" id="unban" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
                                  <button>
                                     <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                                  </button>

@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { Socket } from "socket.io";
 import { IRequest } from "src/chat/chat.interface";
 import { UserEntity } from "src/user/user.entity";
 import { UserService } from "src/user/user.service";
@@ -38,21 +39,30 @@ export class FriendService {
 			.getOne();
 	}
 
-	async checkRequest(idA: string, idB: string): Promise<boolean> {
+	async checkRequest(client: Socket, idA: string, idB: string): Promise<boolean> {
 		let state: boolean = true;
-		console.log(idA, idB)
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
-		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idB);
-		console.log("send: ", requestsSend, "received: ", requestsReceived);
+		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idA);
 		requestsSend.forEach((request) => {
-			if (request.receiverId === idB)
+			if (request.receiverId === idB && request.state == "friend") {
 				state = false;
+				client.emit("notice", "You're already friends.");
+			}
+			else if (request.receiverId === idB) {
+				state = false;
+				client.emit("notice", "You've already sent a friend request to this user.");
+			}
 		})
 		requestsReceived.forEach((request) => {
-			if (request.senderId === idB)
+			if (request.senderId === idB && request.state == "friend") {
 				state = false;
+				client.emit("notice", "You're already friends.");
+			}
+			else if (request.senderId === idB) {
+				state = false;
+				this.updateRequest(request.id);
+			}
 		})
-		console.log(state);
 		return state;
 	}
 
@@ -104,14 +114,12 @@ export class FriendService {
 	async findRequest(senderId: string, receiverId: string): Promise<FriendEntity> {
 		const sender: UserEntity = await this.userService.findById(senderId);
 		const receiver: UserEntity = await this.userService.findById(receiverId);
-		console.log(sender.id, receiver.id);
 		this.friendRepository.createQueryBuilder("friend")
 		.leftJoinAndSelect("friend.sender", "sender")
 		.leftJoinAndSelect("friend.receiver", "receiver")
 		.select("sender.id", "senderId")
 		.addSelect("receiver.id", "receiverId")
-		.getRawMany()
-		.then((all) => console.log(all));
+		.getRawMany();
 		return await this.friendRepository.findOne({where: {sender: sender, receiver: receiver}});
 	}
 

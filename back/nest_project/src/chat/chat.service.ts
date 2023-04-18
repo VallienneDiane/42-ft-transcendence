@@ -10,8 +10,8 @@ import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 import { UserEntity } from "src/user/user.entity";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
-import { FriendService } from "./relation/friend/friend.service";
-import { FriendEntity } from "./relation/friend/friend.entity";
+import { FriendService } from "./friend/friend.service";
+import { FriendEntity } from "./friend/friend.entity";
 import { MuteService } from "./mute/mute.service";
 
 @Injectable({})
@@ -674,41 +674,43 @@ export class ChatService {
     }
 
     public friendRequestEvent(client: Socket, sender: UserEntity, receiverId: string, roomHandler: UserRoomHandler) {
-        this.userService.getAllBlockRelations(sender.id)
-        .then((relations) => {
-            let found = false;
-            for (let elt of relations) {
-                if (elt.id == receiverId) {
-                    found = true;
-                    client.emit("notice", "You can't add him as friend, it seems that you are upset");
-                    break;
-                }
-            }
-            if (!found) {
-                this.friendService.checkRequest(sender.id, receiverId)
-                .then((check: boolean) => {
-                    if (check) {
-                        this.userService.findById(receiverId)
-                        .then((receiver: UserEntity) => {
-                            this.friendService.create(sender, receiver)
-                            .then((friendship: FriendEntity) => {
-                                let senderSockets = roomHandler.userMap.get(sender.id);
-                                if (senderSockets != undefined) {
-                                    senderSockets.emit("notice", "Your request has been sent.");
-                                    senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
-                                }
-                                // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
-                                let receiverSockets = roomHandler.userMap.get(receiver.id);
-                                if (receiverSockets != undefined)
-                                    receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, receiver.login);
-                            })
-                        })
+        if (sender.id == receiverId)
+            client.emit("notice", "You can't be your own friend");
+        else {
+            this.userService.getAllBlockRelations(sender.id)
+            .then((relations) => {
+                let found = false;
+                for (let elt of relations) {
+                    if (elt.id == receiverId) {
+                        found = true;
+                        client.emit("notice", "You can't add him as friend, it seems that you are upset");
+                        break;
                     }
-                    else 
-                        client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
-                })
-            }
-        })
+                }
+                if (!found) {
+                    this.friendService.checkRequest(client, sender.id, receiverId)
+                    .then((check: boolean) => {
+                        if (check) {
+                            this.userService.findById(receiverId)
+                            .then((receiver: UserEntity) => {
+                                this.friendService.create(sender, receiver)
+                                .then((friendship: FriendEntity) => {
+                                    let senderSockets = roomHandler.userMap.get(sender.id);
+                                    if (senderSockets != undefined) {
+                                        senderSockets.emit("notice", "Your request has been sent.");
+                                        senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
+                                    }
+                                    // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
+                                    let receiverSockets = roomHandler.userMap.get(receiver.id);
+                                    if (receiverSockets != undefined)
+                                        receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, sender.login);
+                                })
+                            })
+                        }
+                    })
+                }
+            })
+        }
     }
 
     public acceptFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
@@ -810,6 +812,7 @@ export class ChatService {
                         sockets.sockets.forEach(({}, socket) => {
                             this.listBlockEvent(socket, user.id);
                         })
+                        client.emit("notice", `You blocked ${found.login}.`);
                     })
                 })
             }
