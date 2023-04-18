@@ -84,6 +84,7 @@ export class GameEngineService {
     cooldown = 180; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
+	ongoing_match: boolean;
     loop: any; // set_interval function handle for stoping the game
 	userservice;
 	matchservice;
@@ -117,6 +118,7 @@ export class GameEngineService {
 		this.pl1_ready = false;
 		this.pl2_ready = false;
 		this.game_must_stop = false;
+		this.ongoing_match = false;
 		this.pl1_score = 0;
 		this.pl2_score = 0;
         this.cooldown_start = 0;
@@ -155,6 +157,7 @@ export class GameEngineService {
 		this.pl1 = player1;
 		this.pl2 = player2;
 		this.waiting = waiting;
+		this.waiting.add(user2.login);
 		this.ms = match;
 		this.game_instance = GI;
         this.update_match_state();
@@ -208,8 +211,9 @@ export class GameEngineService {
         else if (player === this.pl2) {
             this.pl2_ready = true;
         }
-        if (this.pl1_ready && this.pl2_ready) {
+        if (this.pl1_ready && this.pl2_ready && this.ongoing_match === false) {
             let thiss = this;
+			this.ongoing_match = true;
             thiss.server.emit("Match_Update", this.ms);
 			//console.log();
             this.loop = setInterval(function() {
