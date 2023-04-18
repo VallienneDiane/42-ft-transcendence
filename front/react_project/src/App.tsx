@@ -17,7 +17,7 @@ import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 import { SocketContextType } from './components/ChatModule/Chat_models';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import HomeSettings from './components/HomeSettings';
+import HomeSettings from './components/HomePageSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
