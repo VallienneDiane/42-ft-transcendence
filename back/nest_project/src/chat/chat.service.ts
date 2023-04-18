@@ -88,7 +88,6 @@ export class ChatService {
 
     public whereIamEvent(client: Socket, userId: string, roomHandler: UserRoomHandler) {
         let room = roomHandler.socketMap.sockets.get(client);
-        console.log("room: ", room);
         if (room != undefined) {
             if (room.isChannel) {
                 if (room.room == "00000000-0000-0000-0000-000000000000")
@@ -458,7 +457,6 @@ export class ChatService {
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
-                console.log(link);
                 if (!link || link.status != "god") {
                     client.emit("notice", "You cannot.");
                 }
@@ -466,7 +464,6 @@ export class ChatService {
                     this.channelService.getUserInChannel(channelId, userToOp)
                     .then(
                         (linkToOp) => {
-                            console.log(linkToOp);
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
                             else if (linkToOp.status != "normal")
@@ -717,7 +714,6 @@ export class ChatService {
     public acceptFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
-            console.log("request = ", request);
             this.friendService.updateRequest(request.id)
             .then(() => {
                 let receiverSockets = roomHandler.userMap.get(request.receiver.id);

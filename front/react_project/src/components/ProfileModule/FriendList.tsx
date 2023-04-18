@@ -20,7 +20,7 @@ export default function FriendList() {
                     friendId: elt.friendId,
                     friendName: elt.friendName,
                     isConnected: false});
-                    socket.emit("isConnected", elt.friendId);
+                    socket.emit("isConnected", {userId: elt.friendId});
             }
             setFriend(friendsArray);
         });
@@ -42,6 +42,7 @@ export default function FriendList() {
                 return (a.friendName.localeCompare(b.friendName));
             });
             setFriend(newFriendList);
+            socket.emit("isConnected", {userId: id});
         });
         socket.on("supressFriend", (friendshipId: string) => {
             setFriend(friends.filter(friend => {
@@ -89,10 +90,10 @@ export default function FriendList() {
 
     return (
         <div id="friend">
-            {friends.length > 0 && <h3>My friend{friends.length > 1 && "s"}</h3>}
+            {friends.length > 0 && <h3 id="titleFriend">My friend{friends.length > 1 && "s"}</h3>}
             <ul id="friendList">
-                {friends.map((elt, id) => (
-                    <li id="friendElement" key={id}><span id="friendName">{elt.friendName}</span>
+                {friends.map((elt) => (
+                    <li id="friendElement" key={elt.friendId}><span id="friendName">{elt.friendName}</span>
                     <button value={elt.friendshipId} id="unfriendButton" onClick={unfriendHandler}>unfriend</button>
                     <NavLink to={`/chat/${elt.friendId}`}>Chatting</NavLink>
                     <button value={elt.friendId} id="inviteToGame" onClick={inviteToGameHandler}>invite to game</button>

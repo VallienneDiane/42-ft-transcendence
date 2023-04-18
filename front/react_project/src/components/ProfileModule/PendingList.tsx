@@ -53,11 +53,11 @@ export default function PendingList() {
     }, []);
 
     return (
-        <div className="pendingList">
-            {pendings.length > 0 && <h3>My pending request{pendings.length > 1 && "s"}</h3>}
+        <div id="pending">
+            {pendings.length > 0 && <h3 id="titlePending">My pending request{pendings.length > 1 && "s"}</h3>}
             <ul>
-                {pendings.map((elt, id) => (
-                    <li className="pendingElement" key={id}>{elt.name}<button value={elt.id} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
+                {pendings.map((elt) => (
+                    <li className="pendingElement" key={elt.id}>{elt.name}<button value={elt.id} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
                 ))}
             </ul>
         </div>
