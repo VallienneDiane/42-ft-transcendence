@@ -83,6 +83,7 @@ export class PongEngineService {
     cooldown = 180; // cooldown between ball respawn
     cooldown_start;
     game_must_stop: boolean;
+    ongoing_match: boolean;
     loop: any; // set_interval function handle for stoping the game
     userservice;
     matchservice;
@@ -101,6 +102,7 @@ export class PongEngineService {
         this.pl1_ready = false;
         this.pl2_ready = false;
         this.game_must_stop = false;
+        this.ongoing_match = false;
         this.pl1_score = 0;
         this.pl2_score = 0;
         this.userservice = userservice;
@@ -130,6 +132,7 @@ export class PongEngineService {
         this.user1 = user_entity1;
         this.user2 = user_entity2;
         this.waiting = waiting;
+        this.waiting.add(user_entity2.login);
         this.ms = match;
         this.game_instance = GI;
         this.update_match_state();
@@ -183,8 +186,9 @@ export class PongEngineService {
         else if (player === this.pl2) {
             this.pl2_ready = true;
         }
-        if (this.pl1_ready && this.pl2_ready) {
+        if (this.pl1_ready && this.pl2_ready && this.ongoing_match === false) {
             let thiss = this;
+            this.ongoing_match = true;
             // console.log("room to emit", thiss.server);
             thiss.server.emit("Match_Update", this.ms);
             console.log(thiss.pl1.rooms, thiss.pl2.rooms);
