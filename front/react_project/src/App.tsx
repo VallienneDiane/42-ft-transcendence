@@ -15,17 +15,10 @@ import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
 import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
+import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 
 function App() {
-  const [socket, setSocket] = useState<Socket>(io('127.0.0.1:3000/chat',
-  {
-    autoConnect: false,
-    transports: ['websocket'],
-    auth: { token: 'undefined' },
-  }));
-  socket.on("test", () => {
-    console.log("Id1", socket.id);
-  });
+  const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
 
   function createSocket() {
     const newSocket = io('127.0.0.1:3000/chat', {
@@ -35,17 +28,34 @@ function App() {
     setSocket(newSocket);
   }
 
+  const [socketGame, setSocketGame] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
+
+  function createSocketGame() {
+    const newSocket = io('127.0.0.1:3000', {
+      transports: ['websocket'],
+      auth: { token: accountService.getToken() },
+    });
+    setSocketGame(newSocket);
+  }
+
+  function disconnectGame() {
+    if (socketGame) {
+      socketGame.disconnect();
+      setSocketGame(null!);
+    }
+  }
+
   function disconnect() {
     if (socket) {
       socket.disconnect();
-      // setSocket(null);
+      setSocket(null!);
     }
   }
 
   return (
     <div className="App">
       <BrowserRouter >
-        <SocketContext.Provider value={{ socket, createSocket, disconnect }} >
+        <SocketContext.Provider value={{ socket, createSocket, disconnect, socketGame, createSocketGame, disconnectGame }} >
           <Routes>
             <Route path="/callback/" element={<Callback />} />
             <Route element={<ProtectedRoutes />}>

@@ -8,6 +8,7 @@ import { accountService } from "../services/account.service";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import MatchsInProgress from "./MatchsInProgress"
 import SearchUserBar from "./SearchUserBar"
+import SocketContext from "./context"
 
 interface ball {
     x: number,
@@ -52,8 +53,8 @@ interface Players {
 const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     // const [startGame, setStartGame] = useState<boolean>(false);
-    const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
     const [waitMatch, setWaitMatch] = useState<boolean>(false); // A init à false
+    const {socketGame, disconnectGame} = React.useContext(SocketContext);
     const [matchInProgress, setMatchInProgress] = useState<boolean>(false); // A init à false
     const [buttonReady, setButtonReady] = useState<boolean>(false); // A init à false
     const [playerReady, setPlayerReady] = useState<boolean>(false);
@@ -67,37 +68,29 @@ const Game: React.FC = () => {
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
 
-    if (socket === null) {
-        console.log("new socket");
-        setSocket(io('localhost:3000', {
-            transports: ['websocket'],
-            auth: { token: accountService.getToken() }
-        }));
-    }
-
     const launchClassic = () => {
         // On click on 'start' button, start the game
         // setTimer(true); ////////////// TO DELETE
         // countDownDiv.current!.classList.add('zoom')
 
-        if (socket !== null && !matchInProgress) {
-            socket.emit('Public_Matchmaking', { super_game_mode: false });
+        if (socketGame !== null && !matchInProgress) {
+            socketGame.emit('Public_Matchmaking', { super_game_mode: false });
             setWaitMatch(true);
         }
     }
 
     const launchGame = () => {
         // On click on 'start' button, start the game
-        if (socket !== null && !matchInProgress) {
-            socket.emit('Public_Matchmaking', { super_game_mode: true });
+        if (socketGame !== null && !matchInProgress) {
+            socketGame.emit('Public_Matchmaking', { super_game_mode: true });
             setWaitMatch(true);
         }
     }
 
     const informReady = () => {
         // On click on 'ready' button, inform server that the player is ready
-        if (socket !== null) {
-            socket.emit('Ready');
+        if (socketGame !== null) {
+            socketGame.emit('Ready');
         }
         setPlayerReady(true);
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
@@ -140,18 +133,18 @@ const Game: React.FC = () => {
     }, [timer, countdown])
 
     useEffect(() => {
-        // triggered when receiving socket data, update position of elements
-        if (socket) {
-            socket.on('Already_On_Match', () => {
+        // triggered when receiving socketGame data, update position of elements
+        if (socketGame) {
+            socketGame.on('Already_On_Match', () => {
                 console.log('Already on match');
                 document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
             });
 
-            socket.on('connect', () => {
+            socketGame.on('connect', () => {
                 console.log('Connected to server!');
             });
 
-            socket.on('Players', (gamePlayers: Players) => {
+            socketGame.on('Players', (gamePlayers: Players) => {
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(true);
@@ -168,7 +161,7 @@ const Game: React.FC = () => {
                 playersRef.current = gamePlayers;;
             })
 
-            socket.on('Game_Update', (gameState: gameState) => {
+            socketGame.on('Game_Update', (gameState: gameState) => {
                 if (ready === true) {
                     setTimer(true);
                 }
@@ -187,7 +180,7 @@ const Game: React.FC = () => {
                 }));
             });
 
-            socket.on('Match_Update', (matchUpdate: MatchState) => {
+            socketGame.on('Match_Update', (matchUpdate: MatchState) => {
                 if (playersRef.current?.player1_login === matchUpdate.player1_login) {
                     setPlayers(prevPlayers => {
                         return {
@@ -199,7 +192,7 @@ const Game: React.FC = () => {
                 }
             })
 
-            socket.on('Match_End', (matchEnd: MatchEnd) => {
+            socketGame.on('Match_End', (matchEnd: MatchEnd) => {
                 setWaitMatch(false);
                 setMatchInProgress(false);
                 setCountdown(3);
@@ -207,13 +200,13 @@ const Game: React.FC = () => {
                 ready = false;
             })
         }
-    }, [socket]);
+    }, [socketGame]);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === false) {
-                socket.emit('Game_Input', { input: "ArrowUp" });
+                socketGame.emit('Game_Input', { input: "ArrowUp" });
             }
             // setInputState({ up: true, down: false });
             setInputState((prevState) => ({
@@ -223,7 +216,7 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === false) {
-                socket.emit('Game_Input', { input: "ArrowDown" });
+                socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
             setInputState((prevState) => ({
@@ -237,7 +230,7 @@ const Game: React.FC = () => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
             if (inputState.up === true) {
-                socket.emit('Game_Input', { input: "ArrowUp" });
+                socketGame.emit('Game_Input', { input: "ArrowUp" });
             }
             setInputState((prevState) => ({
                 ...prevState,
@@ -246,7 +239,7 @@ const Game: React.FC = () => {
         }
         else if (event.key === "ArrowDown") {
             if (inputState.down === true) {
-                socket.emit('Game_Input', { input: "ArrowDown" });
+                socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             setInputState((prevState) => ({
                 ...prevState,
@@ -300,13 +293,13 @@ const Game: React.FC = () => {
     }, [gameState, gameWidth]);
 
     const TEST = () => {
-        socket.emit('Test');
+        socketGame.emit('Test');
     }
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socket} />
+            <MatchsInProgress socket={socketGame} />
             <div id="gamePanel">
                 {matchInProgress ?
                     <div id="players">
