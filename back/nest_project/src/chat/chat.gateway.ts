@@ -8,7 +8,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { friendDto, friendshipDto } from "./relation/friend/friend.dto";
+import { friendDto, friendshipDto } from "./friend/friend.dto";
 import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, getBanListDto, inviteUserDto, isConnectedDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, muteUserDto, unbanUserDto, unmuteUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
@@ -165,7 +165,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('inviteUser')
     handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
@@ -234,7 +233,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
         this.logger.debug("OP");
-        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
