@@ -128,9 +128,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_entity.login);
 
     // check if undefined is it is then set the value to 0 instead
-    nbr_of_socket = nbr_of_socket ?? 1;
-    console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
+    nbr_of_socket = nbr_of_socket ?? 0;
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
+    console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
   }
 
