@@ -5,6 +5,9 @@ const SocketContext = React.createContext({
 	socket: io(),
 	createSocket: () => {},
 	disconnect: () => {},
+	socketGame: io(),
+	createSocketGame: () => {},
+	disconnectGame: () => {},
 });
 
 export default SocketContext;
