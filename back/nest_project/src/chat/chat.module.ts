@@ -6,7 +6,7 @@ import { ChatService } from "./chat.service";
 import { UserModule } from "src/user/user.module";
 import { MessageChannelModule } from "./messageChannel/messageChannel.module";
 import { MessagePrivateModule } from "./messagePrivate/messagePrivate.module";
-import { FriendModule } from "./relation/friend/friend.module";
+import { FriendModule } from "./friend/friend.module";
 import { MuteModule } from "./mute/mute.module";
 
 @Module({

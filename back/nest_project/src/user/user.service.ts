@@ -1,13 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Channel } from "diagnostics_channel";
-import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { ChannelEntity } from "../chat/channel/channel.entity";
-import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
-import { UserDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
-import { FriendEntity } from "../chat/relation/friend/friend.entity";
 import { IRequest } from "src/chat/chat.interface";
 
 @Injectable({})

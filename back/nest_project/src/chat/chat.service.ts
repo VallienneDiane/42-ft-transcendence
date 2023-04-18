@@ -10,8 +10,8 @@ import { UserService } from "../user/user.service";
 import { UserRoomHandler } from "./chat.classes";
 import { UserEntity } from "src/user/user.entity";
 import { createChannelDto, modifyChannelDto } from "./chat.gateway.dto";
-import { FriendService } from "./relation/friend/friend.service";
-import { FriendEntity } from "./relation/friend/friend.entity";
+import { FriendService } from "./friend/friend.service";
+import { FriendEntity } from "./friend/friend.entity";
 import { MuteService } from "./mute/mute.service";
 
 @Injectable({})
@@ -88,7 +88,6 @@ export class ChatService {
 
     public whereIamEvent(client: Socket, userId: string, roomHandler: UserRoomHandler) {
         let room = roomHandler.socketMap.sockets.get(client);
-        console.log("room: ", room);
         if (room != undefined) {
             if (room.isChannel) {
                 if (room.room == "00000000-0000-0000-0000-000000000000")
@@ -458,7 +457,6 @@ export class ChatService {
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
-                console.log(link);
                 if (!link || link.status != "god") {
                     client.emit("notice", "You cannot.");
                 }
@@ -466,7 +464,6 @@ export class ChatService {
                     this.channelService.getUserInChannel(channelId, userToOp)
                     .then(
                         (linkToOp) => {
-                            console.log(linkToOp);
                             if (!linkToOp)
                                 client.emit("notice", "user not in channel");
                             else if (linkToOp.status != "normal")
@@ -677,7 +674,7 @@ export class ChatService {
     }
 
     public friendRequestEvent(client: Socket, sender: UserEntity, receiverId: string, roomHandler: UserRoomHandler) {
-        this.friendService.checkRequest(sender.id, receiverId)
+        this.friendService.checkRequest(client, sender.id, receiverId)
         .then((check: boolean) => {
             if (check) {
                 this.userService.findById(receiverId)
@@ -689,22 +686,18 @@ export class ChatService {
                             senderSockets.emit("notice", "Your request has been sent.");
                             senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
                         }
-                        // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
                         let receiverSockets = roomHandler.userMap.get(receiver.id);
                         if (receiverSockets != undefined)
                             receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, receiver.login);
                     })
                 })
             }
-            else 
-                client.emit("notice", "You've already sent a request to this user ! Or it's your friend...")
         })
     }
 
     public acceptFriendRequestEvent(friendshipId: string, roomHandler: UserRoomHandler) {
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
-            console.log("request = ", request);
             this.friendService.updateRequest(request.id)
             .then(() => {
                 let receiverSockets = roomHandler.userMap.get(request.receiver.id);

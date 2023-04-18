@@ -7,7 +7,7 @@ import { accountService } from "../../services/account.service";
 export default function PendingList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [pendings, setPendings] = useState<{friendshipId: string, id: string, name: string}[]>([]);
+    const [pendings, setPendings] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
 
     const fetchPending = () => {
         Axios.get("listRequestsPendingSend/" + me.sub)
@@ -22,14 +22,14 @@ export default function PendingList() {
 
     useEffect(() => {
         fetchPending();
-        socket.on("newFriendRequestSent", (friendshipId: string, id: string, name: string) => {
-            let newPendings = [...pendings, {friendshipId: friendshipId, id: id, name: name}];
+        socket.on("newFriendRequestSent", (friendshipId: string, friendId: string, friendName: string) => {
+            let newPendings = [...pendings, {friendshipId: friendshipId, friendId: friendId, friendName: friendName}];
             newPendings.sort((a, b) => {
-                return a.name.localeCompare(b.name);
+                return a.friendName.localeCompare(b.friendName);
             })
             setPendings(newPendings);
         })
-        socket.on("newFriend", (friendshipId: string, id: string, login: string) => {
+        socket.on("newFriend", (friendshipId: string, friendId: string, friendName: string) => {
             setPendings(pendings.filter((elt) => {
                 return elt.friendshipId != friendshipId;
             }))
@@ -51,7 +51,7 @@ export default function PendingList() {
             {pendings.length > 0 && <h3>My pending request{pendings.length > 1 && "s"}</h3>}
             <ul>
                 {pendings.map((elt, id) => (
-                    <li className="pendingElement" key={id}>{elt.name}<button value={elt.id} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
+                    <li className="pendingElement" key={id}>{elt.friendName}<button value={elt.friendId} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
                 ))}
             </ul>
         </div>
