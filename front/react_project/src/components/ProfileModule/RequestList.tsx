@@ -44,10 +44,16 @@ export default function RequestsList() {
                 return elt.friendshipId != friendshipId;
             }))
         })
+        socket.on("supressFriend", (friendshipId: string) => {
+            setRequests(requests.filter((elt) => {
+                return elt.friendshipId != friendshipId;
+            }))
+        })
         return () => {
             socket.off("newFriendRequestReceived");
             socket.off("newFriend");
             socket.off("supressFriendRequest");
+            socket.off("supressFriend");
         }
     }, []);
 

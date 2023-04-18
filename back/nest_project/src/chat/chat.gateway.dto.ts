@@ -63,7 +63,7 @@ export class banUserDto {
 }
 
 export class unbanUserDto {
-    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsUUID() readonly userId: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
 }
 
@@ -80,4 +80,8 @@ export class unmuteUserDto {
 
 export class isConnectedDto {
     @IsNotEmpty() @IsUUID() readonly userId: string;
+}
+
+export class getBanListDto {
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
 }
