@@ -35,30 +35,49 @@ export class SignUpDto {
 }
 
 export class SignUp42Dto {
-    @IsString() readonly id42: string;
+    @IsNotEmpty() @IsString() readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() avatarSvg: string;
 }
 
 export class UpdateLoginDto {
-    @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly id: string;
     @IsNotEmpty() @IsString() login: string;
 }
 
 export class UpdateAvatarDto {
-    @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly id: string;
     @IsNotEmpty() @IsString()  avatarSvg: string;
 }
 
 export class idDto {
-    @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly id: string;
 }
 
 export class id42Dto {
-    @IsString() readonly id42: string;
+    @IsNotEmpty() @IsString() readonly id42: string;
+}
+
+export class LoginDto {
+    @IsNotEmpty() @IsString() login: string;
+}
+
+export class LoadAvatarDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsString() file: string;
 }
 
 export class codeApiDto {
-    @IsString() readonly code: string;
+    @IsNotEmpty() @IsString() readonly code: string;
+}
+
+export class VerifyCodeDto42 {
+    @IsNotEmpty() @IsString() code: string
+    @IsNotEmpty() @IsNumber() id42: string
+}
+
+export class VerifyCodeDto {
+    @IsNotEmpty() @IsString() code: string
+    @IsNotEmpty() @IsString() id: string
 }

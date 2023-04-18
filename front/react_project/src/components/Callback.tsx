@@ -23,6 +23,7 @@ const Callback: React.FC = () => {
         accountService.callback(code!)
         .then(res_user => {
             console.log("callback : res_user ", res_user);
+            console.log(typeof(res_user.data));
             accountService.isId42(res_user.data.id42)
             .then(res_id42 => {
                 console.log("callback : res_id42 ", res_id42);
