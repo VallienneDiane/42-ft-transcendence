@@ -368,13 +368,19 @@
 												width: 15px;
 												padding-left: 12px;
 												opacity: 70%;
-												&:hover {
-													// outline: none;
-													// width: 20px;
-													color: #016d06;
-													// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
-												}
+												// &:hover {
+												// 	// outline: none;
+												// 	// width: 20px;
+												// 	color: #016d06;
+												// 	// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+												// }
 											}
+										}
+										& .ban:hover::before {
+											color: rgb(2, 129, 214);
+											content: "Ban";
+											position: absolute;
+											background-color: #d2d7d8;
 										}
 									}
 								}

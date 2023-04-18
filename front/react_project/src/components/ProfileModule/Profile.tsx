@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"
+import { NavLink, useNavigate, useParams } from "react-router-dom"
 import { User } from "../../models";
 import "../../styles/Profile.scss"
 import { userService } from "../../services/user.service";
@@ -58,7 +58,7 @@ export default function Profile() {
                 {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>
-                    { currentUser === undefined ? <a href="/settings"><FontAwesomeIcon icon={faGear} /></a> : null }
+                    { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon icon={faGear} /></NavLink> : null }
                 </div>
 
                 {currentUser === undefined ? (
