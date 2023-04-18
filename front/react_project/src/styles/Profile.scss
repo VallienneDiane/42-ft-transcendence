@@ -37,9 +37,13 @@
         }
 
         & #FriendManagement {
+            display: flex;
+            flex-direction: row;
             padding: 10px 0;
 
-            & #requestList {
+            & #request {
+                display: flex;
+                flex-direction: row;
                 padding: 15px 0;
 
                 & li {
@@ -59,13 +63,30 @@
                 }
             }
 
-            & #friendName {
+            & #friend {
+                display: flex;
+                flex-direction: row;
                 border-radius: 20px;
                 text-shadow: 3cm;
                 position: relative;
                 z-index: 1;
                 font-size: larger;
-                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                
+                & #friendList {
+                    display: flex;
+                    flex-direction: column;
+
+                    & #friendElement {
+                        display: flex;
+                        flex-direction: row;
+
+                        & #friendName {
+                            display: flex;
+                            flex-direction: row;
+                        }
+                    }
+                }
             }
         }
         
