@@ -10,25 +10,38 @@ import * as speakeasy from 'speakeasy';
 export class AuthService {
   constructor(
     private userService: UserService, private jwtService: JwtService) {}
-
-  //give to the api42 infos to get a token to access user infos
+  /**
+   * Give to the api42 infos to get a token to access user infos
+   * @param code 
+   * @returns token
+   */
   async validateFortyTwo(code: string) {
-    const body = JSON.stringify({
-      grant_type: 'authorization_code',
-      client_id: process.env.API_UID,
-      client_secret: process.env.API_KEY,
-      code,
-      redirect_uri: process.env.API_CALLBACK_URL,
-    });
-    const response = await fetch(`https://api.intra.42.fr/oauth/token/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body,
-    });
-    const data = await response.json();
-    return data.access_token;
+    try {
+      const body = JSON.stringify({
+        grant_type: 'authorization_code',
+        client_id: process.env.API_UID,
+        client_secret: process.env.API_KEY,
+        code,
+        redirect_uri: process.env.API_CALLBACK_URL,
+      });
+      const response = await fetch(`https://api.intra.42.fr/oauth/token/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body,
+      });
+      const data = await response.json();
+      return data.access_token;
+    }
+    catch(error) {
+      throw error;
+    }
   }
-
+  /**
+   * Validate user infos when login
+   * @param login 
+   * @param password 
+   * @returns userEntity
+   */
   async validateUser(login: string, password: string) {
     const validUser = await this.userService.findByLogin(login);
     if(!validUser) {

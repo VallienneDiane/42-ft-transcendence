@@ -5,9 +5,7 @@ export interface LogInForm {
 }
 
 export interface VerifyCodeForm {
-    login?: string,
     code: string,
-    errors?:string,
 }
 
 export interface SignUpForm { 
