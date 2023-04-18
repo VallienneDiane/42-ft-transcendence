@@ -1,0 +1,85 @@
+#fasetting {
+    display: flex;
+    border: 2px solid var(--text-color);
+    border-radius: 15px;
+    width: 40%;
+    min-width: 350px;
+    padding-top: 25px;
+    flex-direction: column;
+    align-items: center;
+    max-height: 95%;
+    margin-left: 1%;
+    .switch {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding-top:50px;
+        padding-bottom: 30px;
+        p {
+            font-size: 1.2em;
+            margin-right: 15px;
+        }
+
+    }
+    & #auth2fa {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        #scan {
+            margin-top:2em;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        #qrcode {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            width:12em;
+            max-width: 20em;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1em;
+        }
+        input {
+            font-size: 1.2em;
+            text-align: center;
+            border-radius: 2%;
+            height: 50px;
+            background-color: rgb(255, 255, 255);
+            color: rgb(0, 0, 0);
+        }
+        #validateForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 80px;
+            margin-top: 1em;
+            button {
+                background: transparent;
+                color: var(--text-color);
+                font-size: 1.2em;
+                border: 1px solid var(--text-color);
+                min-width: 150px;
+                padding: 5px 10px;
+                &:hover {
+                    background-color: var(--second-color); 
+                }
+            }
+            .errors {
+                margin-bottom: 1em;
+                font-size: 1.2em;
+                color: red;
+            }
+        }
+        #AuthActivate {
+            font-size: 1.2em;
+            color: rgb(52, 211, 52);
+        }
+    }
+
+
+}

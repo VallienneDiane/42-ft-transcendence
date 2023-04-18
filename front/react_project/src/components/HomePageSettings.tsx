@@ -5,13 +5,13 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { SettingsForm } from "../models";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom"
-import "../styles/HomeSettings.scss"
+import "../styles/HomePageSettings.scss"
 
 const userSchema = yup.object().shape({
     login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") ,
 })
 
-const HomeSettings: React.FC = () => {
+const HomePageSettings: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const id42 = location.state?.id42;
@@ -121,7 +121,7 @@ const HomeSettings: React.FC = () => {
     }
 
     return (
-        <div id="homeSettings">
+        <div id="homePageSettings">
             <form onSubmit={handleSubmit(userSubmit)}>
                 <div id="name">
                     <h2>Choose your login </h2>
@@ -143,7 +143,7 @@ const HomeSettings: React.FC = () => {
                         <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
                     </div>
                     <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                    <div id="saveZone">
+                    <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         {errors.login && <p className="error">{errors.login.message}</p>}
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
@@ -155,4 +155,4 @@ const HomeSettings: React.FC = () => {
     )
 }
 
-export default HomeSettings;
+export default HomePageSettings;

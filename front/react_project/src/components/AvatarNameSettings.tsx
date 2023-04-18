@@ -5,7 +5,7 @@ import { userService } from "../services/user.service";
 import { AvatarSettingsForm, LoginSettingsForm } from "../models";
 import { useForm } from "react-hook-form";
 
-const AvatarSettings: React.FC = () => {
+const AvatarNameSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
     const id = decodedToken.sub;
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
@@ -103,7 +103,6 @@ const AvatarSettings: React.FC = () => {
         .catch(error => {console.log(error);});
     }
 
-
     const onChangeLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLogin(event.target.value);
         setIsUniqueLogin(true);
@@ -111,24 +110,24 @@ const AvatarSettings: React.FC = () => {
     }
 
     return (
-        <div id="homeSettings">
-            <form onSubmit={handleSubmit(loginSubmit)}>
-                <div id="name">
-                    <h2>Change your login </h2>
-                        <input className="form_element"
-                            value={login}
-                            type="text"
-                            onChange={onChangeLogin}
-                        />
-                </div>
-                <div className="saveZone">
-                    <button id="save" type="submit">SAVE</button>
-                    { uniqueLogin ? null : <p className="error">This login already exist</p> }
-                    { error ? <p className="error">Login must be at least 3 characters </p> : null }
-                </div>
-            </form>
-            <form onSubmit={avatarSubmit}>
-                <div id="avatar">
+        <div id="settings">
+            <div id="name">
+                <form onSubmit={handleSubmit(loginSubmit)}>
+                        <h2>Change your login </h2>
+                            <input className="form_element"
+                                value={login}
+                                type="text"
+                                onChange={onChangeLogin}
+                            />
+                    <div className="saveZone">
+                        <button id="save" type="submit">SAVE</button>
+                        { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                        { error ? <p className="error">Login must be at least 3 characters </p> : null }
+                    </div>
+                </form>
+            </div>
+            <div id="avatar">
+                <form onSubmit={avatarSubmit}>
                     <div id="picture">
                         <h2>Upload a new avatar </h2>
                         <img id="profilePicture" src={avatar} />
@@ -142,10 +141,10 @@ const AvatarSettings: React.FC = () => {
                     <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     )
 }
 
-export default AvatarSettings;
+export default AvatarNameSettings;

@@ -16,7 +16,7 @@ const schema = yup.object().shape({
         .test('len', 'Code must be 6 characters', val => val?.length === 6)
 });
 
-const LogSettings: React.FC = () => {
+const Auth2faSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
     const id = decodedToken.sub;
     const [checked, setchecked] = useState<boolean>(false);
@@ -90,9 +90,10 @@ const LogSettings: React.FC = () => {
                     checked={checked}
                     onChange={handleChange}
                 />
-            </div>
-            {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
-            {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ?
+            </div >
+            <div id="auth2fa">
+                {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
+                {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ?
                 <div>
                     <p id="scan">Scan the QRCode in your application </p>
                     <form onSubmit={handleSubmit(verifySubmittedCode)}>
@@ -104,8 +105,9 @@ const LogSettings: React.FC = () => {
                     </form>
                 </div> : null}
             {checked === true && is2faActive == true ? <p id="AuthActivate">Google Authentificator is activate</p> : null}
+            </div>
         </div>
     )
 }
 
-export default LogSettings;
+export default Auth2faSettings;
