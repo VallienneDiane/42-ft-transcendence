@@ -1,10 +1,9 @@
 import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
-import { codeApiDto, id42Dto, idDto, UserDto } from 'src/user/user.dto';
+import { id42Dto, idDto, VerifyCodeDto, VerifyCodeDto42 } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
-import { VerifyCodeDto, VerifyCodeDto42 } from './verifyCode.dto';
 
 @Controller()  
 export class AuthController {
@@ -56,12 +55,12 @@ export class AuthController {
    * @returns token
    */
   @Post('auth/generateToken')
-  async generateToken(@Body() data: UserDto) {
+  async generateToken(@Body() data: idDto) {
     const token = await this.authService.genToken(data.id);
     return token;
   }
   @Post('auth/generateToken42')
-  async generateToken42(@Body() data: UserDto) {
+  async generateToken42(@Body() data: id42Dto) {
     const token = await this.authService.genToken42(data.id42);
     return token;
   }

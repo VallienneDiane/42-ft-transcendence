@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
+import { idDto, LoadAvatarDto, LoginDto, SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -53,10 +53,10 @@ export class UserController {
     }
   
     @Get('user/isUniqueLogin/:login')
-    async isUniqueLogin(@Param('login') login: string):Promise<boolean> {
+    async isUniqueLogin(@Param('login') data: LoginDto):Promise<boolean> {
         const allLogins: {login: string;}[] = await this.userService.findAllLogins() as { login: string; }[];
         for(let i = 0; i < allLogins.length; i++) {
-            if(login == allLogins[i].login) {
+            if(data.login == allLogins[i].login) {
                 return (false);
             }
         }
@@ -86,8 +86,8 @@ export class UserController {
     //get profile
     @UseGuards(JwtAuthGuard)
     @Get('user/:id')
-    async displayUserByLogin(@Param('id') id: string): Promise<UserEntity> {
-        return await this.userService.findById(id);
+    async displayUserByLogin(@Param('id') data: idDto): Promise<UserEntity> {
+        return await this.userService.findById(data.id);
     }
     //update account params
     // @UseGuards(JwtAuthGuard)
@@ -98,20 +98,20 @@ export class UserController {
     //delete user account
     @UseGuards(JwtAuthGuard)
     @Delete('user/:id')
-    async delete(@Param('id') id: string) {
-        return this.userService.delete(id);
+    async delete(@Param('id') data: idDto) {
+        return this.userService.delete(data.id);
     }
 
     //update avatar picture
     @UseGuards(JwtAuthGuard)
     @Post('user/uploadAvatar')
-    async uploadAvatar(@Body() data: {id: string, file: string}, @Headers('Authorization') token: string): Promise<void> {
+    async uploadAvatar(@Body() data: LoadAvatarDto): Promise<void> {
         return this.userService.loadAvatar(data.id, data.file);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get('getAvatar/:user')
-    async findAvatar(@Param('user') userId: string): Promise<string> {
-        return await this.userService.getAvatar(userId);
+    async findAvatar(@Param('user') data: idDto): Promise<string> {
+        return await this.userService.getAvatar(data.id);
     }
 }
