@@ -48,7 +48,6 @@ const Auth2faSettings: React.FC = () => {
             .catch(error => {
                 console.log(error);
             });
-            console.log("(Log settings) 2fa user", user);
     }, [])
 
     const verifySubmittedCode = (data: VerifyCodeForm) => {

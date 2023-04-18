@@ -6,8 +6,8 @@ import { FriendEntity } from "../chat/relation/friend/friend.entity";
 import { UserEntity } from "./user.entity";
 
 export class UserDto {
-    readonly id: string;
-    readonly id42: string;
+    @IsUUID() readonly id: string;
+    @IsString() readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(8) password: string; //@IsOptionnal
@@ -35,26 +35,30 @@ export class SignUpDto {
 }
 
 export class SignUp42Dto {
-    readonly id42: string;
+    @IsString() readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() avatarSvg: string;
 }
 
 export class UpdateLoginDto {
-    readonly id: string;
+    @IsUUID() readonly id: string;
     @IsNotEmpty() @IsString() login: string;
 }
 
 export class UpdateAvatarDto {
-    readonly id: string;
+    @IsUUID() readonly id: string;
     @IsNotEmpty() @IsString()  avatarSvg: string;
 }
 
 export class idDto {
-    readonly id: string;
+    @IsUUID() readonly id: string;
 }
 
 export class id42Dto {
-    readonly id42: string;
+    @IsString() readonly id42: string;
+}
+
+export class codeApiDto {
+    @IsString() readonly code: string;
 }

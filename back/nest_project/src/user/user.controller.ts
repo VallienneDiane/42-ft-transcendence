@@ -48,7 +48,6 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Post('user/updateAvatar')
     async updateAvatar(@Body() user: UpdateAvatarDto) {
-        console.log("(user controller) USER update avatar ", user);
         const updatedAvatar = await this.userService.updateAvatar(user);
         return (updatedAvatar);
     }
@@ -56,7 +55,6 @@ export class UserController {
     @Get('user/isUniqueLogin/:login')
     async isUniqueLogin(@Param('login') login: string):Promise<boolean> {
         const allLogins: {login: string;}[] = await this.userService.findAllLogins() as { login: string; }[];
-        console.log("allLogins = ", allLogins);
         for(let i = 0; i < allLogins.length; i++) {
             if(login == allLogins[i].login) {
                 return (false);
@@ -68,7 +66,6 @@ export class UserController {
     @Get('user/isId42/:id42')
     async isId42(@Param('id42') id42: string):Promise<boolean> {
         const allIds42: {id42: string;}[] = await this.userService.findAllIds42() as { id42: string; }[];
-        console.log("allIds42 = ", allIds42);
         if(allIds42) {
             for(let i = 0; i < allIds42.length; i++) {
                 if(id42 == allIds42[i].id42) {
