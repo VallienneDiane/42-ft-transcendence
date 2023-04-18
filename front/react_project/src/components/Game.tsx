@@ -16,9 +16,9 @@ interface ball {
 }
 
 interface gameState {
-    BallPosition: ball[],
-    paddleOne: { x: number, y: number },
-    paddleTwo: { x: number, y: number }
+    BallPosition: ball[] | null,
+    paddleOne: { x: number, y: number } | null,
+    paddleTwo: { x: number, y: number } | null
 }
 
 interface MatchState {
@@ -51,6 +51,8 @@ interface Players {
 
 const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    let clearGame: boolean = false;
+    // const [clearGame, setClearGame] = useState<boolean>(false);
     // const [startGame, setStartGame] = useState<boolean>(false);
     const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
     const [waitMatch, setWaitMatch] = useState<boolean>(false); // A init à false
@@ -156,6 +158,7 @@ const Game: React.FC = () => {
                 setMatchInProgress(true);
                 setButtonReady(true);
                 ready = true;
+                clearGame = false;
                 setPlayers(prevPlayers => {
                     return {
                         ...prevPlayers!,
@@ -169,22 +172,26 @@ const Game: React.FC = () => {
             })
 
             socket.on('Game_Update', (gameState: gameState) => {
+                // console.log('received update')
                 if (ready === true) {
                     setTimer(true);
                 }
                 setButtonReady(false);
                 ready = false;
-                setGameState(gameState);
-                setGameState((prevState) => ({
-                    ...prevState,
-                    BallPosition: gameState.BallPosition.map((ball) => ({
-                        x: ball.x / (16 / 9),
-                        y: ball.y,
-                        r: ball.r
-                    })),
-                    paddleOne: { x: gameState.paddleOne.x / (16 / 9), y: gameState.paddleOne.y },
-                    paddleTwo: { x: gameState.paddleTwo.x / (16 / 9), y: gameState.paddleTwo.y }
-                }));
+                // setGameState(gameState);
+                if (clearGame === false) {
+                    setGameState((prevState) => ({
+                        ...prevState,
+                        BallPosition: gameState.BallPosition!.map((ball) => ({
+                            x: ball.x / (16 / 9),
+                            y: ball.y,
+                            r: ball.r
+                        })),
+                        paddleOne: { x: gameState.paddleOne!.x / (16 / 9), y: gameState.paddleOne!.y },
+                        paddleTwo: { x: gameState.paddleTwo!.x / (16 / 9), y: gameState.paddleTwo!.y }
+                    }));
+
+                }
             });
 
             socket.on('Match_Update', (matchUpdate: MatchState) => {
@@ -200,14 +207,35 @@ const Game: React.FC = () => {
             })
 
             socket.on('Match_End', (matchEnd: MatchEnd) => {
+                console.log('received match end')
                 setWaitMatch(false);
                 setMatchInProgress(false);
                 setCountdown(3);
                 setPlayerReady(false)
                 ready = false;
+                clearGame = true;
+                // setClearGame(true);
+                // const canvas = canvasRef.current;
+                // const context = canvas!.getContext("2d")!;
+                // console.log('context', context);
+                // context.clearRect(0, 0, gameWidth, gameHeight);
+                setGameState({
+                    BallPosition: null,
+                    paddleOne: null,
+                    paddleTwo: null
+                })
             })
         }
     }, [socket]);
+    
+    // useEffect(() => {
+    //     const canvas = canvasRef.current;
+    //     const context = canvas!.getContext("2d")!;
+    //     console.log('context', context);
+    //     context.clearRect(0, 0, gameWidth, gameHeight);
+    //     clearGame = false;
+
+    // }, [clearGame]);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
@@ -254,7 +282,7 @@ const Game: React.FC = () => {
             }));
         }
     };
-    
+
     const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8 * 0.8);
     const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 * 0.8 / (16 / 9));
     // Handle windows resizing
@@ -268,11 +296,12 @@ const Game: React.FC = () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
-    
+
     // Get css colors variables to use it in the canva
     const styleColor = getComputedStyle(document.documentElement);
     const ballColor = styleColor.getPropertyValue('--ball-color');
-    const secondaryColor = styleColor.getPropertyValue('--secondary-color');
+    const thirdColor = styleColor.getPropertyValue('--third-color');
+    const fourthColor = styleColor.getPropertyValue('--fourth-color');
 
     useEffect(() => {
         let paddleWidth: number = gameWidth * 0.014;
@@ -282,18 +311,22 @@ const Game: React.FC = () => {
             const context = canvas.getContext("2d")!;
             if (context) {
                 context.clearRect(0, 0, gameWidth, gameHeight);
+                if (gameState.BallPosition != null && gameState.paddleOne != null && gameState.paddleTwo != null) {
+                    gameState!.BallPosition!.forEach((ball) => {
+                        context.beginPath();
+                        context.arc(ball.x * gameWidth, ball.y * gameHeight, ball.r * gameHeight, 0, Math.PI * 2);
+                        context.fillStyle = ballColor;
+                        context.fill();
+                        context.stroke()
+                    })
+    
+                    context.fillStyle = thirdColor;
+                    context.fillRect(gameState!.paddleOne!.x * gameWidth, gameState!.paddleOne!.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
+                    context.fillStyle = fourthColor;
+                    context.fillRect(gameState!.paddleTwo!.x * gameWidth - paddleWidth, gameState!.paddleTwo!.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
 
-                gameState!.BallPosition.forEach((ball) => {
-                    context.beginPath();
-                    context.arc(ball.x * gameWidth, ball.y * gameHeight, ball.r * gameHeight, 0, Math.PI * 2);
-                    context.fillStyle = ballColor;
-                    context.fill();
-                    context.stroke()
-                })
+                }
 
-                context.fillStyle = secondaryColor;
-                context.fillRect(gameState!.paddleOne.x * gameWidth, gameState!.paddleOne.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
-                context.fillRect(gameState!.paddleTwo.x * gameWidth - paddleWidth, gameState!.paddleTwo.y * gameHeight - paddleHeight / 2, paddleWidth, paddleHeight);
             }
         }
     }, [gameState, gameWidth]);
@@ -344,7 +377,9 @@ const Game: React.FC = () => {
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
                 <div id="instructions">
-
+                        <h2>Instructions</h2>
+                        <div>Classic : Le pong originel</div>
+                        <div>Super : Super mode</div>
                 </div>
             </div>
         </div>
