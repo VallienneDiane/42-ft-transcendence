@@ -3,7 +3,7 @@ import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.ent
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { MuteEntity } from 'src/chat/mute/mute.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
-import { FriendEntity } from '../chat/relation/friend/friend.entity';
+import { FriendEntity } from '../chat/friend/friend.entity';
 
 @Entity()
 export class UserEntity {

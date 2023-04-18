@@ -8,7 +8,7 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { friendDto, friendshipDto } from "./relation/friend/friend.dto";
+import { friendDto, friendshipDto } from "./friend/friend.dto";
 import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, isConnectedDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, muteUserDto, unbanUserDto, unmuteUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)

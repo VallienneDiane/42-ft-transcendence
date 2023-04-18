@@ -15,7 +15,7 @@ function ModifyChannel(props: {channel: IChannel}) {
         id: props.channel.id,
         name: props.channel.name,
         password: props.channel.password,
-        channelPass: props.channel.channelPass,
+        channelPass: "",
         inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
@@ -60,7 +60,7 @@ function ModifyChannel(props: {channel: IChannel}) {
     )
 }
 
-function MuteFor(props: {user: string, dest: IDest}) {
+function MuteFor(props: {user: string, dest: IDest, handleClose: () => void}) {
     const {socket} = useContext(SocketContext);
     const [minutes, setMinutes] = useState<number>(0);
     const [hours, setHours] = useState<number>(0);
@@ -122,6 +122,7 @@ function MuteFor(props: {user: string, dest: IDest}) {
     const mute = () => {
         let time: number = (hours * 60) + minutes;
         socket.emit("muteUser", {id: props.user, channelId: props.dest.id, minutes: time});
+        props.handleClose();
     }
 
     useEffect(() => { 
@@ -189,6 +190,10 @@ function MemberList(props: {dest: IDest}) {
     
     const doOp = (e: any) => {
         socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
+    }
+
+    const handleCloseMuteFor = () => {
+        setOnClickMute((onClickMute) => !onClickMute);
     }
 
     useEffect(() => {
@@ -278,7 +283,7 @@ function MemberList(props: {dest: IDest}) {
                 }
                 )}
             </ul>
-            {onClickMute && <MuteFor user={userToMute} dest={props.dest} />}
+            {onClickMute && <MuteFor user={userToMute} dest={props.dest} handleClose={handleCloseMuteFor} />}
         </React.Fragment>
     )
 }
