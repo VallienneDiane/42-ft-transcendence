@@ -49,6 +49,11 @@ interface Players {
     player2_score: number,
 }
 
+interface SpecMode {
+    active: boolean,
+    player1_login: string | null
+}
+
 
 const Game: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -63,12 +68,13 @@ const Game: React.FC = () => {
     let ready: boolean = false;
     const [timer, setTimer] = useState<boolean>(false); // A init à false
     const [countdown, setCountdown] = useState<number | string>(3);
-    const countDownDiv = useRef<HTMLElement>(null);
-    const [players, setPlayers] = useState<Players>();
+    const countDownDiv = useRef<HTMLDivElement>(null);
+    const [players, setPlayers] = useState<Players | null >();
     // const [players, setPlayers] = useState<Players>({ player1_login: "", player1_score: 0, player2_score: 0, player2_login: "" });
     const playersRef = useRef<Players>();
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
+    const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
 
     const launchClassic = () => {
         // On click on 'start' button, start the game
@@ -97,20 +103,13 @@ const Game: React.FC = () => {
         setPlayerReady(true);
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
-
-
-    // useEffect(() => {
-    //     // Set the initial position of elements based on the width and height of the canvas element
-    //     if (canvasRef.current) {
-    //         setGameState({
-    //             BallPosition: [
-    //                 { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
-    //             ],
-    //             paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
-    //             paddleTwo: { x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
-    //         });
-    //     }
-    // }, []);
+    
+    
+    useEffect(() => {
+        if (socketGame !== null) {
+            socketGame.emit('Get_Matchs');      
+        }
+    }, []);
 
     // countdown handler
     useEffect(() => {
@@ -165,12 +164,12 @@ const Game: React.FC = () => {
             })
 
             socketGame.on('Game_Update', (gameState: gameState) => {
+                // console.log("game update");
                 if (ready === true) {
                     setTimer(true);
                 }
                 setButtonReady(false);
                 ready = false;
-                // setGameState(gameState);
                 if (clearGame === false) {
                     setGameState((prevState) => ({
                         ...prevState,
@@ -187,7 +186,10 @@ const Game: React.FC = () => {
             });
 
             socketGame.on('Match_Update', (matchUpdate: MatchState) => {
-                if (playersRef.current?.player1_login === matchUpdate.player1_login) {
+                // console.log("matchUpdate", matchUpdate, "players", players, "specMode", specMode);
+                clearGame = false;
+                if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login) {
+                    // console.log("set players", players);
                     setPlayers(prevPlayers => {
                         return {
                             ...prevPlayers!,
@@ -201,8 +203,12 @@ const Game: React.FC = () => {
             socketGame.on('Match_End', (matchEnd: MatchEnd) => {
                 setWaitMatch(false);
                 setMatchInProgress(false);
+                setTimer(false);
                 setCountdown(3);
-                setPlayerReady(false)
+                setPlayerReady(false);
+                setButtonReady(false);
+                setPlayers(null);
+                setSpecMode({active: false, player1_login: null});
                 ready = false;
                 clearGame = true;
                 // setClearGame(true);
@@ -320,10 +326,10 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socketGame} />
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode}/>
             <div id="gameContainer">
                 <div id="gamePanel">
-                    {matchInProgress ?
+                    {(matchInProgress || specMode.active) ?
                         <div id="players">
                             <div className="player">
                                 <div>{players?.player1_login}</div>
@@ -338,12 +344,10 @@ const Game: React.FC = () => {
                         : null}
                     <div id="gameField">
                         <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
-                        {matchInProgress || waitMatch ?
+                        {matchInProgress || waitMatch || specMode.active ?
                             null
                             :
                             <div id="gameSelector">
-                                {/* <h2>Select your opponent</h2>
-                            <SearchUserBar /> */}
                                 <h2>Select your game</h2>
                                 <div id="gameButtons">
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
@@ -369,6 +373,3 @@ const Game: React.FC = () => {
 }
 
 export default Game;
-
-// Match_Update
-// Match_End
