@@ -456,12 +456,28 @@
 										border: none;
 										outline: none;
 									}
-									& .svgSearch {
-										height: 1.1rem;
-										margin-left: -2rem;
-										opacity: 50%;
-										background-color: #eee;
-										cursor: pointer;
+								}
+								& .invite {
+									display: flex;
+									flex-direction: column;
+									background-color: #b9cbce;
+									& ul {
+										padding: 0 1.5rem 0.3rem 1.5rem;
+										background: transparent;
+										& li {
+											display: flex;
+											justify-content: space-between;
+											text-align: start;
+											font-size: 15px;
+											background: transparent;
+											& button {
+												background: transparent;
+												&:hover {
+													font-weight: bolder;
+													color: #0f1a83;
+												}
+											}
+										}
 									}
 								}
 								& .settingList {
