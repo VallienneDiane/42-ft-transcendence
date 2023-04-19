@@ -10,7 +10,7 @@ import { Socket } from "socket.io-client";
 
 class FriendList extends React.Component<{socket: Socket}, {
     me: JwtPayload,
-    friends: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[],
+    friends: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[],
     fetchFriendsDone: boolean,
     askIfConnectedDone: boolean,
 }> {
@@ -31,13 +31,16 @@ class FriendList extends React.Component<{socket: Socket}, {
     fetchFriends() {
         Axios.get("listFriends/" + this.state.me.sub)
         .then((response) => {
-            let friendsArray: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
+            let friendsArray: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
             for (let elt of response.data) {
-                friendsArray.push({
+                let toPush: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} = {
+                    key: elt.friendId,
                     friendshipId: elt.friendshipId,
                     friendId: elt.friendId,
                     friendName: elt.friendName,
-                    isConnected: false});
+                    isConnected: false};
+                    toPush.key.concat('0');
+                    friendsArray.push(toPush);
                 }
             this.setState({
                 friends: friendsArray,
@@ -73,8 +76,16 @@ class FriendList extends React.Component<{socket: Socket}, {
 
     componentDidMount(): void {
         this.props.socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
-            console.log("newFriend");
-            let newFriendList = [...this.state.friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
+            let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
+                {
+                    key: id,
+                    friendshipId: friendshipId,
+                    friendId: id,
+                    friendName: name,
+                    isConnected: false,
+                }
+            newFriend.key.concat('0');
+            let newFriendList = [...this.state.friends, newFriend];
             newFriendList.sort((a, b) => {
                 return (a.friendName.localeCompare(b.friendName));
             });
@@ -83,21 +94,17 @@ class FriendList extends React.Component<{socket: Socket}, {
         });
 
         this.props.socket.on("supressFriend", (friendshipId: string) => {
-            console.log("unfriend", friendshipId);
             this.setState({friends: this.state.friends.filter(friend => {
                 return friend.friendshipId != friendshipId;
             })})
         });
-
-        this.props.socket.on("tamere", () => {
-            console.log("tamere");
-        })
 
         this.props.socket.on("usersAreConnected", (userIds: string[]) => {
             let newFriendList = this.state.friends;
             for (let eltData of userIds) {
                 for (let elt of newFriendList) {
                     if (elt.friendId == eltData) {
+                        elt.key = elt.key.slice(0, -1).concat('1');
                         elt.isConnected = true;
                         break;
                     }
@@ -106,26 +113,28 @@ class FriendList extends React.Component<{socket: Socket}, {
             this.setState({friends: newFriendList});
         });
 
-        this.props.socket.on("userConnected", (userId: string, userName: string) => {
+        this.props.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
             let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
-                if (elt.friendId == userId) {
+                if (elt.friendId == user.userId) {
+                    elt.key = elt.key.slice(0, -1).concat('1');
                     elt.isConnected = true;
-                    this.setState({friends: newFriendList});
                     break;
                 }
             }
+            this.setState({friends: newFriendList});
         });
 
-        this.props.socket.on("userDisconnected", (userId: string, userName: string) => {
+        this.props.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
             let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
-                if (elt.friendId == userId) {
+                if (elt.friendId == user.userId) {
+                    elt.key = elt.key.slice(0, -1).concat('0');
                     elt.isConnected = false;
-                    this.setState({friends: newFriendList});
                     break;
                 }
             }
+            this.setState({friends: newFriendList});
         });
     }
 
@@ -135,7 +144,7 @@ class FriendList extends React.Component<{socket: Socket}, {
             {this.state.friends.length > 0 && <h3 id="titleFriend">My friend{this.state.friends.length > 1 && "s"}</h3>}
             <ul id="friendList">
                 {this.state.friends.map((elt) => (
-                    <li id="friendElement" key={elt.friendId}>
+                    <li id="friendElement" key={elt.key}>
                         <span id="friendInfo">
                             <div id="friendName">{elt.friendName}</div>
                             <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
