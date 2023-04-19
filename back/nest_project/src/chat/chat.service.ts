@@ -749,6 +749,7 @@ export class ChatService {
 
     public unfriendEvent(client: Socket, me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
         console.log(me.login, "wants to delete : ", friendshipId);
+        client.emit("supressFriend", "wefnwkgnasgfs");
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             let friend: UserEntity = null;
@@ -760,11 +761,18 @@ export class ChatService {
             this.friendService.deleteRequest(friendshipId)
             .then(() => {
                 let meSockets = roomHandler.userMap.get(me.id);
-                if (meSockets != undefined)
-                    meSockets.emit("supressFriend", friendshipId);
+                if (meSockets != undefined) {
+                    meSockets.sockets.forEach(({}, socket) => {
+                        socket.emit("tamere");
+                        console.log(friendshipId);
+                        socket.emit("supressFriend", friendshipId);
+                    })
+                }
                 let friendSockets = roomHandler.userMap.get(friend.id);
-                if (friendSockets != undefined)
+                if (friendSockets != undefined) {
+                    console.log("I sent to him");
                     friendSockets.emit("supressFriend", friendshipId);
+                }
             })
         })
     }
