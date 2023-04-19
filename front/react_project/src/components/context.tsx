@@ -6,4 +6,7 @@ export const SocketContext = React.createContext<SocketContextType>({
 	socket: io(),
 	createSocket: () => {},
 	disconnect: () => {},
+	socketGame: io(),
+	createSocketGame: () => {},
+	disconnectGame: () => {},
 });

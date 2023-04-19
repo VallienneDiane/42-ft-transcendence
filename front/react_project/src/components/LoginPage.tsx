@@ -17,7 +17,9 @@ const LoginPage: React.FC = () => {
             loginInput.current.focus();
         }
     }, [])
-    //login with 42, get url to authorize connexion and navigate to this url
+    /**
+     * login with 42, get url to authorize connexion and navigate to this url
+     */
     const redirectToApi42 = async () => {
         await accountService.url42()
         .then(response_url => {
@@ -27,32 +29,35 @@ const LoginPage: React.FC = () => {
             console.log(error);
         });
     }
-    //login with or without 2fa
+    /**
+     * login with or without 2fa
+     * @param data 
+     */
     const onSubmit = async (data: LogInForm) => {
+        console.log("LoginPage 37 : LogInform : ", data);
         accountService.login(data)
-        .then(response_user => {
-            if(response_user.data == true) {
-                accountService.is2faActive(data.login)
-                .then(response_2fa => {
-                    if(response_2fa.data.is2faActive == true) {
-                        navigate("/verifyCode2fa", { state: { login: data.login } });
-                    }
-                    else {
-                        accountService.generateToken(data.login)
-                        .then(response_token => {
-                            accountService.saveToken(response_token.data.access_token);
-                            const from = (location.state as any)?.from || "/";
-                            navigate(from);
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-            }
+        .then(res => {
+            accountService.is2faActive(data.id)
+            .then(response_2fa => {
+                if(response_2fa.data.is2faActive == true) {
+                    navigate("/verifyCode2fa", { state: { login: res.data.login } });
+                }
+                else {
+                    console.log("LoginPage 47: ", data.id, data.login);
+                    accountService.generateToken(res.data.id)
+                    .then(response_token => {
+                        accountService.saveToken(response_token.data.access_token);
+                        const from = (location.state as any)?.from || "/";
+                        navigate(from);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         })
         .catch(error => {
             console.log(error);
@@ -70,15 +75,13 @@ const LoginPage: React.FC = () => {
                     type="text"
                     placeholder="Enter your login ..."
                     />
-                    {/* {errors.login && <span>Login is required</span>} */}
                     <input className="form_element"
                     {...register("password", {required: true})}
                     type="password"
                     placeholder="Enter your password ..."
                     />
-                    {/* {errors.password && <span>Password is required</span>} */}
                     { incorrectCredentials && <div className="logError">Wrong user or password</div>}
-                    <button className="form_element" type="submit">Submit</button>
+                    <button className="form_element" type="submit">SUBMIT</button>
                 </form>
                 <button id="signin42" onClick={redirectToApi42}>
                     Sign in with 42 !

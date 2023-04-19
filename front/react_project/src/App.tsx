@@ -3,7 +3,7 @@ import ChatModule from './components/ChatModule/ChatModule';
 import SignupPage from './components/SignupPage'
 import LoginPage from './components/LoginPage'
 import Home from './components/Home'
-import { Routes, Route, BrowserRouter } from "react-router-dom"
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom"
 import Profile from './components/ProfileModule/Profile';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import { SocketContext } from './components/context';
@@ -15,9 +15,8 @@ import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
 import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
-import { SocketContextType } from './components/ChatModule/Chat_models';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import HomeSettings from './components/HomeSettings';
+import HomeSettings from './components/HomePageSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
@@ -31,6 +30,23 @@ function App() {
     newSocket.emit("whereIam");
   }
 
+  const [socketGame, setSocketGame] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
+
+  function createSocketGame() {
+    const newSocket = io('127.0.0.1:3000', {
+      transports: ['websocket'],
+      auth: { token: accountService.getToken() },
+    });
+    setSocketGame(newSocket);
+  }
+
+  function disconnectGame() {
+    if (socketGame) {
+      socketGame.disconnect();
+      setSocketGame(null!);
+    }
+  }
+
   function disconnect() {
     console.log("avant", socket);
     if (socket) {
@@ -42,10 +58,10 @@ function App() {
   return (
     <div className="App">
       <BrowserRouter >
-        <SocketContext.Provider value={{ socket, createSocket, disconnect } as SocketContextType}>
+        <SocketContext.Provider value={{ socket, createSocket, disconnect, socketGame, createSocketGame, disconnectGame }} >
           <Routes>
-            <Route path="/callback/" element={<Callback />} />
-            <Route path='/homeSettings' element={<HomeSettings />} />
+            <Route path="/callback/"element={<Callback />}/>
+            <Route path='/homeSettings' element={ accountService.isLogged() ? <Navigate to="/"/> : (<HomeSettings/>) }/>
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />

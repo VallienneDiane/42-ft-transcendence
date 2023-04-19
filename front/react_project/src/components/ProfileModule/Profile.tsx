@@ -18,11 +18,12 @@ export default function Profile() {
     const navigate = useNavigate();
     const [user, setUser] = useState<User>();
     const currentUser = useParams().login;
-
+    
     useEffect(() => {
         if (currentUser !== undefined){
             userService.getUser(currentUser)
             .then(response => {
+                console.log("Profile 26: user ", response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }
@@ -34,13 +35,25 @@ export default function Profile() {
         }
         else {
             let decodedToken: JwtPayload = accountService.readPayload()!;
-            userService.getUser(decodedToken.login)
+            const id = decodedToken.sub;
+            userService.getUser(id!)
             .then(response => {
                 setUser(response.data);
             })
             .catch(error => {
                 console.log(error);
             });
+        }
+
+        return () => {
+            socket.off("newFriendRequestSent");
+            socket.off("newFriend");
+            socket.off("supressFriendRequest");
+            socket.off("supressFriend");
+            socket.off("newFriendRequestReceived");
+            socket.off("userIsConnected");
+            socket.off("userConnected");
+            socket.off("userDisconnected");
         }
     }, [currentUser])
     
@@ -64,7 +77,7 @@ export default function Profile() {
                 {currentUser === undefined ? (
                     <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
-                        {socket && <FriendList />}
+                        {socket && <FriendList socket={socket} />}
                         {socket && <PendingList />}
                         {socket && <RequestsList />}
                         {socket && <BlockList />}
