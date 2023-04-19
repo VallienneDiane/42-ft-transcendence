@@ -81,7 +81,7 @@ const Auth2faSettings: React.FC = () => {
 
     return (
         <div id="fasetting">
-            <h2>LogIn settings</h2>
+            <h2>Activate Two-Factor-Auth</h2>
             <div className="switch">
                 <p>Activate Google Authentificator</p>
                 <ReactSwitch

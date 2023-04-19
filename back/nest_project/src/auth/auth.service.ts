@@ -53,7 +53,11 @@ export class AuthService {
     }
     return validUser;
   }
-  
+  /**
+   * Generate token
+   * @param id 
+   * @returns 
+   */
   async genToken(id: string){
     const validUser = await this.userService.findById(id);
     const payload = {sub: validUser.id};
@@ -69,16 +73,24 @@ export class AuthService {
       access_token: this.jwtService.sign(payload)
     }
   }
-  // TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
-  //otp auth = one time password compatible with Google authentificator
+  /**
+   * TWO FACTOR AUTH | GOOGLE AUTHENTIFICATOR
+   * otp auth = one time password compatible with Google authentificator
+   * @param fullToken 
+   * @returns 
+   */
   async decodeToken(fullToken: string): Promise<{ id: string }>{
     const token = fullToken.split(' ')[1];
     const decodedToken = await this.jwtService.verifyAsync(token);
     const id = decodedToken.sub;
     return { id };
   }
-  //generate secret use for google authentificator
-  //secret est une chaîne de caractères aléatoire qui est utilisée pour générer les codes d'authentification à deux facteurs.
+  /**
+   * Generate secret use for google authentificator
+   * secret = random string use to generate two factor authentication codes
+   * @param id 
+   * @returns 
+   */
   async generateQRcode(id: string) {
     const secretInfos = speakeasy.generateSecret( {
       name: "ft_Transcendence"
@@ -88,7 +100,12 @@ export class AuthService {
     await this.userService.setQrCode(QRcode, id);
     return (QRcode);
   }
-  //check if entered code for google authentificator is valid
+  /**
+   * Check if entered code for google authentificator is valid
+   * @param token 
+   * @param secret 
+   * @returns 
+   */
   async is2faCodeValid(token: string, secret:string) {
     const isCodeValid = speakeasy.totp.verify(
     { 

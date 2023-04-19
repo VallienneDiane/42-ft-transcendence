@@ -60,11 +60,9 @@ const HomePageSettings: React.FC = () => {
         }
         await accountService.isUniqueLogin(user.login)
         .then(loginUnique => {
-            console.log("homesettings : login unique ? ", loginUnique.data);
             if(loginUnique.data == true) {
                 accountService.isId42(user.id42)
                 .then(res_id42 => {
-                    console.log("homesettings : isId42 unique ? ", res_id42.data)
                     if(res_id42.data == true) {
                         setIsUniqueId42(false);
                         return;
@@ -72,7 +70,6 @@ const HomePageSettings: React.FC = () => {
                     setIsUniqueId42(true);
                     accountService.createUser(user)
                     .then(token => {
-                        console.log("home settings : gen token ? ", token.data);
                         accountService.saveToken(token.data.access_token);
                         const from = (location.state as any)?.from || "/";
                         navigate(from);

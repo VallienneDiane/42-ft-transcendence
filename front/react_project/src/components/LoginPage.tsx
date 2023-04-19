@@ -17,7 +17,9 @@ const LoginPage: React.FC = () => {
             loginInput.current.focus();
         }
     }, [])
-    //login with 42, get url to authorize connexion and navigate to this url
+    /**
+     * login with 42, get url to authorize connexion and navigate to this url
+     */
     const redirectToApi42 = async () => {
         await accountService.url42()
         .then(response_url => {
@@ -27,11 +29,13 @@ const LoginPage: React.FC = () => {
             console.log(error);
         });
     }
-    //login with or without 2fa
+    /**
+     * login with or without 2fa
+     * @param data 
+     */
     const onSubmit = async (data: LogInForm) => {
         accountService.login(data)
         .then(response_user => {
-            console.log("loginpage data user ", response_user.data);
             if(response_user.data == true) {
                 accountService.is2faActive(data.id)
                 .then(response_2fa => {

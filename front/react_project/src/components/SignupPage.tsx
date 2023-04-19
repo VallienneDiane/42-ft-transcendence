@@ -17,6 +17,7 @@ const userSchema = yup.object().shape({
 
 const SignupPage: React.FC = () => {
   let navigate = useNavigate();
+  const [errorLogin, setError] = useState<boolean>(false);
   
   const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
@@ -27,15 +28,23 @@ const SignupPage: React.FC = () => {
     const svgString = ReactDOMServer.renderToString(avatar);
 
     data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
-    accountService.signUp(data)
-    .then(Response => {
-      accountService.saveToken(Response.data.access_token);
-      navigate("/");
+    await accountService.isUniqueLogin(data.login)
+    .then(loginUnique => {
+      if(loginUnique.data == true) {
+        accountService.signUp(data)
+        .then(Response => {
+          accountService.saveToken(Response.data.access_token);
+          navigate("/");
+        })
+        .catch(error => {console.log(error);})
+      }
+      else {
+        setError(true);
+      }
     })
-    .catch(error => {
-        console.log(error);
-    })
+    .catch(error=> {console.log(error);})
   }
+  
 
   return (
     <div id='signup_page'>
@@ -61,6 +70,7 @@ const SignupPage: React.FC = () => {
             />
             {errors.password && <p className='logError'>{errors.password.message}</p>}
           <button className="form_element" type="submit">SIGN UP</button>
+            {errorLogin ? <p className="error">This login already exist, choose another one</p> : null}
         </form>
         <a href="/login">Already registered ? Log In</a>
       </div>

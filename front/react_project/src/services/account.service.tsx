@@ -3,47 +3,83 @@ import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
-////////////////// SIGN UP - LOGIN - LOGOUT - TOKEN /////////////////
-// Request to signup
+/**
+ * Request to signup
+ * @param credentials 
+ * @returns 
+ */
 let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
-// Request to login
+/**
+ * Request to login
+ * @param credentials 
+ * @returns 
+ */
 let login = (credentials: LogInForm) => {
     return Axios.post('auth/login', credentials);
 }
-// Upload Avatar picture
-let uploadAvatar = (file: string) => {
-    const user: JwtPayload = accountService.readPayload()!;
-    return Axios.post('user/uploadAvatar', {id: user.sub, file});
-}
-// Get Avatar picture
+/**
+ * Upload Avatar picture
+ * @param file 
+ * @returns 
+ */
+// let uploadAvatar = (file: string) => {
+//     const user: JwtPayload = accountService.readPayload()!;
+//     return Axios.post('user/uploadAvatar', {id: user.sub, file});
+// }
+ /**
+  * Get Avatar picture
+  * @param id 
+  * @returns 
+  */
 let getAvatar = (id: string) => {
     return Axios.get('getAvatar/' + id);
 }
-
+/**
+ * Check if login is unique
+ * @param login 
+ * @returns 
+ */
 let isUniqueLogin = (login: string) => {
     return Axios.get('user/isUniqueLogin/' + login);
 }
-
+/**
+ * Check if it's a 42 id
+ * @param id42 
+ * @returns 
+ */
 let isId42 = (id42: string) => {
     return Axios.get('user/isId42/' + id42);
 }
-// Update name and avatar if first connection with 42
+/**
+ * Update name and avatar if first connection with 42
+ * @param credentials 
+ * @returns 
+ */
 let createUser = (credentials: SettingsForm ) => {
     return Axios.post('user/signup42', credentials);
 }
-
+/**
+ * Update login
+ * @param credentials 
+ * @returns 
+ */
 let updateLogin = (credentials: LoginSettingsForm ) => {
     return Axios.post('user/updateLogin', credentials);//return 
 }
-
+/**
+ * Update avatar
+ * @param credentials 
+ * @returns 
+ */
 let updateAvatar = (credentials: AvatarSettingsForm ) => {
-    console.log("je suis dans la requete UPDATE avatar", credentials);
     return Axios.post('user/updateAvatar', credentials);//return 
 }
-
-// Fonction qui check si user est connecté. Et que le token n'est pas expiré
+/**
+ * Check if user connected and that token is valid
+ * @returns 
+ */
 let isLogged = () => {
     let token = localStorage.getItem('token');
     if (token !== null)  { 
@@ -60,28 +96,42 @@ let isLogged = () => {
         return (false);
     }
 }
-// Request to generate token
+/**
+ * Request to generate token
+ * @param id 
+ * @returns 
+ */
 let generateToken = (id: string) => {
     return Axios.post('auth/generateToken', {id});
 }
-
 let generateToken42 = (id42: string) => {
     return Axios.post('auth/generateToken42', {id42});
 }
-
+/**
+ * Save token in storage
+ * @param token 
+ */
 let saveToken = (token: string) => {
     localStorage.setItem('token', token);
 }
-//get token from local storage
+/**
+ * Get token from local storage
+ * @returns 
+ */
 let getToken = () => {
     return localStorage.getItem('token');
 }
-// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de localStorage
+/**
+ * When user logout, request send to inform server and destroy token
+ */
 let logout = () => {
     Axios.post('/auth/logout');
     localStorage.removeItem('token');
 }
-// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
+/**
+ * decrypt token and returns infos of token (id, expiration time)
+ * @returns 
+ */
 let readPayload = () => {
     let token = getToken();
     if (token === null) {
@@ -98,40 +148,68 @@ let readPayload = () => {
         }
     }
 }
-////////////////// TWO FACTOR AUTHENTIFICATOR ////////////////////
-//check if 2fa / google auth is active when login
+/**
+ * Check if 2fa / google auth is active when login
+ * @param id 
+ * @returns 
+ */
 let is2faActive = (id: string) => {
     return Axios.post('auth/is2faActive', {id});
 }
 let is2faActive42 = (id42: string) => {
     return Axios.post('auth/is2faActive42', {id42});
 }
-//check if 2fa is active in settings to display the right setting and check token
+/**
+ * check if 2fa is active in settings to display the right setting and check token
+ * @param id 
+ * @returns 
+ */
 let is2faActiveSettings = (id: string) => {
     return Axios.post('auth/is2faActiveSettings', {id});
 }
-//enable 2fa
+/**
+ * Enable 2fa
+ * @returns 
+ */
 let enable2fa = () => {
     return Axios.post('auth/enable2fa');
 }
-//verify code submitted by the user
+/**
+ * Verify code submitted by the user
+ * @param credentials 
+ * @returns 
+ */
 let verifyCode2fa = (credentials: VerifyCodeForm) => {
     return Axios.post('auth/verifyCode', credentials);
 }
-//verify code submitted by the user in settings to check token
+/**
+ * Verify code submitted by the user in settings to check token
+ * @param credentials 
+ * @returns 
+ */
 let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
     return Axios.post('auth/verifyCodeSettings', credentials);
 }
-//disable 2fa
+/**
+ * Disable 2fa
+ * @returns 
+ */
 let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
-////////////////// SIGN IN WITH 42 /////////////////////////////
-//get url to give authorization to connect api42
+/**
+ * SIGN IN WITH 42
+ * get url to give authorization to connect api42
+ * @returns 
+ */
 let url42 = () => {
     return Axios.get('/')
 }
-//send code to get token and infos user from the api and then generate jwt token
+/**
+ * Send code to get token and infos user from the api and then generate jwt token
+ * @param code 
+ * @returns 
+ */
 let callback = (code: string) => {
     return Axios.get('/callback?code=' + code);
 }
@@ -139,6 +217,6 @@ let callback = (code: string) => {
 export const accountService = {
     signUp, login, isUniqueLogin, isId42, createUser, saveToken, logout, isLogged, 
     getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, uploadAvatar,
-    getAvatar, url42, callback, updateLogin, updateAvatar
+    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, 
+    getAvatar, url42, callback, updateLogin, updateAvatar //uploadAvatar,
 }

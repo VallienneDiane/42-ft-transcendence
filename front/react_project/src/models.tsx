@@ -12,6 +12,7 @@ export interface SignUpForm {
     login: string,
     email: string,
     password: string,
+    avatarSvg: string;
   }
   
   export interface SettingsForm {
