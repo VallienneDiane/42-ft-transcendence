@@ -1,7 +1,11 @@
+
+/**
+ * a 2D basic vector class
+ */
 export class Vec2 {
 
-	x: number;
-	y: number;
+	public x: number;
+	public y: number;
 
 	constructor(x: number, y: number) {
 		this.x = x;

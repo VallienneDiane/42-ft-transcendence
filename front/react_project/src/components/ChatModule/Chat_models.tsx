@@ -5,6 +5,9 @@ export interface SocketContextType {
 	socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 	createSocket: () => void;
 	disconnect: () => void;
+	socketGame: Socket<DefaultEventsMap, DefaultEventsMap>;
+	createSocketGame: () => void;
+	disconnectGame: () => void;
 }
 
 export interface IUser {

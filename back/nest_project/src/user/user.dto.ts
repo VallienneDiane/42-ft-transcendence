@@ -1,3 +1,5 @@
+import { Optional } from "@nestjs/common";
+import { Match } from "src/match/Match";
 import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean, IsNumber } from "class-validator";
 import { ChannelDto } from "src/chat/channel/channel.dto";
 import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
@@ -23,6 +25,8 @@ export class UserDto {
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
     @IsNotEmpty() @IsString() qrCode: string;
     @IsNotEmpty() avatarSvg: string;
+    @Optional() wonMatches: Match[];
+    @Optional() lostMatches: Match[];
     readonly requestsSend: FriendEntity[];
     readonly requestsReceived: FriendEntity[];
     readonly blockList: UserEntity[];

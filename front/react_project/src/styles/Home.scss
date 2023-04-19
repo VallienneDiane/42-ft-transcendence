@@ -19,7 +19,7 @@
         align-items: flex-end;
         justify-content: center;
         width: 50%;
-
+        max-width: 700px;
         padding-bottom: 100px;
 
         &>div {
@@ -46,11 +46,11 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    top: 8px;
+                    top: 9px;
                     left: -5px;
                     width: 15px;
                     height: 15px;
-                    background-color: var(--second-color);
+                    // background-color: var(--second-color);
                     // filter: brightness(0.9);
                     transform: rotate(45deg);
                     z-index: -1;
@@ -66,7 +66,7 @@
                     right: -8px;
                     width: 15px;
                     height: 8px;
-                    background-color: var(--second-color);
+                    // background-color: var(--second-color);
                     // filter: brightness(0.9);
                     transform: rotate(45deg);
                     z-index: -1;
@@ -81,15 +81,17 @@
                 padding: 10px 15px;
                 height: 100%;
                 width: 100%;
+                max-width: 800px;
                 // box-shadow: 0px -5px 0px 3px rgba(189, 0, 0, 1);;
                 // background-color: red;
                 // background-color: transparent;
                 background-color: var(--second-color);
-                font-size: 3.2em;
+                // font-size: 3.2em;
                 border: solid 4px var(--text-color);
                 position: relative;
                 z-index: 2;
 
+                font-size: clamp(10px, 7cqw, 75px) ;
             }
 
             & .navLink {
@@ -137,10 +139,11 @@
             }
 
             & h1:hover {
+                
                 // background-color: red;
-                font-size: 3.1em;
-                width: 99%;
-                transform: translateY(-5px);
+                // font-size: 30%;
+                // width: 99%;
+                transform: translateY(-12px) scale(0.97);
                 filter: brightness(95%);
                 z-index: 2;
 
@@ -150,13 +153,13 @@
                 }
 
                 &+.shadow::after {
-                    height: 9px;
+                    height: 0px;
                     left: -2px;
                     // top: -1px;
                 }
 
                 &+.shadow::before {
-                    width: 8px;
+                    width: 0px;
                     top: 4px;
                     right: 2px;
                 }
@@ -206,8 +209,8 @@
 
             & .navLink:hover {
                 // background-color: red;
-                width: 288px;
-                transform: translateY(-5px);
+                // width: 288px;
+                transform: translateY(-12px) scale(0.95);
                 filter: brightness(95%);
                 z-index: 2;
 
@@ -217,13 +220,13 @@
                 }
 
                 &+.shadow::after {
-                    height: 9px;
+                    height: 0px;
                     left: -2px;
                     // top: -1px;
                 }
 
                 &+.shadow::before {
-                    width: 8px;
+                    width: 0px;
                     top: 4px;
                     right: 2px;
                 }
@@ -246,7 +249,7 @@
                 &::after {
                     content: '';
                     position: absolute;
-                    top: 8px;
+                    top: 9px;
                     left: -5px;
                     width: 15px;
                     height: 15px;
