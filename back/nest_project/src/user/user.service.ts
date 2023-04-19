@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { Repository } from "typeorm";
+import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { IRequest } from "src/chat/chat.interface";
 
@@ -11,18 +12,82 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly usersRepository: Repository<UserEntity>
     ) {}
-    // SIGN UP : CREATE NEW USER AND SAVE IT IN THE DATABASE
-    public create(newUser: UserEntity): Promise<UserEntity> {
-        return this.usersRepository.save(newUser);
+    /**
+     * Create new user and save it in database
+     * @param newUser 
+     * @returns UserEntity
+     */
+    async create(newUser: SignUpDto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: null,
+            login: newUser.login,
+            email: newUser.email,
+            password: newUser.password,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: null,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+            mutedList: [],
+        }
+        return await this.usersRepository.save(user);
     }
-    // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
+    async create42(newUser: SignUp42Dto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: newUser.id42,
+            login: newUser.login,
+            email: newUser.email,
+            password: null,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: newUser.avatarSvg,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+            mutedList: [],
+        }
+        return await this.usersRepository.save(user);
+    }
+    /**
+     * Find user by login
+     * @param login 
+     * @returns UserEntity
+     */
     async findByLogin(login: string): Promise<UserEntity> {
         return await this.usersRepository.findOneBy({login});
     }
-    // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
+    /**
+     * Find user by id
+     * @param id 
+     * @returns UserEntity
+     */
     async findById(id: string): Promise<UserEntity> {
         const toReturn = await this.usersRepository.findOneBy({id: id});
-        return toReturn
+        return toReturn;
+    }
+    public findById42(id42: string): Promise<UserEntity> {
+        return this.usersRepository.findOneBy({id42});
     }
     
     /**
@@ -38,10 +103,10 @@ export class UserService {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
     }
-    public findById42(id42: number): Promise<UserEntity> {
-        return this.usersRepository.findOneBy({id42});
-    }
-    // DISPLAY ALL USERS
+    /**
+     * Display all users
+     * @returns 
+     */
     async findAll(): Promise<{ id: string, login: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
           .select(['user.id', 'user.login'])
@@ -52,21 +117,36 @@ export class UserService {
           .select(['user.login'])
           .getMany();
     }
-    async findAllIds42(): Promise<{ id42: number }[]> {
+    async findAllIds42(): Promise<{ id42: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
           .select(['user.id42'])
           .getMany();
     }
-    // UPDATE USER INFOS
-    async update(login: string, User: UserEntity): Promise<void> {
-        this.usersRepository.update(login, User);
+    /**
+     * Update user login
+     * @param userToUpdate 
+     * @returns 
+     */
+    async updateLogin(userToUpdate: UpdateLoginDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {login: userToUpdate.login});
     }
-    // DELETE USER ACCOUNT BY ID
+    /**
+     * Update user avatar
+     * @param userToUpdate 
+     * @returns 
+     */
+    async updateAvatar(userToUpdate: UpdateAvatarDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {avatarSvg: userToUpdate.avatarSvg});
+    }
+    /**
+     * Delete user account
+     * @param login 
+     */
     async delete(login: string): Promise<void> {
         this.usersRepository.delete(login);
     }
     /**
-     * return the link between an user and a channel
+     * Return the link between an user and a channel
      * @param userId primary key of a user
      * @param channelId primary key of a channel
      * @returns channel: channel entity + status: user status in this channel as a string ("normal", "op" or "god")  
@@ -153,35 +233,56 @@ export class UserService {
         return arrayOfChannels;
     }
     
-    //set secret code for 2fa in user entity
+    /**
+     * set secret code for 2fa in user entity
+     * @param secret 
+     * @param id 
+     * @returns 
+     */
     async set2faSecret(secret: string, id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
         await this.usersRepository.save(user);
         return (user.twoFactorSecret);
     }
-    //set secret code for 2fa in user entity
+    /**
+     * set secret code for 2fa in user entity
+     * @param qrcode 
+     * @param id 
+     * @returns 
+     */
     async setQrCode(qrcode: string, id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.qrCode = qrcode;
         await this.usersRepository.save(user);
         return (user.qrCode);
     }
-    //the user turned on the 2fa
+    /**
+     * the user turned on the 2fa
+     * @param user 
+     * @returns 
+     */
     async turnOn2fa(user: UserEntity) {
         user.isTwoFactorEnabled = true;
-        await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
+        await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
-    //the user turned off the 2fa
+    /**
+     * the user turned off the 2fa
+     * @param id 
+     * @returns 
+     */
     async turnOff2fa(id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
         await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
-
-    //upload avatar
+    /**
+     * upload avatar
+     * @param id 
+     * @param file 
+     */
     async loadAvatar(id: string, file: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.avatarSvg = file;

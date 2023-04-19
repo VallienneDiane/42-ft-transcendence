@@ -752,28 +752,22 @@ export class ChatService {
         client.emit("supressFriend", "wefnwkgnasgfs");
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
-            let friend: UserEntity = null;
-            console.log(me.id, request.receiver.id, request.sender.id);
-            if (request.sender.id == me.id)
-                friend = request.receiver;
-            else
-                friend = request.sender;
-            this.friendService.deleteRequest(friendshipId)
-            .then(() => {
-                let meSockets = roomHandler.userMap.get(me.id);
-                if (meSockets != undefined) {
-                    meSockets.sockets.forEach(({}, socket) => {
-                        socket.emit("tamere");
-                        console.log(friendshipId);
-                        socket.emit("supressFriend", friendshipId);
-                    })
-                }
-                let friendSockets = roomHandler.userMap.get(friend.id);
-                if (friendSockets != undefined) {
-                    console.log("I sent to him");
-                    friendSockets.emit("supressFriend", friendshipId);
-                }
-            })
+            if (request) {
+                let friend: UserEntity = null;
+                if (request.sender.id == me.id)
+                    friend = request.receiver;
+                else
+                    friend = request.sender;
+                this.friendService.deleteRequest(friendshipId)
+                .then(() => {
+                    let meSockets = roomHandler.userMap.get(me.id);
+                    if (meSockets != undefined)
+                        meSockets.emit("supressFriend", friendshipId);
+                    let friendSockets = roomHandler.userMap.get(friend.id);
+                    if (friendSockets != undefined)
+                        friendSockets.emit("supressFriend", friendshipId);
+                })
+            }
         })
     }
 

@@ -129,13 +129,6 @@ class FriendList extends React.Component<{socket: Socket}, {
         });
     }
 
-    componentWillUnmount(): void {
-        this.props.socket.off("newFriend");
-        this.props.socket.off("supressFriend");
-        this.props.socket.off("userIsConnected");
-        this.props.socket.off("userConnected");
-        this.props.socket.off("userDisconnected");
-    }
     render() {
         return (
         <div id="friend">

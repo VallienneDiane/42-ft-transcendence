@@ -10,8 +10,8 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({nullable: true})
-  id42: number;
+  @Column({nullable: true, unique: true})
+  id42: string;
 
   @Column(
     {type: 'varchar', 
