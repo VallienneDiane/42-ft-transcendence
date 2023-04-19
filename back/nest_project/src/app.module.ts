@@ -9,6 +9,7 @@ import { GameUpdateCenterModule } from './game_update_center/game_update_center.
 import { ChatModule } from './chat/chat.module';
 import { GameEngineModule } from './game_engine/game_engine.module';
 import { PongEngineModule } from './pong_engine/pong_engine.module';
+import { MatchModule } from './match/Match.module';
 import { FriendModule } from './chat/friend/friend.module';
 
 @Module({
@@ -17,6 +18,7 @@ import { FriendModule } from './chat/friend/friend.module';
     ChatModule,
     UserModule,
     AuthModule,
+    MatchModule,
     GameUpdateCenterModule,
     GameEngineModule,
     FriendModule,

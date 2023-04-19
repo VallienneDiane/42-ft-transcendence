@@ -10,7 +10,7 @@ import { IRequest } from "src/chat/chat.interface";
 export class UserService {
     constructor (
         @InjectRepository(UserEntity)
-        private readonly usersRepository: Repository<UserEntity>
+        private readonly usersRepository: Repository<UserEntity>,
     ) {}
     /**
      * Create new user and save it in database
@@ -40,6 +40,8 @@ export class UserService {
             blockList: [],
             blockedMeList: [],
             mutedList: [],
+            wonMatches: [],
+            lostMatches: [],
         }
         return await this.usersRepository.save(user);
     }
@@ -66,6 +68,8 @@ export class UserService {
             blockList: [],
             blockedMeList: [],
             mutedList: [],
+            wonMatches: [],
+            lostMatches: [],
         }
         return await this.usersRepository.save(user);
     }
