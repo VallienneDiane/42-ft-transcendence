@@ -3,10 +3,11 @@ import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { IDest, IChannel } from "./Chat_models";
+import { IDest, IChannel, ISearch } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faBroom, faCommentSlash, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faRightFromBracket, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router-dom";
+import { userService } from "../../services/user.service";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
@@ -261,13 +262,13 @@ function MemberList(props: {dest: IDest}) {
                             if (member.status == "normal")
                                 return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                                         <div>
-                                            <button className="muteFor" value={member.user.id} onClick={showMuteFor}>
+                                            <button className="memberButton" data-hover-text="Mute" value={member.user.id} onClick={showMuteFor}>
                                                 <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
                                             </button>
-                                            <button className="kick" value={member.user.id} onClick={kickUser}>
+                                            <button className="memberButton" data-hover-text="Kick" value={member.user.id} onClick={kickUser}>
                                                 <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
                                             </button>
-                                            <button className="ban" value={member.user.id} onClick={ban}>
+                                            <button className="memberButton" data-hover-text="Ban" value={member.user.id} onClick={ban}>
                                                 <FontAwesomeIcon className="iconAction" icon={faBan} />
                                             </button>
                                         </div></li>)
@@ -278,19 +279,19 @@ function MemberList(props: {dest: IDest}) {
                             return (<li key={id}><div>{member.user.login}{iconStatus}</div>
                             <div>
                                 { member.status == "op" ? 
-                                (<button className="downgrade" value={member.user.id} onClick={deOp}>
+                                (<button className="memberButton" data-hover-text="Downgrade" value={member.user.id} onClick={deOp}>
                                     <FontAwesomeIcon className="iconAction" icon={faBroom} />
                                 </button>) :
-                                (<button className="upgrade" value={member.user.id} onClick={doOp}>
+                                (<button className="memberButton" data-hover-text="Upgrade" value={member.user.id} onClick={doOp}>
                                     <FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} />
                                 </button>) }
-                                <button className="muteFor" value={member.user.id} onClick={showMuteFor}>
+                                <button className="memberButton" data-hover-text="Mute" value={member.user.id} onClick={showMuteFor}>
                                     <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
                                 </button>
-                                <button className="kick" value={member.user.id} onClick={kickUser}>
+                                <button className="memberButton" data-hover-text="Kick" value={member.user.id} onClick={kickUser}>
                                     <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
                                 </button>
-                                <button className="ban" value={member.user.id} onClick={ban}>
+                                <button className="memberButton" data-hover-text="Ban" value={member.user.id} onClick={ban}>
                                     <FontAwesomeIcon className="iconAction" icon={faBan} />
                                 </button>
                             </div></li>)
@@ -313,8 +314,9 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
     const [userToInvit, setUserToInvit] = useState<string>("");
     const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
-    const [userToUnban, setUserToUnban] = useState<string>("");
-    const [bans, setBans] = useState<{ban: {id: string, login: string}}[]>([]);
+    const [bans, setBans] = useState<{id: string, login: string}[]>([]);
+    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string}[]>([]);
+    const [users, setUsers] = useState<{id: string, name: string}[]>([]);
 
     const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
@@ -348,15 +350,9 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         setUserToInvit("");
     }
 
-    const onChangeUnban = (e: any) => {
-        setUserToUnban(e.target.value);
-    }
-
     const unban = (e: any) => {
-        console.log(e.target.value, props.dest.id)
         e.preventDefault();
-        socket.emit("unbanUser", {name: userToUnban, channelId: props.dest.id});
-        setUserToUnban("");
+        socket.emit("unbanUser", {userId: e.target.value, channelId: props.dest.id});
     }
 
     const leaveChannel = () => {
@@ -369,10 +365,51 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         props.handleClose();
     }
 
+    const fetchUsers = () => { // récupération de tous les users, sauf moi-même, et les users qui sont déjà dans le channel
+        userService.getAllUsers()
+        .then(response => {
+            const playload: JwtPayload = accountService.readPayload()!;
+            socket.emit('listUsersChann', {channelId: props.dest.id});
+            const users = new Map<string, string>();
+            response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login));
+            let newUserList: {id: string, name: string}[] = [];
+            console.log("members", members);
+            users.forEach((login, id) => {
+                let bool: boolean = true;
+                for (let elt of members) {
+                    console.log("blop")
+                    console.log(elt.user.login);
+                    if (elt.user.login == login) {
+                        bool = false;
+                        break;
+                    }
+                }
+                if (bool === true)
+                    newUserList.push({id: id, name: login});
+            });
+            newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
+            // console.log(newUserList);
+            setUsers(newUserList);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+    
     useEffect(() => {
         socket.emit("getBanList", {channelId: props.dest.id});
-        socket.on("banList", (array: {ban: {id: string, login: string}}[]) => {
+        socket.on("banList", (array: {id: string, login: string}[]) => {
             setBans(array);
+        })
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
+            console.log("zoubi");
+            setMembers(list);
+        })
+        socket.on("newUnban", (userId: string) => {
+            let newArray: {id: string, login: string}[] = bans.filter(
+                (ban: {id: string, login: string}) => {return (ban.id != userId)}
+                );
+            setBans(newArray);
         })
         
         document.addEventListener("mousedown", handleClickOutside);
@@ -380,7 +417,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
             document.removeEventListener("mousedown", handleClickOutside);
             socket.off('banList');
         }
-    }, [ref]);
+    }, [ref, bans, members]);
 
     return (
         <div className="sidebarContent" ref={ref}>
@@ -395,7 +432,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                          <li onClick={showInvite}>Invite</li>
                          {onClickInvite && (
                              <form className="searchbar" onSubmit={inviteUser}>
-                                 <input type="text" id="invite" onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
+                                 <input type="text" id="invite" onClick={fetchUsers} onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
                                  <button>
                                     <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
                                  </button>
@@ -404,17 +441,16 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                      </React.Fragment>
                 ) : null }
                 {(props.dest.status === "god" && bans.length != 0) ? (
-                     <React.Fragment>
-                         <li onClick={showUnban}>Unban</li>
-                         {onClickUnban && (
-                             <form className="searchbar" onSubmit={unban}>
-                                 <input type="text" id="unban" onChange={onChangeUnban} value={userToUnban} placeholder="Search"/>
-                                 <button>
-                                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-                                 </button>
-                             </form>)
-                         }
-                     </React.Fragment>
+                    <React.Fragment>
+                        <li onClick={showUnban}>Unban</li>
+                        {onClickUnban && 
+                            <ul className="memberList">
+                                {bans.map((ban, id) => (
+                                    <li key={id}><button value={ban.id} onClick={unban}>{ban.login}</button></li>
+                                ))}
+                            </ul>
+                        }
+                    </React.Fragment>
                 ) : null }
                 {props.dest.status !== "normal" ? (
                     <React.Fragment>
