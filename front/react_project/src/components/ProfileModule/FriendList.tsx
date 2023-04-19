@@ -12,6 +12,8 @@ export default function FriendList() {
     const me: JwtPayload = accountService.readPayload()!;
     const [friends, setFriend] = useState<{friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
     const [bug, setBug] = useState<boolean>(false); //react hooks is unable to detect when I update a boolean of an array.
+    const [fetchUserDone, setFetchUserDone] = useState<boolean>(false);
+    const [askIfConnectedDone, setAskIfConnected] = useState<boolean>(false);
 
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
@@ -23,9 +25,10 @@ export default function FriendList() {
                     friendId: elt.friendId,
                     friendName: elt.friendName,
                     isConnected: false});
-                    socket.emit("isConnected", {userId: elt.friendId});
-            }
+                }
             setFriend(friendsArray);
+            if (!fetchUserDone)
+                setFetchUserDone(true);
         });
     }
 
@@ -37,12 +40,28 @@ export default function FriendList() {
         console.log("invite To Game");
     }
 
+    const askIfConnected = () => {
+        if (friends.length) {
+            let arrayToAskIfConnected: {userId: string}[] = [];
+            friends.forEach((friend) => {
+                arrayToAskIfConnected.push({userId: friend.friendId});
+            })
+            socket.emit("isConnected", arrayToAskIfConnected);
+        }
+        setAskIfConnected(true);
+    }
+
     useEffect(() => {
-        fetchFriends();
+        if (!fetchUserDone)
+            fetchFriends();
     }, [])
 
     useEffect(() => {
+        if (fetchUserDone && !askIfConnectedDone)
+            askIfConnected();
+        console.log("pouet");
         socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+            console.log("newFriend");
             let newFriendList = [...friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
             newFriendList.sort((a, b) => {
                 return (a.friendName.localeCompare(b.friendName));
@@ -50,21 +69,27 @@ export default function FriendList() {
             setFriend(newFriendList);
             socket.emit("isConnected", {userId: id});
         });
+        
         socket.on("supressFriend", (friendshipId: string) => {
+            console.log("unfriend", friendshipId);
             setFriend(friends.filter(friend => {
                 return friend.friendshipId != friendshipId;
             }))
         });
-        socket.on("userIsConnected", (userId: string) => {
+
+        socket.on("usersAreConnected", (userIds: string[]) => {
             let newFriendList = friends;
-            for (let elt of newFriendList) {
-                if (elt.friendId == userId) {
-                    elt.isConnected = true;
-                    setFriend(newFriendList);
-                    setBug(!bug);
-                    break;
+            for (let eltData of userIds) {
+                for (let elt of newFriendList) {
+                    if (elt.friendId == eltData) {
+                        elt.isConnected = true;
+                        break;
+                    }
                 }
             }
+            console.log("newFriends", newFriendList, "userIds", userIds);
+            setFriend(newFriendList);
+            setBug(!bug);
         });
         socket.on("userConnected", (userId: string, userName: string) => {
             let newFriendList = friends;
@@ -89,13 +114,14 @@ export default function FriendList() {
             }
         });
         return () => {
+            console.log("pas pouet");
             socket.off("newFriend");
             socket.off("supressFriend");
             socket.off("userIsConnected");
             socket.off("userConnected");
             socket.off("userDisconnected");
         }
-    }, [friends, bug]);
+    }, [friends, fetchUserDone, bug]);
 
     return (
         <div id="friend">
