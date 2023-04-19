@@ -81,11 +81,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage("isConnected")
-    handleIsConnected(@MessageBody() data: isConnectedDto, @ConnectedSocket() client: Socket) {
+    handleIsConnected(@MessageBody() data: isConnectedDto[], @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.isConnectedEvent(client, user, data.userId, this.chatRoomHandler);
+                this.chatService.isConnectedEvent(client, user, data, this.chatRoomHandler);
         })
     }
 
@@ -337,7 +337,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((me) => {
             if (me != null) {
-                this.chatService.unfriendEvent(me, data.friendshipId, this.chatRoomHandler);
+                this.chatService.unfriendEvent(client, me, data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
