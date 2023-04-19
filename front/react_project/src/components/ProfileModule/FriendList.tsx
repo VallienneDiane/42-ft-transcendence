@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Axios from "../../services/caller.service";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
@@ -6,17 +6,30 @@ import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faCheck, faComment, faCommentDots, faCommentSms, faGun, faHandsBubbles, faPoo, faSpaghettiMonsterFlying, faTrashCan, faWalkieTalkie } from "@fortawesome/free-solid-svg-icons";
+import { Socket } from "socket.io-client";
 
-export default function FriendList() {
-    const {socket} = useContext(SocketContext);
-    const me: JwtPayload = accountService.readPayload()!;
-    const [friends, setFriend] = useState<{friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
-    const [bug, setBug] = useState<boolean>(false); //react hooks is unable to detect when I update a boolean of an array.
-    const [fetchUserDone, setFetchUserDone] = useState<boolean>(false);
-    const [askIfConnectedDone, setAskIfConnected] = useState<boolean>(false);
+class FriendList extends React.Component<{socket: Socket}, {
+    me: JwtPayload,
+    friends: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[],
+    fetchFriendsDone: boolean,
+    askIfConnectedDone: boolean,
+}> {
+    constructor(props:{socket: Socket}) {
+        super(props);
+        this.state = {
+            me: accountService.readPayload()!,
+            friends: [],
+            fetchFriendsDone: false,
+            askIfConnectedDone: false,
+        }
+        this.fetchFriends = this.fetchFriends.bind(this);
+        this.unfriendHandler = this.unfriendHandler.bind(this);
+        this.inviteToGameHandler = this.inviteToGameHandler.bind(this);
+        this.askIfConnected = this.askIfConnected.bind(this);
+    }
 
-    const fetchFriends = () => {
-        Axios.get("listFriends/" + me.sub)
+    fetchFriends() {
+        Axios.get("listFriends/" + this.state.me.sub)
         .then((response) => {
             let friendsArray: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
             for (let elt of response.data) {
@@ -26,59 +39,62 @@ export default function FriendList() {
                     friendName: elt.friendName,
                     isConnected: false});
                 }
-            setFriend(friendsArray);
-            if (!fetchUserDone)
-                setFetchUserDone(true);
+            this.setState({
+                friends: friendsArray,
+                fetchFriendsDone: true});
         });
     }
 
-    const unfriendHandler = (e: any) => {
-        socket.emit("unfriend", {friendshipId: e.currentTarget.value});
+    unfriendHandler(e: any) {
+        this.props.socket.emit("unfriend", {friendshipId: e.currentTarget.value});
     }
 
-    const inviteToGameHandler = (e:any) => {
+    inviteToGameHandler(e:any) {
         console.log("invite To Game");
     }
 
-    const askIfConnected = () => {
-        if (friends.length) {
+    askIfConnected() {
+        if (this.state.friends.length) {
             let arrayToAskIfConnected: {userId: string}[] = [];
-            friends.forEach((friend) => {
+            this.state.friends.forEach((friend) => {
                 arrayToAskIfConnected.push({userId: friend.friendId});
             })
-            socket.emit("isConnected", arrayToAskIfConnected);
+            this.props.socket.emit("isConnected", arrayToAskIfConnected);
         }
-        setAskIfConnected(true);
+        this.setState({askIfConnectedDone: true})
     }
 
-    useEffect(() => {
-        if (!fetchUserDone)
-            fetchFriends();
-    }, [])
+    componentDidUpdate(): void {
+        if (!this.state.fetchFriendsDone)
+            this.fetchFriends();
+        if (this.state.fetchFriendsDone && !this.state.askIfConnectedDone)
+            this.askIfConnected();
+    }
 
-    useEffect(() => {
-        if (fetchUserDone && !askIfConnectedDone)
-            askIfConnected();
-        // console.log("pouet");
-        socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+    componentDidMount(): void {
+        this.props.socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
             console.log("newFriend");
-            let newFriendList = [...friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
+            let newFriendList = [...this.state.friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
             newFriendList.sort((a, b) => {
                 return (a.friendName.localeCompare(b.friendName));
             });
-            setFriend(newFriendList);
-            socket.emit("isConnected", {userId: id});
-        });
-        
-        socket.on("supressFriend", (friendshipId: string) => {
-            console.log("unfriend", friendshipId);
-            setFriend(friends.filter(friend => {
-                return friend.friendshipId != friendshipId;
-            }))
+            this.setState({friends: newFriendList});
+            this.props.socket.emit("isConnected", [{userId: id}]);
         });
 
-        socket.on("usersAreConnected", (userIds: string[]) => {
-            let newFriendList = friends;
+        this.props.socket.on("supressFriend", (friendshipId: string) => {
+            console.log("unfriend", friendshipId);
+            this.setState({friends: this.state.friends.filter(friend => {
+                return friend.friendshipId != friendshipId;
+            })})
+        });
+
+        this.props.socket.on("tamere", () => {
+            console.log("tamere");
+        })
+
+        this.props.socket.on("usersAreConnected", (userIds: string[]) => {
+            let newFriendList = this.state.friends;
             for (let eltData of userIds) {
                 for (let elt of newFriendList) {
                     if (elt.friendId == eltData) {
@@ -87,60 +103,51 @@ export default function FriendList() {
                     }
                 }
             }
-            console.log("newFriends", newFriendList, "userIds", userIds);
-            setFriend(newFriendList);
-            setBug(!bug);
+            this.setState({friends: newFriendList});
         });
-        socket.on("userConnected", (userId: string, userName: string) => {
-            let newFriendList = friends;
+
+        this.props.socket.on("userConnected", (userId: string, userName: string) => {
+            let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
                 if (elt.friendId == userId) {
                     elt.isConnected = true;
-                    setBug(!bug);
-                    setFriend(newFriendList);
+                    this.setState({friends: newFriendList});
                     break;
                 }
             }
         });
-        socket.on("userDisconnected", (userId: string, userName: string) => {
-            let newFriendList = friends;
+
+        this.props.socket.on("userDisconnected", (userId: string, userName: string) => {
+            let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
                 if (elt.friendId == userId) {
                     elt.isConnected = false;
-                    setBug(!bug);
-                    setFriend(newFriendList);
+                    this.setState({friends: newFriendList});
                     break;
                 }
             }
         });
-        return () => {
-            // console.log("pas pouet");
-            socket.off("newFriend");
-            socket.off("supressFriend");
-            socket.off("userIsConnected");
-            socket.off("userConnected");
-            socket.off("userDisconnected");
-        }
-    }, [friends, fetchUserDone, bug]);
+    }
 
-    return (
+    render() {
+        return (
         <div id="friend">
-            {friends.length > 0 && <h3 id="titleFriend">My friend{friends.length > 1 && "s"}</h3>}
+            {this.state.friends.length > 0 && <h3 id="titleFriend">My friend{this.state.friends.length > 1 && "s"}</h3>}
             <ul id="friendList">
-                {friends.map((elt) => (
+                {this.state.friends.map((elt) => (
                     <li id="friendElement" key={elt.friendId}>
                         <span id="friendInfo">
                             <div id="friendName">{elt.friendName}</div>
                             <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                         </span>
                     <span id="friendOptions">
-                        <button value={elt.friendshipId} id="unfriendButton" onClick={unfriendHandler}>
+                        <button value={elt.friendshipId} id="unfriendButton" onClick={this.unfriendHandler}>
                         <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
                         </button>
                         <NavLink id="chatButton" to={`/chat/${elt.friendId}`}>
                         <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
                         </NavLink>
-                        <button value={elt.friendId} id="inviteToGame" onClick={inviteToGameHandler}>
+                        <button value={elt.friendId} id="inviteToGame" onClick={this.inviteToGameHandler}>
                         <FontAwesomeIcon className="iconAction" icon={faGun} />
                         </button>
                         <NavLink id="checkProfileButton" to={`/profile/${elt.friendName}`}>
@@ -152,4 +159,7 @@ export default function FriendList() {
             </ul>
         </div>
     )
+    }
 }
+
+export default FriendList;
