@@ -133,16 +133,15 @@ export class UserController {
         return this.userService.delete(data.id);
     }
     /**
-     * Get avatar
+     * Get avatar in chat
      * @param data 
      * @returns 
      */
     @UseGuards(JwtAuthGuard)
     @Get('getAvatar/:user')
-    async findAvatar(@Param('user') data: idDto): Promise<string> {
-        return await this.userService.getAvatar(data.id);
+    async findAvatar(@Param('user') id: string ): Promise<string> {
+        return await this.userService.getAvatar(id);
     }
-
     //update avatar picture
     // @UseGuards(JwtAuthGuard)
     // @Post('user/uploadAvatar')
