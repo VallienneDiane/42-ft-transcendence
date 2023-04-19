@@ -1,7 +1,7 @@
 @import url("styles/Base.css");
 
 *:not(.react-switch-bg > div, .react-switch-bg > div > svg) {
-  background-color: var(--prim-color);
+  /* background-color: var(--prim-color); */
   box-sizing: border-box;
   margin:0;
   padding:0;
@@ -23,6 +23,9 @@ button:hover {
 }
 
 .App {
+  background-color: var(--prim-color);
+  background: url(./assets/trianglyfy5.png) no-repeat center center fixed;
+  background-size: cover;
   display: flex;
   display:flex;
   align-items: center;

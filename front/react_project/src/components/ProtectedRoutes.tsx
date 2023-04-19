@@ -5,12 +5,13 @@ import React, { useEffect } from "react";
 
 const ProtectedRoutes = () => {
     const location = useLocation();
-    const {socket, createSocket} = React.useContext(SocketContext);
+    const {socket, createSocket, socketGame, createSocketGame} = React.useContext(SocketContext);
     const token = accountService.getToken();
    
     useEffect(() => {
-        if (token !== null && socket === null) {
+        if (token !== null && socket === null && socketGame === null) {
             createSocket();
+            createSocketGame();
         }
     })
         

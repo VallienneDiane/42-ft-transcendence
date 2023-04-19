@@ -1,0 +1,151 @@
+#settings {
+    display: flex;
+    justify-content: center;
+    width: 25%;
+    min-width: 350px;
+    flex-direction: column;
+    align-items: center;
+    max-height: 95%;
+    & #name {
+        display: flex;
+        justify-content: center;
+        flex-direction: row;
+        align-items: center;
+        width:100%;
+        height: 28%;
+        margin-bottom: 1em;
+        border-radius: 15px;
+        border: 2px solid var(--text-color);
+        & form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            & h2 {
+                text-align: center;
+                padding-top: 40px;
+                margin-bottom: 1.5em;
+                color: var(--text-color);
+            }
+            & input {
+                width: 150px;
+                height: 45px;
+                font-size: 1.2em;
+                background-color: white;
+                text-align: center;
+                margin-bottom: 1.5em;
+            }
+        }
+    }
+    & #avatar {
+        height: 72%;
+        width: 100%;
+        display: flex;
+        padding-top: 5%;
+        align-items: center;
+        justify-content: flex-start;
+        flex-direction: column;
+        border: 2px solid var(--text-color);
+        border-radius: 15px;
+        & h2 {
+            color: var(--text-color);
+            padding-bottom: 20px;
+        }
+        & #picture {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px;
+        }
+        & #profilePicture {
+            border: 2px solid var(--text-color);
+            margin: 15px 15px 0px 15px;
+            object-fit: cover;
+            aspect-ratio: 1 /1;
+            max-width: 150px;
+            border-radius: 100%;
+        }
+    }
+    & form {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        & #inputDiv {
+            width: 80%;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            margin: 10px 0;
+            border: 2px dashed var(--text-color);
+            color: var(--text-color);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            & > p {
+                background-color: transparent;
+            }
+            & .or {
+                margin: 10px 0;
+            }
+            & #files {
+                color: transparent;
+                width: 120px;
+                height: 35px;
+                display: flex;
+                background: transparent;
+                &::before {
+                    color: var(--text-color);
+                    text-align: center;
+                    content: 'Select file';
+                    display: inline-block;
+                    background: transparent;
+                    border: 1px solid #999;
+                    border-radius: 3px;
+                    padding: 5px 8px;
+                    outline: none;
+                    white-space: nowrap;
+                    cursor: pointer;
+                }
+                &:hover::before {
+                    background-color: var(--second-color);
+                }
+                &::-webkit-file-upload-button {
+                    visibility: hidden;
+                }
+            }
+            & .hovered {
+                background-color: var(--second-color);
+            }
+        }
+        & label {
+            min-width: 100px;
+            margin-bottom: 7px;
+            color: var(--text-color);
+        }
+        & .saveZone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 10%;
+            margin-top: 1em;
+            & #save {
+                border: 1px solid var(--text-color);
+                min-width: 150px;
+                padding: 5px 10px;
+                font-size: 1.2em;
+                &:hover {
+                    background-color: var(--second-color); 
+                }
+            }
+            & .error {
+                margin-top: 10px;
+                color: red;
+                font-weight: bold;
+            }
+        }
+    }
+}
+   

@@ -8,10 +8,11 @@ import { SocketContext } from './context';
 const NavBar: React.FC = () => {
   let navigate = useNavigate();
   const [burgerList, setBurgerList] = useState<boolean>(false);
-  const {socket, disconnect} = useContext(SocketContext);
+  const {disconnect, disconnectGame} = useContext(SocketContext);
 
   const logout = () => {
     disconnect();
+    disconnectGame();
     accountService.logout();
     navigate("/login");
   }
