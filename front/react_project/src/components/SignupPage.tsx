@@ -1,5 +1,5 @@
 import "../styles/LoginPage.scss"
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -11,14 +11,14 @@ import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
 
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters"),
-  email: yup.string().required("Email is required"),
-  password: yup.string().required("Password is required") .min(8, "Password must be at least 8 characters"),
+  email: yup.string().required("Email is required").email("Invalid email format").matches(/(.fr|.com)$/, "Invalid email format"),
+  password: yup.string().required("Password is required") .min(6, "Password must be at least 6 characters") .max(10, "Password is 10 characters maximum"),
 })
+
 
 const SignupPage: React.FC = () => {
   let navigate = useNavigate();
   const [errorLogin, setError] = useState<boolean>(false);
-  
   const { register, handleSubmit, formState: { errors }} = useForm<SignUpForm>({
     resolver: yupResolver(userSchema)
   });
@@ -27,13 +27,15 @@ const SignupPage: React.FC = () => {
     const avatar = generateRandomAvatarOptions();
     const svgString = ReactDOMServer.renderToString(avatar);
 
+    setError(false);
     data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
     await accountService.isUniqueLogin(data.login)
     .then(loginUnique => {
       if(loginUnique.data == true) {
         accountService.signUp(data)
-        .then(Response => {
-          accountService.saveToken(Response.data.access_token);
+        .then(res => {
+          console.log(res.data);
+          accountService.saveToken(res.data.access_token);
           navigate("/");
         })
         .catch(error => {console.log(error);})
@@ -69,8 +71,8 @@ const SignupPage: React.FC = () => {
             placeholder="Password"
             />
             {errors.password && <p className='logError'>{errors.password.message}</p>}
-          <button className="form_element" type="submit">SIGN UP</button>
-            {errorLogin ? <p className="error">This login already exist, choose another one</p> : null}
+            <button className="form_element" type="submit">SIGN UP</button>
+            {errorLogin ? <p className="error">This login already exist</p> : null}
         </form>
         <NavLink to="/login">Already registered ? Log In</NavLink>
       </div>
