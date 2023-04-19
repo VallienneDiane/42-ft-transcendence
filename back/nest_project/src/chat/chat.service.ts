@@ -746,20 +746,22 @@ export class ChatService {
     public unfriendEvent(me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
-            let friend: UserEntity = null;
-            if (request.sender.id == me.id)
-                friend = request.receiver;
-            else
-                friend = request.sender;
-            this.friendService.deleteRequest(friendshipId)
-            .then(() => {
-                let meSockets = roomHandler.userMap.get(me.id);
-                if (meSockets != undefined)
-                    meSockets.emit("supressFriend", friendshipId);
-                let friendSockets = roomHandler.userMap.get(friend.id);
-                if (friendSockets != undefined)
-                    friendSockets.emit("supressFriend", friendshipId);
-            })
+            if (request) {
+                let friend: UserEntity = null;
+                if (request.sender.id == me.id)
+                    friend = request.receiver;
+                else
+                    friend = request.sender;
+                this.friendService.deleteRequest(friendshipId)
+                .then(() => {
+                    let meSockets = roomHandler.userMap.get(me.id);
+                    if (meSockets != undefined)
+                        meSockets.emit("supressFriend", friendshipId);
+                    let friendSockets = roomHandler.userMap.get(friend.id);
+                    if (friendSockets != undefined)
+                        friendSockets.emit("supressFriend", friendshipId);
+                })
+            }
         })
     }
 
