@@ -749,6 +749,7 @@ export class ChatService {
 
     public unfriendEvent(client: Socket, me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
         console.log(me.login, "wants to delete : ", friendshipId);
+        client.emit("supressFriend", "wefnwkgnasgfs");
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             if (request) {

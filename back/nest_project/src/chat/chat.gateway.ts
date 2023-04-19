@@ -336,6 +336,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     handleUnfriend(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((me) => {
+            console.log(me.login);
             if (me != null) {
                 this.chatService.unfriendEvent(client, me, data.friendshipId, this.chatRoomHandler);
             }

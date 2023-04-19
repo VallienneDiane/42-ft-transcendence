@@ -44,6 +44,17 @@ export default function Profile() {
                 console.log(error);
             });
         }
+
+        return () => {
+            socket.off("newFriendRequestSent");
+            socket.off("newFriend");
+            socket.off("supressFriendRequest");
+            socket.off("supressFriend");
+            socket.off("newFriendRequestReceived");
+            socket.off("userIsConnected");
+            socket.off("userConnected");
+            socket.off("userDisconnected");
+        }
     }, [currentUser])
     
     useEffect(() => {
@@ -66,7 +77,7 @@ export default function Profile() {
                 {currentUser === undefined ? (
                     <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
-                        {socket && <FriendList />}
+                        {socket && <FriendList socket={socket} />}
                         {socket && <PendingList />}
                         {socket && <RequestsList />}
                         {socket && <BlockList />}

@@ -1,8 +1,9 @@
+import { Match } from 'src/match/Match';
 import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { MuteEntity } from 'src/chat/mute/mute.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { FriendEntity } from '../chat/friend/friend.entity';
 
 @Entity()
@@ -19,7 +20,7 @@ export class UserEntity {
      unique: true}
   )
   login: string;
-  
+
   @Column()
   email: string;
 
@@ -64,6 +65,14 @@ export class UserEntity {
 
   @Column({nullable: true})
   avatarSvg: string;
+
+  @OneToMany(() => Match, (match) => match.winner)
+  @JoinColumn({ name: "winner_id" })
+  wonMatches: Match[];
+
+  @OneToMany(() => Match, (match) => match.loser)
+  @JoinColumn({ name: "loser_id" })
+  lostMatches: Match[];
 
   @OneToMany(() => FriendEntity, (request) => request.sender)
   requestsSend : FriendEntity[];
