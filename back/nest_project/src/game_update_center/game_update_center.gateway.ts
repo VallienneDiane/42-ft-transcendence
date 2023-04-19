@@ -300,6 +300,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
         game.spectators.push(client);
         client.join(game.players[0].id);
+        game.game_engine.update_match_state();
       }
     }
   }
