@@ -59,7 +59,7 @@ export default function FriendList() {
     useEffect(() => {
         if (fetchUserDone && !askIfConnectedDone)
             askIfConnected();
-        console.log("pouet");
+        // console.log("pouet");
         socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
             console.log("newFriend");
             let newFriendList = [...friends, {friendshipId: friendshipId, friendId: id, friendName: name, isConnected: false}];
@@ -114,7 +114,7 @@ export default function FriendList() {
             }
         });
         return () => {
-            console.log("pas pouet");
+            // console.log("pas pouet");
             socket.off("newFriend");
             socket.off("supressFriend");
             socket.off("userIsConnected");

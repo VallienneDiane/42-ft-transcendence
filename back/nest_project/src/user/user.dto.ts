@@ -36,6 +36,11 @@ export class SignUpDto {
     @IsNotEmpty() @IsString() @MinLength(8) password: string;
 }
 
+export class LoginDto {
+    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsString() @MinLength(8) password: string;
+}
+
 export class SignUp42Dto {
     @IsNotEmpty() @IsString() readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;

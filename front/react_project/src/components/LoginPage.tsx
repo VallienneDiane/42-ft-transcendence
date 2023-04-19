@@ -34,30 +34,30 @@ const LoginPage: React.FC = () => {
      * @param data 
      */
     const onSubmit = async (data: LogInForm) => {
+        console.log("LoginPage 37 : LogInform : ", data);
         accountService.login(data)
-        .then(response_user => {
-            if(response_user.data == true) {
-                accountService.is2faActive(data.id)
-                .then(response_2fa => {
-                    if(response_2fa.data.is2faActive == true) {
-                        navigate("/verifyCode2fa", { state: { login: data.login } });
-                    }
-                    else {
-                        accountService.generateToken(data.id)
-                        .then(response_token => {
-                            accountService.saveToken(response_token.data.access_token);
-                            const from = (location.state as any)?.from || "/";
-                            navigate(from);
-                        })
-                        .catch(error => {
-                            console.log(error);
-                        })
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-            }
+        .then(res => {
+            accountService.is2faActive(data.id)
+            .then(response_2fa => {
+                if(response_2fa.data.is2faActive == true) {
+                    navigate("/verifyCode2fa", { state: { login: res.data.login } });
+                }
+                else {
+                    console.log("LoginPage 47: ", data.id, data.login);
+                    accountService.generateToken(res.data.id)
+                    .then(response_token => {
+                        accountService.saveToken(response_token.data.access_token);
+                        const from = (location.state as any)?.from || "/";
+                        navigate(from);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    })
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            })
         })
         .catch(error => {
             console.log(error);
