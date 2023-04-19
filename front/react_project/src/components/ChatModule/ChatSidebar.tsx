@@ -306,17 +306,102 @@ function MemberList(props: {dest: IDest}) {
     )
 }
 
+function InviteUser(props: {dest: IDest}) {
+    const {socket} = useContext(SocketContext);
+    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
+    const [userToInvit, setUserToInvit] = useState<string>("");
+    const [users, setUsers] = useState<{id: string, name: string}[]>([]);
+    const [isDropdown, setIsDropdown] = useState<boolean>(false);
+    const [filtered, setFiltered] = useState<{id: string, name: string}[]>([]);
+
+    const showInvite = () => {
+        setOnClickInvite((onClickInvite) => !onClickInvite)
+    }
+
+    const inviteUser = (event: any) => {
+        console.log(event.target.value);
+        event.preventDefault();
+        socket.emit('inviteUser', {userToInvite: event.target.value, channelId: props.dest.id});
+        setUserToInvit("");
+        socket.emit('listUsersChann', {channelId: props.dest.id});
+    }
+
+    const fetchUsers = (event : any) => { // récupération de tous les users, sauf moi-même, et les users qui sont déjà dans le channel
+        socket.emit('listUsersChann', {channelId: props.dest.id});
+        setIsDropdown((isDropdown) => !isDropdown);
+        displayList(event);
+    }
+
+    const displayList = (event: any) => {
+        setUserToInvit(event.target.value);
+        if (event.target.value) {
+            const filteredUsers: {id: string, name: string}[] = 
+            users.filter((user) => user.name.startsWith(event.target.value));
+            setFiltered(filteredUsers);
+        }
+        else {
+            setFiltered(users);
+        }
+    }
+    
+    useEffect(() => {
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
+            const members: {user: {id: string, login: string}, status: string}[] = [];
+            list.forEach(member => members.push(member));
+            userService.getAllUsers()
+            .then(response => {
+                let newUserList: {id: string, name: string}[] = [];
+                response.data.forEach((user: {id: string, login: string}) => { 
+                    let bool: boolean = true;
+                    for (let elt of members) {
+                        if (elt.user.login == user.login) {
+                            bool = false;
+                            break;
+                        }
+                    }
+                    if (bool === true)
+                        newUserList.push({id: user.id, name: user.login});
+                });
+                newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
+                setUsers(newUserList);
+            })
+            .catch(error => {
+                console.log(error);
+            })
+        })
+        return () => {
+            socket.off('listUsersChann');
+        }
+    }, [users]);
+
+    return (
+        <React.Fragment>
+            <li onClick={showInvite}>Invite</li>
+            {onClickInvite && (
+                <div className="invite"> 
+                    <form className="searchbar" onSubmit={inviteUser}>
+                        <input type="text" onClick={fetchUsers} onChange={displayList} value={userToInvit} placeholder="Search"/>
+                    </form>
+                    {(filtered.length != 0 && isDropdown) &&
+                        <ul>
+                            {filtered.map((elt: {id: string, name: string}, id: number) => (
+                            <li key={id}><button value={elt.name} onClick={inviteUser}>{elt.name}</button></li>
+                            ))}
+                        </ul>
+                    }
+                </div>
+            )}
+        </React.Fragment>
+    )
+}
+
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
-    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
-    const [userToInvit, setUserToInvit] = useState<string>("");
     const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
     const [bans, setBans] = useState<{id: string, login: string}[]>([]);
-    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string}[]>([]);
-    const [users, setUsers] = useState<{id: string, name: string}[]>([]);
 
     const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
@@ -325,29 +410,15 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const showSettings = () => {
         setOnClickSettings((onClickSettings) => !onClickSettings)
     }
-    
-    const showInvite = () => {
-        setOnClickInvite((onClickInvite) => !onClickInvite)
-    }
 
     const showUnban = () => {
         setOnClickUnban((onClickUban) => !onClickUban)
-    }
-    
-    const onChangeInvite = (e: any) => {
-        setUserToInvit(e.target.value);
     }
 
     const handleClickOutside = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
             props.handleClose();
         }
-    }
-     
-    const inviteUser = (event: any) => {
-        event.preventDefault();
-        socket.emit('inviteUser', {userToInvite: userToInvit, channelId: props.dest.id});
-        setUserToInvit("");
     }
 
     const unban = (e: any) => {
@@ -364,51 +435,18 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         socket.emit('destroyChannel', {channelId: props.dest.id});
         props.handleClose();
     }
-
-    const fetchUsers = () => { // récupération de tous les users, sauf moi-même, et les users qui sont déjà dans le channel
-        userService.getAllUsers()
-        .then(response => {
-            const playload: JwtPayload = accountService.readPayload()!;
-            socket.emit('listUsersChann', {channelId: props.dest.id});
-            const users = new Map<string, string>();
-            response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login));
-            let newUserList: {id: string, name: string}[] = [];
-            console.log("members", members);
-            users.forEach((login, id) => {
-                let bool: boolean = true;
-                for (let elt of members) {
-                    console.log("blop")
-                    console.log(elt.user.login);
-                    if (elt.user.login == login) {
-                        bool = false;
-                        break;
-                    }
-                }
-                if (bool === true)
-                    newUserList.push({id: id, name: login});
-            });
-            newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
-            // console.log(newUserList);
-            setUsers(newUserList);
-        })
-        .catch(error => {
-            console.log(error);
-        })
-    }
     
     useEffect(() => {
         socket.emit("getBanList", {channelId: props.dest.id});
         socket.on("banList", (array: {id: string, login: string}[]) => {
+            console.log("banList");
             setBans(array);
-        })
-        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
-            console.log("zoubi");
-            setMembers(list);
         })
         socket.on("newUnban", (userId: string) => {
             let newArray: {id: string, login: string}[] = bans.filter(
                 (ban: {id: string, login: string}) => {return (ban.id != userId)}
-                );
+            );
+            console.log("newUnban");
             setBans(newArray);
         })
         
@@ -416,8 +454,9 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
             socket.off('banList');
+            socket.off('newUnban');
         }
-    }, [ref, bans, members]);
+    }, [ref]);
 
     return (
         <div className="sidebarContent" ref={ref}>
@@ -428,18 +467,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                 <li onClick={showMembers}>Members</li>
                 {onClickMembers && <MemberList dest={props.dest} />}
                 {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
-                     <React.Fragment>
-                         <li onClick={showInvite}>Invite</li>
-                         {onClickInvite && (
-                             <form className="searchbar" onSubmit={inviteUser}>
-                                 <input type="text" id="invite" onClick={fetchUsers} onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
-                                 <button>
-                                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-                                 </button>
-                             </form>)
-                         }
-                     </React.Fragment>
-                ) : null }
+                    <InviteUser dest={props.dest} /> ) : null }
                 {(props.dest.status === "god" && bans.length != 0) ? (
                     <React.Fragment>
                         <li onClick={showUnban}>Unban</li>
