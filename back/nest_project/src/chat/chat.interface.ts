@@ -1,8 +1,3 @@
-import { Logger } from "@nestjs/common";
-import { Namespace, Socket } from "socket.io";
-import { UserEntity } from "src/user/user.entity";
-import { ChannelEntity } from "./channel/channel.entity";
-import { UserRoomHandler } from "./chat.classes";
 
 export interface IMessageChat {
     room: string;
@@ -14,8 +9,8 @@ export interface IMessageChat {
 export interface IMessageToSend {
     //room can be a channel or an user
     date: Date;
-    sender: string;
-    room: string;
+    senderName: string;
+    senderId: string;
     content: string;
 }
 
@@ -25,9 +20,6 @@ export interface IChannelToEmit {
     name: string;
     password: boolean;
     inviteOnly: boolean;
-    persistant: boolean;
-    onlyOpCanTalk: boolean;
-    hidden: boolean;
     normalUsers: IUserToEmit[];
     opUsers: IUserToEmit[];
     godUser?: IUserToEmit;
@@ -44,4 +36,11 @@ export interface IToken {
     sub?: string;
     iat?: number;
     exp?: number;
+}
+
+export interface IRequest {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    state: string;
 }

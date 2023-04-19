@@ -1,6 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { accountService } from "../services/account.service";
-import SocketContext from './context';
+import { SocketContext } from './context';
 import React, { useEffect } from "react";
 
 const ProtectedRoutes = () => {

@@ -87,10 +87,10 @@ class RoomMap {
 
 class SocketMap {
 
-    public sockets: Map<Socket, {userId: string, room: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean}>;
+    public sockets: Map<Socket, {userId: string, room: string, isChannel: boolean, isGod: boolean, isOp: boolean}>;
 
     constructor() {
-        this.sockets = new Map<Socket, {userId: string, room: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean}>();
+        this.sockets = new Map<Socket, {userId: string, room: string, isChannel: boolean, isGod: boolean, isOp: boolean}>();
     }
 
     public emit(ev: string, ...args: any[]) {
@@ -99,10 +99,10 @@ class SocketMap {
         })
     }
 
-    public update(socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean) {
+    public update(socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean) {
         let socketFound = this.sockets.get(socket);
         if (socketFound != undefined) {
-            return this.sockets.set(socket, {userId: socketFound.userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp, onlyOpCanTalk: onlyOpCanTalk});
+            return this.sockets.set(socket, {userId: socketFound.userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp});
         }
         return undefined;
     }
@@ -115,18 +115,18 @@ class UserMap {
         this.users = new Map<string, SocketMap>();
     }
 
-    public set(userId: string, socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean): boolean {
+    public set(userId: string, socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean): boolean {
         let found = this.users.get(userId);
         if (found == undefined) {
-            this.users.set(userId, new SocketMap()).get(userId).sockets.set(socket, {userId: userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp, onlyOpCanTalk: onlyOpCanTalk})
+            this.users.set(userId, new SocketMap()).get(userId).sockets.set(socket, {userId: userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp})
             return true;
         }
         else
-            found.sockets.set(socket, {userId: userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp, onlyOpCanTalk: onlyOpCanTalk});
+            found.sockets.set(socket, {userId: userId, room: room, isChannel: isChannel, isGod: isGod, isOp: isOp});
         return false;
     }
 
-    public userChangeRoom(userId: string, socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean) {
+    public userChangeRoom(userId: string, socket: Socket, room: string, isChannel: boolean, isGod: boolean, isOp: boolean) {
         let userFound = this.users.get(userId);
         if (userFound != undefined) {
             let found = userFound.sockets.get(socket);
@@ -135,7 +135,6 @@ class UserMap {
                 found.isChannel = isChannel;
                 found.isGod = isGod;
                 found.isOp = isOp;
-                found.onlyOpCanTalk = onlyOpCanTalk;
             }
         }
     }
@@ -193,7 +192,6 @@ class UserMap {
                 user.emit(ev, ...args);
         });
     }
-
 }
 
 export class UserRoomHandler {
@@ -207,53 +205,52 @@ export class UserRoomHandler {
         this.socketMap = new SocketMap();
     }
 
-    public addUser(userId: string, socket: Socket, roomId: string, isChannel: boolean, isGod: boolean, isOP: boolean, onlyOpCanTalk: boolean): boolean {
+    public addUser(userId: string, socket: Socket, roomId: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean): boolean {
         let newUser: boolean;
         if (isChannel)
             this.roomMap.addSocketInRoom(roomId, socket);
-        newUser = this.userMap.set(userId, socket, roomId, isChannel, isGod, isOP, onlyOpCanTalk);
-        this.socketMap.sockets.set(socket, {userId: userId, room: roomId, isChannel: isChannel, isGod: isGod, isOp: isOP, onlyOpCanTalk: onlyOpCanTalk})
+        newUser = this.userMap.set(userId, socket, roomId, isChannel, isGod, isOp);
+        this.socketMap.sockets.set(socket, {userId: userId, room: roomId, isChannel: isChannel, isGod: isGod, isOp: isOp})
         return newUser;
     }
 
     public roomKill(channelId: string) {
         let locGeneral: ChannelEntity = {
-            id: "general",
+            id: "00000000-0000-0000-0000-000000000000",
             name: "general",
             date: new Date(),
             password: false,
             channelPass: null,
-            opNumber: 0,
             inviteOnly: false,
-            persistant: true,
-            onlyOpCanTalk: false,
-            hidden: false,
             normalUsers: [],
             opUsers: [],
+            godUser: undefined,
+            bannedUsers: [],
+            usersMuted: [],
             messages: []
         }
         let room = this.roomMap.of(channelId);
         if (room != undefined) {
             room.c.forEach( (socket) => {
                 let userToMove = this.socketMap
-                    .update(socket, "general", true, false, false, false)
+                    .update(socket, "general", true, false, false)
                     .get(socket).userId;
-                this.userMap.userChangeRoom(userToMove, socket, "general", true, false, false, false);
+                this.userMap.userChangeRoom(userToMove, socket, "general", true, false, false);
                 socket.emit("newLocChannel", {channel: locGeneral, status: "normal"}, []);
-                socket.emit("leaveChannel", channelId);
+                socket.emit("channelDestroy", channelId);
             })
             this.roomMap.movingAway(channelId, "general");
         }
     }
 
-    public joinRoom(userId: string, socket: Socket, roomId: string, isChannel: boolean, isGod: boolean, isOp: boolean, onlyOpCanTalk: boolean) {
+    public joinRoom(userId: string, socket: Socket, roomId: string, isChannel: boolean, isGod: boolean, isOp: boolean) {
         let currentRoom = this.socketMap.sockets.get(socket);
         if (currentRoom.isChannel)
             this.roomMap.deleteSocketInRoom(currentRoom.room, socket);
         if (isChannel)
             this.roomMap.addSocketInRoom(roomId, socket);
-        this.userMap.userChangeRoom(userId, socket, roomId, isChannel, isGod, isOp, onlyOpCanTalk);
-        this.socketMap.update(socket, roomId, isChannel, isGod, isOp, onlyOpCanTalk);
+        this.userMap.userChangeRoom(userId, socket, roomId, isChannel, isGod, isOp);
+        this.socketMap.update(socket, roomId, isChannel, isGod, isOp);
     }
 
     //This extract an user from rooms and return the room where he was 
@@ -282,4 +279,15 @@ export class UserRoomHandler {
             return {room: found.room, isChannel: found.isChannel};
         return undefined;
     }
+
+    public emitToUserHavingThisSocket(socket: Socket, ev: string, ...args: any[]) {
+        let socketFound = this.socketMap.sockets.get(socket);
+        if (socketFound != undefined) {
+            let userFound = this.userMap.get(socketFound.userId);
+            if (userFound != undefined) {
+                userFound.emit(ev, ...args);
+            }
+        }
+    }
+
 }

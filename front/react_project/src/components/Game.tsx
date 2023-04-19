@@ -8,7 +8,7 @@ import { accountService } from "../services/account.service";
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import MatchsInProgress from "./MatchsInProgress"
 import SearchUserBar from "./SearchUserBar"
-import SocketContext from "./context"
+import { SocketContext } from "./context"
 
 interface ball {
     x: number,
