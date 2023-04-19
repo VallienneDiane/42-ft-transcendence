@@ -9,8 +9,8 @@ import { GameUpdateCenterModule } from './game_update_center/game_update_center.
 import { ChatModule } from './chat/chat.module';
 import { GameEngineModule } from './game_engine/game_engine.module';
 import { PongEngineModule } from './pong_engine/pong_engine.module';
-import { Match } from './match/Match';
 import { MatchModule } from './match/Match.module';
+import { FriendModule } from './chat/friend/friend.module';
 
 @Module({
   imports: [
@@ -21,6 +21,7 @@ import { MatchModule } from './match/Match.module';
     MatchModule,
     GameUpdateCenterModule,
     GameEngineModule,
+    FriendModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'db_container',

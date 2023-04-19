@@ -1,9 +1,4 @@
 version: '3.3'
-
-networks:
-  transcendence_network:
-    driver: bridge
-
 services:
 ########################################## POSTGRESQL - DATABASE ##############################
   db:
@@ -17,6 +12,9 @@ services:
       - .env
     networks:
       - transcendence_network
+    volumes:
+      - ./postgres:/var/lib/postgresql/users
+
 ########################################## BACK-END NEST JS ##################################
   back:
     image: nestjs_img
@@ -26,12 +24,12 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     networks:
       - transcendence_network
+    env_file:
+      - .env
     volumes:
-      - ./back:/usr/src/app
+      - back:/usr/src/app
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################
@@ -46,7 +44,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - ./front:/usr/src/app
+      - front:/usr/src/app
 ########################################## PGADMIN  ########################################
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -87,3 +85,6 @@ volumes:
   #     o: bind
   #     device: /home/vallienne/42_Projects/transcendence/pgadmin
 ########################################## NETWORK  ########################################
+networks:
+  transcendence_network:
+    driver: bridge

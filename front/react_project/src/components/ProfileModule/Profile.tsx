@@ -1,24 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom"
-import SearchUserBar from "./SearchUserBar";
-import { User } from "../models";
-import "../styles/Profile.scss"
-import { userService } from "../services/user.service";
-import { accountService } from "../services/account.service";
+import { useContext, useEffect, useState } from "react";
+import { NavLink, useNavigate, useParams } from "react-router-dom"
+import { User } from "../../models";
+import "../../styles/Profile.scss"
+import { userService } from "../../services/user.service";
+import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { SocketContext } from "../context";
+import FriendList from "./FriendList";
+import PendingList from "./PendingList";
+import RequestsList from "./RequestList";
+import BlockList from "./BlockList";
 
 export default function Profile() {
+    const {socket} = useContext(SocketContext);
     const navigate = useNavigate();
     const [user, setUser] = useState<User>();
     const currentUser = useParams().login;
-
+    
     useEffect(() => {
         if (currentUser !== undefined){
             userService.getUser(currentUser)
             .then(response => {
-                console.log(response.data);
+                console.log("Profile 26: user ", response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }
@@ -30,7 +35,8 @@ export default function Profile() {
         }
         else {
             let decodedToken: JwtPayload = accountService.readPayload()!;
-            userService.getUser(decodedToken.login)
+            const id = decodedToken.sub;
+            userService.getUser(id!)
             .then(response => {
                 setUser(response.data);
             })
@@ -41,7 +47,7 @@ export default function Profile() {
     }, [currentUser])
     
     useEffect(() => {
-        console.log('user', user);
+        // console.log('user', user);
     }, [user])
     
     return (
@@ -54,13 +60,16 @@ export default function Profile() {
                 {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>
-                    { currentUser === undefined ? <a href="/settings"><FontAwesomeIcon icon={faGear} /></a> : null }
+                    { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon icon={faGear} /></NavLink> : null }
                 </div>
 
                 {currentUser === undefined ? (
-                    <div id="friendList">
+                    <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
-                        <h3>My friends</h3>
+                        {socket && <FriendList />}
+                        {socket && <PendingList />}
+                        {socket && <RequestsList />}
+                        {socket && <BlockList />}
                     </div>
                     ): null}
             </aside>
