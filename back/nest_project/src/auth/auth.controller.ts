@@ -1,6 +1,6 @@
 import { Controller, Body, Post, Get, UseGuards, Headers, Query, Res} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth_strategies/jwt-auth.guard';
-import { id42Dto, idDto, VerifyCodeDto, VerifyCodeDto42 } from 'src/user/user.dto';
+import { id42Dto, idDto, LoginDto, VerifyCodeDto, VerifyCodeDto42 } from 'src/user/user.dto';
 import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from '../auth_strategies/local-auth.guard';
@@ -46,8 +46,9 @@ export class AuthController {
    */
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
-  async isValidUser() {
-    return (true);
+  async isValidUser(@Body() data: LoginDto) {
+    const user = await this.userService.findByLogin(data.login);
+    return (user);
   }
   /**
    * Generate a jwt token when register or login successfully

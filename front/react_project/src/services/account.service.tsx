@@ -17,6 +17,7 @@ let signUp = (credentials: SignUpForm) => {
  * @returns 
  */
 let login = (credentials: LogInForm) => {
+    console.log("request login ", credentials);
     return Axios.post('auth/login', credentials);
 }
 /**

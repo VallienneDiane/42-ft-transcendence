@@ -23,7 +23,7 @@ export default function Profile() {
         if (currentUser !== undefined){
             userService.getUser(currentUser)
             .then(response => {
-                console.log("get user " , response.data);
+                console.log("Profile 26: user ", response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }
