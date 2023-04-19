@@ -1,13 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Channel } from "diagnostics_channel";
-import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { ChannelEntity } from "../chat/channel/channel.entity";
-import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
 import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
-import { FriendEntity } from "../chat/relation/friend/friend.entity";
+import { IRequest } from "src/chat/chat.interface";
 
 @Injectable({})
 export class UserService {
@@ -42,6 +39,7 @@ export class UserService {
             requestsReceived: [],
             blockList: [],
             blockedMeList: [],
+            mutedList: [],
         }
         return await this.usersRepository.save(user);
     }
@@ -67,6 +65,7 @@ export class UserService {
             requestsReceived: [],
             blockList: [],
             blockedMeList: [],
+            mutedList: [],
         }
         return await this.usersRepository.save(user);
     }
@@ -90,6 +89,16 @@ export class UserService {
     public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});
     }
+    
+    /**
+     * this one is to be able to do some tricks with typeORM.
+     * typescript sucks.
+     */
+    async findByIdAsAny(id: any): Promise<UserEntity> {
+        const toReturn = await this.usersRepository.findOneBy({id: id});
+        return toReturn;
+    }
+
     public findOne(options?: object): Promise<UserEntity> {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
@@ -196,6 +205,7 @@ export class UserService {
                 opUsers: [],
                 godUser: undefined,
                 bannedUsers: [],
+                usersMuted: [],
                 messages: []
             },
             status: "normal"}];
@@ -222,29 +232,6 @@ export class UserService {
         });
         return arrayOfChannels;
     }
-
-    // async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
-    //     let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
-    //     const msgSendDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesSend", "send")
-    //         .select("send.receiver")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     const msgReceivedDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesReceived", "received")
-    //         .select("received.sender")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     msgSendDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     msgReceivedDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     return sorted;
-    // }
     
     /**
      * set secret code for 2fa in user entity
@@ -311,8 +298,8 @@ export class UserService {
         return userAvatar;
     }
 
-    async getFriendRequestsSend(id: string): Promise<FriendEntity[]> {
-        const requestsSend: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+    async getFriendRequestsSend(id: string): Promise<IRequest[]> {
+        const requestsSend: IRequest[] = await this.usersRepository.createQueryBuilder("user")
             .where("user.id = :id", { id: id })
             .innerJoinAndSelect("user.requestsSend", "send")
             .select("send.*")
@@ -320,8 +307,8 @@ export class UserService {
         return requestsSend;
     }
 
-    async getFriendRequestsReceived(id: string): Promise<FriendEntity[]> {
-        const requestsReceived: FriendEntity[] = await this.usersRepository.createQueryBuilder("user")
+    async getFriendRequestsReceived(id: string): Promise<IRequest[]> {
+        const requestsReceived: IRequest[] = await this.usersRepository.createQueryBuilder("user")
             .where("user.id = :id", { id: id })
             .innerJoinAndSelect("user.requestsReceived", "receiv")
             .select("receiv.*")
@@ -351,6 +338,29 @@ export class UserService {
             .innerJoinAndSelect("user.blockList", "blocked")
             .select("blocked.id", "id")
             .addSelect("blocked.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getBlockedMeList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockedMeList", "blockedMe")
+            .select("blockedMe.id", "id")
+            .addSelect("blockedMe.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getAllBlockRelations(userId: string): Promise<{id: string, name: string}[]> {
+        return [...await this.getBlockList(userId), ...await this.getBlockedMeList(userId)];
+    }
+
+    async getMuteList(userId: string): Promise<{id: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.mutedList", "mute")
+            .select("mute.id", "id")
             .where("user.id = :id", { id : userId })
             .getRawMany();
     }

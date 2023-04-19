@@ -246,11 +246,12 @@
 						justify-content: space-between;
 						padding: 0.2rem 0.5rem;
 						& button {
-							width: 100%;
+							width: 85%;
 							text-align: left;
 							cursor: pointer;
 							& #msg {
 								padding-left: 0.5em;
+								opacity: 70%;
 							}
 						}
 						& .waitingMsg {
@@ -258,9 +259,10 @@
 						}
 						
 						& .circle {
+							width: 15%;
 							width: 8px;
 							height: 8px;
-							border-radius: 13px;
+							border-radius: 50%;
 							margin: 0 1rem;
 							&.online {
 								background-color: #8BC34A;
@@ -362,17 +364,80 @@
 										}
 										& button {
 											background: transparent;
-											& .iconAction {
+											&:hover {
+												font-weight: bolder;
+												color: #0f1a83;
+											}
+										}
+									}
+								}
+								& .memberButton {
+									background: transparent;
+									position: relative;
+									& .iconAction {
+										background: transparent;
+										width: 15px;
+										padding-left: 12px;
+										opacity: 70%;
+										&:hover {
+											// outline: none;
+											// width: 20px;
+											color: #016d06;
+											// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+										}
+									}
+									&:hover::before {
+										color: rgb(2, 129, 214);
+										font-weight: bold;
+										content: attr(data-hover-text);
+										position: absolute;
+										z-index: 10;
+										top: -1rem;
+										right: 10px;
+										// margin-bottom: 1rem;
+										background-color: rgba(184, 179, 179, 0.3);
+										padding: 0.1rem 0.4rem;
+									}
+									& .mute {
+										display: flex;
+										flex-direction: column;
+										background: transparent;
+										&:hover {
+											background: rgba(223, 223, 223, 0.95);
+											color: var(--text-color);
+											cursor: initial;
+										}
+										& div {
+											display: flex;
+											justify-content: space-between;
+											background: transparent;
+											align-items: center;
+											& button {
+												// font-size: 2rem;
 												background: transparent;
-												width: 15px;
-												padding-left: 6px;
-												opacity: 70%;
-												&:hover {
-													// outline: none;
-													// width: 20px;
-													color: #016d06;
-													// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
-												}
+												padding:0 0.2rem;
+												margin: 0 0.2rem;
+												border-radius: 100%;
+												// box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .6);
+											}
+											& span {
+												width: 1.8rem;
+												font-size: 1.4rem;
+												font-weight: bold;
+												background: transparent;
+											}
+											& .muteButton {
+												color: var(--text-color);
+												width: 25%;
+												font-size: 1rem;
+												// font-size: 18px;
+												margin: 3px 0 5px 0;
+												// padding: 3px 0;
+												background-color:#b9cbce;
+												border-radius: 50px;
+												position: relative;
+												z-index: 1;
+												overflow: hidden;
 											}
 										}
 									}
@@ -519,7 +584,9 @@
 					width: 3.2rem;
 					background: transparent;
 					& #profilePicture {
-					border-radius: 50%;
+					border-radius: 100%;
+					aspect-ratio: 1/1;
+					object-fit: cover;
 					margin-right: 0.5rem;
 					width: 3rem;
 					background: transparent;

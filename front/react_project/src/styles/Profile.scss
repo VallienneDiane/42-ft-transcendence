@@ -36,9 +36,115 @@
             margin: 0 15px;
         }
 
-        & #friendList {
+        & #FriendManagement {
+            display: flex;
+            flex-direction: column;
             padding: 10px 0;
+
+            & #request {
+                display: flex;
+                flex-direction: row;
+                padding: 15px 0;
+
+                & li {
+                    padding: 2px 0;
+
+                    & button {
+                        color: var(--text-color);
+                        margin: 2px 0;
+                        padding-left: 1em;
+						padding-right: 1em;
+                        background-color: var(--second-color);
+                        border-radius: 50px;
+                        position: relative;
+                        z-index: 1;
+                        overflow: hidden;
+                    }
+                }
+            }
+
+            & #friend {
+                display: flex;
+                flex-direction: column;
+                font-size: larger;
+                align-items: center;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                
+                & h3 {
+                    justify-content: center;
+                }
+
+                & #friendList {
+                    flex-direction: column;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    width: 100%;
+
+                    & #friendName {
+                        color: rgba(18, 167, 38, 0.664);
+                        font-size: x-large;
+                        font-family: 'Pacifico', sans-serif;
+                    }
+
+                    & #friendElement {
+                        display: flex;
+                        flex-direction: column;
+                        width: 100%;
+                        & #friendInfo {
+                            display: flex;
+                            flex-direction: row;
+                            justify-content: center;
+                            align-items: center;
+                            & #friendName {
+                                color: rgba(18, 167, 38, 0.664);
+                                font-size: x-large;
+                                font-family: 'Pacifico', sans-serif;
+                            }
+                            & .circle {
+                                width: 15%;
+                                width: 8px;
+                                height: 8px;
+                                border-radius: 50%;
+                                margin: 0 1rem;
+                                &.online {
+                                    background-color: #8BC34A;
+                                }
+                                &.offline {
+                                    background-color: #fa6969;
+                                }
+                            }
+                        }
+
+                        & #friendOptions {
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            padding-left: 7%;
+                            padding-right: 7%;
+                            align-items: center;
+                            justify-content: space-between;
+                            & #unfriendButton {
+                                color: rgb(0, 0, 0);
+                                opacity: 80%;
+                            }
+                            & #chatButton {
+                                color: rgb(13, 119, 19);
+                                opacity: 80%;
+                            }
+                            & #inviteToGame {
+                                color: red;
+                                opacity: 80%;
+                            }
+                            & #checkProfileButton {
+                                color: rgb(7, 63, 216);
+                                opacity: 80%;
+                            }
+                        }
+                    }
+                }
+            }
         }
+        
     }
 
     

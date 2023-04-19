@@ -81,7 +81,7 @@ let updateAvatar = (credentials: AvatarSettingsForm ) => {
  * @returns 
  */
 let isLogged = () => {
-    let token = localStorage.getItem('token');
+    let token = sessionStorage.getItem('token');
     if (token !== null)  { 
         let decodedToken: JwtPayload = accountService.readPayload()!;
         if (decodedToken === null || decodedToken === undefined || ( decodedToken.exp !== undefined && decodedToken.exp < Date.now() / 1000)) {
@@ -112,21 +112,21 @@ let generateToken42 = (id42: string) => {
  * @param token 
  */
 let saveToken = (token: string) => {
-    localStorage.setItem('token', token);
+    sessionStorage.setItem('token', token);
 }
 /**
  * Get token from local storage
  * @returns 
  */
 let getToken = () => {
-    return localStorage.getItem('token');
+    return sessionStorage.getItem('token');
 }
 /**
  * When user logout, request send to inform server and destroy token
  */
 let logout = () => {
     Axios.post('/auth/logout');
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
 }
 /**
  * decrypt token and returns infos of token (id, expiration time)
