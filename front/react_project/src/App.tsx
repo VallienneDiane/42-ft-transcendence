@@ -3,7 +3,7 @@ import ChatModule from './components/ChatModule/ChatModule';
 import SignupPage from './components/SignupPage'
 import LoginPage from './components/LoginPage'
 import Home from './components/Home'
-import { Routes, Route, BrowserRouter } from "react-router-dom"
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom"
 import Profile from './components/ProfileModule/Profile';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import { SocketContext } from './components/context';
@@ -17,7 +17,7 @@ import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 import { SocketContextType } from './components/ChatModule/Chat_models';
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
-import HomeSettings from './components/HomeSettings';
+import HomeSettings from './components/HomePageSettings';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
@@ -44,8 +44,8 @@ function App() {
       <BrowserRouter >
         <SocketContext.Provider value={{ socket, createSocket, disconnect } as SocketContextType}>
           <Routes>
-            <Route path="/callback/" element={<Callback />} />
-            <Route path='/homeSettings' element={<HomeSettings />} />
+            <Route path="/callback/"element={<Callback />}/>
+            <Route path='/homeSettings' element={ accountService.isLogged() ? <Navigate to="/"/> : (<HomeSettings/>) }/>
             <Route element={<Layout />}>
               <Route path='/login' element={<LoginPage />} />
               <Route path='/signup' element={<SignupPage />} />

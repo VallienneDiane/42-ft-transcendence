@@ -16,8 +16,9 @@ const schema = yup.object().shape({
         .test('len', 'Code must be 6 characters', val => val?.length === 6)
 });
 
-const LogSettings: React.FC = () => {
+const Auth2faSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
+    const id = decodedToken.sub;
     const [checked, setchecked] = useState<boolean>(false);
     const [qrcode, setQrcode] = useState<string>("null");
     const [qrLoad, setQrLoad] = useState<boolean>(false)
@@ -28,8 +29,8 @@ const LogSettings: React.FC = () => {
         resolver: yupResolver(schema)
     });
 
-    const isGoogleActivate = () => {
-        accountService.is2faActiveSettings(decodedToken.login)
+    const isGoogleAuthActivate = () => {
+        accountService.is2faActiveSettings(id!)
             .then(response => {
                 setActivate2fa(response.data.is2faActive);
                 setchecked(response.data.is2faActive);
@@ -39,15 +40,14 @@ const LogSettings: React.FC = () => {
     }
 
     useEffect(() => {
-        isGoogleActivate();
-        userService.getUser(decodedToken.login)
+        isGoogleAuthActivate();
+        userService.getUser(id!)
             .then(response => {
                 setUser(response.data);
             })
             .catch(error => {
                 console.log(error);
             });
-        console.log("user", user);
     }, [])
 
     const verifySubmittedCode = (data: VerifyCodeForm) => {
@@ -81,7 +81,7 @@ const LogSettings: React.FC = () => {
 
     return (
         <div id="fasetting">
-            <h2>LogIn settings</h2>
+            <h2>Activate Two-Factor-Auth</h2>
             <div className="switch">
                 <p>Activate Google Authentificator</p>
                 <ReactSwitch
@@ -89,9 +89,10 @@ const LogSettings: React.FC = () => {
                     checked={checked}
                     onChange={handleChange}
                 />
-            </div>
-            {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
-            {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ?
+            </div >
+            <div id="auth2fa">
+                {checked === true && qrLoad ? <img id="qrcode" src={qrcode} alt="" /> : null}
+                {checked === true && qrLoad && (is2faActive == false || is2faActive == null) ?
                 <div>
                     <p id="scan">Scan the QRCode in your application </p>
                     <form onSubmit={handleSubmit(verifySubmittedCode)}>
@@ -103,8 +104,9 @@ const LogSettings: React.FC = () => {
                     </form>
                 </div> : null}
             {checked === true && is2faActive == true ? <p id="AuthActivate">Google Authentificator is activate</p> : null}
+            </div>
         </div>
     )
 }
 
-export default LogSettings;
+export default Auth2faSettings;

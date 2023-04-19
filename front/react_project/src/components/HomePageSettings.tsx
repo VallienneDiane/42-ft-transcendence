@@ -5,37 +5,27 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { SettingsForm } from "../models";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom"
-import "../styles/HomeSettings.scss"
+import "../styles/HomePageSettings.scss"
 
 const userSchema = yup.object().shape({
     login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") ,
 })
 
-const HomeSettings: React.FC = () => {
+const HomePageSettings: React.FC = () => {
     const location = useLocation();
     const navigate = useNavigate();
-
     const id42 = location.state?.id42;
     const email = location.state?.email;
     const [avatar, setAvatar] = useState<string>(location.state?.avatar);
     const [login, setLogin] = useState<string>(location.state?.login);
-    const [logins, setLogins] = useState<{login: string}[]>([]);
-    const [duplicateLogin, setDupLogin] = useState<boolean>(false);
+    const [uniqueLogin, setIsUniqueLogin] = useState<boolean>(true);
+    const [uniqueId42, setIsUniqueId42] = useState<boolean>(true);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
-
     const { register, handleSubmit, formState: { errors }} = useForm<SettingsForm>({
         resolver: yupResolver(userSchema)
     });
 
-    useEffect(() => {
-        accountService.getAllLogins()
-        .then(res => {
-            setLogins(res.data);
-        })
-        .catch(error => {});
-    }, [])
-    
     useEffect(() => {
         if(selectedFile) {
             let reader = new FileReader();
@@ -54,26 +44,45 @@ const HomeSettings: React.FC = () => {
         }
     }
 
+    useEffect(() => {
+        if(id42 == undefined) {
+            navigate("/");
+            return;
+        }    
+    }, [])
+    
     const userSubmit = async () => {
         const user = {
-            id42: id42,
+            id42: id42.toString(),
             login: login,
             email: email,
             avatarSvg: avatar,
         }
-        for(let i = 0; i < logins.length; i++) {
-            if(user.login == logins[i].login) {
-                setDupLogin(true);
-                return;
+        await accountService.isUniqueLogin(user.login)
+        .then(loginUnique => {
+            if(loginUnique.data == true) {
+                accountService.isId42(user.id42)
+                .then(res_id42 => {
+                    if(res_id42.data == true) {
+                        setIsUniqueId42(false);
+                        return;
+                    }
+                    setIsUniqueId42(true);
+                    accountService.createUser(user)
+                    .then(token => {
+                        accountService.saveToken(token.data.access_token);
+                        const from = (location.state as any)?.from || "/";
+                        navigate(from);
+                    })
+                    .catch(error => {console.log(error);});
+                })
+                .catch(error => {console.log(error);});
+            }  
+            else {
+                setIsUniqueLogin(false);
             }
-        }
-        await accountService.createUser(user)
-        .then(res_token => {
-            accountService.saveToken(res_token.data.access_token);
-            const from = (location.state as any)?.from || "/";
-            navigate(from);
         })
-        .catch(error => {});
+        .catch(error => {console.log(error);});
     }
 
     const handleDragOver = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,11 +114,11 @@ const HomeSettings: React.FC = () => {
 
     const onChangeLogin = (event: React.ChangeEvent<HTMLInputElement>) => {
         setLogin(event.target.value);
-        setDupLogin(false);
+        setIsUniqueLogin(true);
     }
 
     return (
-        <div id="homeSettings">
+        <div id="homePageSettings">
             <form onSubmit={handleSubmit(userSubmit)}>
                 <div id="name">
                     <h2>Choose your login </h2>
@@ -131,10 +140,11 @@ const HomeSettings: React.FC = () => {
                         <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
                     </div>
                     <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                    <div id="test">
+                    <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         {errors.login && <p className="error">{errors.login.message}</p>}
-                        { duplicateLogin ? <p className="error">This login already exist</p> : null }
+                        { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                        { uniqueId42 ? null : <p className="error">You are already register with 42</p> }
                     </div>
                 </div>
             </form>
@@ -142,4 +152,4 @@ const HomeSettings: React.FC = () => {
     )
 }
 
-export default HomeSettings;
+export default HomePageSettings;

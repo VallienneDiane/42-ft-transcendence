@@ -9,11 +9,17 @@
     --text-color: #4F200D;
     --ball-color: #ffd500; */
 
-    --prim-color: #ffffff;
-    --second-color: #2a9d8f;
-    --third-color: #4a214a;
-    --text-color: #333333;
+    --prim-color: #272c46;
+    --second-color: #dc9017;
+    --third-color: #0e4f78;
+    --text-color: #ffffff;
     --ball-color: #f4a261;
+
+    /* --prim-color: #272c46;
+    --second-color: #dc9017;
+    --third-color: #4a214a;
+    --text-color: #ffffff;
+    --ball-color: #f4a261; */
 
     /* --prim-color: #5f0f40;
     --second-color: #1d8ca8;
