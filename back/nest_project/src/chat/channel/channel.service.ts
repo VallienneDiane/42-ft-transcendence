@@ -6,6 +6,7 @@ import { UserEntity } from "src/user/user.entity";
 import { NotBrackets, Repository } from "typeorm";
 import { modifyChannelDto } from "../chat.gateway.dto";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
+import { MuteEntity } from "../mute/mute.entity";
 import { ChannelDto } from "./channel.dto";
 import { ChannelEntity } from "./channel.entity";
 
@@ -98,7 +99,7 @@ export class ChannelService {
 	 * @returns an array or UserEntity belong to this channel with theyre grade in this channel, a connected: boolean is available 
 	 * to set it up later, it can be ignored either
 	 */
-	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string, connected: boolean}[]> {
+	async listUsersInChannel(channelId: string, sorted: boolean): Promise<{user: UserEntity, status: string}[]> {
 		const godUser = await this.channelRepository
 			.createQueryBuilder("channel")
 			.leftJoinAndSelect("channel.godUser", "god")
@@ -125,17 +126,17 @@ export class ChannelService {
 				return (a.login.localeCompare(b.login))
 			});
 		}
-		let toReturn: {user: UserEntity, status: string, connected: boolean}[] = [];
+		let toReturn: {user: UserEntity, status: string}[] = [];
 		if (godUser)
-		toReturn.push({user: godUser, status: "god", connected: false});
+		toReturn.push({user: godUser, status: "god"});
 		opUsers.forEach(
 			(user) => {
-				toReturn.push({user: user, status: "op", connected: false});
+				toReturn.push({user: user, status: "op"});
 			}
 		);
 		normalUsers.forEach(
 			(user) => {
-				toReturn.push({user: user, status: "normal", connected: false});
+				toReturn.push({user: user, status: "normal"});
 			}
 		)
 		return toReturn;
@@ -216,9 +217,41 @@ export class ChannelService {
 			.getRawMany();
 	}
 
+	async getBannedListWithLogin(channelId: string): Promise<{id: string, login: string}[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.bannedUsers", "banned")
+			.where("channel.id = :id", { id: channelId })
+			.select("banned.id", "id")
+			.addSelect("banned.login", "login")
+			.getRawMany();
+	}
+
+	async getMutedList(channelId: string): Promise<{id: string}[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.usersMuted", "mute")
+			.select("mute.id", "id")
+			.where("channel.id = :id", { id: channelId })
+			.getRawMany();
+	}
+
+	async getMutedListWithJoin(channelId: string): Promise<MuteEntity[]> {
+		return await this.channelRepository
+			.createQueryBuilder("channel")
+			.innerJoinAndSelect("channel.usersMuted", "mute")
+			.select("mute.*")
+			.where("channel.id = :id", { id: channelId })
+			.getRawMany();
+	}
+
 	async findUserInBannedList(userId: string, channelId: string) : Promise<boolean> {
 		const arrayBanned: {id: string}[] = await this.getBannedList(channelId);
-		return arrayBanned.includes({id: userId});
+		for (let elt of arrayBanned) {
+			if (elt.id == userId)
+				return true;
+		}
+		return false;
 	}
 
 	async delUser(userId: string, channelId: string) {

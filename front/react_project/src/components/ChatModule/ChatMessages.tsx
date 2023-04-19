@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IMessage, IDest, IMessageReceived } from "./Chat_models";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { SocketContext } from "../context";
+import LogoOrdi from'../../assets/LogoOrdi.jpg';
 
 class MessageDisplay extends React.Component<{message: IMessage, prevSender: string, last: boolean}, {
     playload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
@@ -51,6 +52,8 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
                 })
                 .catch(error => console.log(error));
         }
+        else
+            this.setState({avatar: LogoOrdi})
     }
 
     render() {
@@ -100,6 +103,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     }
 
     componentWillUnmount(): void {
+        this.context.socket.off('listBlock');
         this.context.socket.off('newMessage');
         this.context.socket.off('selfMessage');
         this.context.socket.off('notice');

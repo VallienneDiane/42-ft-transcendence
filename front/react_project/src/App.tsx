@@ -4,7 +4,7 @@ import SignupPage from './components/SignupPage'
 import LoginPage from './components/LoginPage'
 import Home from './components/Home'
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom"
-import Profile from './components/Profile';
+import Profile from './components/ProfileModule/Profile';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import { SocketContext } from './components/context';
 import { accountService } from "./services/account.service";

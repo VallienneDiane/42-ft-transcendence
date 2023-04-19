@@ -8,8 +8,8 @@ import { UserRoomHandler } from "./chat.classes";
 import { UserService } from "src/user/user.service";
 import { JwtService } from '@nestjs/jwt';
 import { UserEntity } from "src/user/user.entity";
-import { friendDto } from "./relation/friend/friend.dto";
-import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, inviteUserDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, unbanUserDto } from "./chat.gateway.dto";
+import { friendDto, friendshipDto } from "./friend/friend.dto";
+import { addMessageDto, banUserDto, blockUserDto, changeLocDto, channelIdDto, createChannelDto, getBanListDto, inviteUserDto, isConnectedDto, joinChannelDto, kickUserDto, makeHimNoOpDto, makeHimOpDto, modifyChannelDto, muteUserDto, unbanUserDto, unmuteUserDto } from "./chat.gateway.dto";
 
 @UsePipes(ValidationPipe)
 @WebSocketGateway({transports: ['websocket'], namespace: '/chat'})
@@ -77,6 +77,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         .then((user) => {
             if (user != null)
                 this.chatService.disconnectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger)
+        })
+    }
+
+    @SubscribeMessage("isConnected")
+    handleIsConnected(@MessageBody() data: isConnectedDto[], @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.isConnectedEvent(client, user, data, this.chatRoomHandler);
         })
     }
 
@@ -156,7 +165,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('inviteUser')
     handleInviteUser(@MessageBody() data: inviteUserDto, @ConnectedSocket() client: Socket) {
-        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
@@ -225,7 +233,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
         this.logger.debug("OP");
-        console.log(data);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
@@ -288,13 +295,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage('cancelFriendRequest')
+    handleCancelRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((me) => {
+            if (me != null) {
+                this.chatService.supressRequestEvent(data.friendshipId, this.chatRoomHandler);
+            }
+            else
+                client.emit('notice', 'Your token is invalid, please log out then sign in');
+        })
+    }
 
     @SubscribeMessage('acceptFriendRequest')
-    handleAcceptRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleAcceptRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((receiver) => {
             if (receiver != null) {
-                this.chatService.acceptFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+                this.chatService.acceptFriendRequestEvent(data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -303,11 +321,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 
     @SubscribeMessage('rejectFriendRequest')
-    handleRejectRequest(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleRejectRequest(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((receiver) => {
             if (receiver != null) {
-                this.chatService.rejectFriendRequestEvent(receiver, data.userId, this.chatRoomHandler);
+                this.chatService.supressRequestEvent(data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -315,11 +333,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     @SubscribeMessage('unfriend')
-    handleUnfriend(@MessageBody() data: friendDto, @ConnectedSocket() client: Socket) {
+    handleUnfriend(@MessageBody() data: friendshipDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((me) => {
             if (me != null) {
-                this.chatService.unfriendEvent(me, data.userId, this.chatRoomHandler);
+                this.chatService.unfriendEvent(client, me, data.friendshipId, this.chatRoomHandler);
             }
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
@@ -370,13 +388,45 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage("getBanList")
+    handleGetBanList(@MessageBody() data: getBanListDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.chatService.getBanListEvent(client, user, data.channelId);
+            }
+        })
+    }
+
     @SubscribeMessage("unbanUser")
     handleUnbanUser(@MessageBody() data: unbanUserDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
                 this.logger.debug(`ban event`);
-                this.chatService.unbanUserEvent(client, user.id, data.name, data.channelId, this.logger, this.chatRoomHandler);
+                this.chatService.unbanUserEvent(client, user.id, data.userId, data.channelId, this.logger, this.chatRoomHandler);
+            }
+        })
+    }
+
+    @SubscribeMessage("muteUser")
+    handleMuteUser(@MessageBody() data: muteUserDto, @ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`mute event`);
+                this.chatService.muteUserEvent(client, user.id, data.id, data.channelId, data.minutes);
+            }
+        })
+    }
+
+    @SubscribeMessage("listMutedUsers")
+    handleListMutedUsers(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null) {
+                this.logger.debug(`listMuted Event`);
+                this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
             }
         })
     }

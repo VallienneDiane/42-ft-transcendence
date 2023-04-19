@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max } from "class-validator";
 
 export class addMessageDto {
     @IsNotEmpty() @IsString() readonly message: string;
@@ -60,11 +60,28 @@ export class blockUserDto {
 export class banUserDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
-
 }
 
 export class unbanUserDto {
-    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsUUID() readonly userId: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
 
+export class muteUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+    @IsNotEmpty() @IsNumber() @IsPositive() @Max(1440) readonly minutes: number; 
+}
+
+export class unmuteUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
+
+export class isConnectedDto {
+    @IsNotEmpty() @IsUUID() readonly userId: string;
+}
+
+export class getBanListDto {
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
 }

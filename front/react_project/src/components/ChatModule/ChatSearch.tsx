@@ -42,8 +42,8 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
             if (offSocket) {
-                socket.off("wrong");
-                socket.off("true");
+                socket.off("wincorrectPasswordrong");
+                socket.off("incorrectPassword");
             }
         }
     }, [ref]);
@@ -159,21 +159,13 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             users.forEach((login, id) => {
                 if (playload.login !== login)
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
-            })
+            });
+            newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
             this.setState({users: newUserList});
             this.context.socket.emit('myDM');
-            this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-                let newList: ISearch[] = [];
-                for (let user of this.state.users) {
-                    let ok: boolean = true;
-                    for (let elt of strs) {
-                        if (elt.userId == user.id)
-                            ok = false;
-                    }
-                    if (ok)
-                        newList.push(user);
-                }
-                this.setState({users: newList});
+            this.setState(() => {
+                const filtered: ISearch[] = this.compileFiltered(newUserList, this.state.channels);
+                return { filtered };
             })
         })
         .catch(error => {
@@ -243,11 +235,24 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
             for (let str of strs)
                 newChanList.push({id: str.id!, name: str.name, password: str.password, isChannel: true, isClickable: true});
+            newChanList.sort((a, b) => {return a.name.localeCompare(b.name);})
             this.setState({channels: newChanList});
             let newFiltered = this.compileFiltered(this.state.users, newChanList);
             this.setState({filtered: newFiltered});
         });
-        
+        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+            let newList: ISearch[] = [];
+            for (let user of this.state.users) {
+                let ok: boolean = true;
+                for (let elt of strs) {
+                    if (elt.userId == user.id)
+                        ok = false;
+                }
+                if (ok)
+                    newList.push(user);
+            }
+            this.setState({users: newList});
+        });
         this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
             let nextState: ISearch[] = this.state.channels.filter(
                 elt => {return (elt.id != chann.channel.id)}
@@ -266,7 +271,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             this.setState({filtered: newFiltered});
         })
            
-        this.context.socket.on('newUserConnected', () => {
+        this.context.socket.on('userConnected', () => {
             this.fetchUsers()});
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
             let newList: ISearch[] = this.state.users.filter(
@@ -301,6 +306,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
         this.context.socket.off('newUserConnected');
+        this.context.socket.off('checkNewDM');
         this.context.socket.off('newLocChannel');
         this.context.socket.off('newLocPrivate');
     }
