@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, IsBoolean, IsNumber } from "class-validator";
+import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber } from "class-validator";
 import { ChannelDto } from "src/chat/channel/channel.dto";
 import { MessageChannelEntity } from "src/chat/messageChannel/messageChannel.entity";
 import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
@@ -11,7 +11,7 @@ export class UserDto {
     @IsString() readonly id42: string;
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
-    @IsNotEmpty() @IsString() @MinLength(8) password: string; //@IsOptionnal
+    @IsNotEmpty() @IsString() @MinLength(8) password: string;
     readonly channelsAsNormal: ChannelDto[];
     readonly channelsAsOp: ChannelDto[];
     readonly channelsAsGod: ChannelDto[];
@@ -33,12 +33,12 @@ export class UserDto {
 export class SignUpDto {
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
-    @IsNotEmpty() @IsString() @MinLength(8) password: string;
+    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(10) password: string;
 }
 
 export class LoginDto {
     @IsNotEmpty() @IsString() readonly login: string;
-    @IsNotEmpty() @IsString() @MinLength(8) password: string;
+    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(10) password: string;
 }
 
 export class SignUp42Dto {
