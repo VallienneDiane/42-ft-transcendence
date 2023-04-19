@@ -4,6 +4,8 @@ import "../styles/MatchInProgress.scss"
 import React, { useState, useEffect } from 'react'
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 
 interface MatchState {
@@ -29,9 +31,14 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
     const [matchs, setMatchs] = useState<MatchState[]>([
         {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiiifez", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        // {player1_login: "Michellangelloooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
+
+    
 
     // useEffect(() => {
     //     console.log("display matchs", matchs);
@@ -70,12 +77,14 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                 console.log('match end', matchEnd);
                 setMatchs(matchs.filter(match => match.player1_login !== matchEnd.player1_login));
             })
-
-
-
         }
     }, [props.socket]);
 
+    const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
+        // console.log("event", event.currentTarget.attributes);
+        // console.log("je veux voir le match de ", event.currentTarget.getAttribute('data-key'));
+        props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')} )
+    }
 
     return (
         <div id="matchsInProgress">
@@ -92,17 +101,18 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                     
                     matchs.map((match: MatchState) => {
                         return (
-                            <div className="match" key={match.player1_login}>
-                                <div>{match.player1_login}</div>
-                                <div>{match.player1_score}</div>
-                                <div>{match.player2_score}</div>
-                                <div>{match.player2_login}</div>
+                            <div className="match" key={match.player1_login} data-key={match.player1_login} onClick={watchMatch}>
+                                <div><span>{match.player1_login}</span></div>
+                                <div><span>{match.player1_score}</span></div>
+                                <div className="watchMatch">Watch in direct<FontAwesomeIcon icon={faCircle} className="redDot"/></div>
+                                <div><span>{match.player2_score}</span></div>
+                                <div><span>{match.player2_login}</span></div>
                             </div>
                         )
                     })
                 :
                 <div id="noMatch">
-                    No Match in progress
+                    <p>No Match in progress</p>
                 </div>
                 }
             </div>

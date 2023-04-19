@@ -22,12 +22,31 @@ interface PageElement {
     hit: boolean,
 }
 
+const darkenColor = function (color: string, percent: number) {
+  const match = color.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/);
+  if (!match) {
+    throw new Error('Invalid color string');
+  }
+
+  const r = parseInt(match[1]);
+  const g = parseInt(match[2]);
+  const b = parseInt(match[3]);
+  const a = match[4] ? parseFloat(match[4]) : 1;
+
+  const darkenedR = Math.round(r * (1 - percent / 100));
+  const darkenedG = Math.round(g * (1 - percent / 100));
+  const darkenedB = Math.round(b * (1 - percent / 100));
+
+  return `rgba(${darkenedR}, ${darkenedG}, ${darkenedB}, ${a})`;
+};
+
 const DarkenColor = function (stringColor: string, percent: number) {
     let r: number = parseInt(stringColor.substring(2, 4), 16) * percent / 100;
     let g: number = parseInt(stringColor.substring(4, 6), 16) * percent / 100;
     let b: number = parseInt(stringColor.substring(6, 8), 16) * percent / 100;
+    let alpha: number = parseInt(stringColor.substring(8, 10), 16);
 
-    return (`#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}`);
+    return (`#${Math.round(r).toString(16).padStart(2, '0')}${Math.round(g).toString(16).padStart(2, '0')}${Math.round(b).toString(16).padStart(2, '0')}${alpha.toString(16).padStart(2, '0')}`);
 }
 
 const style = getComputedStyle(document.documentElement);
@@ -61,7 +80,7 @@ const BallContainer = (props: BallContainerProps) => {
 const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WIDTH: number, pageElements: { element: DOMRect | null, hit: boolean }[]) => {
     const gravity = 0.01;
     const frottement = 0.998;
-    const restitution = 0.98;
+    const restitution = 0.93;
 
     for (let i = 0; i < balls.length; i++) {
         const ball = balls[i];
@@ -83,6 +102,8 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
                     if (ball.vy > 1.5) {
                         pageElements[j].hit = true;
                     }
+                    if (ball.vy < 0.12)
+                        ball.vy = 0;
                     ball.vy *= -restitution;
                     ball.y += ball.vy;
                 }
@@ -313,7 +334,7 @@ const Home: React.FC = () => {
             <div id="title">
 
                 <div>
-                    <h1 ref={h1_title} onMouseEnter={onHoverTitle} onMouseLeave={mouseLeave} className="navLink" >ft_transcendance</h1>
+                    <h1 ref={h1_title} onMouseEnter={onHoverTitle} onMouseLeave={mouseLeave} className="navLink" >ft_transcendence</h1>
                     <div className="shadow"></div>
                 </div>
             </div>
