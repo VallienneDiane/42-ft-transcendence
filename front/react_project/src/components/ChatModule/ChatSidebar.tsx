@@ -1,21 +1,23 @@
 import React, { useState, useContext, useEffect, useRef } from "react";
-import SocketContext from "../context";
+import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { IDest, IChannel } from "../../models";
+import { IDest, IChannel, ISearch } from "./Chat_models";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBan, faBroom, faCommentSlash, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faRightFromBracket, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
+import { NavLink } from "react-router-dom";
+import { userService } from "../../services/user.service";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
     const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
+        id: props.channel.id,
         name: props.channel.name,
         password: props.channel.password,
-        channelPass: props.channel.channelPass,
-        inviteOnly: props.channel.inviteOnly,
-        persistant: props.channel.persistant,
-        onlyOpCanTalk: props.channel.onlyOpCanTalk, 
-        hidden: props.channel.hidden } 
+        channelPass: "",
+        inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
 
@@ -24,20 +26,17 @@ function ModifyChannel(props: {channel: IChannel}) {
     }
 
     const onSubmit = (data: IChannel) => {
-        console.log(data)
         socket.emit('modifyChannel', {
+            id: props.channel.id,
             name: data.name,
             password: data.password,
             channelPass: data.channelPass,
-            inviteOnly: data.inviteOnly,
-            persistant: data.persistant,
-            onlyOpCanTalk: data.onlyOpCanTalk,
-            hidden: data.hidden,
+            inviteOnly: data.inviteOnly
         });
     };
 
     return (
-        <form className="settingList">
+        <form className="settingList" onSubmit={handleSubmit(onSubmit)}>
             <li>Name 
                 <input className="inputChannel" {...register("name", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                     type="text"
@@ -50,69 +49,375 @@ function ModifyChannel(props: {channel: IChannel}) {
             </li>
             {showChannelPass && (
                 <li>
-                    <input className="inputChannel" {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
+                    <input className="inputPassword" {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
                         type="password"
                         placeholder=""
                     /> 
                 </li>)}
             {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
             <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
-            <li>Persistant<input type="checkbox" {...register("persistant")}/></li>
-            <li>Only OP Can Talk<input type="checkbox" {...register("onlyOpCanTalk")}/></li>
-            <li>Hidden<input type="checkbox" {...register("hidden")}/></li>
             <li><button type="submit">Save</button></li>
         </form>
+    )
+}
+
+function MuteFor(props: {user: string, dest: IDest, handleClose: () => void}) {
+    const {socket} = useContext(SocketContext);
+    const [minutes, setMinutes] = useState<number>(0);
+    const [hours, setHours] = useState<number>(0);
+    const [mouseOn, setMouseOn] = useState<boolean>(false);
+    const [time, setTime] = useState<string>("");
+    const [plus, setPlus] = useState<boolean>(false);
+
+    const increment = (timi: string) => {
+        if (timi == "minute") {
+            if (minutes < 59)
+                setMinutes(minutes => minutes + 1);
+        }
+        else {
+            if (hours < 23)
+                setHours(hours => hours + 1);
+        }
+    }
+
+    const decrement = (timi: string) => {
+        if (timi == "minute") {
+            if (minutes > 0)
+                setMinutes(minutes => minutes - 1);
+        }
+        else {
+            if (hours > 0)
+                setHours(hours => hours - 1);
+        }
+    }
+
+    const handleMouse = (e: any) => {
+        const tmp: string = e.target.value;
+        const values: string[] = tmp.split(", ");
+        if (e.type === "mousedown") {
+            setMouseOn(true);
+            if (values[0] == "minute")
+                setTime("minute");
+            if (values[0] == "hour")
+                setTime("hours");
+            if (values[1] == "-")
+                setPlus(false);
+            if (values[1] == "+")
+                setPlus(true);
+        } 
+        else if (e.type === "mouseup") {
+            setMouseOn(false);
+            setTime("");
+        }
+    }
+
+    const handleClick = (e: any) => {
+        const tmp: string = e.target.value;
+        const values: string[] = tmp.split(", ");
+        if (values[1] == "+")
+            increment(values[0]);
+        else
+            decrement(values[0]);
+    }
+
+    const mute = () => {
+        let time: number = (hours * 60) + minutes;
+        socket.emit("muteUser", {id: props.user, channelId: props.dest.id, minutes: time});
+        props.handleClose();
+    }
+
+    useEffect(() => { 
+        let intervalPlus: NodeJS.Timer;
+        let intervalMinus: NodeJS.Timer;
+        if (mouseOn && plus) {
+            intervalPlus = setInterval(() => increment(time), 100);
+        }
+        if (mouseOn && !plus) {
+            intervalMinus = setInterval(() => decrement(time), 100);
+        }
+        return () => {
+            clearInterval(intervalPlus);
+            clearInterval(intervalMinus);
+        }
+    }, [mouseOn, hours, minutes])
+
+    return (
+        <React.Fragment>
+            <li className="mute">
+                <div>
+                    Mute for:
+                </div>
+                <div>
+                    <div>
+                        <button value="hour, -" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>-</button>
+                            <span>{hours}</span>h
+                        <button value="hour, +" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>+</button>
+                    </div>
+                    <div>
+                        <button value="minute, -" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>-</button>
+                            <span>{minutes}</span>m
+                        <button value="minute, +" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>+</button>
+                    </div>
+                    <button className="muteButton" onClick={mute}>Save</button>
+                </div>
+            </li>
+        </React.Fragment>
+    )
+}
+
+function MemberList(props: {dest: IDest}) {
+    const {socket} = useContext(SocketContext);
+    const me: JwtPayload = accountService.readPayload()!;
+    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string}[]>([]);
+    const [onClickMute, setOnClickMute] = useState<boolean>(false);
+    const [userToMute, setUserToMute] = useState<string>("");
+
+    const showMuteFor = (e: any) => {
+        setUserToMute(e.currentTarget.value);
+        setOnClickMute((onClickMute) => !onClickMute)
+    }
+
+    const kickUser = (e: any) => {
+        socket.emit("kickUser", {userToKick: e.currentTarget.value, channelId: props.dest.id});
+    }
+    
+    const ban = (e: any) => {
+        socket.emit("banUser", {id: e.currentTarget.value, channelId: props.dest.id});
+    }
+
+    const deOp = (e: any) => {
+        socket.emit("makeHimNoOp", {userToNoOp: e.currentTarget.value, channelId: props.dest.id});
+    }
+    
+    const doOp = (e: any) => {
+        socket.emit("makeHimOp", {userToOp: e.currentTarget.value, channelId: props.dest.id});
+    }
+
+    const handleCloseMuteFor = () => {
+        setOnClickMute((onClickMute) => !onClickMute);
+    }
+
+    useEffect(() => {
+        socket.emit('listUsersChann', {channelId: props.dest.id}); 
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
+            setMembers(list);
+        })
+        socket.on("userLeaveChannel", (userId: string) => {
+            setMembers((members) => {
+                let newMembers = [...members].filter((member) => {
+                    return member.user.id != userId;
+                });
+                return newMembers;
+            });
+        })
+        socket.on("newUserInChannel", (id: string, login: string) => {
+            setMembers(members => {
+                let user: {user: {id: string, login: string}, status: string} = {
+                    user: {
+                        id: id,
+                        login: login
+                    },
+                    status: "normal"
+                }
+                let newMembers = [...members, user];
+                newMembers.sort((a, b) => {
+                    if (a.status == "god" && b.status != "god")
+                        return (-1)
+                    if (a.status == "op") {
+                        if (b.status == "god")
+                            return (1)
+                        if (b.status == "normal")
+                            return (-1) 
+                    }
+                    if (a.status == "normal" && b.status != "normal")
+                        return (1)
+                    return (a.user.login.localeCompare(b.user.login))
+                });
+                return newMembers;
+            });
+        })
+
+        return () => {
+            socket.off('listUsersChann');
+            socket.off('userLeaveChannel');
+            socket.off('newUserInChannel');
+        }
+    }, [])
+
+    return (
+        <React.Fragment>
+            <ul className="memberList">{
+                members.map(
+                (member, id) => {
+                    let iconStatus: JSX.Element = null!;
+                    if (member.status === "god")
+                        iconStatus = <FontAwesomeIcon className="iconStatus" icon={faKiwiBird} />;
+                    else if (member.status === "op")
+                        iconStatus = <FontAwesomeIcon className="iconStatus" icon={faFeather} />;
+    
+                    if (member.user.id !== me.sub) {
+                        if (props.dest.status == "normal")
+                            return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                        else if (props.dest.status == "op") {
+                            if (member.status == "normal")
+                                return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                                        <div>
+                                            <button className="memberButton" data-hover-text="Mute" value={member.user.id} onClick={showMuteFor}>
+                                                <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
+                                            </button>
+                                            <button className="memberButton" data-hover-text="Kick" value={member.user.id} onClick={kickUser}>
+                                                <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
+                                            </button>
+                                            <button className="memberButton" data-hover-text="Ban" value={member.user.id} onClick={ban}>
+                                                <FontAwesomeIcon className="iconAction" icon={faBan} />
+                                            </button>
+                                        </div></li>)
+                            else if (member.status == "op" || member.status == "god")
+                                return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                        }
+                        else if (props.dest.status == "god")
+                            return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                            <div>
+                                { member.status == "op" ? 
+                                (<button className="memberButton" data-hover-text="Downgrade" value={member.user.id} onClick={deOp}>
+                                    <FontAwesomeIcon className="iconAction" icon={faBroom} />
+                                </button>) :
+                                (<button className="memberButton" data-hover-text="Upgrade" value={member.user.id} onClick={doOp}>
+                                    <FontAwesomeIcon className="iconAction" icon={faWandMagicSparkles} />
+                                </button>) }
+                                <button className="memberButton" data-hover-text="Mute" value={member.user.id} onClick={showMuteFor}>
+                                    <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
+                                </button>
+                                <button className="memberButton" data-hover-text="Kick" value={member.user.id} onClick={kickUser}>
+                                    <FontAwesomeIcon className="iconAction" icon={faRightFromBracket} />
+                                </button>
+                                <button className="memberButton" data-hover-text="Ban" value={member.user.id} onClick={ban}>
+                                    <FontAwesomeIcon className="iconAction" icon={faBan} />
+                                </button>
+                            </div></li>)
+                    }
+                    else
+                        return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                }
+                )}
+            </ul>
+            {onClickMute && <MuteFor user={userToMute} dest={props.dest} handleClose={handleCloseMuteFor} />}
+        </React.Fragment>
     )
 }
 
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
-    const [members, setMembers] = useState<string[]>([]);
     const [onClickMembers, setOnClickMembers] = useState<boolean>(false);
     const [onClickSettings, setOnClickSettings] = useState<boolean>(false);
-    const me: JwtPayload = accountService.readPayload()!;
+    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
+    const [userToInvit, setUserToInvit] = useState<string>("");
+    const [onClickUnban, setOnClickUnban] = useState<boolean>(false);
+    const [bans, setBans] = useState<{id: string, login: string}[]>([]);
+    const [members, setMembers] = useState<{user: {id: string, login: string}, status: string}[]>([]);
+    const [users, setUsers] = useState<{id: string, name: string}[]>([]);
 
-    const leaveChannel = () => {
-        console.log(props.dest.id)
-        socket.emit('leaveChannel', {channelId: props.dest.id});
-        props.handleClose();
-    }
-
-    const inviteUser = () => {
-        // coder l'invitation : search user
-        socket.emit('inviteUser', "nami", props.dest.id);
-    }
-
-    const listMembers = () => {
+    const showMembers = () => {
         setOnClickMembers((onClickMembers) => !onClickMembers)
     }
 
     const showSettings = () => {
         setOnClickSettings((onClickSettings) => !onClickSettings)
     }
+    
+    const showInvite = () => {
+        setOnClickInvite((onClickInvite) => !onClickInvite)
+    }
 
-    const showUserParam = () => {
-        console.log("blop");
+    const showUnban = () => {
+        setOnClickUnban((onClickUban) => !onClickUban)
     }
     
+    const onChangeInvite = (e: any) => {
+        setUserToInvit(e.target.value);
+    }
+
     const handleClickOutside = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
             props.handleClose();
         }
     }
+     
+    const inviteUser = (event: any) => {
+        event.preventDefault();
+        socket.emit('inviteUser', {userToInvite: userToInvit, channelId: props.dest.id});
+        setUserToInvit("");
+    }
 
+    const unban = (e: any) => {
+        e.preventDefault();
+        socket.emit("unbanUser", {userId: e.target.value, channelId: props.dest.id});
+    }
+
+    const leaveChannel = () => {
+        socket.emit('leaveChannel', {channelId: props.dest.id});
+        props.handleClose();
+    }
+
+    const deleteChannel = () => {
+        socket.emit('destroyChannel', {channelId: props.dest.id});
+        props.handleClose();
+    }
+
+    const fetchUsers = () => { // récupération de tous les users, sauf moi-même, et les users qui sont déjà dans le channel
+        userService.getAllUsers()
+        .then(response => {
+            const playload: JwtPayload = accountService.readPayload()!;
+            socket.emit('listUsersChann', {channelId: props.dest.id});
+            const users = new Map<string, string>();
+            response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login));
+            let newUserList: {id: string, name: string}[] = [];
+            console.log("members", members);
+            users.forEach((login, id) => {
+                let bool: boolean = true;
+                for (let elt of members) {
+                    console.log("blop")
+                    console.log(elt.user.login);
+                    if (elt.user.login == login) {
+                        bool = false;
+                        break;
+                    }
+                }
+                if (bool === true)
+                    newUserList.push({id: id, name: login});
+            });
+            newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
+            // console.log(newUserList);
+            setUsers(newUserList);
+        })
+        .catch(error => {
+            console.log(error);
+        })
+    }
+    
     useEffect(() => {
-        socket.emit('listUsersChann', props.dest.id); 
-        socket.on('listUsersChann', (list: string[]) => {
+        socket.emit("getBanList", {channelId: props.dest.id});
+        socket.on("banList", (array: {id: string, login: string}[]) => {
+            setBans(array);
+        })
+        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
+            console.log("zoubi");
             setMembers(list);
         })
+        socket.on("newUnban", (userId: string) => {
+            let newArray: {id: string, login: string}[] = bans.filter(
+                (ban: {id: string, login: string}) => {return (ban.id != userId)}
+                );
+            setBans(newArray);
+        })
+        
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-            socket.off('listUsersChann');
+            socket.off('banList');
         }
-    }, [ref]);
+    }, [ref, bans, members]);
 
     return (
         <div className="sidebarContent" ref={ref}>
@@ -120,22 +425,34 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
           <div className="navRight">
             <h1>{props.dest.name}</h1>
             <ul className="paramMenu">
-                <li onClick={listMembers}>Members</li>
-                {onClickMembers && (
-                    <ul className="memberList">{members.map(
-                        (member, id) => {
-                            if (member !== me.login)
-                                return (<li key={id} onClick={showUserParam}>{member}</li>)
-                            else
-                                return (<li key={id}>{member}<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M288 192h17.1c22.1 38.3 63.5 64 110.9 64c11 0 21.8-1.4 32-4v4 32V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V339.2L248 448h56c17.7 0 32 14.3 32 32s-14.3 32-32 32H160c-53 0-96-43-96-96V192.5c0-16.1-12-29.8-28-31.8l-7.9-1C10.5 157.6-1.9 141.6 .2 124s18.2-30 35.7-27.8l7.9 1c48 6 84.1 46.8 84.1 95.3v85.3c34.4-51.7 93.2-85.8 160-85.8zm160 26.5v0c-10 3.5-20.8 5.5-32 5.5c-28.4 0-54-12.4-71.6-32h0c-3.7-4.1-7-8.5-9.9-13.2C325.3 164 320 146.6 320 128v0V32 12 10.7C320 4.8 324.7 .1 330.6 0h.2c3.3 0 6.4 1.6 8.4 4.2l0 .1L352 21.3l27.2 36.3L384 64h64l4.8-6.4L480 21.3 492.8 4.3l0-.1c2-2.6 5.1-4.2 8.4-4.2h.2C507.3 .1 512 4.8 512 10.7V12 32v96c0 17.3-4.6 33.6-12.6 47.6c-11.3 19.8-29.6 35.2-51.4 42.9zM400 128a16 16 0 1 0 -32 0 16 16 0 1 0 32 0zm48 16a16 16 0 1 0 0-32 16 16 0 1 0 0 32z"/></svg></li>)
-                        }
-                        )}
-                    </ul>
-                )}
-                { props.dest.channel?.inviteOnly ? (
-                    <li onClick={inviteUser}>Invite</li>
+                <li onClick={showMembers}>Members</li>
+                {onClickMembers && <MemberList dest={props.dest} />}
+                {(!props.dest.channel?.inviteOnly || (props.dest.channel?.inviteOnly && props.dest.status !== "normal")) ? (
+                     <React.Fragment>
+                         <li onClick={showInvite}>Invite</li>
+                         {onClickInvite && (
+                             <form className="searchbar" onSubmit={inviteUser}>
+                                 <input type="text" id="invite" onClick={fetchUsers} onChange={onChangeInvite} value={userToInvit} placeholder="Search"/>
+                                 <button>
+                                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
+                                 </button>
+                             </form>)
+                         }
+                     </React.Fragment>
                 ) : null }
-                { props.dest.status ? (
+                {(props.dest.status === "god" && bans.length != 0) ? (
+                    <React.Fragment>
+                        <li onClick={showUnban}>Unban</li>
+                        {onClickUnban && 
+                            <ul className="memberList">
+                                {bans.map((ban, id) => (
+                                    <li key={id}><button value={ban.id} onClick={unban}>{ban.login}</button></li>
+                                ))}
+                            </ul>
+                        }
+                    </React.Fragment>
+                ) : null }
+                {props.dest.status !== "normal" ? (
                     <React.Fragment>
                         <li onClick={showSettings}>Settings</li>
                         {onClickSettings && (
@@ -143,7 +460,8 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         )}
                     </React.Fragment>
                 ) : null }
-                <li onClick={leaveChannel}>Leave</li>
+                {props.dest.status !== "god" ? (
+                <li className="outChannel" onClick={leaveChannel}>Leave</li>) : (<li className="outChannel" onClick={deleteChannel}>Delete</li>)}
             </ul>
           </div>
       </div>
@@ -155,16 +473,11 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const ref = useRef<HTMLDivElement>(null);
 
     const addFriend = () => {
-
+        socket.emit("friendRequest", {userId: props.dest.id});
     }
 
     const blockUser = () => {
-
-    }
-
-    const kickUser = () => {
-        // search
-        socket.emit('kickUser', "nami", props.dest.name);
+        socket.emit("blockUser", {id: props.dest.id});
     }
 
     useEffect(() => {
@@ -185,11 +498,10 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
             <div className="navRight">
                 <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
-                    <li>See profile</li>
+                    <li><NavLink to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game</li>
                     <li onClick={blockUser}>Block</li>
-                    {/* {props.dest.isChannel && props.dest.isOp && <li onClick={kickUser}>Kick</li>} */}
                 </ul>
             </div>
         </div>
@@ -210,11 +522,11 @@ export function Header(props: {dest: IDest}) {
                 {sidebarIsOpen && (props.dest.isChannel ? <SidebarChannel dest={props.dest} handleClose={onClickSidebar}/> : <SidebarUser handleClose={onClickSidebar} dest={props.dest}/>)}
             </div>
             <h1>  
-            {isChannel ? <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path d="M96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3zM609.3 512H471.4c5.4-9.4 8.6-20.3 8.6-32v-8c0-60.7-27.1-115.2-69.8-151.8c2.4-.1 4.7-.2 7.1-.2h61.4C567.8 320 640 392.2 640 481.3c0 17-13.8 30.7-30.7 30.7zM432 256c-31 0-59-12.6-79.3-32.9C372.4 196.5 384 163.6 384 128c0-26.8-6.6-52.1-18.3-74.3C384.3 40.1 407.2 32 432 32c61.9 0 112 50.1 112 112s-50.1 112-112 112z"/></svg>
-            : <svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg> }
+            {isChannel ? <FontAwesomeIcon className="iconChannels" icon={faUserGroup} />
+            : <FontAwesomeIcon className="iconChannels" icon={faUser} /> }
                 {props.dest.name}
             </h1>
-            {props.dest.name !== "general" && <button onClick={onClickSidebar}><svg className="iconChannels" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 512"><path d="M56 472a56 56 0 1 1 0-112 56 56 0 1 1 0 112zm0-160a56 56 0 1 1 0-112 56 56 0 1 1 0 112zM0 96a56 56 0 1 1 112 0A56 56 0 1 1 0 96z"/></svg></button>}
+            {props.dest.name !== "general" && <button onClick={onClickSidebar}><FontAwesomeIcon className="iconChannels" icon={faEllipsisVertical} /></button>}
         </div>
     )
 }

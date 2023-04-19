@@ -130,11 +130,18 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if undefined is it is then set the value to 0 instead
     nbr_of_socket = nbr_of_socket ?? 0;
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
+    //this.transfer_all_match(client);
     console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
   }
 
+  @SubscribeMessage("Get_Matches")
+  givematches(@ConnectedSocket() client: Socket) {
+    this.transfer_all_match(client);
+  }
+
   transfer_all_match(@ConnectedSocket() client: Socket) {
+    console.log("in transfert there is : ", this.all_the_match.length);
     for (let index = 0; index < this.all_the_match.length; index++) {
       const match = this.all_the_match[index];
       this.server.to(client.id).emit("Match_Update", match);
@@ -293,6 +300,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
         game.spectators.push(client);
         client.join(game.players[0].id);
+        game.game_engine.update_match_state();
       }
     }
   }

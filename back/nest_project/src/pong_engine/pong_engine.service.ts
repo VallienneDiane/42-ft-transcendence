@@ -190,7 +190,7 @@ export class PongEngineService {
             let thiss = this;
             this.ongoing_match = true;
             // console.log("room to emit", thiss.server);
-            thiss.server.emit("Match_Update", this.ms);
+            //thiss.server.emit("Match_Update", this.ms);
             console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
@@ -235,8 +235,8 @@ export class PongEngineService {
         }
 		this.server.emit("Match_End", this.match_end_state);
         await this.matchservice.createMatch(match);
-        //let result = await this.matchservice.findMatch();
-        //console.log("the score should be save and the match history is :", result);
+        // let result = await this.matchservice.findMatch();
+        // console.log("the score should be save and the match history is :", result);
     }
 
     /**

@@ -38,9 +38,9 @@
 				margin: 0 auto;
 				margin-top: calc(100vh - 85vh - 20px);
 				font-size: 16px;
-				color: black;
-				background: #fff9fd;
-				border: 1px solid #d8d8d8;
+				color: var(--text-color);
+				background: var(--prim-color);
+				border: 1px solid var(--text-color);
 				border-radius: 4px;
 				overflow: auto;
 				& > h1 {
@@ -57,20 +57,20 @@
 						display: flex;
 						flex-wrap: wrap;
 						justify-content: space-around;
-						padding-top: 1rem;
+						align-items: center;
 					}
 					& section {
-						padding: 0 1.5rem;
-						& input {
-							border: 1px solid var(--second-color);
-        					border-radius: 50px;
-        					padding: 0.3rem 1rem;
-        					margin: 10px;
-        					// font-size: 1.2em;
-						}
+						padding: 0.5rem 1rem;
 						& .labelName {
 							padding: 0.3rem;
 						}
+					}
+					& input {
+						border: 1px solid var(--second-color);
+						border-radius: 50px;
+						padding: 0.3rem 1rem;
+						margin: 10px;
+						// font-size: 1.2em;
 					}
 					& .button {
 						color: var(--text-color);
@@ -137,8 +137,7 @@
 						outline: none;
 					}
 					& .svgSearch {
-						width: 1.5rem;
-						height: 1.5rem;
+						height: 1.1rem;
 						margin-left: -2rem;
 						opacity: 50%;
 						background-color: #eee;
@@ -170,8 +169,9 @@
 						margin: 0 auto;
 						margin-top: calc(100vh - 85vh - 20px);
 						font-size: 16px;
-						background: #fff9fd;
-						border: 1px solid #d8d8d8;
+						color: var(--text-color);
+						background: var(--prim-color);
+						border: 1px solid var(--text-color);
 						border-radius: 4px;
 						& > h1 {
 							font-size: 23px;
@@ -246,12 +246,23 @@
 						justify-content: space-between;
 						padding: 0.2rem 0.5rem;
 						& button {
+							width: 85%;
+							text-align: left;
 							cursor: pointer;
+							& #msg {
+								padding-left: 0.5em;
+								opacity: 70%;
+							}
 						}
+						& .waitingMsg {
+							font-style: bold;
+						}
+						
 						& .circle {
+							width: 15%;
 							width: 8px;
 							height: 8px;
-							border-radius: 13px;
+							border-radius: 50%;
 							margin: 0 1rem;
 							&.online {
 								background-color: #8BC34A;
@@ -322,6 +333,9 @@
 									padding: 0.4rem 1rem;
 									background: transparent;
 									border-bottom: 2px solid rgb(214, 214, 214);
+									& a {
+										background: transparent;
+									}
 									&:hover {
 										background:#ddd;
 										color:#000000;
@@ -329,52 +343,173 @@
 									}
 								}
 								& .memberList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									padding: 0.3rem 1.5rem;
 									& > li {
-										justify-content: flex-start;
+										display: flex;
+										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
 										background: transparent;
-										& svg {
+										& div {
+											background: transparent;
+										}
+										& .iconStatus {
 											background: transparent;
 											width: 15px;
 											padding-left: 6px;
 											opacity: 70%;
 										}
+										& button {
+											background: transparent;
+											&:hover {
+												font-weight: bolder;
+												color: #0f1a83;
+											}
+										}
+									}
+								}
+								& .memberButton {
+									background: transparent;
+									position: relative;
+									& .iconAction {
+										background: transparent;
+										width: 15px;
+										padding-left: 12px;
+										opacity: 70%;
+										&:hover {
+											// outline: none;
+											// width: 20px;
+											color: #016d06;
+											// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+										}
+									}
+									&:hover::before {
+										color: rgb(2, 129, 214);
+										font-weight: bold;
+										content: attr(data-hover-text);
+										position: absolute;
+										z-index: 10;
+										top: -1rem;
+										right: 10px;
+										// margin-bottom: 1rem;
+										background-color: rgba(184, 179, 179, 0.3);
+										padding: 0.1rem 0.4rem;
+									}
+									& .mute {
+										display: flex;
+										flex-direction: column;
+										background: transparent;
+										&:hover {
+											background: rgba(223, 223, 223, 0.95);
+											color: var(--text-color);
+											cursor: initial;
+										}
+										& div {
+											display: flex;
+											justify-content: space-between;
+											background: transparent;
+											align-items: center;
+											& button {
+												// font-size: 2rem;
+												background: transparent;
+												padding:0 0.2rem;
+												margin: 0 0.2rem;
+												border-radius: 100%;
+												// box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .6);
+											}
+											& span {
+												width: 1.8rem;
+												font-size: 1.4rem;
+												font-weight: bold;
+												background: transparent;
+											}
+											& .muteButton {
+												color: var(--text-color);
+												width: 25%;
+												font-size: 1rem;
+												// font-size: 18px;
+												margin: 3px 0 5px 0;
+												// padding: 3px 0;
+												background-color:#b9cbce;
+												border-radius: 50px;
+												position: relative;
+												z-index: 1;
+												overflow: hidden;
+											}
+										}
+									}
+								}
+								& .searchbar {
+									display: flex;
+									align-items: center;
+									justify-content: center;
+									background-color: #b9cbce;
+									padding: 0.5rem 1.5rem;
+									& input {
+										width: 100%;
+										background: rgb(238, 238, 238);
+										color: rgb(77, 77, 77);
+										padding: 0.3rem 2rem 0.3rem 1rem;
+										border-radius: 2rem;
+										border: none;
+										outline: none;
+									}
+									& .svgSearch {
+										height: 1.1rem;
+										margin-left: -2rem;
+										opacity: 50%;
+										background-color: #eee;
+										cursor: pointer;
 									}
 								}
 								& .settingList {
+									display: flex;
+									flex-direction: column;
 									background-color: #b9cbce;
 									width: 100%;
+									padding: 0.5rem 0;
 									& > li {
 										display: flex;
 										flex-direction: row;
+										align-items: center;
 										justify-content: space-between;
 										background: transparent;
 										font-size: 15px;
 										width: 100%;
-										padding: 0.2rem 1.5rem;
-										// border-bottom: 1px solid rgb(150, 156, 177);
+										padding: 0.3rem 1.5rem;
+										// border-bottom: 1px solid rgb(217, 223, 243);
 									}
 									& .inputChannel {
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: transparent;
+										background: #b0c1c4;
 										width: 60%;
-										padding-left: 1px;
-										// padding: 0.5rem 2rem 0.5rem 1rem;
-										// border-bottom: 1px solid rgb(42, 42, 43);
-										// border: none;
-										// outline: none;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
+									}
+									.inputPassword {
+										outline: 0;
+										border-width: 0 0 1px;
+										border-color: rgb(42, 42, 43, 0.5);
+										background: #b0c1c4;
+										width: 100%;
+										padding: 0.2rem 0.5rem;
+										border-radius: 0.5rem;
 									}
 									& button {
 										background: transparent;
-										color: #fa6969;
+										color: #088f03;
 										font-weight: bold;
 										font-size: 17px;
 									}
+								}
+								& .outChannel {
+									color: red;
+									background: transparent;
 								}	
 							}
 						}
@@ -404,10 +539,13 @@
 				flex-direction: column-reverse;
 				height: 70%;
 				background: rgb(231, 231, 231);
-				padding: 1.5rem;
+				// padding: 1.5rem;
+				padding: 1.5rem 1.5rem 1.5rem 1rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
+					display: flex;
+					flex-direction: row;
 					background: transparent;
 					vertical-align: top;
 					padding: 0.1rem 0;
@@ -439,7 +577,23 @@
 						}
 					}
 				}
+				& .messageBlock {
+					background: transparent;
+				}
+				& .avatar {
+					width: 3.2rem;
+					background: transparent;
+					& #profilePicture {
+					border-radius: 100%;
+					aspect-ratio: 1/1;
+					object-fit: cover;
+					margin-right: 0.5rem;
+					width: 3rem;
+					background: transparent;
+					}
+				}
 				& .messageUserName {
+					color: var(--prim-color);
 					background: transparent;
 				}
 				& .messageText {
@@ -479,13 +633,16 @@
 						outline: none;
 					}
 					& .send {
+						display: flex;
+						justify-content: center;
+						align-items: center;
 						width: 1.3rem;
 						height: 2rem;
 						margin-left: -4rem;
-						margin-top: 0.3rem;
 						opacity: 40%;
 						background-color: transparent;
 						& .svgSend {
+							height: 70%;
 							background: rgb(238, 238, 238);
 						}
 					}
@@ -494,3 +651,8 @@
 		}
 	}
 }
+
+.logError {
+	color: red;
+  }
+  
