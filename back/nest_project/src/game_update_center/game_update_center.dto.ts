@@ -1,10 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 /**
  * DTO use for private matchmaking request
  */
 export class PrivateGameRequestDTO {
-	@IsString() @IsNotEmpty() target: string;
+	@IsString() @IsNotEmpty() @MaxLength(64) target: string;
 	@IsBoolean() @IsNotEmpty() super_game_mode: boolean;
 }
 
@@ -19,9 +19,9 @@ export class PublicGameRequestDTO {
  * DTO use for sending input
  */
 export class GameInputDTO {
-	@IsString() @IsNotEmpty() input: string;
+	@IsString() @IsNotEmpty() @MaxLength(64) input: string;
 }
 
 export class SpectatorRequestDTO {
-	@IsString() @IsNotEmpty() player1_login: string;
+	@IsString() @IsNotEmpty() @MaxLength(64) player1_login: string;
 }
