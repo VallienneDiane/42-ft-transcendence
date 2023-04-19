@@ -118,11 +118,15 @@ export class ChatService {
         }
     }
 
-    public isConnectedEvent(client: Socket, user: UserEntity, connectedId: string, roomHandler: UserRoomHandler) {
-        let guy = roomHandler.userMap.get(connectedId);
-        if (guy != undefined) {
-            client.emit("userIsConnected", connectedId);
+    public isConnectedEvent(client: Socket, user: UserEntity, connectedIds: {userId: string}[], roomHandler: UserRoomHandler) {
+        let idsToEmit: string[] = [];
+        for (let elt of connectedIds) {
+            let guy = roomHandler.userMap.get(elt.userId);
+            if (guy != undefined) {
+                idsToEmit.push(elt.userId);
+            }
         }
+        client.emit("usersAreConnected", idsToEmit);
     }
 
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
@@ -743,7 +747,8 @@ export class ChatService {
         })
     }
 
-    public unfriendEvent(me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
+    public unfriendEvent(client: Socket, me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
+        console.log(me.login, "wants to delete : ", friendshipId);
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             if (request) {
@@ -792,7 +797,7 @@ export class ChatService {
                                 let foundInSend = false;
                                 for (let elt of sends) {
                                     if (elt.receiverId == userIdToBlock) {
-                                        this.unfriendEvent(user, elt.id, roomHandler)
+                                        this.unfriendEvent(client, user, elt.id, roomHandler)
                                         foundInSend = true;
                                         break;
                                     }
@@ -802,7 +807,7 @@ export class ChatService {
                                 .then((receivs) => {
                                     for (let elt of receivs) {
                                         if (elt.senderId == userIdToBlock) {
-                                            this.unfriendEvent(user, elt.id, roomHandler)
+                                            this.unfriendEvent(client, user, elt.id, roomHandler)
                                             break;
                                         }
                                     }

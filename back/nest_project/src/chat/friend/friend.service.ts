@@ -31,12 +31,13 @@ export class FriendService {
 	}
 
 	async findByIdWithRelation(id: string): Promise<FriendEntity> {
-		return await this.friendRepository
+		const data = await this.friendRepository
 			.createQueryBuilder("friend")
 			.innerJoinAndSelect("friend.sender", "sender")
 			.innerJoinAndSelect("friend.receiver", "receiver")
 			.where("friend.id = :id", { id: id })
 			.getOne();
+		return data;
 	}
 
 	async checkRequest(client: Socket, idA: string, idB: string): Promise<boolean> {
