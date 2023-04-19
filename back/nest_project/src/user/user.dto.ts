@@ -59,10 +59,6 @@ export class id42Dto {
     @IsNotEmpty() @IsString() readonly id42: string;
 }
 
-export class LoginDto {
-    @IsNotEmpty() @IsString() login: string;
-}
-
 export class LoadAvatarDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
     @IsNotEmpty() @IsString() file: string;

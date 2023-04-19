@@ -96,7 +96,11 @@ export class AuthController {
       isCodeValid,
     }
   }
-  //check if the code entered is valid when signin and 2fa was activate in settings
+  /**
+   * Check if the code entered is valid when signin and 2fa was activate in settings
+   * @param data 
+   * @returns 
+   */
   @Post('auth/verifyCode')
   async verifyCode2fa(@Body() data: VerifyCodeDto) {
     const user = await this.userService.findById(data.id);
@@ -117,7 +121,11 @@ export class AuthController {
       isCodeValid,
     }
   }
-  //disable two factor authentication
+  /**
+   * Disable two factor authentication
+   * @param token 
+   * @returns 
+   */
   @UseGuards(JwtAuthGuard)
   @Post('auth/disable2fa')
   async disable2fa(@Headers('Authorization') token: string) {
@@ -125,7 +133,9 @@ export class AuthController {
     const is2faActive = await this.userService.turnOff2fa(user.id);
     return {is2faActive};
   }
-  //check if two factor auth is activate and generate qrcode in settings
+  /**
+   * Check if two factor auth is activate and generate qrcode in settings
+   */
   @UseGuards(JwtAuthGuard)
   @Post('auth/is2faActiveSettings')
   async is2faActiveSettings(@Body() data: idDto) {
@@ -134,7 +144,11 @@ export class AuthController {
     const qrcode = validUser.qrCode;
     return {is2faActive, qrcode};
   }
-  //check if two factor auth is active
+  /**
+   * Check if two factor auth is active
+   * @param data 
+   * @returns 
+   */
   @Post('auth/is2faActive')
   async is2faActive(@Body() data: idDto) {
     const validUser = await this.userService.findById(data.id);

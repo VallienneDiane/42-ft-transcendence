@@ -22,11 +22,8 @@ const Callback: React.FC = () => {
     useEffect(() => {
         accountService.callback(code!)
         .then(res_user => {
-            console.log("callback : res_user ", res_user);
-            console.log(typeof(res_user.data));
             accountService.isId42(res_user.data.id42)
             .then(res_id42 => {
-                console.log("callback : res_id42 ", res_id42);
                 if(res_id42.data == false && accountService.isLogged() == false) {
                     navigate("/homeSettings", 
                     { state: 
@@ -41,14 +38,12 @@ const Callback: React.FC = () => {
                 }
                 accountService.is2faActive42(res_user.data.id42)
                 .then(res_2fa => {
-                    console.log("callback is2faActive42 : res_2fa ", res_2fa);
                     if(res_2fa.data.is2faActive == true) {
                         navigate("/verifyCode2fa", { state: { id42: res_user.data.id42 } });
                     }
                     else {
                         accountService.generateToken42(res_user.data.id42)
                         .then(res_token => {
-                            console.log("callback genToken : res_token ", res_token);
                             accountService.saveToken(res_token.data.access_token);
                             const from = (location.state as any)?.from || "/";
                             navigate(from);

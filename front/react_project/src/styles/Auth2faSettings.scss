@@ -2,22 +2,25 @@
     display: flex;
     border: 2px solid var(--text-color);
     border-radius: 15px;
-    width: 40%;
+    width: 25%;
     min-width: 350px;
     padding-top: 25px;
     flex-direction: column;
     align-items: center;
     max-height: 95%;
     margin-left: 1%;
+    & h2 {
+        padding-top: 70px;
+    }
     .switch {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         align-items: center;
         padding-top:50px;
         padding-bottom: 30px;
         p {
             font-size: 1.2em;
-            margin-right: 15px;
+            margin: 25px;
         }
 
     }
