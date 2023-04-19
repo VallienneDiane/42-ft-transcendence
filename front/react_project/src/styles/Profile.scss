@@ -73,9 +73,20 @@
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 width: 100%;
 
-                & h3 {
-                    justify-content: center;
+                & #titleFriend {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    & h3 {
+                        font-size: x-large;
+                        color:rgb(0, 0, 0);
+                    }
+                    & #developButton {
+                        color:rgb(255, 0, 140);
+                    }
                 }
+
 
                 & #friendList {
                     flex-direction: column;
@@ -135,7 +146,7 @@
                                 opacity: 80%;
                             }
                             & #inviteToGame {
-                                color: red;
+                                color: rgb(228, 16, 16);
                                 opacity: 80%;
                             }
                             & #checkProfileButton {

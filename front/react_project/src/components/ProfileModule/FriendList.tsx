@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faCheck, faComment, faCommentDots, faCommentSms, faGun, faHandsBubbles, faPoo, faSpaghettiMonsterFlying, faTrashCan, faWalkieTalkie } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faArrowDown, faArrowUp, faBaseball, faCheck, faComment, faCommentDots, faCommentSms, faGun, faHandsBubbles, faPingPongPaddleBall, faPoo, faSpaghettiMonsterFlying, faTrashCan, faWalkieTalkie } from "@fortawesome/free-solid-svg-icons";
 import { Socket } from "socket.io-client";
 
 class FriendList extends React.Component<{socket: Socket}, {
@@ -13,6 +13,7 @@ class FriendList extends React.Component<{socket: Socket}, {
     friends: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[],
     fetchFriendsDone: boolean,
     askIfConnectedDone: boolean,
+    develop: boolean,
 }> {
     constructor(props:{socket: Socket}) {
         super(props);
@@ -21,11 +22,14 @@ class FriendList extends React.Component<{socket: Socket}, {
             friends: [],
             fetchFriendsDone: false,
             askIfConnectedDone: false,
+            develop: false,
         }
         this.fetchFriends = this.fetchFriends.bind(this);
         this.unfriendHandler = this.unfriendHandler.bind(this);
         this.inviteToGameHandler = this.inviteToGameHandler.bind(this);
         this.askIfConnected = this.askIfConnected.bind(this);
+        this.changeLoc = this.changeLoc.bind(this);
+        this.invertDevelop = this.invertDevelop.bind(this);
     }
 
     fetchFriends() {
@@ -56,6 +60,14 @@ class FriendList extends React.Component<{socket: Socket}, {
         console.log("invite To Game");
     }
 
+    invertDevelop() {
+        this.setState({develop: !this.state.develop});
+    }
+
+    changeLoc(e: any) {
+        this.props.socket.emit("changeLoc", {loc: e.currentTarget.value, isChannel: false});
+    }
+
     askIfConnected() {
         if (this.state.friends.length) {
             let arrayToAskIfConnected: {userId: string}[] = [];
@@ -68,6 +80,7 @@ class FriendList extends React.Component<{socket: Socket}, {
     }
 
     componentDidUpdate(): void {
+        console.log("fecth", this.state.fetchFriendsDone, "ask" , this.state.askIfConnectedDone)
         if (!this.state.fetchFriendsDone)
             this.fetchFriends();
         if (this.state.fetchFriendsDone && !this.state.askIfConnectedDone)
@@ -141,8 +154,14 @@ class FriendList extends React.Component<{socket: Socket}, {
     render() {
         return (
         <div id="friend">
-            {this.state.friends.length > 0 && <h3 id="titleFriend">My friend{this.state.friends.length > 1 && "s"}</h3>}
-            <ul id="friendList">
+            {this.state.friends.length > 0 && <div id="titleFriend">
+                <h3>My friend{this.state.friends.length > 1 && "s"}</h3>
+                <button id="developButton" onClick={this.invertDevelop}>
+                    {this.state.develop ? <FontAwesomeIcon icon={faArrowUp} />
+                                        : <FontAwesomeIcon icon={faArrowDown} />}
+                </button>
+            </div>}
+            {this.state.develop && <ul id="friendList">
                 {this.state.friends.map((elt) => (
                     <li id="friendElement" key={elt.key}>
                         <span id="friendInfo">
@@ -153,19 +172,21 @@ class FriendList extends React.Component<{socket: Socket}, {
                         <button value={elt.friendshipId} id="unfriendButton" onClick={this.unfriendHandler}>
                         <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
                         </button>
-                        <NavLink id="chatButton" to={`/chat/${elt.friendId}`}>
-                        <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
-                        </NavLink>
-                        <button value={elt.friendId} id="inviteToGame" onClick={this.inviteToGameHandler}>
-                        <FontAwesomeIcon className="iconAction" icon={faGun} />
+                        <button value={elt.friendId} onClick={this.changeLoc}>
+                            <NavLink to={`/chat`}>
+                                <FontAwesomeIcon id="chatButton" className="iconAction" icon={faCommentDots} />
+                            </NavLink>
                         </button>
-                        <NavLink id="checkProfileButton" to={`/profile/${elt.friendName}`}>
+                        <button value={elt.friendId} id="inviteToGame" onClick={this.inviteToGameHandler}>
+                        <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
+                        </button>
+                        <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
                         <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
                         </NavLink>
                     </span>
                     </li>
                     ))}
-            </ul>
+            </ul>}
         </div>
     )
     }
