@@ -214,7 +214,7 @@ export class GameEngineService {
         if (this.pl1_ready && this.pl2_ready && this.ongoing_match === false) {
             let thiss = this;
 			this.ongoing_match = true;
-            thiss.server.emit("Match_Update", this.ms);
+            //thiss.server.emit("Match_Update", this.ms);
 			//console.log();
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
