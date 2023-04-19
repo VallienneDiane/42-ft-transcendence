@@ -1,0 +1,145 @@
+@import url("Base.css");
+
+#matchsInProgress {
+    border: 3px solid var(--ball-color);
+    width: 60%;
+    max-width: 1000px;
+    height: 20%;
+    min-height: 200px;
+    font-size: 1.5cqh;
+    font-weight: 900;
+    color: var(--text-color);
+
+    & #header {
+        height: 30%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--second-color);
+        backdrop-filter: blur(5px);
+        
+        & > div {
+            text-align: center;
+            width: 100%;
+            height: 50%;
+            background-color: var(--second-color);
+
+            &:first-child {
+                font-size: 1.5em;
+            }
+        }
+    }
+    
+    & #colHeader {
+        display: flex;
+        width: 100%;
+        
+        & div {
+            // width: 100%;
+            text-align: center;
+            flex-grow: 1;
+        }
+    }
+    
+    & #content {
+        overflow-y: auto;
+        height: 70%;
+        backdrop-filter: blur(7px);
+
+        & .match {
+            cursor: pointer;
+            height: 20%;
+            display: flex;
+            
+            & > div:not(.watchMatch) {
+                
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                
+                // width: 25%;
+                white-space: nowrap;
+                overflow: hidden;
+                flex: 1;
+                
+                & > span {
+                    display: block;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    
+                }
+            }
+            
+            &:nth-child(odd) > div:not(.watchMatch) {
+                background-color: var(--third-color);
+            }
+            
+            &:nth-child(even) > div:not(.watchMatch) {
+                background-color: var(--fourth-color);
+            }
+
+            & .redDot {
+                color: rgb(221, 0, 0);
+                margin: 1vw;
+                animation: redDot infinite 1000ms;
+            }
+
+            & .watchMatch {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 0%;
+                overflow: hidden;
+                background-color: var(--second-color);
+                white-space: nowrap;
+                transition: all 200ms ease-in-out;
+            }
+
+            &:hover .watchMatch {
+                width: 50%;
+            }
+        }
+
+        & #noMatch {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+
+            & > p {
+                font-size: 2em;
+                font-weight: 900;
+                color: var(--second-color);
+            }
+        }
+
+        &::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background-color: rgb(49, 49, 42);
+        }
+        
+        &::-webkit-scrollbar-thumb {
+            background-color: rgb(159, 159, 148);
+            border-radius: 100px;
+        }
+    }
+    
+    @keyframes redDot {
+        0% {
+            filter: brightness(0.9);
+        }
+        50% {
+            filter: brightness(1);
+        }
+        100% {
+            filter: brightness(0.9);
+        }
+        
+    }
+}
