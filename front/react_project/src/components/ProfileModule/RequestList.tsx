@@ -27,7 +27,11 @@ export default function RequestsList() {
 
     useEffect(() => {
         fetchRequests();
+    }, [])
+
+    useEffect(() => {
         socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
+            console.log(name, "send me a friend request");
             let newRequests = [...requests, {friendshipId: friendshipId, friendId: id, friendName: name}];
             newRequests.sort((a, b) => {
                 return a.friendName.localeCompare(b.friendName);
@@ -55,14 +59,14 @@ export default function RequestsList() {
             socket.off("supressFriendRequest");
             socket.off("supressFriend");
         }
-    }, []);
+    }, [requests]);
 
     return (
-        <div id="requestList">
-            {requests.length > 0 && <h3>Request{requests.length > 1 && "s"} I received</h3>}
-            <ul>
-                {requests.map((elt, id) => (
-                    <li className="requestElement" key={id}>{elt.friendName}
+        <div id="request">
+            {requests.length > 0 && <h3 id="titleRequest">Request{requests.length > 1 && "s"} I received</h3>}
+            <ul id = "requestList">
+                {requests.map((elt) => (
+                    <li className="requestElement" key={elt.friendshipId}><span>{elt.friendName}</span>
                     <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
                     <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
                 ))}

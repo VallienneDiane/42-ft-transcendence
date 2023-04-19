@@ -22,6 +22,9 @@ export default function PendingList() {
 
     useEffect(() => {
         fetchPending();
+    })
+
+    useEffect(() => {
         socket.on("newFriendRequestSent", (friendshipId: string, friendId: string, friendName: string) => {
             let newPendings = [...pendings, {friendshipId: friendshipId, friendId: friendId, friendName: friendName}];
             newPendings.sort((a, b) => {
@@ -50,14 +53,14 @@ export default function PendingList() {
             socket.off("supressFriendRequest");
             socket.off("supressFriend");
         }
-    }, []);
+    }, [pendings]);
 
     return (
-        <div className="pendingList">
-            {pendings.length > 0 && <h3>My pending request{pendings.length > 1 && "s"}</h3>}
+        <div id="pending">
+            {pendings.length > 0 && <h3 id="titlePending">My pending request{pendings.length > 1 && "s"}</h3>}
             <ul>
-                {pendings.map((elt, id) => (
-                    <li className="pendingElement" key={id}>{elt.friendName}<button value={elt.friendId} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
+                {pendings.map((elt) => (
+                    <li className="pendingElement" key={elt.friendId}>{elt.friendName}<button value={elt.friendshipId} onClick={cancelHandler} className="cancelRequestButton">cancel</button></li>
                 ))}
             </ul>
         </div>
