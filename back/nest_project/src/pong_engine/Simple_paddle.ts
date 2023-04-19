@@ -12,7 +12,7 @@ export class Simple_paddle {
 
     constructor () {
         this.x_position = 0.025;
-        this.length = 0.17;
+        this.length = 0.177;
         this.y_position = 0.5 - (this.length / 2);
         this.speed = 1/60;
         this.up = false;
