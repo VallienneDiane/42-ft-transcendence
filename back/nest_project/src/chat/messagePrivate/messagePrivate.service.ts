@@ -21,8 +21,8 @@ export class MessagePrivateService {
      * @param personBId 
      * @returns a dialogue between 2 users ordered by date
      */
-    async findConversation(personAId: string, personBId: string): Promise<{date: Date, sender: string, content: string}[]> {
-        const obj: {date: Date, sender: string, content: string}[] =
+    async findConversation(personAId: string, personBId: string): Promise<{date: Date, senderId: string, senderName: string, content: string}[]> {
+        const obj: {date: Date, senderId: string, senderName: string, content: string}[] =
         await this.messagesRepository.createQueryBuilder("MessagePrivateEntity")
         .leftJoinAndSelect("MessagePrivateEntity.sender", "sender")
         .leftJoinAndSelect("MessagePrivateEntity.receiver", "receiver")
@@ -39,7 +39,8 @@ export class MessagePrivateService {
             })
         )
         .select("date", "date")
-        .addSelect("sender.login", "sender")
+        .addSelect("sender.id", "senderId")
+        .addSelect("sender.login", "senderName")
         .addSelect("content")
         .orderBy({"MessagePrivateEntity.date": "ASC"})
         .getRawMany();

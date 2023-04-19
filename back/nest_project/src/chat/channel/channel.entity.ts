@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { UserEntity } from "src/user/user.entity";
 import { MessageChannelEntity } from "../messageChannel/messageChannel.entity";
+import { MuteEntity } from "../mute/mute.entity";
 
 @Entity()
 export class ChannelEntity {
@@ -20,19 +21,7 @@ export class ChannelEntity {
 	channelPass: string;
 
 	@Column()
-	opNumber: number;
-
-	@Column()
 	inviteOnly: boolean;
-
-	@Column()
-	persistant: boolean;
-
-	@Column()
-	onlyOpCanTalk: boolean;
-
-	@Column()
-	hidden: boolean;
 
 	@ManyToMany(() => UserEntity, (user) => user.channelsAsNormal)
 	@JoinTable()
@@ -44,11 +33,16 @@ export class ChannelEntity {
 
 	@ManyToOne(() => UserEntity, (user) => user.channelsAsGod)
 	@JoinTable()
-	godUser?: UserEntity;
+	godUser: UserEntity;
+
+	@ManyToMany(() => UserEntity, (user) => user.channelsAsBanned)
+	@JoinTable()
+	bannedUsers: UserEntity[];
 
 	@OneToMany(() => MessageChannelEntity, (message) => message.channel, {
-		eager: true,
 	})
 	messages: MessageChannelEntity[];
 
+	@OneToMany(() => MuteEntity, (muted) => muted.channel)
+	usersMuted: MuteEntity[];
 }

@@ -1,23 +1,86 @@
-import { LogInForm, SignUpForm, VerifyCodeForm } from "../models";
+import { AvatarSettingsForm, LogInForm, LoginSettingsForm, SettingsForm, SignUpForm, VerifyCodeForm } from "../models";
 import { JwtPayload } from "jsonwebtoken";
 import Axios from "./caller.service";
 import * as jsrsasign from 'jsrsasign';
 
-////////////////// SIGN UP - LOGIN - LOGOUT - TOKEN /////////////////
-// Request to signup
+/**
+ * Request to signup
+ * @param credentials 
+ * @returns 
+ */
 let signUp = (credentials: SignUpForm) => {
     return Axios.post('/user/signup', credentials);
 }
-// Request to login
+/**
+ * Request to login
+ * @param credentials 
+ * @returns 
+ */
 let login = (credentials: LogInForm) => {
+    console.log("request login ", credentials);
     return Axios.post('auth/login', credentials);
 }
-// Upload Avatar picture
-let uploadAvatar = (file: string) => {
-    const user: JwtPayload = accountService.readPayload()!;
-    return Axios.post('user/uploadAvatar', {id: user.sub, file});
+/**
+ * Upload Avatar picture
+ * @param file 
+ * @returns 
+ */
+// let uploadAvatar = (file: string) => {
+//     const user: JwtPayload = accountService.readPayload()!;
+//     return Axios.post('user/uploadAvatar', {id: user.sub, file});
+// }
+ /**
+  * Get Avatar picture
+  * @param id 
+  * @returns 
+  */
+let getAvatar = (id: string) => {
+    return Axios.get('getAvatar/' + id);
 }
-// Fonction qui check si user est connecté. Et que le token n'est pas expiré
+/**
+ * Check if login is unique
+ * @param login 
+ * @returns 
+ */
+let isUniqueLogin = (login: string) => {
+    return Axios.get('user/isUniqueLogin/' + login);
+}
+/**
+ * Check if it's a 42 id
+ * @param id42 
+ * @returns 
+ */
+let isId42 = (id42: string) => {
+    return Axios.get('user/isId42/' + id42);
+}
+/**
+ * Update name and avatar if first connection with 42
+ * @param credentials 
+ * @returns 
+ */
+let createUser = (credentials: SettingsForm ) => {
+    return Axios.post('user/signup42', credentials);
+}
+/**
+ * Update login
+ * @param credentials 
+ * @returns 
+ */
+let updateLogin = (credentials: LoginSettingsForm ) => {
+    return Axios.post('user/updateLogin', credentials);//return 
+}
+/**
+ * Update avatar
+ * @param credentials 
+ * @returns 
+ */
+let updateAvatar = (credentials: AvatarSettingsForm ) => {
+    return Axios.post('user/updateAvatar', credentials);//return 
+}
+/**
+ * Check if user connected and that token is valid
+ * @returns 
+ */
 let isLogged = () => {
     let token = sessionStorage.getItem('token');
     if (token !== null)  { 
@@ -34,23 +97,42 @@ let isLogged = () => {
         return (false);
     }
 }
-// Request to generate token
-let generateToken = (login: string) => {
-    return Axios.post('auth/generateToken', {login});
+/**
+ * Request to generate token
+ * @param id 
+ * @returns 
+ */
+let generateToken = (id: string) => {
+    return Axios.post('auth/generateToken', {id});
 }
+let generateToken42 = (id42: string) => {
+    return Axios.post('auth/generateToken42', {id42});
+}
+/**
+ * Save token in storage
+ * @param token 
+ */
 let saveToken = (token: string) => {
     sessionStorage.setItem('token', token);
 }
-//get token from local storage
+/**
+ * Get token from local storage
+ * @returns 
+ */
 let getToken = () => {
     return sessionStorage.getItem('token');
 }
-// Lorsqu'un user se logOut, une requete est envoyée au back pour l'en informer et le token est enlevé de sessionStorage
+/**
+ * When user logout, request send to inform server and destroy token
+ */
 let logout = () => {
     Axios.post('/auth/logout');
     sessionStorage.removeItem('token');
 }
-// Fonction qui decrypt le JWT et retourne un objet contenant les infos cryptées dans le JWT (id, login, date expiration du token etc..)
+/**
+ * decrypt token and returns infos of token (id, expiration time)
+ * @returns 
+ */
 let readPayload = () => {
     let token = getToken();
     if (token === null) {
@@ -67,43 +149,75 @@ let readPayload = () => {
         }
     }
 }
-////////////////// TWO FACTOR AUTHENTIFICATOR ////////////////////
-//check if 2fa / google auth is active when login
-let is2faActive = (login: string) => {
-    return Axios.post('auth/is2faActive', {login});
+/**
+ * Check if 2fa / google auth is active when login
+ * @param id 
+ * @returns 
+ */
+let is2faActive = (id: string) => {
+    return Axios.post('auth/is2faActive', {id});
 }
-//check if 2fa is active in settings to display the right setting and check token
-let is2faActiveSettings = (login: string) => {
-    return Axios.post('auth/is2faActiveSettings', {login});
+let is2faActive42 = (id42: string) => {
+    return Axios.post('auth/is2faActive42', {id42});
 }
-//enable 2fa
+/**
+ * check if 2fa is active in settings to display the right setting and check token
+ * @param id 
+ * @returns 
+ */
+let is2faActiveSettings = (id: string) => {
+    return Axios.post('auth/is2faActiveSettings', {id});
+}
+/**
+ * Enable 2fa
+ * @returns 
+ */
 let enable2fa = () => {
     return Axios.post('auth/enable2fa');
 }
-//verify code submitted by the user
+/**
+ * Verify code submitted by the user
+ * @param credentials 
+ * @returns 
+ */
 let verifyCode2fa = (credentials: VerifyCodeForm) => {
     return Axios.post('auth/verifyCode', credentials);
 }
-//verify code submitted by the user in settings to check token
+/**
+ * Verify code submitted by the user in settings to check token
+ * @param credentials 
+ * @returns 
+ */
 let verifyCode2faSettings = (credentials: VerifyCodeForm) => {
     return Axios.post('auth/verifyCodeSettings', credentials);
 }
-//disable 2fa
+/**
+ * Disable 2fa
+ * @returns 
+ */
 let disable2fa = () => {
     return Axios.post('auth/disable2fa');
 }
-////////////////// SIGN IN WITH 42 /////////////////////////////
-//get url to give authorization to connect api42
+/**
+ * SIGN IN WITH 42
+ * get url to give authorization to connect api42
+ * @returns 
+ */
 let url42 = () => {
     return Axios.get('/')
 }
-//send code to get token and infos user from the api and then generate jwt token
+/**
+ * Send code to get token and infos user from the api and then generate jwt token
+ * @param code 
+ * @returns 
+ */
 let callback = (code: string) => {
     return Axios.get('/callback?code=' + code);
 }
 
 export const accountService = {
-    signUp, login, saveToken, logout, isLogged, getToken, readPayload, 
-    enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
-    is2faActive, generateToken, is2faActiveSettings, uploadAvatar, url42, callback
+    signUp, login, isUniqueLogin, isId42, createUser, saveToken, logout, isLogged, 
+    getToken, readPayload, enable2fa, verifyCode2fa, verifyCode2faSettings, disable2fa, 
+    is2faActive,is2faActive42, generateToken, generateToken42, is2faActiveSettings, 
+    getAvatar, url42, callback, updateLogin, updateAvatar //uploadAvatar,
 }

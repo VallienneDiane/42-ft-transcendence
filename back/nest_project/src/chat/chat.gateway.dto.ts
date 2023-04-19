@@ -1,4 +1,4 @@
-import { IsBoolean, IsDate, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max } from "class-validator";
 
 export class addMessageDto {
     @IsNotEmpty() @IsString() readonly message: string;
@@ -19,7 +19,7 @@ export class joinChannelDto {
 };
 
 export class inviteUserDto {
-    @IsNotEmpty() @IsUUID() readonly userToInvite: string;
+    @IsNotEmpty() @IsString() readonly userToInvite: string;
     @IsNotEmpty() @IsUUID() readonly channelId: string;
 };
 
@@ -43,7 +43,45 @@ export class createChannelDto {
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
-	@IsNotEmpty() @IsBoolean() readonly persistant: boolean;
-	@IsNotEmpty() @IsBoolean() readonly onlyOpCanTalk: boolean;
-	@IsNotEmpty() @IsBoolean() readonly hidden: boolean;
+}
+
+export class modifyChannelDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsBoolean() readonly password: boolean;
+    @IsOptional() @IsString() readonly channelPass: string;
+    @IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
+}
+
+export class blockUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+}
+
+export class banUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
+
+export class unbanUserDto {
+    @IsNotEmpty() @IsUUID() readonly userId: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
+
+export class muteUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+    @IsNotEmpty() @IsNumber() @IsPositive() @Max(1440) readonly minutes: number; 
+}
+
+export class unmuteUserDto {
+    @IsNotEmpty() @IsUUID() readonly id: string;
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
+}
+
+export class isConnectedDto {
+    @IsNotEmpty() @IsUUID() readonly userId: string;
+}
+
+export class getBanListDto {
+    @IsNotEmpty() @IsUUID() readonly channelId: string;
 }

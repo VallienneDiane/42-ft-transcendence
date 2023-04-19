@@ -6,6 +6,8 @@ import { ChatService } from "./chat.service";
 import { UserModule } from "src/user/user.module";
 import { MessageChannelModule } from "./messageChannel/messageChannel.module";
 import { MessagePrivateModule } from "./messagePrivate/messagePrivate.module";
+import { FriendModule } from "./friend/friend.module";
+import { MuteModule } from "./mute/mute.module";
 
 @Module({
 	imports: [
@@ -13,6 +15,8 @@ import { MessagePrivateModule } from "./messagePrivate/messagePrivate.module";
 		ChannelModule,
 		MessageChannelModule,
 		MessagePrivateModule,
+		FriendModule,
+		MuteModule,
 		JwtModule.register({
             secret: process.env.SECRET, 
             signOptions: { expiresIn: '1d' },

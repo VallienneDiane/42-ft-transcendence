@@ -1,12 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Channel } from "diagnostics_channel";
-import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.entity";
 import { ChannelEntity } from "../chat/channel/channel.entity";
-import { ByteData } from "qrcode";
 import { Repository } from "typeorm";
-import { UserDto } from "./user.dto";
+import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
+import { IRequest } from "src/chat/chat.interface";
 
 @Injectable({})
 export class UserService {
@@ -14,43 +12,145 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly usersRepository: Repository<UserEntity>,
     ) {}
-    // SIGN UP : CREATE NEW USER AND SAVE IT IN THE DATABASE
-    public create(newUser: UserEntity): Promise<UserEntity> {
-        return this.usersRepository.save(newUser);
+    /**
+     * Create new user and save it in database
+     * @param newUser 
+     * @returns UserEntity
+     */
+    async create(newUser: SignUpDto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: null,
+            login: newUser.login,
+            email: newUser.email,
+            password: newUser.password,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: null,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+            mutedList: [],
+            wonMatches: [],
+            lostMatches: [],
+        }
+        return await this.usersRepository.save(user);
     }
-
-    // SIGN IN OR DISPLAY ONE USER PROFILE BY LOGIN
+    async create42(newUser: SignUp42Dto): Promise<UserEntity> {
+        const user: UserEntity = {
+            id: undefined,
+            id42: newUser.id42,
+            login: newUser.login,
+            email: newUser.email,
+            password: null,
+            channelsAsNormal: [],
+            channelsAsOp: [],
+            channelsAsGod: [],
+            channelsAsBanned: [],
+            messagesReceived: [],
+            messagesSend: [],
+            messagesChannel: [],
+            twoFactorSecret: null,
+            isTwoFactorEnabled: false,
+            qrCode: null,
+            avatarSvg: newUser.avatarSvg,
+            requestsSend: [],
+            requestsReceived: [],
+            blockList: [],
+            blockedMeList: [],
+            mutedList: [],
+            wonMatches: [],
+            lostMatches: [],
+        }
+        return await this.usersRepository.save(user);
+    }
+    /**
+     * Find user by login
+     * @param login 
+     * @returns UserEntity
+     */
     async findByLogin(login: string): Promise<UserEntity> {
         return await this.usersRepository.findOneBy({login});
     }
-    // SIGN IN OR DISPLAY ONE USER PROFILE BY ID
+    /**
+     * Find user by id
+     * @param id 
+     * @returns UserEntity
+     */
     async findById(id: string): Promise<UserEntity> {
-        // console.log(`${id}`)
         const toReturn = await this.usersRepository.findOneBy({id: id});
-        // console.log(`${id} apres ooooooooooooooooooooooooooooooooooooooooooo findById`)
-        return toReturn
+        return toReturn;
+    }
+    public findById42(id42: string): Promise<UserEntity> {
+        return this.usersRepository.findOneBy({id42});
     }
     
+    /**
+     * this one is to be able to do some tricks with typeORM.
+     * typescript sucks.
+     */
+    async findByIdAsAny(id: any): Promise<UserEntity> {
+        const toReturn = await this.usersRepository.findOneBy({id: id});
+        return toReturn;
+    }
+
     public findOne(options?: object): Promise<UserEntity> {
         const user =  this.usersRepository.findOne(options);    
         return (user);  
     }
-    // DISPLAY ALL USERS
+    /**
+     * Display all users
+     * @returns 
+     */
     async findAll(): Promise<{ id: string, login: string }[]> {
         return await this.usersRepository.createQueryBuilder('user')
           .select(['user.id', 'user.login'])
           .getMany();
     }
-    // UPDATE USER INFOS
-    async update(login: string, User: UserEntity): Promise<void> {
-        this.usersRepository.update(login, User);
+    async findAllLogins(): Promise<{ login: string }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.login'])
+          .getMany();
     }
-    // DELETE USER ACCOUNT BY ID
+    async findAllIds42(): Promise<{ id42: string }[]> {
+        return await this.usersRepository.createQueryBuilder('user')
+          .select(['user.id42'])
+          .getMany();
+    }
+    /**
+     * Update user login
+     * @param userToUpdate 
+     * @returns 
+     */
+    async updateLogin(userToUpdate: UpdateLoginDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {login: userToUpdate.login});
+    }
+    /**
+     * Update user avatar
+     * @param userToUpdate 
+     * @returns 
+     */
+    async updateAvatar(userToUpdate: UpdateAvatarDto) {
+        return await this.usersRepository.update({id: userToUpdate.id}, {avatarSvg: userToUpdate.avatarSvg});
+    }
+    /**
+     * Delete user account
+     * @param login 
+     */
     async delete(login: string): Promise<void> {
         this.usersRepository.delete(login);
     }
     /**
-     * return the link between an user and a channel
+     * Return the link between an user and a channel
      * @param userId primary key of a user
      * @param channelId primary key of a channel
      * @returns channel: channel entity + status: user status in this channel as a string ("normal", "op" or "god")  
@@ -99,18 +199,17 @@ export class UserService {
         const user = await this.findById(userId);
         let arrayOfChannels: {channel: ChannelEntity, status: string}[] = [{
             channel: {
-                id: "general",
+                id: "00000000-0000-0000-0000-000000000000",
                 date: new Date(),
                 name: "general",
                 password: false,
                 channelPass: null,
-                opNumber: 0,
                 inviteOnly: false,
-                persistant: true,
-                onlyOpCanTalk: false,
-                hidden: false,
                 normalUsers: [],
                 opUsers: [],
+                godUser: undefined,
+                bannedUsers: [],
+                usersMuted: [],
                 messages: []
             },
             status: "normal"}];
@@ -137,64 +236,136 @@ export class UserService {
         });
         return arrayOfChannels;
     }
-
-    // async listDM(userId: string): Promise< Map<string, {user: UserEntity, connected: boolean}> > {
-    //     let sorted = new Map<string, {user: UserEntity, connected: boolean}>();
-    //     const msgSendDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesSend", "send")
-    //         .select("send.receiver")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     const msgReceivedDM: UserEntity[] = await this.usersRepository
-    //         .createQueryBuilder("user")
-    //         .leftJoinAndSelect("user.messagesReceived", "received")
-    //         .select("received.sender")
-    //         .where("user.id = :id", { id: userId })
-    //         .getRawMany();
-    //     msgSendDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     msgReceivedDM.forEach((user) => {
-    //         sorted.set(user.login, {user: user, connected: false});
-    //     })
-    //     return sorted;
-    // }
     
-    //set secret code for 2fa in user entity
+    /**
+     * set secret code for 2fa in user entity
+     * @param secret 
+     * @param id 
+     * @returns 
+     */
     async set2faSecret(secret: string, id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.twoFactorSecret = secret;
         await this.usersRepository.save(user);
         return (user.twoFactorSecret);
     }
-    //set secret code for 2fa in user entity
+    /**
+     * set secret code for 2fa in user entity
+     * @param qrcode 
+     * @param id 
+     * @returns 
+     */
     async setQrCode(qrcode: string, id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.qrCode = qrcode;
         await this.usersRepository.save(user);
         return (user.qrCode);
     }
-    //the user turned on the 2fa
+    /**
+     * the user turned on the 2fa
+     * @param user 
+     * @returns 
+     */
     async turnOn2fa(user: UserEntity) {
         user.isTwoFactorEnabled = true;
-        await this.usersRepository.save(user); //save value of param isTwoFactorEnabled in db
+        await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
-    //the user turned off the 2fa
+    /**
+     * the user turned off the 2fa
+     * @param id 
+     * @returns 
+     */
     async turnOff2fa(id: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.isTwoFactorEnabled = false;
         await this.usersRepository.save(user);
         return (user.isTwoFactorEnabled);
     }
-
-    //upload avatar
+    /**
+     * upload avatar
+     * @param id 
+     * @param file 
+     */
     async loadAvatar(id: string, file: string) {
         const user = await this.usersRepository.findOneBy({id});
         user.avatarSvg = file;
         await this.usersRepository.save(user);
     }
 
-    
+    async getAvatar(id : string): Promise<string> {
+        const userAvatar: string = await this.usersRepository.createQueryBuilder()
+            .where("user.id = :id", { id: id })
+            .select("user.avatarSvg")
+            .from(UserEntity, 'user')
+            .getRawOne();
+        return userAvatar;
+    }
+
+    async getFriendRequestsSend(id: string): Promise<IRequest[]> {
+        const requestsSend: IRequest[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsSend", "send")
+            .select("send.*")
+            .getRawMany();
+        return requestsSend;
+    }
+
+    async getFriendRequestsReceived(id: string): Promise<IRequest[]> {
+        const requestsReceived: IRequest[] = await this.usersRepository.createQueryBuilder("user")
+            .where("user.id = :id", { id: id })
+            .innerJoinAndSelect("user.requestsReceived", "receiv")
+            .select("receiv.*")
+            .getRawMany();
+        return requestsReceived;
+    }
+
+    async addUserToBlock(userId: string, userIdToBlock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .add(userIdToBlock);
+    }
+
+    async delUserToBlock(userId: string, userIdToUnblock: string) {
+        await this.usersRepository
+            .createQueryBuilder()
+            .relation(UserEntity, "blockList")
+            .of(userId)
+            .remove(userIdToUnblock);
+    }
+
+    async getBlockList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockList", "blocked")
+            .select("blocked.id", "id")
+            .addSelect("blocked.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getBlockedMeList(userId: string): Promise<{id: string, name: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.blockedMeList", "blockedMe")
+            .select("blockedMe.id", "id")
+            .addSelect("blockedMe.login", "name")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
+
+    async getAllBlockRelations(userId: string): Promise<{id: string, name: string}[]> {
+        return [...await this.getBlockList(userId), ...await this.getBlockedMeList(userId)];
+    }
+
+    async getMuteList(userId: string): Promise<{id: string}[]> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.mutedList", "mute")
+            .select("mute.id", "id")
+            .where("user.id = :id", { id : userId })
+            .getRawMany();
+    }
 }
