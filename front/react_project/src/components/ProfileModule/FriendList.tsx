@@ -62,6 +62,8 @@ class FriendList extends React.Component<{socket: Socket}, {
 
     invertDevelop() {
         this.setState({develop: !this.state.develop});
+        if (!this.state.develop)
+            this.askIfConnected();
     }
 
     changeLoc(e: any) {
@@ -80,7 +82,6 @@ class FriendList extends React.Component<{socket: Socket}, {
     }
 
     componentDidUpdate(): void {
-        console.log("fecth", this.state.fetchFriendsDone, "ask" , this.state.askIfConnectedDone)
         if (!this.state.fetchFriendsDone)
             this.fetchFriends();
         if (this.state.fetchFriendsDone && !this.state.askIfConnectedDone)
