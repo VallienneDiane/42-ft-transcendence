@@ -200,7 +200,8 @@ class ChannelDMList extends React.Component<{}, {
 
 export default class ChatModule extends React.Component<{}, {
     dest: IDest,
-    history: IMessage[]}> {
+    history: IMessage[]
+}> {
     constructor(props : {}) {
         super(props);
         this.state = {dest: {id: '', name: '', isChannel: true}, history: []};
