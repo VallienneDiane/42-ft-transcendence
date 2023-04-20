@@ -38,7 +38,8 @@
 
         & #FriendManagement {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: wrap;
             align-items: center;
             padding: 10px 0;
             width: 90%;
