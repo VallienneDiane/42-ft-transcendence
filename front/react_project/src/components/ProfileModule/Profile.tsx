@@ -46,14 +46,16 @@ export default function Profile() {
         }
 
         return () => {
-            socket.off("newFriendRequestSent");
-            socket.off("newFriend");
-            socket.off("supressFriendRequest");
-            socket.off("supressFriend");
-            socket.off("newFriendRequestReceived");
-            socket.off("userIsConnected");
-            socket.off("userConnected");
-            socket.off("userDisconnected");
+            if (socket) {
+                socket.off("newFriendRequestSent");
+                socket.off("newFriend");
+                socket.off("supressFriendRequest");
+                socket.off("supressFriend");
+                socket.off("newFriendRequestReceived");
+                socket.off("userIsConnected");
+                socket.off("userConnected");
+                socket.off("userDisconnected");
+            }
         }
     }, [currentUser])
     
