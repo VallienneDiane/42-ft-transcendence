@@ -4,7 +4,8 @@ import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowDown, faArrowUp, faCheck, faCheckSquare, faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faArrowDown, faArrowUp, faCheck, faCheckSquare, faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import { NavLink } from "react-router-dom";
 
 export default function RequestsList() {
     const {socket} = useContext(SocketContext);
@@ -25,11 +26,11 @@ export default function RequestsList() {
     }
 
     const acceptHandler = (e: any) => {
-        socket.emit("acceptFriendRequest", {friendshipId: e.target.value});
+        socket.emit("acceptFriendRequest", {friendshipId: e.currentTarget.value});
     }
 
     const declineHandler = (e:any) => {
-        socket.emit('rejectFriendRequest', {friendshipId: e.target.value});
+        socket.emit('rejectFriendRequest', {friendshipId: e.currentTarget.value});
     }
 
     useEffect(() => {
@@ -74,13 +75,17 @@ export default function RequestsList() {
             </div>}
             {develop && <ul id = "requestList">
                 {requests.map((elt) => (
-                    <li className="requestElement" key={elt.friendshipId}><span>{elt.friendName}</span>
-                    <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">
-                        <FontAwesomeIcon icon={faThumbsUp} />
-                    </button>
-                    <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">
-                        <FontAwesomeIcon icon={faThumbsDown} />
-                    </button></li>
+                    <li id="requestElement" key={elt.friendshipId}><span>{elt.friendName}</span>
+                        <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
+                            <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        </NavLink>
+                        <button value={elt.friendshipId} onClick={acceptHandler} id="acceptFriendButton">
+                            <FontAwesomeIcon className="iconAction" icon={faThumbsUp} />
+                        </button>
+                        <button value={elt.friendshipId} onClick={declineHandler} id="declineFriendButton">
+                            <FontAwesomeIcon className="iconAction" icon={faThumbsDown} />
+                        </button>
+                    </li>
                 ))}
             </ul>}
         </div>

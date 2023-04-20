@@ -9,9 +9,9 @@
         display: flex;
         flex-direction: column;
         align-items: center;
+        overflow-y: auto;
         height: 100%;
         width: 30%;
-        // background-color: rgb(253, 79, 79);
         box-shadow: 0 15px 15px 0px rgba(0,0,0,0.75);
         clip-path: inset(0px -15px 0px 0px);
 
@@ -19,7 +19,7 @@
             object-fit: cover;
             width: 90%;
             aspect-ratio: 1/1;
-            max-width: 300px;
+            max-width: 225px;
             border-radius: 100%;
         }
 
@@ -38,20 +38,30 @@
 
         & #FriendManagement {
             display: flex;
+            overflow-y: auto;
             flex-direction: row;
             flex-wrap: wrap;
             align-items: center;
             padding: 10px 0;
-            width: 90%;
+            width: 100%;
 
-            & #request {
+            & .iconAction {
+                background: transparent;
+                &:hover {
+                    color: #ffffff;
+                }
+            }
+
+            & #pending {
                 display: flex;
                 flex-direction: column;
+                font-size: larger;
                 padding: 15px 0;
-                width: 100%;
+                width: 90%;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 align-items: center;
 
-                & #titleRequest {
+                & #titlePending {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
@@ -65,33 +75,93 @@
                         color:rgb(255, 0, 140);
                     }
                 }
+
+                & #pendingList {
+                    display: flex;
+                    flex-direction: column;
+                    align-items:center;
+                    width: 90%;
+                    
+                    & #pendingElement {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: baseline;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        font-size: x-large;
+                        
+                        & span {
+                            color:blue;
+                            font-family: 'Pacifico', sans-serif;
+                            font-size: xx-large;
+                        }
+
+                        & #cancelRequestButton {
+                            color:rgb(228, 16, 16);
+                        }
+
+                        & #checkProfileButton {
+                            color:rgb(7, 63, 216);
+                        }
+                    }
+                }
+            }
+
+            & #request {
+                display: flex;
+                flex-direction: column;
+                font-size: larger;
+                padding: 15px 0;
+                width: 90%;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                align-items: center;
+
+                & #titleRequest {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 15px;
+                    & h3 {
+                        font-size: x-large;
+                        color:rgb(0, 0, 0);
+                    }
+                    & #developButton {
+                        color:rgb(255, 0, 140);
+                    }
+                }
                 & #requestList {
                     display: flex;
                     flex-direction: column;
+                    align-items: center;
+                    width: 90%;
                     
                     & #requestElement {
                         display: flex;
                         flex-direction: row;
-                        width: 90%;
-                        align-items: flex-start;
-                        gap: 10px;
+                        align-items: center;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        font-size: x-large;
+                        
+                        & span {
+                            color:blue;
+                            font-family: 'Pacifico', sans-serif;
+                            font-size: xx-large;
+                        }
+
+                        & #acceptFriendButton {
+                            color:rgb(13, 119, 19);
+                        }
+
+                        & #declineFriendButton {
+                            color:rgb(228, 16, 16);
+                        }
+
+                        & #checkProfileButton {
+                            color:rgb(7, 63, 216);
+                        }
                     }
                 }
-                // & li {
-                //     padding: 2px 0;
-
-                //     & button {
-                //         color: var(--text-color);
-                //         margin: 2px 0;
-                //         padding-left: 1em;
-				// 		padding-right: 1em;
-                //         background-color: var(--second-color);
-                //         border-radius: 50px;
-                //         position: relative;
-                //         z-index: 1;
-                //         overflow: hidden;
-                //     }
-                // }
             }
 
             & #friend {
@@ -100,7 +170,7 @@
                 font-size: larger;
                 align-items: center;
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                width: 100%;
+                width: 90%;
 
                 & #titleFriend {
                     display: flex;
@@ -124,12 +194,6 @@
                     flex-wrap: wrap;
                     width: 100%;
 
-                    & #friendName {
-                        color: rgba(18, 167, 38, 0.664);
-                        font-size: x-large;
-                        font-family: 'Pacifico', sans-serif;
-                    }
-
                     & #friendElement {
                         display: flex;
                         flex-direction: column;
@@ -141,7 +205,7 @@
                             align-items: baseline;
                             & #friendName {
                                 color: rgba(18, 167, 38, 0.664);
-                                font-size: x-large;
+                                font-size: xx-large;
                                 font-family: 'Pacifico', sans-serif;
                             }
                             & .circle {
@@ -164,15 +228,9 @@
                             flex-direction: row;
                             flex-wrap: wrap;
                             align-items: center;
-                            justify-content: space-between;
-                            & .iconAction {
-                                background: transparent;
-                                width: 15px;
-                                opacity: 70%;
-                                &:hover {
-                                    color: #ffffff;
-                                }
-                            }
+                            justify-content: space-around;
+                            font-size: x-large;
+
                             & #unfriendButton {
                                 &:hover::before {
                                     color: rgb(0, 0, 0);
@@ -220,7 +278,63 @@
                     }
                 }
             }
+
+            & #block {
+                display: flex;
+                flex-direction: column;
+                font-size: larger;
+                padding: 15px 0;
+                width: 90%;
+                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+                align-items: center;
+    
+                & #titleBlock {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 10px;
+                    justify-content: space-between;
+                    & h3 {
+                        font-size: x-large;
+                        color:rgb(0, 0, 0);
+                    }
+                    & #developButton {
+                        color:rgb(255, 0, 140);
+                    }
+                }
+    
+                & #blockList {
+                    display: flex;
+                    flex-direction: column;
+                    align-items:center;
+                    width: 90%;
+                    
+                    & #blockElement {
+                        display: flex;
+                        flex-direction: row;
+                        align-items: baseline;
+                        gap: 15px;
+                        flex-wrap: wrap;
+                        font-size: x-large;
+                        
+                        & span {
+                            color:rgb(163, 113, 5);
+                            font-family: 'Pacifico', sans-serif;
+                            font-size: xx-large;
+                        }
+    
+                        & #unblockButton {
+                            color:rgba(22, 161, 3, 0.897);
+                        }
+    
+                        & #checkProfileButton {
+                            color:rgb(7, 63, 216);
+                        }
+                    }
+                }
+            }
         }
+
         
     }
 

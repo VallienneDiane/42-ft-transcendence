@@ -3,18 +3,26 @@ import Axios from "../../services/caller.service";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAddressCard, faArrowDown, faArrowUp, faChainBroken, faPeace } from "@fortawesome/free-solid-svg-icons";
+import { NavLink } from "react-router-dom";
 
 export default function BlockList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [blocked, setBlocked] = useState<{id: string, name: string}[]>([]);
+    const [develop, setDevelop] = useState<boolean>(false);
 
     const fetchBlocked = () => {
         socket.emit("listBlock");
     }
 
+    const invertDevelop = () => {
+        setDevelop(!develop);
+    }
+
     const unblockEvent = (e : any) => {
-        socket.emit("unblockUser", {id: e.target.value})
+        socket.emit("unblockUser", {id: e.currentTarget.value})
     }
 
     useEffect(() => {
@@ -26,13 +34,29 @@ export default function BlockList() {
     }, []);
 
     return (
-        <div className="blockList">
-            {blocked.length > 0 && <h3>User{blocked.length > 1 && "s"} I blocked</h3>}
-            <ul>
+        <div id="block">
+            {blocked.length > 0 && <div id="titleBlock">
+                <h3>
+                    User{blocked.length > 1 && "s"} I blocked
+                </h3>
+                <button id="developButton" onClick={invertDevelop}>
+                    {develop    ? <FontAwesomeIcon icon={faArrowUp} />
+                                : <FontAwesomeIcon icon={faArrowDown} />}
+                </button>
+            </div>}
+            {develop && <ul id="blockList">
                 {blocked.map((elt, id) => (
-                    <li className="blockElement" key={id}>{elt.name}<button className="unblockButton" value={elt.id} onClick={unblockEvent}>unblock</button></li>
+                    <li id="blockElement" key={id}>
+                        <span>{elt.name}</span>
+                        <NavLink id="checkProfileButton" to={`/profile/${elt.id}`}>
+                            <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        </NavLink>
+                        <button id="unblockButton" value={elt.id} onClick={unblockEvent}>
+                            <FontAwesomeIcon className="iconAction" icon={faPeace} />
+                        </button>
+                    </li>
                 ))}
-            </ul>
+            </ul>}
         </div>
     )
 }
