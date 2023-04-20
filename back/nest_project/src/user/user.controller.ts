@@ -139,7 +139,7 @@ export class UserController {
      */
     @UseGuards(JwtAuthGuard)
     @Get('getAvatar/:user')
-    async findAvatar(@Param('user') id: string ): Promise<string> {
+    async findAvatar(@Param('user', ParseUUIDPipe) id: string ): Promise<string> {
         return await this.userService.getAvatar(id);
     }
     //update avatar picture
