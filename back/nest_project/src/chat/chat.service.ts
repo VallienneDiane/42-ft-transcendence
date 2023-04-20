@@ -181,7 +181,7 @@ export class ChatService {
                         if (!data.isChannel && data.room == user.id)
                             socket.emit("newMessage", toSend);
                         else
-                            socket.emit("pingedBy", room.room);
+                            socket.emit("pingedBy", user.id);
                     })
                 }
             }

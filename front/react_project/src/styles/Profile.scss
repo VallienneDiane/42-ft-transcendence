@@ -67,6 +67,15 @@
                 }
                 & #requestList {
                     display: flex;
+                    flex-direction: column;
+                    
+                    & #requestElement {
+                        display: flex;
+                        flex-direction: row;
+                        width: 90%;
+                        align-items: flex-start;
+                        gap: 10px;
+                    }
                 }
                 // & li {
                 //     padding: 2px 0;
