@@ -10,20 +10,16 @@ import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
-import { useParams } from "react-router-dom";
 
 class ChannelDMList extends React.Component<{}, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
-    dms: {userName: string, userId: string, connected: boolean}[], 
-    waitingMsg: boolean,
-
+    dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[], 
     me: JwtPayload}> {
     constructor(props: {}) {
         super(props);
         this.state = {
             channels: [],
             dms: [],
-            waitingMsg: false,
             me: accountService.readPayload()!,
         };
         this.changeLoc = this.changeLoc.bind(this);
@@ -36,7 +32,12 @@ class ChannelDMList extends React.Component<{}, {
     
     changeLoc(channel: {loc: string, isChannel: boolean}) {
         this.context.socket.emit('changeLoc', channel);
-        this.setState({ waitingMsg: false });
+        const index = this.state.dms.findIndex(dm => dm.userName === channel.loc);
+        if (index != -1) {
+            const tmpDM = [...this.state.dms];
+            tmpDM[index].waitingMsg = false;
+            this.setState({ dms: tmpDM });
+        }
     }
 
     initList() {
@@ -45,40 +46,54 @@ class ChannelDMList extends React.Component<{}, {
             this.setState({ channels: channels }) }); 
         this.context.socket.emit('myDM');
         this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
-            this.setState({ dms: strs }) });
+            let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            strs.forEach((elt) => {
+                listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
+            });
+            this.setState({ dms: listDM }) });
+    }
+    
+    checkNewMsg() {
         this.context.socket.on('pingedBy', (login: string) => {
-                this.setState({ waitingMsg: true });
+            const index = this.state.dms.findIndex(dm => dm.userName === login);
+            if (index != -1) {
+                const tmpDM = [...this.state.dms];
+                tmpDM[index].waitingMsg = true;
+                this.setState({ dms: tmpDM });
+            }
         })
     }
 
     checkOnline() {
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
-            let sorted = new Map<string, {userName: string, connected: boolean}>();
+            let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
-                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected});
+                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
-            if (sorted.get(user.userId) != undefined) // vérifier si le login se trouve dans ma liste de DM
-                sorted.set(user.userId, {userName: user.userLogin, connected: true});
+            const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
+            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM
+                sorted.set(user.userId, {userName: user.userLogin, connected: true, waitingMsg: change.waitingMsg});
             else
                 return;
-            let nextState: {userName: string, userId: string, connected: boolean}[] = [];
-            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected}));
+            let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
             this.setState({dms: nextState});
         })
     }
 
     checkOffline() {
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
-            let sorted = new Map<string, {userName: string, connected: boolean}>();
+            let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
-                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected});
+                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
-            if (sorted.get(user.userId) != undefined)
-                sorted.set(user.userId, {userName: user.userLogin, connected: false});
+            const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
+            if (change != undefined)
+                sorted.set(user.userId, {userName: user.userLogin, connected: false, waitingMsg: change.waitingMsg});
             else
                 return;
-            let nextState: {userName: string, userId: string, connected: boolean}[] = [];
-            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected}));
+            let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
             this.setState({dms: nextState});
         })
     }
@@ -89,13 +104,13 @@ class ChannelDMList extends React.Component<{}, {
         this.checkOffline();
         
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
-            let sorted = new Map<string, {userName: string, userId: string, connected: boolean}>();
+            let sorted = new Map<string, {userName: string, userId: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
-                sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected});
+                sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
-            sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected});
-            let nextState: {userName: string, userId: string, connected: boolean}[] = [];
-            sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected}));
+            sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
+            let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
             this.setState({dms: nextState});
         });
 
@@ -165,9 +180,9 @@ class ChannelDMList extends React.Component<{}, {
                     if (this.state.me.login !== dm.userName) {
                         return (
                         <li key={id}>
-                            <button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})} className={this.state.waitingMsg ? "waitingMsg" : ""}>
+                            <button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})} className={dm.waitingMsg ? "waitingMsg" : ""}>
                                 {dm.userName}
-                                { this.state.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  }
+                                { dm.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  }
                             </button>
                             <div className={dm.connected? "circle online" : "circle offline"}></div>
                         </li>
