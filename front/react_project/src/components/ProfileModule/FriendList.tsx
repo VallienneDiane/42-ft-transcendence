@@ -169,18 +169,18 @@ class FriendList extends React.Component<{socket: Socket}, {
                             <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                         </span>
                     <span id="friendOptions">
-                        <button value={elt.friendshipId} id="unfriendButton" onClick={this.unfriendHandler}>
+                        <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={this.unfriendHandler}>
                         <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
                         </button>
-                        <button value={elt.friendId} onClick={this.changeLoc}>
-                            <NavLink to={`/chat`}>
-                                <FontAwesomeIcon id="chatButton" className="iconAction" icon={faCommentDots} />
+                        <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={this.changeLoc}>
+                            <NavLink id="chatButton" to={`/chat`}>
+                                <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
                             </NavLink>
                         </button>
-                        <button value={elt.friendId} id="inviteToGame" onClick={this.inviteToGameHandler}>
+                        <button value={elt.friendId} data-hover-text="invite to play" id="inviteToGame" onClick={this.inviteToGameHandler}>
                         <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
                         </button>
-                        <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
+                        <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
                         <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
                         </NavLink>
                     </span>
