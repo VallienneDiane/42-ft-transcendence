@@ -99,6 +99,7 @@ class FriendList extends React.Component<{socket: Socket}, {
                     isConnected: false,
                 }
             newFriend.key.concat('0');
+            console.log("newFriend", newFriend);
             let newFriendList = [...this.state.friends, newFriend];
             newFriendList.sort((a, b) => {
                 return (a.friendName.localeCompare(b.friendName));
@@ -170,20 +171,20 @@ class FriendList extends React.Component<{socket: Socket}, {
                             <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                         </span>
                     <span id="friendOptions">
-                        <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={this.unfriendHandler}>
-                        <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
-                        </button>
+                        <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
+                            <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        </NavLink>
                         <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={this.changeLoc}>
                             <NavLink id="chatButton" to={`/chat`}>
                                 <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
                             </NavLink>
                         </button>
                         <button value={elt.friendId} data-hover-text="invite to play" id="inviteToGame" onClick={this.inviteToGameHandler}>
-                        <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
+                            <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
                         </button>
-                        <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
-                        <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
-                        </NavLink>
+                        <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={this.unfriendHandler}>
+                            <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
+                        </button>
                     </span>
                     </li>
                     ))}
