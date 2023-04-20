@@ -42,14 +42,11 @@ class ChannelDMList extends React.Component<{}, {
     }
 
     initList() {
-        console.log("initList");
         this.context.socket.emit('myChannels');
         this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => { 
-            console.log("listMyChannels")
             this.setState({ channels: channels }) }); 
         this.context.socket.emit('myDM');
         this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
-            console.log("listMyDM")
             let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             strs.forEach((elt) => {
                 listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
@@ -58,9 +55,8 @@ class ChannelDMList extends React.Component<{}, {
     }
     
     checkNewMsg() {
-        this.context.socket.on('pingedBy', (login: string) => {
-            console.log("pingedBy")
-            const index = this.state.dms.findIndex(dm => dm.userName === login);
+        this.context.socket.on('pingedBy', (id: string) => {
+            const index = this.state.dms.findIndex(dm => dm.userId == id);
             if (index != -1) {
                 const tmpDM = [...this.state.dms];
                 tmpDM[index].waitingMsg = true;
@@ -71,7 +67,6 @@ class ChannelDMList extends React.Component<{}, {
 
     checkOnline() {
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
-            console.log("userConnected")
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -89,7 +84,6 @@ class ChannelDMList extends React.Component<{}, {
 
     checkOffline() {
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
-            console.log("userDisconnected")
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -112,19 +106,20 @@ class ChannelDMList extends React.Component<{}, {
         this.checkNewMsg();
         
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
-            console.log("checkNewDM")
             let sorted = new Map<string, {userName: string, userId: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.dms) {
                 sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
-            sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
+            const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(room.login);
+            if (change == undefined) {
+                sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
+            }
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
             this.setState({dms: nextState});
         });
 
         this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
-            console.log("channelJoined")
             let nextState: {channel: IChannel, status: string}[] = [...this.state.channels, chann];
             nextState.sort((a, b) => {
                 if (a.status == "god" && b.status != "god")
@@ -143,7 +138,6 @@ class ChannelDMList extends React.Component<{}, {
         })
 
         this.context.socket.on('channelLeaved', (chann: IChannel) => {
-            console.log("channelLeaved")
             let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
                 (elt: {channel: IChannel}) => {return (elt.channel.id != chann.id)}
                 );
@@ -151,7 +145,6 @@ class ChannelDMList extends React.Component<{}, {
         })
 
         this.context.socket.on('channelDestroy', (channelId: string) => {
-            console.log("channelDestroy")
             let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
                 (elt: {channel: IChannel}) => {return (elt.channel.id != channelId)}
                 );
@@ -172,7 +165,6 @@ class ChannelDMList extends React.Component<{}, {
     }
 
     render() {
-        console.log(this.state.dms);
         let displayDM: boolean = false;
         if (this.state.dms.length !== 0)
         displayDM = true;
@@ -231,7 +223,6 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     changeLoc(newDest: IDest) {
-        // console.log(newDest);
         this.setState({ dest: newDest });
     }
 
