@@ -3,11 +3,14 @@ import Axios from "../../services/caller.service";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowDown, faArrowUp, faCheck, faCheckSquare, faThumbsDown, faThumbsUp } from "@fortawesome/free-solid-svg-icons";
 
 export default function RequestsList() {
     const {socket} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [requests, setRequests] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
+    const [develop, setDevelop] = useState<boolean>(false);
 
     const fetchRequests = () => {
         Axios.get("listRequestsPendingReceived/" + me.sub)
@@ -15,6 +18,10 @@ export default function RequestsList() {
             console.log(response.data);
             setRequests(response.data);
         });
+    }
+
+    const invertDevelop = () => {
+        setDevelop(!develop);
     }
 
     const acceptHandler = (e: any) => {
@@ -57,14 +64,25 @@ export default function RequestsList() {
 
     return (
         <div id="request">
-            {requests.length > 0 && <h3 id="titleRequest">Request{requests.length > 1 && "s"} I received</h3>}
-            <ul id = "requestList">
+            {requests.length > 0 &&
+            <div id="titleRequest">
+                <h3>Request{requests.length > 1 && "s"} I received</h3>
+                <button id="developButton" onClick={invertDevelop}>
+                    {develop    ? <FontAwesomeIcon icon={faArrowUp} />
+                                : <FontAwesomeIcon icon={faArrowDown} />}
+                </button>
+            </div>}
+            {develop && <ul id = "requestList">
                 {requests.map((elt) => (
                     <li className="requestElement" key={elt.friendshipId}><span>{elt.friendName}</span>
-                    <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">-OK-</button>
-                    <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">-NOT OK-</button></li>
+                    <button value={elt.friendshipId} onClick={acceptHandler} className="acceptFriendButton">
+                        <FontAwesomeIcon icon={faThumbsUp} />
+                    </button>
+                    <button value={elt.friendshipId} onClick={declineHandler} className="declineFriendButton">
+                        <FontAwesomeIcon icon={faThumbsDown} />
+                    </button></li>
                 ))}
-            </ul>
+            </ul>}
         </div>
     )
 }
