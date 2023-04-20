@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect, useRef } from "react";
+import React, { useState, useContext, useEffect, useRef, ContextType } from "react";
 import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
@@ -306,93 +306,112 @@ function MemberList(props: {dest: IDest}) {
     )
 }
 
-function InviteUser(props: {dest: IDest}) {
-    const {socket} = useContext(SocketContext);
-    const [onClickInvite, setOnClickInvite] = useState<boolean>(false);
-    const [userToInvit, setUserToInvit] = useState<string>("");
-    const [users, setUsers] = useState<{id: string, name: string}[]>([]);
-    const [isDropdown, setIsDropdown] = useState<boolean>(false);
-    const [filtered, setFiltered] = useState<{id: string, name: string}[]>([]);
-
-    const showInvite = () => {
-        setOnClickInvite((onClickInvite) => !onClickInvite)
+class InviteUser extends React.Component<{dest: IDest}, {
+    onClickInvite: boolean, 
+    users: {id: string, name: string}[],
+    filtered: {id: string, name: string}[],
+    userToInvite: string,
+    isDropdown: boolean}
+    > {
+    constructor(props: {dest: IDest}) {
+        super(props);
+        this.state = {
+            onClickInvite: false,
+            users: [],
+            filtered: [],
+            userToInvite: "",
+            isDropdown: false,
+        }
+        this.showInvite = this.showInvite.bind(this);
+        this.inviteUser = this.inviteUser.bind(this);
+        this.fetchUsers = this.fetchUsers.bind(this);
+        this.displayList = this.displayList.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
 
-    const inviteUser = (event: any) => {
-        console.log(event.target.value);
+    showInvite() {
+        this.setState({ onClickInvite: !this.state.onClickInvite });
+        this.context.socket.emit('listUsersChann', {channelId: this.props.dest.id});
+    }
+    
+    inviteUser(event: any) {
         event.preventDefault();
-        socket.emit('inviteUser', {userToInvite: event.target.value, channelId: props.dest.id});
-        setUserToInvit("");
-        socket.emit('listUsersChann', {channelId: props.dest.id});
+        this.context.socket.emit('inviteUser', {userToInvite: event.target.value, channelId: this.props.dest.id});
+        this.setState({ userToInvite: "", onClickInvite: !this.state.onClickInvite });
+    }
+    
+    fetchUsers(event: any) {
+        this.context.socket.emit('listUsersChann', {channelId: this.props.dest.id});
+        this.setState({ isDropdown: !this.state.isDropdown});
+        this.displayList(event);
     }
 
-    const fetchUsers = (event : any) => { // récupération de tous les users, sauf moi-même, et les users qui sont déjà dans le channel
-        socket.emit('listUsersChann', {channelId: props.dest.id});
-        setIsDropdown((isDropdown) => !isDropdown);
-        displayList(event);
-    }
-
-    const displayList = (event: any) => {
-        setUserToInvit(event.target.value);
+    displayList(event: any) {
+        console.log("displayList")
+        console.log(this.state.users);
+        this.setState({ userToInvite: event.target.value });
         if (event.target.value) {
             const filteredUsers: {id: string, name: string}[] = 
-            users.filter((user) => user.name.startsWith(event.target.value));
-            setFiltered(filteredUsers);
+            this.state.users.filter((user) => user.name.startsWith(event.target.value));
+            this.setState({ filtered: filteredUsers });
         }
         else {
-            setFiltered(users);
+            this.setState({ filtered: this.state.users });
         }
     }
     
-    useEffect(() => {
-        socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
-            const members: {user: {id: string, login: string}, status: string}[] = [];
-            list.forEach(member => members.push(member));
+    componentDidMount(): void {
+        this.context.socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
+            console.log("listUsersChann")
+            const members: {user: {id: string, login: string}, status: string}[] = list.map(member => (member));
             userService.getAllUsers()
             .then(response => {
-                let newUserList: {id: string, name: string}[] = [];
-                response.data.forEach((user: {id: string, login: string}) => { 
-                    let bool: boolean = true;
-                    for (let elt of members) {
-                        if (elt.user.login == user.login) {
-                            bool = false;
-                            break;
+                let newUserList: {id: string, name: string}[] =
+                response.data
+                    .filter((user: {id: string, login: string}) => {
+                        for (let elt of members) {
+                            if (elt.user.login === user.login) {
+                                return false;
+                            }
                         }
-                    }
-                    if (bool === true)
-                        newUserList.push({id: user.id, name: user.login});
-                });
+                        return true;
+                    })
+                    .map((user: {id: string, login: string}) => ({id: user.id, name: user.login}));
                 newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
-                setUsers(newUserList);
+                this.setState({ users: newUserList, filtered: newUserList });
             })
             .catch(error => {
                 console.log(error);
             })
         })
-        return () => {
-            socket.off('listUsersChann');
-        }
-    }, [users]);
+    }
 
-    return (
-        <React.Fragment>
-            <li onClick={showInvite}>Invite</li>
-            {onClickInvite && (
-                <div className="invite"> 
-                    <form className="searchbar" onSubmit={inviteUser}>
-                        <input type="text" onClick={fetchUsers} onChange={displayList} value={userToInvit} placeholder="Search"/>
-                    </form>
-                    {(filtered.length != 0 && isDropdown) &&
-                        <ul>
-                            {filtered.map((elt: {id: string, name: string}, id: number) => (
-                            <li key={id}><button value={elt.name} onClick={inviteUser}>{elt.name}</button></li>
-                            ))}
-                        </ul>
-                    }
-                </div>
-            )}
-        </React.Fragment>
-    )
+    componentWillUnmount(): void {
+        this.context.socket.off('listUsersChann');
+    }
+
+    render() {
+        return (
+            <React.Fragment>
+                <li onClick={this.showInvite}>Invite</li>
+                {this.state.onClickInvite && (
+                    <div className="invite"> 
+                        <form className="searchbar" onSubmit={this.inviteUser}>
+                            <input type="text" onClick={this.fetchUsers} onChange={this.displayList} value={this.state.userToInvite} placeholder="Search"/>
+                        </form>
+                        {(this.state.filtered.length != 0 && this.state.isDropdown) &&
+                            <ul>
+                                {this.state.filtered.map((elt: {id: string, name: string}, id: number) => (
+                                <li key={id}><button value={elt.name} onClick={this.inviteUser}>{elt.name}</button></li>
+                                ))}
+                            </ul>
+                        }
+                    </div>
+                )}
+            </React.Fragment>
+        )
+    } 
 }
 
 export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
@@ -437,24 +456,33 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
     }
     
     useEffect(() => {
-        socket.emit("getBanList", {channelId: props.dest.id});
         socket.on("banList", (array: {id: string, login: string}[]) => {
-            console.log("banList");
             setBans(array);
         })
         socket.on("newUnban", (userId: string) => {
+            socket.emit("getBanList", {channelId: props.dest.id});
             let newArray: {id: string, login: string}[] = bans.filter(
                 (ban: {id: string, login: string}) => {return (ban.id != userId)}
             );
-            console.log("newUnban");
             setBans(newArray);
         })
-        
+        socket.on("newBan", (id: string, login: string) => {
+            socket.emit("getBanList", {channelId: props.dest.id});
+            let newArray: {id: string, login: string}[] = [...bans, {id, login}];
+            setBans(newArray);
+        })
+        return () => {
+            socket.off('banList');
+            socket.off('newUnban');
+            socket.off('newBan');
+        }
+    }, [])
+    
+    useEffect(() => {
+        socket.emit("getBanList", {channelId: props.dest.id});
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
-            socket.off('banList');
-            socket.off('newUnban');
         }
     }, [ref]);
 
