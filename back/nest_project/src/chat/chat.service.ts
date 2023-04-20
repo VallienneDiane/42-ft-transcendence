@@ -176,12 +176,12 @@ export class ChatService {
                 )
                 if (connected) {
                     let userToEmit: IUserToEmit = user;
-                    dest.emit('checkNewDM', userToEmit, true);
+                    dest.emit('checkNewDM', {id: room.room, login: user.login}, true);
                     dest.sockets.forEach((data, socket) => {
                         if (!data.isChannel && data.room == user.id)
                             socket.emit("newMessage", toSend);
                         else
-                            socket.emit("pingedBy", userToEmit);
+                            socket.emit("pingedBy", room.room);
                     })
                 }
             }

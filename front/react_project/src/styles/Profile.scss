@@ -46,24 +46,43 @@
 
             & #request {
                 display: flex;
-                flex-direction: row;
+                flex-direction: column;
                 padding: 15px 0;
+                width: 100%;
+                align-items: center;
 
-                & li {
-                    padding: 2px 0;
-
-                    & button {
-                        color: var(--text-color);
-                        margin: 2px 0;
-                        padding-left: 1em;
-						padding-right: 1em;
-                        background-color: var(--second-color);
-                        border-radius: 50px;
-                        position: relative;
-                        z-index: 1;
-                        overflow: hidden;
+                & #titleRequest {
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 10px;
+                    justify-content: space-between;
+                    & h3 {
+                        font-size: x-large;
+                        color:rgb(0, 0, 0);
+                    }
+                    & #developButton {
+                        color:rgb(255, 0, 140);
                     }
                 }
+                & #requestList {
+                    display: flex;
+                }
+                // & li {
+                //     padding: 2px 0;
+
+                //     & button {
+                //         color: var(--text-color);
+                //         margin: 2px 0;
+                //         padding-left: 1em;
+				// 		padding-right: 1em;
+                //         background-color: var(--second-color);
+                //         border-radius: 50px;
+                //         position: relative;
+                //         z-index: 1;
+                //         overflow: hidden;
+                //     }
+                // }
             }
 
             & #friend {
