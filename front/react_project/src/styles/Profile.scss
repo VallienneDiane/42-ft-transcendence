@@ -77,6 +77,7 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    gap: 10px;
                     justify-content: space-between;
                     & h3 {
                         font-size: x-large;
@@ -133,23 +134,56 @@
                             display: flex;
                             flex-direction: row;
                             flex-wrap: wrap;
-                            // padding-left: 7%;
-                            // padding-right: 7%;
                             align-items: center;
                             justify-content: space-between;
+                            & .iconAction {
+                                background: transparent;
+                                width: 15px;
+                                opacity: 70%;
+                                &:hover {
+                                    color: #ffffff;
+                                }
+                            }
                             & #unfriendButton {
+                                &:hover::before {
+                                    color: rgb(0, 0, 0);
+                                    font-weight: bold;
+                                    content: attr(data-hover-text);
+                                    position: absolute;
+                                    background-color: rgba(184, 179, 179, 0.3);
+                                }
                                 color: rgb(0, 0, 0);
                                 opacity: 80%;
                             }
                             & #chatButton {
+                                &:hover::before {
+                                    color: rgb(13, 119, 19);
+                                    font-weight: bold;
+                                    content: attr(data-hover-text);
+                                    position: absolute;
+                                    background-color: rgba(184, 179, 179, 0.3);                                }
                                 color: rgb(13, 119, 19);
                                 opacity: 80%;
                             }
                             & #inviteToGame {
+                                &:hover::before {
+                                    color: rgb(228, 16, 16);
+                                    font-weight: bold;
+                                    content: attr(data-hover-text);
+                                    position: absolute;
+                                    background-color: rgba(184, 179, 179, 0.3);
+                                }
                                 color: rgb(228, 16, 16);
                                 opacity: 80%;
                             }
                             & #checkProfileButton {
+                                &:hover::before {
+                                    color: rgb(2, 129, 214);
+                                    font-weight: bold;
+                                    content: attr(data-hover-text);
+                                    position: absolute;
+                                    background-color: rgba(184, 179, 179, 0.3);
+                                }
                                 color: rgb(7, 63, 216);
                                 opacity: 80%;
                             }
