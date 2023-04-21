@@ -27,4 +27,21 @@ export class MatchService {
 		return this.MatchRepository.save(newMatch);
 	}
 	
+	async matchHistory(userId: string): Promise<{matchId: string, winnerId: string, winnerLogin: string, scoreWinner: number, loserId: string, loserLogin: string, scoreLoser: number}[]> {
+		return this.MatchRepository
+			.createQueryBuilder("match")
+			.innerJoinAndSelect("match.winner", "winner")
+			.innerJoinAndSelect("match.loser", "loser")
+			.where("winner.id = :winnerId", {winnerId: userId})
+			.orWhere("loser.id = :loserId", {loserId: userId})
+			.select("match.id", "matchId")
+			.addSelect("winner.id", "winnerId")
+			.addSelect("winner.login", "winnerLogin")
+			.addSelect("match.score_winner", "scoreWinner")
+			.addSelect("loser.id", "loserId")
+			.addSelect("loser.login", "loserLogin")
+			.addSelect("match.score_loser", "scoreLoser")
+			.getRawMany();
+	}
+
 }

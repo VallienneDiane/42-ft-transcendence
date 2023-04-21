@@ -58,8 +58,8 @@ export default function PendingList() {
     }, [pendings]);
 
     return (
-        <div id="pending">
-            {pendings.length > 0 && 
+        <div>
+        {pendings.length > 0 && <div id="pending">
             <div id="titlePending">
                 <h3>
                     My pending request{pendings.length > 1 && "s"}
@@ -68,11 +68,11 @@ export default function PendingList() {
                     {develop    ? <FontAwesomeIcon icon={faArrowUp} />
                                 : <FontAwesomeIcon icon={faArrowDown} />}
                 </button>
-            </div>}
+            </div>
             {develop && <ul id="pendingList">
                 {pendings.map((elt) => (
                     <li id="pendingElement" key={elt.friendId}>
-                        <span>{elt.friendName}</span>
+                        <span className="name">{elt.friendName}</span>
                         <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
                             <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
                         </NavLink>
@@ -82,6 +82,7 @@ export default function PendingList() {
                     </li>
                 ))}
             </ul>}
+        </div>}
         </div>
     )
 }

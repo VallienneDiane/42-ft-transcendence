@@ -12,18 +12,20 @@ import FriendList from "./FriendList";
 import PendingList from "./PendingList";
 import RequestsList from "./RequestList";
 import BlockList from "./BlockList";
+import MatchHistory from "./MatchHistory";
 
 export default function Profile() {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const navigate = useNavigate();
     const [user, setUser] = useState<User>();
     const currentUser = useParams().login;
     
     useEffect(() => {
+        console.log("loop")
         if (currentUser !== undefined){
             userService.getUser(currentUser)
             .then(response => {
-                console.log("Profile 26: user ", response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }
@@ -44,6 +46,7 @@ export default function Profile() {
                 console.log(error);
             });
         }
+        console.log(user?.login);
 
         return () => {
             if (socket) {
@@ -55,13 +58,10 @@ export default function Profile() {
                 socket.off("userIsConnected");
                 socket.off("userConnected");
                 socket.off("userDisconnected");
+                socketGame.off("matchHistory");
             }
         }
-    }, [currentUser])
-    
-    useEffect(() => {
-        // console.log('user', user);
-    }, [user])
+    }, [currentUser, navigate])
     
     return (
         
@@ -86,17 +86,7 @@ export default function Profile() {
                     </div>
                     ): null}
             </aside>
-            <div id="score">
-                <div id="stats">
-                    <h2>Statistics</h2>
-
-                </div>
-                <div id="history">
-                    <h2>Match History</h2>
-
-                </div>
-            </div>
-
+            {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
     )
 }

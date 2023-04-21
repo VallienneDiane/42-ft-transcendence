@@ -3,7 +3,9 @@
 #profilePage {
     // height: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: flex-start;
 
     & aside {
         display: flex;
@@ -12,6 +14,7 @@
         overflow-y: auto;
         height: 100%;
         width: 30%;
+        max-width: 350px;
         box-shadow: 0 15px 15px 0px rgba(0,0,0,0.75);
         clip-path: inset(0px -15px 0px 0px);
 
@@ -39,11 +42,15 @@
         & #FriendManagement {
             display: flex;
             overflow-y: auto;
-            flex-direction: row;
-            flex-wrap: wrap;
-            align-items: center;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 20px;
             padding: 10px 0;
-            width: 100%;
+            width: 90%;
+
+            & .name {
+                word-break: break-all;
+            }
 
             & .iconAction {
                 background: transparent;
@@ -56,8 +63,8 @@
                 display: flex;
                 flex-direction: column;
                 font-size: larger;
-                padding: 15px 0;
-                width: 90%;
+                width: 100%;
+                gap: 10px;
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 align-items: center;
 
@@ -65,8 +72,8 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    width: 100%;
                     gap: 10px;
-                    justify-content: space-between;
                     & h3 {
                         font-size: x-large;
                         color:rgb(0, 0, 0);
@@ -79,8 +86,10 @@
                 & #pendingList {
                     display: flex;
                     flex-direction: column;
-                    align-items:center;
+                    align-items: center;
                     width: 90%;
+                    background-color: #24bdb588;
+                    border-radius: 30%;
                     
                     & #pendingElement {
                         display: flex;
@@ -91,8 +100,8 @@
                         font-size: x-large;
                         
                         & span {
-                            color:blue;
-                            font-family: 'Pacifico', sans-serif;
+                            color: rgb(6, 114, 21);
+                            font-family: 'Alumni Sans Inline One', cursive;
                             font-size: xx-large;
                         }
 
@@ -111,8 +120,8 @@
                 display: flex;
                 flex-direction: column;
                 font-size: larger;
-                padding: 15px 0;
-                width: 90%;
+                width: 100%;
+                gap: 10px;
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 align-items: center;
 
@@ -120,7 +129,8 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
-                    gap: 15px;
+                    width: 100%;
+                    gap: 10px;
                     & h3 {
                         font-size: x-large;
                         color:rgb(0, 0, 0);
@@ -130,6 +140,8 @@
                     }
                 }
                 & #requestList {
+                    background-color: #24bdb588;
+                    border-radius: 30%;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -144,8 +156,8 @@
                         font-size: x-large;
                         
                         & span {
-                            color:blue;
-                            font-family: 'Pacifico', sans-serif;
+                            color: rgb(6, 114, 21);
+                            font-family: 'Alumni Sans Inline One', cursive;
                             font-size: xx-large;
                         }
 
@@ -169,15 +181,17 @@
                 flex-direction: column;
                 font-size: larger;
                 align-items: center;
+                justify-content: space-around;
+                gap: 10px;
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                width: 90%;
+                width: 100%;
 
                 & #titleFriend {
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    width: 100%;
                     gap: 10px;
-                    justify-content: space-between;
                     & h3 {
                         font-size: x-large;
                         color:rgb(0, 0, 0);
@@ -189,24 +203,34 @@
 
 
                 & #friendList {
+                    display: flex;
                     flex-direction: column;
                     align-items: center;
+                    justify-content: space-between;
+                    gap: 7px;
                     flex-wrap: wrap;
                     width: 100%;
 
                     & #friendElement {
                         display: flex;
                         flex-direction: column;
-                        width: 100%;
+                        align-items: center;
+                        border-radius: 30%;
+                        background-color: #24bdb588;
+                        width: 90%;
                         & #friendInfo {
                             display: flex;
                             flex-direction: row;
                             justify-content: center;
+                            flex-wrap: wrap;
                             align-items: baseline;
-                            & #friendName {
-                                color: rgba(18, 167, 38, 0.664);
+                            width: 100%;
+
+                            & .name {
+                                color: rgb(6, 114, 21);
+                                word-wrap: break-word;
                                 font-size: xx-large;
-                                font-family: 'Pacifico', sans-serif;
+                                font-family: 'Alumni Sans Inline One', cursive;
                             }
                             & .circle {
                                 width: 15%;
@@ -230,47 +254,21 @@
                             align-items: center;
                             justify-content: space-around;
                             font-size: x-large;
+                            width: 100%;
 
                             & #unfriendButton {
-                                &:hover::before {
-                                    color: rgb(0, 0, 0);
-                                    font-weight: bold;
-                                    content: attr(data-hover-text);
-                                    position: absolute;
-                                    background-color: rgba(184, 179, 179, 0.3);
-                                }
                                 color: rgb(0, 0, 0);
                                 opacity: 80%;
                             }
                             & #chatButton {
-                                &:hover::before {
-                                    color: rgb(13, 119, 19);
-                                    font-weight: bold;
-                                    content: attr(data-hover-text);
-                                    position: absolute;
-                                    background-color: rgba(184, 179, 179, 0.3);                                }
                                 color: rgb(13, 119, 19);
                                 opacity: 80%;
                             }
                             & #inviteToGame {
-                                &:hover::before {
-                                    color: rgb(228, 16, 16);
-                                    font-weight: bold;
-                                    content: attr(data-hover-text);
-                                    position: absolute;
-                                    background-color: rgba(184, 179, 179, 0.3);
-                                }
                                 color: rgb(228, 16, 16);
                                 opacity: 80%;
                             }
                             & #checkProfileButton {
-                                &:hover::before {
-                                    color: rgb(2, 129, 214);
-                                    font-weight: bold;
-                                    content: attr(data-hover-text);
-                                    position: absolute;
-                                    background-color: rgba(184, 179, 179, 0.3);
-                                }
                                 color: rgb(7, 63, 216);
                                 opacity: 80%;
                             }
@@ -283,8 +281,8 @@
                 display: flex;
                 flex-direction: column;
                 font-size: larger;
-                padding: 15px 0;
-                width: 90%;
+                width: 100%;
+                gap: 10px;
                 font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 align-items: center;
     
@@ -292,8 +290,8 @@
                     display: flex;
                     flex-direction: row;
                     align-items: center;
+                    width: 100%;
                     gap: 10px;
-                    justify-content: space-between;
                     & h3 {
                         font-size: x-large;
                         color:rgb(0, 0, 0);
@@ -304,10 +302,12 @@
                 }
     
                 & #blockList {
+                    background-color: #000000;
+                    border-radius: 30%;
                     display: flex;
                     flex-direction: column;
-                    align-items:center;
-                    width: 90%;
+                    align-items: center;
+                    width: 100%;
                     
                     & #blockElement {
                         display: flex;
@@ -319,7 +319,7 @@
                         
                         & span {
                             color:rgb(163, 113, 5);
-                            font-family: 'Pacifico', sans-serif;
+                            font-family: 'Alumni Sans Inline One', cursive;
                             font-size: xx-large;
                         }
     

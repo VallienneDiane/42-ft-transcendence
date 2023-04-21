@@ -46,6 +46,7 @@ class FriendList extends React.Component<{socket: Socket}, {
                     toPush.key.concat('0');
                     friendsArray.push(toPush);
                 }
+            friendsArray.sort((a, b) => {return a.friendName.localeCompare(b.friendName)})
             this.setState({
                 friends: friendsArray,
                 fetchFriendsDone: true});
@@ -155,19 +156,20 @@ class FriendList extends React.Component<{socket: Socket}, {
 
     render() {
         return (
-        <div id="friend">
-            {this.state.friends.length > 0 && <div id="titleFriend">
+        <div>
+        {this.state.friends.length > 0 && <div id="friend">
+            <div id="titleFriend">
                 <h3>My friend{this.state.friends.length > 1 && "s"}</h3>
                 <button id="developButton" onClick={this.invertDevelop}>
                     {this.state.develop ? <FontAwesomeIcon icon={faArrowUp} />
                                         : <FontAwesomeIcon icon={faArrowDown} />}
                 </button>
-            </div>}
+            </div>
             {this.state.develop && <ul id="friendList">
                 {this.state.friends.map((elt) => (
                     <li id="friendElement" key={elt.key}>
                         <span id="friendInfo">
-                            <div id="friendName">{elt.friendName}</div>
+                            <div className="name">{elt.friendName}</div>
                             <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                         </span>
                     <span id="friendOptions">
@@ -179,9 +181,9 @@ class FriendList extends React.Component<{socket: Socket}, {
                                 <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
                             </NavLink>
                         </button>
-                        <button value={elt.friendId} data-hover-text="invite to play" id="inviteToGame" onClick={this.inviteToGameHandler}>
+                        {elt.isConnected && <button value={elt.friendId} data-hover-text="invite to play" id="inviteToGame" onClick={this.inviteToGameHandler}>
                             <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
-                        </button>
+                        </button>}
                         <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={this.unfriendHandler}>
                             <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
                         </button>
@@ -189,6 +191,7 @@ class FriendList extends React.Component<{socket: Socket}, {
                     </li>
                     ))}
             </ul>}
+        </div>}
         </div>
     )
     }
