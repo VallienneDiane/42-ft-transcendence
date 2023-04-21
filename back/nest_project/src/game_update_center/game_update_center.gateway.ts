@@ -3,7 +3,7 @@
  */
 
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'; // socket event handling stuff
-import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SpectatorRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
+import { GameInputDTO, matchHistoryDto, PrivateGameRequestDTO, PublicGameRequestDTO, SpectatorRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
 import { GameEngineService } from 'src/game_engine/game_engine.service'; // use to acces the gameEngine of the super mode
 import { PongEngineService } from 'src/pong_engine/pong_engine.service'; // use to acces the gameEngine of the classic mode
 import { MatchService } from 'src/match/Match.service'; // use to acces function for the MatchEntity in the gameEngine to store goal
@@ -476,6 +476,19 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
+  @SubscribeMessage("matchHistory")
+  handleMatchHistory(@MessageBody() data: matchHistoryDto, @ConnectedSocket() client: Socket) {
+    this.tokenChecker(client)
+    .then((user) => {
+      if (user) {
+        this.matchservice.matchHistory(data.userId)
+        .then((matches) => {
+          client.emit("matchHistory", matches);
+        })
+      }
+    })
+  }
+
   /**
    * nicolas' function
    * @param client 
@@ -503,7 +516,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let id: string = object.sub;
     return id;
   }
-
+  
   /**
    * nicolas' function
    * @param client 

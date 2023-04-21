@@ -59,25 +59,25 @@ services:
   #     - db
   #   restart: always
 ########################################### VOLUMES  #########################################
-# volumes:
-#   db:
-#     driver: local
-#     driver_opts:
-#       type: none 
-#       o: bind
-#       device: ./postgres
-#   back:
-#     driver: local
-#     driver_opts:
-#       type: none
-#       o: bind
-#       device: ./back
-#   front:
-#     driver: local
-#     driver_opts:
-#       type: none 
-#       o: bind
-#       device: ./front
+volumes:
+  db:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: ./postgres
+  back:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./back
+  front:
+    driver: local
+    driver_opts:
+      type: none 
+      o: bind
+      device: ./front
   # pgadmin:
   #   driver: local
   #   driver_opts:

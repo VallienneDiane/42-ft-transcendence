@@ -64,18 +64,18 @@ export default function RequestsList() {
     }, [requests]);
 
     return (
-        <div id="request">
-            {requests.length > 0 &&
+        <div>
+        {requests.length > 0 && <div id="request">
             <div id="titleRequest">
                 <h3>Request{requests.length > 1 && "s"} I received</h3>
                 <button id="developButton" onClick={invertDevelop}>
                     {develop    ? <FontAwesomeIcon icon={faArrowUp} />
                                 : <FontAwesomeIcon icon={faArrowDown} />}
                 </button>
-            </div>}
+            </div>
             {develop && <ul id = "requestList">
                 {requests.map((elt) => (
-                    <li id="requestElement" key={elt.friendshipId}><span>{elt.friendName}</span>
+                    <li id="requestElement" key={elt.friendshipId}><span className="name">{elt.friendName}</span>
                         <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
                             <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
                         </NavLink>
@@ -88,6 +88,7 @@ export default function RequestsList() {
                     </li>
                 ))}
             </ul>}
+        </div>}
         </div>
     )
 }

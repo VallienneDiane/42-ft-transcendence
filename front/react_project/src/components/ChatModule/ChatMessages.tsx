@@ -113,6 +113,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     checkBlock(senderName: string) {
         let block: boolean = false;
         for (let elt of this.state.usersBlocked) {
+
             if (elt.name == senderName) {
                 block = true;
             }
