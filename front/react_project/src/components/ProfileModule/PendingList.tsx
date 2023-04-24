@@ -58,8 +58,7 @@ export default function PendingList() {
     }, [pendings]);
 
     return (
-        <div>
-        {pendings.length > 0 && <div id="pending">
+            pendings.length > 0 && <div id="pending">
             <div id="titlePending">
                 <h3>
                     My pending request{pendings.length > 1 && "s"}
@@ -82,7 +81,6 @@ export default function PendingList() {
                     </li>
                 ))}
             </ul>}
-        </div>}
         </div>
     )
 }

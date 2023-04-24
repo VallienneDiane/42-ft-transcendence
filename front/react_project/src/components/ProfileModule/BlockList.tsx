@@ -34,9 +34,8 @@ export default function BlockList() {
     }, []);
 
     return (
-        <div>
-        {blocked.length > 0 && <div id="block">
-            {blocked.length > 0 && <div id="titleBlock">
+        blocked.length > 0 && <div id="block">
+            <div id="titleBlock">
                 <h3>
                     User{blocked.length > 1 && "s"} I blocked
                 </h3>
@@ -44,7 +43,7 @@ export default function BlockList() {
                     {develop    ? <FontAwesomeIcon icon={faArrowUp} />
                                 : <FontAwesomeIcon icon={faArrowDown} />}
                 </button>
-            </div>}
+            </div>
             {develop && <ul id="blockList">
                 {blocked.map((elt, id) => (
                     <li id="blockElement" key={id}>
@@ -58,7 +57,6 @@ export default function BlockList() {
                     </li>
                 ))}
             </ul>}
-        </div>}
         </div>
     )
 }
