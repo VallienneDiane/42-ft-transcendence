@@ -64,8 +64,7 @@ export default function RequestsList() {
     }, [requests]);
 
     return (
-        <div>
-        {requests.length > 0 && <div id="request">
+        requests.length > 0 && <div id="request">
             <div id="titleRequest">
                 <h3>Request{requests.length > 1 && "s"} I received</h3>
                 <button id="developButton" onClick={invertDevelop}>
@@ -88,7 +87,6 @@ export default function RequestsList() {
                     </li>
                 ))}
             </ul>}
-        </div>}
         </div>
     )
 }

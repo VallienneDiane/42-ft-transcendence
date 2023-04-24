@@ -43,7 +43,7 @@ export default function MatchHistory(props: {userId: string}) {
             setMatchLost(loose);
             setHistory(data);
         })
-    }, [])
+    }, [props.userId])
 
     return (
         <div id="score">
@@ -56,12 +56,22 @@ export default function MatchHistory(props: {userId: string}) {
             <div id="history">
                     <h2>Match history</h2>
             <ul id="matchList">
+                {history.length > 0 && 
+                <div id="firstRow" className="scoreTab">
+                    <span className="winner">Winner</span>
+                    <span className="scores">Scores</span>
+                    <span className="loser">Loser</span>
+                </div>}
                 {history.map((elt) => (
-                    <li id="historyElement" key={elt.matchId}>
-                        <span id="winnerName" className="name">{elt.winnerLogin}</span>
-                        <span id="winnerScore">{elt.scoreWinner}</span>
-                        <span id="loserName" className="name">{elt.loserLogin}</span>
-                        <span id="loserScore">{elt.scoreLoser}</span>
+                    <li id="historyElement" className="scoreTab" key={elt.matchId}>
+                        <div id="winner">
+                            <span id="nameW" >{elt.winnerLogin}</span>
+                            <span id="scoreW">{elt.scoreWinner}</span>
+                        </div>
+                        <div id="loser">
+                            <span id="scoreL">{elt.scoreLoser == -1 ? "give up" : elt.scoreLoser}</span>
+                            <span id="nameL" >{elt.loserLogin}</span>
+                        </div>
                     </li>
                 ))}
             </ul>

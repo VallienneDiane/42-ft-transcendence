@@ -156,8 +156,7 @@ class FriendList extends React.Component<{socket: Socket}, {
 
     render() {
         return (
-        <div>
-        {this.state.friends.length > 0 && <div id="friend">
+        this.state.friends.length > 0 && <div id="friend">
             <div id="titleFriend">
                 <h3>My friend{this.state.friends.length > 1 && "s"}</h3>
                 <button id="developButton" onClick={this.invertDevelop}>
@@ -191,10 +190,8 @@ class FriendList extends React.Component<{socket: Socket}, {
                     </li>
                     ))}
             </ul>}
-        </div>}
         </div>
-    )
-    }
+    )}
 }
 
 export default FriendList;

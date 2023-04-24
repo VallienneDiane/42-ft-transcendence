@@ -1,10 +1,8 @@
 @import url("Base.css");
 
 #profilePage {
-    // height: 100%;
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
     justify-content: flex-start;
 
     & aside {
@@ -31,6 +29,7 @@
             text-align: center;
             border-bottom: 1px solid var(--text-color);
             display: flex;
+            word-break: break-all;
             align-items: center;
             justify-content: center;
         }
@@ -41,7 +40,6 @@
 
         & #FriendManagement {
             display: flex;
-            overflow-y: auto;
             flex-direction: column;
             justify-content: space-around;
             gap: 20px;
@@ -215,8 +213,10 @@
                         display: flex;
                         flex-direction: column;
                         align-items: center;
-                        border-radius: 30%;
+                        border-radius: 15%;
                         background-color: #24bdb588;
+                        border-style: double;
+                        border-color: #a4a4d1;
                         width: 90%;
                         & #friendInfo {
                             display: flex;
@@ -341,26 +341,114 @@
     
     & #score {
         height: 100%;
-        width: 70%;
+        width: 100%;
         display: flex;
+        overflow-y: auto;
         flex-direction: column;
-        align-items: center;
 
-        & > div {
+        & #stats {
+            overflow-y: auto;
             width: 100%;
             min-height: 50%;
             display: flex;
             flex-direction: column;
             align-items: center;
+            
+            & > h2 {
+                width: 80%;
+                text-align: center;
+                box-shadow: 0px -3px 23px -010px rgb(126, 23, 104);
+                clip-path: inset(1px 2px -15px 1px);
+                margin: 20px;
+            }
         }
 
-        & h2 {
-            width: 80%;
-            text-align: center;
-            // border-bottom: 1px var(--text-color) solid;
-            box-shadow: 0px -3px 23px -010px rgba(0,0,0,0.75);
-            clip-path: inset(1px 2px -15px 1px);
+        & #history {
+            overflow-y: auto;
+            width: 100%;
+            min-height: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
+            & > h2 {
+                width: 80%;
+                text-align: center;
+                box-shadow: 0px -3px 23px -010px rgb(126, 23, 104);
+                clip-path: inset(1px 2px -15px 1px);
+                margin: 20px;
+            }
 
+            & #matchList {
+                display: flex;
+                width: 75%;
+                background-color: #00000057;
+                border-style: double;
+                flex-direction: column;
+
+                & #firstRow{
+                    display: flex;
+                    flex-direction: row;
+                    padding: 1.3%;
+                    justify-content: space-evenly;
+                    font-weight: 900;
+                    font-size: larger;
+                }
+
+                & #historyElement {
+                    display: flex;
+                    padding: 0.5%;
+                    border-style: groove;
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                    justify-content: center;
+
+                    & #winner {
+                        font-weight: 900;
+                        display: flex;
+                        width: 50%;
+                        background-color: #8bc34a57;
+                        border-style: solid;
+                        border-right-color: #00000086;
+                        border-right-style: dotted;
+                        justify-content: space-between;
+                        flex-direction: row;
+
+                        & #nameW {
+                            display: flex;
+                            padding: 3px;
+                            word-break: break-all;
+                        }
+
+                        & #scoreW {
+                            padding: 3px;
+                            padding-right: 2%;
+                        }
+                    }
+
+                    & #loser {
+                        font-weight: 900;
+                        display: flex;
+                        width: 50%;
+                        background-color: #da2e2e86;
+                        border-style: solid;
+                        border-left-color: #00000086;
+                        border-left-style: dotted;
+                        flex-direction: row;
+                        justify-content: space-between;
+
+                        & #nameL {
+                            padding: 3px;
+                            word-break: break-all;
+                        }
+
+                        & #scoreL {
+                            padding: 3px;
+                            padding-left: 2%;
+                        }
+                    }
+                }
+            }
         }
     }
 }
