@@ -49,7 +49,7 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
         if (this.props.message.senderName !== "WARNING") {
             accountService.getAvatar(this.props.message.senderId!)
                 .then(response => { 
-                   this.setState({avatar: response.data.user_avatarSvg});
+                    this.setState({avatar: response.data});
                 })
                 .catch(error => console.log(error));
         }

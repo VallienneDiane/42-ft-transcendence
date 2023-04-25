@@ -8,6 +8,10 @@ let getUser = (id: string) => {
     return Axios.get("user/" + id);
 }
 
+let getUserWithAvatar = (id: string) => {
+    return Axios.get("userWithAvatar/" + id);
+}
+
 export const userService = {
-    getAllUsers, getUser
+    getAllUsers, getUser, getUserWithAvatar
 }

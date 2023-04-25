@@ -24,7 +24,7 @@ export default function Profile() {
     useEffect(() => {
         console.log("loop")
         if (currentUser !== undefined){
-            userService.getUser(currentUser)
+            userService.getUserWithAvatar(currentUser)
             .then(response => {
                 if (response.data === "") {
                     navigate('/profile');
@@ -38,7 +38,7 @@ export default function Profile() {
         else {
             let decodedToken: JwtPayload = accountService.readPayload()!;
             const id = decodedToken.sub;
-            userService.getUser(id!)
+            userService.getUserWithAvatar(id!)
             .then(response => {
                 setUser(response.data);
             })
@@ -46,7 +46,6 @@ export default function Profile() {
                 console.log(error);
             });
         }
-        console.log(user?.login);
 
         return () => {
             if (socket) {
