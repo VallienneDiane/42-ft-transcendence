@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
 import { JwtAuthGuard } from "../auth_strategies/jwt-auth.guard";
 import { AuthService } from "src/auth/auth.service";
+import { AvatarEntity } from "./avatar/avatar.entity";
 
 /**
  * UseGuards()
@@ -122,6 +123,13 @@ export class UserController {
     async displayUserByLogin(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
         return await this.userService.findById(id);
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('userWithAvatar/:id')
+    async getUserWithAvatar(@Param('id', ParseUUIDPipe) id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
+        return await this.userService.findByIdWithAvatar(id);
+    }
+
     /**
      * delete user account
      * @param data 

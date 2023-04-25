@@ -1,16 +1,20 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ChannelEntity } from "../chat/channel/channel.entity";
 import { Repository } from "typeorm";
 import { SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import { IRequest } from "src/chat/chat.interface";
+import { AvatarService } from "./avatar/avatar.service";
+import { AvatarEntity } from "./avatar/avatar.entity";
 
 @Injectable({})
 export class UserService {
     constructor (
         @InjectRepository(UserEntity)
         private readonly usersRepository: Repository<UserEntity>,
+        @Inject(AvatarService)
+        private readonly avatarService: AvatarService
     ) {}
     /**
      * Create new user and save it in database
@@ -46,6 +50,7 @@ export class UserService {
         return await this.usersRepository.save(user);
     }
     async create42(newUser: SignUp42Dto): Promise<UserEntity> {
+        const avatar: AvatarEntity = await this.avatarService.create(newUser.avatarSvg);
         const user: UserEntity = {
             id: undefined,
             id42: newUser.id42,
@@ -62,7 +67,7 @@ export class UserService {
             twoFactorSecret: null,
             isTwoFactorEnabled: false,
             qrCode: null,
-            avatarSvg: newUser.avatarSvg,
+            avatarSvg: avatar,
             requestsSend: [],
             requestsReceived: [],
             blockList: [],
@@ -89,6 +94,17 @@ export class UserService {
     async findById(id: string): Promise<UserEntity> {
         const toReturn = await this.usersRepository.findOneBy({id: id});
         return toReturn;
+    }
+    async findByIdWithAvatar(id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .leftJoinAndSelect("user.avatarSvg", "avatar")
+            .where("user.id = :userId", {userId: id})
+            .select("user.id", "id")
+            .addSelect("login", "login")
+            .addSelect("email", "email")
+            .addSelect("avatar.*", "avatarSvg")
+            .getRawOne();
     }
     public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});
@@ -140,7 +156,17 @@ export class UserService {
      * @returns 
      */
     async updateAvatar(userToUpdate: UpdateAvatarDto) {
-        return await this.usersRepository.update({id: userToUpdate.id}, {avatarSvg: userToUpdate.avatarSvg});
+        const avatarId: {avatarId: string} = await this.usersRepository
+            .createQueryBuilder("user")
+            .where("user.id = :id", {id: userToUpdate.id})
+            .select("user.avatarSvg", "avatarId")
+            .getRawOne();
+        if (avatarId.avatarId)
+            this.avatarService.update(avatarId.avatarId, userToUpdate.avatarSvg);
+        else {
+            const avatar = await this.avatarService.create(userToUpdate.avatarSvg);
+            this.usersRepository.update({id: userToUpdate.id}, {avatarSvg: avatar});
+        }
     }
     /**
      * Delete user account
@@ -288,18 +314,28 @@ export class UserService {
      * @param file 
      */
     async loadAvatar(id: string, file: string) {
-        const user = await this.usersRepository.findOneBy({id});
-        user.avatarSvg = file;
-        await this.usersRepository.save(user);
+        const avatarId: {avatarId: string} = await this.usersRepository
+            .createQueryBuilder("user")
+            .where("user.id = :id", {id: id})
+            .select("user.avatarSvg", "avatarId")
+            .getRawOne();
+        if (avatarId.avatarId)
+            this.avatarService.update(avatarId.avatarId, file);
+        else {
+            const avatar = await this.avatarService.create(file);
+            this.usersRepository.update({id: id}, {avatarSvg: avatar});
+        }
     }
 
     async getAvatar(id : string): Promise<string> {
-        const userAvatar: string = await this.usersRepository.createQueryBuilder()
+        console.log("getAvatar");
+        const userAvatar: AvatarEntity = await this.usersRepository.createQueryBuilder("user")
+            .innerJoinAndSelect("user.avatarSvg", "avatar")
             .where("user.id = :id", { id: id })
-            .select("user.avatarSvg")
-            .from(UserEntity, 'user')
+            .select("avatar.*", "avatarSvg")
             .getRawOne();
-        return userAvatar;
+        console.log("userAvatar:" , userAvatar.avatarSvg);
+        return userAvatar.avatarSvg;
     }
 
     async getFriendRequestsSend(id: string): Promise<IRequest[]> {
