@@ -9,6 +9,9 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 import MatchsInProgress from "./MatchsInProgress"
 import SearchUserBar from "./SearchUserBar"
 import { SocketContext } from "./context"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowDown, faArrowUp, faGear } from "@fortawesome/free-solid-svg-icons"
+// import { faUp, faDown } from '@fortawesome/free-solid-svg-icons';
 
 interface ball {
     x: number,
@@ -75,6 +78,15 @@ const Game: React.FC = () => {
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
     const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
+    let specModeActive: boolean = false;
+    let specMatchLogin: string | null = null;
+
+    const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
+        console.log("TOGGLE SPEC MODE FUNCTION")
+        specModeActive = toggle;
+        specMatchLogin = player1_login;
+        setSpecMode({active: toggle, player1_login: player1_login});
+    }
 
     const launchClassic = () => {
         // On click on 'start' button, start the game
@@ -104,12 +116,7 @@ const Game: React.FC = () => {
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
     
-    
-    useEffect(() => {
-        if (socketGame !== null) {
-            socketGame.emit('Get_Matchs');      
-        }
-    }, []);
+
 
     // countdown handler
     useEffect(() => {
@@ -146,6 +153,7 @@ const Game: React.FC = () => {
             });
 
             socketGame.on('Players', (gamePlayers: Players) => {
+                console.log("Players", gamePlayers);
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(true);
@@ -186,13 +194,13 @@ const Game: React.FC = () => {
             });
 
             socketGame.on('Match_Update', (matchUpdate: MatchState) => {
-                // console.log("matchUpdate", matchUpdate, "players", players, "specMode", specMode);
                 clearGame = false;
-                if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login) {
-                    // console.log("set players", players);
+                if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
                     setPlayers(prevPlayers => {
                         return {
                             ...prevPlayers!,
+                            player1_login: matchUpdate.player1_login,
+                            player2_login: matchUpdate.player2_login,
                             player1_score: matchUpdate.player1_score,
                             player2_score: matchUpdate.player2_score,
                         }
@@ -271,8 +279,8 @@ const Game: React.FC = () => {
         }
     };
 
-    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8 * 0.8);
-    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 * 0.8 / (16 / 9));
+    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.96 * 0.75);
+    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.96 * 0.75 / (16 / 9));
     // Handle windows resizing
     useEffect(() => {
         function handleResize() {
@@ -326,7 +334,7 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode}/>
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode}/>
             <div id="gameContainer">
                 <div id="gamePanel">
                     {(matchInProgress || specMode.active) ?
@@ -363,9 +371,28 @@ const Game: React.FC = () => {
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
                 <div id="instructions">
-                        <h2>Instructions</h2>
-                        <div>Classic : Le pong originel</div>
-                        <div>Super : Super mode</div>
+                    <div id="gameModes">
+                        <h3>Game Modes</h3>
+                        <div>
+                            <h3>Classic</h3>
+                            <p>The original pong game from 1973</p>
+                        </div>
+                        <div>
+                            <h3>Super</h3>
+                            <p>Keep an eye on every moving objects !</p>
+                        </div>
+                    </div>
+                    <div id="controls">
+                        <h3>Controls</h3>
+                        <div>
+                            <div className="icon"><FontAwesomeIcon icon={faArrowUp} /></div>
+                            <p>Move your paddle up</p>
+                        </div>
+                        <div>
+                            <div className="icon"><FontAwesomeIcon icon={faArrowDown} /></div>
+                            <p>Move your paddle up</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
