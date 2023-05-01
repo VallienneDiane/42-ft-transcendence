@@ -30,7 +30,10 @@ interface SpecMode {
 
 interface inProgressProps {
     socket: Socket<DefaultEventsMap, DefaultEventsMap>,
-    setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>
+    setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>,
+    toggleSpecMode: (toggle: boolean, player1_login: string | null) => void,
+    // specModeActive: boolean,
+    // specMatchLogin: string | null
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
@@ -50,17 +53,21 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     //     console.log("display matchs", matchs);
     // }, [matchs])
 
+        
+    useEffect(() => {
+        setMatchs([]);
+        if (props.socket !== null) {
+            console.log("ASK FOR MATCHS");
+            props.socket.emit('Get_Matches');      
+        }
+    }, []);
+
 
     useEffect(() => {
         // triggered when receiving socket data, update match list
         if (props.socket) {
 
             props.socket.on('Match_Update', (matchUpdate: MatchState) => {
-                // console.log('match update', matchUpdate);
-                // matchs.map((match) => {
-                //     console.log(match.player1_login, matchUpdate.player1_login);
-                // })
-                
                 setMatchs(prevMatchs => {
                     const updatedMatchs = prevMatchs.map(match => {
                       if (match.player1_login === matchUpdate.player1_login) {
@@ -87,8 +94,8 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     }, [props.socket]);
 
     const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
+        props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key')),
         props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')});
-        props.setSpecMode({active: true, player1_login: event.currentTarget.getAttribute('data-key')});
     }
 
     return (
