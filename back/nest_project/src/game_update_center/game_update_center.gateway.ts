@@ -480,9 +480,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   handleMatchHistory(@MessageBody() data: matchHistoryDto, @ConnectedSocket() client: Socket) {
     this.tokenChecker(client)
     .then((user) => {
+      this.matchservice.findMatch()
+      .then(pouet => {
+        // console.log("matchos: ", pouet);
+      })
       if (user) {
         this.matchservice.matchHistory(data.userId)
         .then((matches) => {
+          // console.log("tableau : ", matches);
           client.emit("matchHistory", matches);
         })
       }

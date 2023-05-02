@@ -22,7 +22,6 @@ export default function Profile() {
     const currentUser = useParams().login;
     
     useEffect(() => {
-        console.log("loop")
         if (currentUser !== undefined){
             userService.getUserWithAvatar(currentUser)
             .then(response => {
