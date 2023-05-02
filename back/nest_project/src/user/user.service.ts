@@ -22,6 +22,7 @@ export class UserService {
      * @returns UserEntity
      */
     async create(newUser: SignUpDto): Promise<UserEntity> {
+        const avatar: AvatarEntity = await this.avatarService.create(null);
         const user: UserEntity = {
             id: undefined,
             id42: null,
@@ -38,7 +39,7 @@ export class UserService {
             twoFactorSecret: null,
             isTwoFactorEnabled: false,
             qrCode: null,
-            avatarSvg: null,
+            avatarSvg: avatar,
             requestsSend: [],
             requestsReceived: [],
             blockList: [],
@@ -47,7 +48,9 @@ export class UserService {
             wonMatches: [],
             lostMatches: [],
         }
-        return await this.usersRepository.save(user);
+        let lol = await this.usersRepository.save(user);
+        console.log("lol: ", lol);
+        return lol;
     }
     async create42(newUser: SignUp42Dto): Promise<UserEntity> {
         const avatar: AvatarEntity = await this.avatarService.create(newUser.avatarSvg);
@@ -96,15 +99,19 @@ export class UserService {
         return toReturn;
     }
     async findByIdWithAvatar(id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
-        return await this.usersRepository
+        this.usersRepository.find()
+        .then((users) => console.log("all users :", users));
+        let pouet = await this.usersRepository
             .createQueryBuilder("user")
-            .leftJoinAndSelect("user.avatarSvg", "avatar")
+            .innerJoinAndSelect("user.avatarSvg", "avatar")
             .where("user.id = :userId", {userId: id})
             .select("user.id", "id")
             .addSelect("login", "login")
             .addSelect("email", "email")
-            .addSelect("avatar.*", "avatarSvg")
+            .addSelect("avatar.avatarSvg", "avatarSvg")
             .getRawOne();
+        console.log("pouet: ", pouet);
+        return pouet;
     }
     public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});

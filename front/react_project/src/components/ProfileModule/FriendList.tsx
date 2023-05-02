@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { ContextType, useContext, useEffect, useState } from "react";
 import Axios from "../../services/caller.service";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
@@ -8,14 +8,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAddressCard, faArrowDown, faArrowUp, faBaseball, faCheck, faComment, faCommentDots, faCommentSms, faGun, faHandsBubbles, faPingPongPaddleBall, faPoo, faSpaghettiMonsterFlying, faTrashCan, faWalkieTalkie } from "@fortawesome/free-solid-svg-icons";
 import { Socket } from "socket.io-client";
 
-class FriendList extends React.Component<{socket: Socket}, {
+class FriendList extends React.Component<{}, {
     me: JwtPayload,
     friends: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[],
     fetchFriendsDone: boolean,
     askIfConnectedDone: boolean,
     develop: boolean,
 }> {
-    constructor(props:{socket: Socket}) {
+    constructor(props:{}) {
         super(props);
         this.state = {
             me: accountService.readPayload()!,
@@ -31,6 +31,8 @@ class FriendList extends React.Component<{socket: Socket}, {
         this.changeLoc = this.changeLoc.bind(this);
         this.invertDevelop = this.invertDevelop.bind(this);
     }
+    static contextType = SocketContext;
+    declare context: ContextType<typeof SocketContext>;
 
     fetchFriends() {
         Axios.get("listFriends/" + this.state.me.sub)
@@ -54,7 +56,7 @@ class FriendList extends React.Component<{socket: Socket}, {
     }
 
     unfriendHandler(e: any) {
-        this.props.socket.emit("unfriend", {friendshipId: e.currentTarget.value});
+        this.context.socket.emit("unfriend", {friendshipId: e.currentTarget.value});
     }
 
     inviteToGameHandler(e:any) {
@@ -68,7 +70,7 @@ class FriendList extends React.Component<{socket: Socket}, {
     }
 
     changeLoc(e: any) {
-        this.props.socket.emit("changeLoc", {loc: e.currentTarget.value, isChannel: false});
+        this.context.socket.emit("changeLoc", {loc: e.currentTarget.value, isChannel: false});
     }
 
     askIfConnected() {
@@ -77,7 +79,7 @@ class FriendList extends React.Component<{socket: Socket}, {
             this.state.friends.forEach((friend) => {
                 arrayToAskIfConnected.push({userId: friend.friendId});
             })
-            this.props.socket.emit("isConnected", arrayToAskIfConnected);
+            this.context.socket.emit("isConnected", arrayToAskIfConnected);
         }
         this.setState({askIfConnectedDone: true})
     }
@@ -90,7 +92,7 @@ class FriendList extends React.Component<{socket: Socket}, {
     }
 
     componentDidMount(): void {
-        this.props.socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+        this.context.socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
             let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
                 {
                     key: id,
@@ -106,16 +108,16 @@ class FriendList extends React.Component<{socket: Socket}, {
                 return (a.friendName.localeCompare(b.friendName));
             });
             this.setState({friends: newFriendList});
-            this.props.socket.emit("isConnected", [{userId: id}]);
+            this.context.socket.emit("isConnected", [{userId: id}]);
         });
 
-        this.props.socket.on("supressFriend", (friendshipId: string) => {
+        this.context.socket.on("supressFriend", (friendshipId: string) => {
             this.setState({friends: this.state.friends.filter(friend => {
                 return friend.friendshipId != friendshipId;
             })})
         });
 
-        this.props.socket.on("usersAreConnected", (userIds: string[]) => {
+        this.context.socket.on("usersAreConnected", (userIds: string[]) => {
             let newFriendList = this.state.friends;
             for (let eltData of userIds) {
                 for (let elt of newFriendList) {
@@ -129,7 +131,7 @@ class FriendList extends React.Component<{socket: Socket}, {
             this.setState({friends: newFriendList});
         });
 
-        this.props.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
+        this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
             let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
                 if (elt.friendId == user.userId) {
@@ -141,7 +143,7 @@ class FriendList extends React.Component<{socket: Socket}, {
             this.setState({friends: newFriendList});
         });
 
-        this.props.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
+        this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
             let newFriendList = this.state.friends;
             for (let elt of newFriendList) {
                 if (elt.friendId == user.userId) {
