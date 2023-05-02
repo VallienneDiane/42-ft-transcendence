@@ -48,9 +48,7 @@ export class UserService {
             wonMatches: [],
             lostMatches: [],
         }
-        let lol = await this.usersRepository.save(user);
-        console.log("lol: ", lol);
-        return lol;
+        return await this.usersRepository.save(user);
     }
     async create42(newUser: SignUp42Dto): Promise<UserEntity> {
         const avatar: AvatarEntity = await this.avatarService.create(newUser.avatarSvg);
@@ -99,9 +97,7 @@ export class UserService {
         return toReturn;
     }
     async findByIdWithAvatar(id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
-        this.usersRepository.find()
-        .then((users) => console.log("all users :", users));
-        let pouet = await this.usersRepository
+        return await this.usersRepository
             .createQueryBuilder("user")
             .innerJoinAndSelect("user.avatarSvg", "avatar")
             .where("user.id = :userId", {userId: id})
@@ -110,8 +106,6 @@ export class UserService {
             .addSelect("email", "email")
             .addSelect("avatar.avatarSvg", "avatarSvg")
             .getRawOne();
-        console.log("pouet: ", pouet);
-        return pouet;
     }
     public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});

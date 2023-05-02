@@ -2,6 +2,7 @@
 
 - image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
 - page settings : pas responsive
+- il faut que le protected route controle si le token contient un user existant dans la base de donnee
 
 ---Pour Clemence---
 
