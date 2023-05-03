@@ -152,12 +152,12 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
     fetchUsers() { // récupération de tous les users, sauf moi-même, et les users que j'ai déjà DM
         userService.getAllUsers()
         .then(response => {
-            const playload: JwtPayload = accountService.readPayload()!;
+            const payload: JwtPayload = accountService.readPayload()!;
             const users = new Map<string, string>();
             response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login)); // à revoir
             let newUserList: ISearch[] = [];
             users.forEach((login, id) => {
-                if (playload.login !== login)
+                if (payload.sub !== id)
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             });
             newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});

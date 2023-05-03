@@ -257,6 +257,7 @@ export class GameEngineService {
 		if (this.waiting.delete(this.user2.login)) {
             console.log("removed from waiting in pong engin close_the_game function");
         }
+		console.log("match ended: ", match.winner.login);
 		this.server.emit("Match_End", this.match_end_state);
 		await this.matchservice.createMatch(match);
 		// let result = await this.matchservice.findMatch();
@@ -319,7 +320,7 @@ export class GameEngineService {
 				this.update_match_state();
 			}
 			// if end of game save score and quit
-			if (this.pl1_score > 5 || this.pl2_score > 5) { /////////////////// A REMTTRE A 4 (alexi)
+			if ((this.pl1_score > 0 || this.pl2_score > 0) && !this.game_must_stop) { /////////////////// A REMTTRE A 4 (alexi)
 				this.game_must_stop = true;
 				this.close_the_game();
 				console.log("past close_the_game");

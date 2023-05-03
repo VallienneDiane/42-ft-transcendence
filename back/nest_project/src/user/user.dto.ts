@@ -7,6 +7,7 @@ import { MessagePrivateEntity } from "src/chat/messagePrivate/messagePrivate.ent
 import { MuteEntity } from "src/chat/mute/mute.entity";
 import { FriendEntity } from "../chat/friend/friend.entity";
 import { UserEntity } from "./user.entity";
+import { AvatarEntity } from "./avatar/avatar.entity";
 
 export class UserDto {
     @IsUUID() readonly id: string;
@@ -24,7 +25,7 @@ export class UserDto {
     @IsNotEmpty() @IsString() twoFactorSecret: string;
     @IsNotEmpty() @IsBoolean() isTwoFactorEnabled: boolean;
     @IsNotEmpty() @IsString() qrCode: string;
-    @IsNotEmpty() avatarSvg: string;
+    readonly avatarSvg: AvatarEntity;
     @Optional() wonMatches: Match[];
     @Optional() lostMatches: Match[];
     readonly requestsSend: FriendEntity[];
