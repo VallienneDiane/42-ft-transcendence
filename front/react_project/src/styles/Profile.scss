@@ -3,13 +3,12 @@
 #profilePage {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
 
     & aside {
         display: flex;
         flex-direction: column;
         align-items: center;
-        overflow-y: auto;
+        min-height: 500px;
         height: 100%;
         width: 30%;
         max-width: 350px;
@@ -41,7 +40,6 @@
         & #FriendManagement {
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
             gap: 20px;
             padding: 10px 0;
             width: 90%;
@@ -342,14 +340,13 @@
     & #score {
         height: 100%;
         width: 100%;
+        min-height: 500px;
         display: flex;
-        overflow-y: auto;
         flex-direction: column;
 
         & #stats {
-            overflow-y: auto;
             width: 100%;
-            min-height: 50%;
+            min-height: 200px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -364,7 +361,6 @@
         }
 
         & #history {
-            overflow-y: auto;
             width: 100%;
             min-height: 50%;
             display: flex;
