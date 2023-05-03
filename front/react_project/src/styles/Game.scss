@@ -14,13 +14,15 @@
         justify-content: center;
         
         width: 96%;
-        // max-width: 1000px;
+        // min-width: 600px;
+        // max-width: 1400px;
         // height: calc(80vw / (16 /9) + 7vh);
         height: 70%;
         
         & #gamePanel {
             width: 75%;
-            max-width: 1000px;
+            min-width: 600px;
+            max-width: 1400px;
             // border: 3px solid white;
             display: flex;
             flex-direction: column;
@@ -79,7 +81,8 @@
                     align-items: center;
     
                     & > h2 {
-                        letter-spacing: 10px;
+                        font-size: 2.5em;
+                        letter-spacing: 8px;
                     }
                     
                     & #gameButtons {
@@ -163,7 +166,8 @@
                 }
                 
                 & canvas {
-                    max-width: 1000px;
+                    min-width: 600px;
+                    max-width: 1400px;
                     border-radius: 10px;
                     background-color: var(--second-color);
                     border: solid 5px var(--third-color);
@@ -262,14 +266,24 @@
 }
 
 @media (max-width: 1200px) {
-    #gameContainer {
-        flex-direction: column;
-    }
-    #instructions {
-        & #gameModes, #controls {
-            height: 80%;
-            margin: 15px 0;
+    #Game {
+        & #gameContainer {
+            flex-direction: column;
+    
+            & #instructions {
+                width: 80%;
+                justify-content: space-around;
+                & #gameModes, #controls {
+                    flex: none;
+                    width: 40%;
+                    min-width: 250px;
+                    height: 80%;
+                    max-height: 300px;
+                    margin: 35px 0;
+                }
+            }
         }
+
     }
 }
 
