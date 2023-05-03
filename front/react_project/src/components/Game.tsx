@@ -375,7 +375,7 @@ const Game: React.FC = () => {
                         <h3>Game Modes</h3>
                         <div>
                             <h3>Classic</h3>
-                            <p>The original pong game from 1973</p>
+                            <p>The original pong game from 1972</p>
                         </div>
                         <div>
                             <h3>Super</h3>
@@ -385,11 +385,17 @@ const Game: React.FC = () => {
                     <div id="controls">
                         <h3>Controls</h3>
                         <div>
-                            <div className="icon"><FontAwesomeIcon icon={faArrowUp} /></div>
+                            <div className="icon">
+                                <FontAwesomeIcon className="arrow" icon={faArrowUp} />
+                                <div></div>
+                            </div>
                             <p>Move your paddle up</p>
                         </div>
                         <div>
-                            <div className="icon"><FontAwesomeIcon icon={faArrowDown} /></div>
+                            <div className="icon">
+                                <FontAwesomeIcon className="arrow" icon={faArrowDown} />
+                                <div></div>
+                            </div>
                             <p>Move your paddle up</p>
                         </div>
                     </div>
