@@ -526,6 +526,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
 
 export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
 
     const addFriend = () => {
@@ -534,6 +535,10 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
 
     const blockUser = () => {
         socket.emit("blockUser", {id: props.dest.id});
+    }
+
+    const proposeGame = () => {
+        socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: false}); ///// SUPER_GAME_MODE A CHANGER EN FONCTION DU TYPE DE MATCH DEMANDE
     }
 
     useEffect(() => {
@@ -556,7 +561,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
                 <ul className="paramMenu">
                     <li><NavLink to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
-                    <li>Propose a game</li>
+                    <li onClick={proposeGame}>Propose a game</li>
                     <li onClick={blockUser}>Block</li>
                 </ul>
             </div>

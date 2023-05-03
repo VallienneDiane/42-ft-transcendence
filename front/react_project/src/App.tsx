@@ -17,6 +17,7 @@ import Settings from './components/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import HomeSettings from './components/HomePageSettings';
+import PopUp from './components/PopUp';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
@@ -57,27 +58,28 @@ function App() {
 
   return (
     <div className="App">
-      <BrowserRouter >
-        <SocketContext.Provider value={{ socket, createSocket, disconnect, socketGame, createSocketGame, disconnectGame }} >
-          <Routes>
-            <Route path="/callback/"element={<Callback />}/>
-            <Route path='/homeSettings' element={ accountService.isLogged() ? <Navigate to="/"/> : (<HomeSettings/>) }/>
-            <Route element={<Layout />}>
-              <Route path='/login' element={<LoginPage />} />
-              <Route path='/signup' element={<SignupPage />} />
-              <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
-              <Route element={<ProtectedRoutes />}>
-                <Route path='/' element={<Home />} />
-                <Route path='/game' element={<Game />} />
-                <Route path='/profile' element={<Profile />} />
-                <Route path='/profile/:login' element={<Profile />} />
-                <Route path='/settings' element={<Settings />} />
-                <Route path='/chat' element={<ChatModule />} />
+      <SocketContext.Provider value={{ socket, createSocket, disconnect, socketGame, createSocketGame, disconnectGame }} >
+        <PopUp/>
+        <BrowserRouter >
+            <Routes>
+              <Route path="/callback/"element={<Callback />}/>
+              <Route path='/homeSettings' element={ accountService.isLogged() ? <Navigate to="/"/> : (<HomeSettings/>) }/>
+              <Route element={<Layout />}>
+                <Route path='/login' element={<LoginPage />} />
+                <Route path='/signup' element={<SignupPage />} />
+                <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
+                <Route element={<ProtectedRoutes />}>
+                  <Route path='/' element={<Home />} />
+                  <Route path='/game' element={<Game />} />
+                  <Route path='/profile' element={<Profile />} />
+                  <Route path='/profile/:login' element={<Profile />} />
+                  <Route path='/settings' element={<Settings />} />
+                  <Route path='/chat' element={<ChatModule />} />
+                </Route>
               </Route>
-            </Route>
-          </Routes>
-        </SocketContext.Provider>
-      </BrowserRouter>
+            </Routes>
+        </BrowserRouter>
+      </SocketContext.Provider>
     </div>
   )
 }
