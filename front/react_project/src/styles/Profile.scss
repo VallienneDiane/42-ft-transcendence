@@ -87,7 +87,7 @@
                     align-items: center;
                     width: 90%;
                     background-color: #24bdb588;
-                    border-radius: 30%;
+                    border-radius: 15px;
                     
                     & #pendingElement {
                         display: flex;
@@ -139,7 +139,7 @@
                 }
                 & #requestList {
                     background-color: #24bdb588;
-                    border-radius: 30%;
+                    border-radius: 15px;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -213,7 +213,7 @@
                         display: flex;
                         flex-direction: column;
                         align-items: center;
-                        border-radius: 15%;
+                        border-radius: 15px;
                         background-color: #24bdb588;
                         border-style: double;
                         border-color: #a4a4d1;
