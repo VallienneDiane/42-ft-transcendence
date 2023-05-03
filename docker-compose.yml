@@ -29,7 +29,7 @@ services:
     env_file:
       - .env
     volumes:
-      - back:/usr/src/app
+      - ./back:/usr/src/app
     depends_on:
       - db
 ########################################## FRONT-END REACT VITE  ############################
@@ -44,7 +44,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - front:/usr/src/app
+      - ./front:/usr/src/app
 ########################################## PGADMIN  ########################################
   # pgadmin:
   #   image: dpage/pgadmin4

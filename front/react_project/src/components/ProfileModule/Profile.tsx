@@ -12,18 +12,19 @@ import FriendList from "./FriendList";
 import PendingList from "./PendingList";
 import RequestsList from "./RequestList";
 import BlockList from "./BlockList";
+import MatchHistory from "./MatchHistory";
 
 export default function Profile() {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const navigate = useNavigate();
     const [user, setUser] = useState<User>();
     const currentUser = useParams().login;
     
     useEffect(() => {
         if (currentUser !== undefined){
-            userService.getUser(currentUser)
+            userService.getUserWithAvatar(currentUser)
             .then(response => {
-                console.log("Profile 26: user ", response.data);
                 if (response.data === "") {
                     navigate('/profile');
                 }
@@ -36,7 +37,7 @@ export default function Profile() {
         else {
             let decodedToken: JwtPayload = accountService.readPayload()!;
             const id = decodedToken.sub;
-            userService.getUser(id!)
+            userService.getUserWithAvatar(id!)
             .then(response => {
                 setUser(response.data);
             })
@@ -46,20 +47,19 @@ export default function Profile() {
         }
 
         return () => {
-            socket.off("newFriendRequestSent");
-            socket.off("newFriend");
-            socket.off("supressFriendRequest");
-            socket.off("supressFriend");
-            socket.off("newFriendRequestReceived");
-            socket.off("userIsConnected");
-            socket.off("userConnected");
-            socket.off("userDisconnected");
+            if (socket) {
+                socket.off("newFriendRequestSent");
+                socket.off("newFriend");
+                socket.off("supressFriendRequest");
+                socket.off("supressFriend");
+                socket.off("newFriendRequestReceived");
+                socket.off("userIsConnected");
+                socket.off("userConnected");
+                socket.off("userDisconnected");
+                socketGame.off("matchHistory");
+            }
         }
-    }, [currentUser])
-    
-    useEffect(() => {
-        // console.log('user', user);
-    }, [user])
+    }, [currentUser, navigate])
     
     return (
         
@@ -84,17 +84,7 @@ export default function Profile() {
                     </div>
                     ): null}
             </aside>
-            <div id="score">
-                <div id="stats">
-                    <h2>Statistics</h2>
-
-                </div>
-                <div id="history">
-                    <h2>Match History</h2>
-
-                </div>
-            </div>
-
+            {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
     )
 }

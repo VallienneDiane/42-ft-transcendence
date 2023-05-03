@@ -1,0 +1,28 @@
+---Pour Alexi---
+
+- image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
+- page settings : pas responsive
+- il faut que le protected route controle si le token contient un user existant dans la base de donnee
+
+---Pour Clemence---
+
+- a la creation d'un utilisateur, la mise a jour dans le tableau de la serach bar ne fonctionne plus
+- a la premiere fois que l'on parle a un connard, il ne recoit pas l'infobulle, mais l'envoyeur la recoit
+- les newDM -> bizarre, n'apparait pas
+
+---Pour BouleMan---
+
+- des matchs sont lancees en trop !
+
+---Pour Diane---
+
+- image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
+
+---Pour Nicolas---
+
+- 
+
+
+---A faire---
+
+les invitation en game
