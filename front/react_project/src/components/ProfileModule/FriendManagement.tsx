@@ -134,6 +134,7 @@ export default function FriendManagement() {
     useEffect(() => {
         fetchPending();
         fetchRequests();
+        fetchBlocked();
     }, []);
 
     useEffect(() => {
@@ -238,6 +239,10 @@ export default function FriendManagement() {
             })
             setRequests(newRequests);
         });
+
+        socket.on("listBlock", (data: {id: string, name: string}[]) => {
+            setBlocked(data);
+        })
 
         return () => {
             socket.off("newFriendRequestSent");
