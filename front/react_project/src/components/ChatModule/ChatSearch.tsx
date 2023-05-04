@@ -161,6 +161,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             });
             newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
+            // console.log("fetchUsers", newUserList);
             this.setState({users: newUserList});
             this.context.socket.emit('myDM');
             this.setState(() => {
@@ -270,9 +271,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             let newFiltered: ISearch[] = this.compileFiltered(this.state.users, nextState);
             this.setState({filtered: newFiltered});
         })
-           
-        this.context.socket.on('userConnected', () => {
-            this.fetchUsers()});
+
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
             let newList: ISearch[] = this.state.users.filter(
                 elt => {return (elt.id != room.id)}
@@ -297,6 +296,12 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             this.props.handleHistory(newHistory);
             this.props.changeLoc({id: id, name: login, isChannel: false});
         });
+    }
+
+    componentDidUpdate(): void {
+        this.context.socket.off('userConnected');
+        this.context.socket.on('userConnected', (user: {userId: string, userLogin: string}) => {
+            this.fetchUsers()});
     }
 
     componentWillUnmount(): void {
