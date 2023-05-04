@@ -445,9 +445,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.private_space.push(private_room);
     if (this.waiting_on_match.has(body.target))
     {
-      this.server.to(this.get_socket_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false});
+      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false})
+      //this.server.to(this.get_socket_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false});
     }
     else {
+      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true})
       this.server.to(this.get_socket_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true});
     }
 
