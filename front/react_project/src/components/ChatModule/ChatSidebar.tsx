@@ -348,8 +348,8 @@ class InviteUser extends React.Component<{dest: IDest}, {
     }
 
     displayList(event: any) {
-        console.log("displayList")
-        console.log(this.state.users);
+        // console.log("displayList")
+        // console.log(this.state.users);
         this.setState({ userToInvite: event.target.value });
         if (event.target.value) {
             const filteredUsers: {id: string, name: string}[] = 
@@ -363,7 +363,7 @@ class InviteUser extends React.Component<{dest: IDest}, {
     
     componentDidMount(): void {
         this.context.socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
-            console.log("listUsersChann")
+            // console.log("listUsersChann")
             const members: {user: {id: string, login: string}, status: string}[] = list.map(member => (member));
             userService.getAllUsers()
             .then(response => {

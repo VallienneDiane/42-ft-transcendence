@@ -43,10 +43,12 @@ class ChannelDMList extends React.Component<{}, {
 
     initList() {
         this.context.socket.emit('myChannels');
-        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => { 
+        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => {
+            // console.log("listMyChannels")
             this.setState({ channels: channels }) }); 
         this.context.socket.emit('myDM');
-        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
+        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+            // console.log("listMyDM")
             let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             strs.forEach((elt) => {
                 listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
@@ -72,7 +74,7 @@ class ChannelDMList extends React.Component<{}, {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
-            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM
+            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM, && change.userName === channel.loc
                 sorted.set(user.userId, {userName: user.userLogin, connected: true, waitingMsg: change.waitingMsg});
             else
                 return;
@@ -112,7 +114,7 @@ class ChannelDMList extends React.Component<{}, {
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(room.login);
             if (change == undefined) {
-                sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
+                sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: false});
             }
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
@@ -167,7 +169,7 @@ class ChannelDMList extends React.Component<{}, {
     render() {
         let displayDM: boolean = false;
         if (this.state.dms.length !== 0)
-        displayDM = true;
+            displayDM = true;
         return (
             <div id="channelListWrapper">
             <h2>Channels</h2>
@@ -185,7 +187,7 @@ class ChannelDMList extends React.Component<{}, {
                         return (
                         <li key={id}>
                             <button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})} className={dm.waitingMsg ? "waitingMsg" : ""}>
-                                {dm.userName}
+                                { dm.userName }
                                 { dm.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  }
                             </button>
                             <div className={dm.connected? "circle online" : "circle offline"}></div>
