@@ -554,9 +554,12 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
             <div className="navRight">
                 <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
-                    <li><NavLink to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
+                    <li><NavLink id="navlink" to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
-                    <li>Propose a game</li>
+                    <li>Propose a game<br></br>
+                        <button>normal</button>
+                        <button>super</button>
+                    </li>
                     <li onClick={blockUser}>Block</li>
                 </ul>
             </div>
