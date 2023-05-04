@@ -1,13 +1,13 @@
 import * as yup from 'yup';
-import { VerifyCodeForm } from "../models";
+import { VerifyCodeForm } from "../../models";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { yupResolver } from '@hookform/resolvers/yup';
 import ReactSwitch from 'react-switch';
-import { accountService } from "../services/account.service";
+import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { User } from "../models";
-import { userService } from "../services/user.service";
+import { User } from "../../models";
+import { userService } from "../../services/user.service";
 
 const schema = yup.object().shape({
     code: yup

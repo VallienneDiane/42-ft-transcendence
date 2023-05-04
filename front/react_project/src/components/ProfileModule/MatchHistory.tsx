@@ -43,6 +43,10 @@ export default function MatchHistory(props: {userId: string}) {
             setMatchLost(loose);
             setHistory(data);
         })
+
+        return () => {
+            socketGame.off("matchHistory");
+        }
     }, [props.userId])
 
     return (

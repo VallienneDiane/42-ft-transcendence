@@ -8,11 +8,8 @@ import { JwtPayload } from "jsonwebtoken";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { SocketContext } from "../context";
-import FriendList from "./FriendList";
-import PendingList from "./PendingList";
-import RequestsList from "./RequestList";
-import BlockList from "./BlockList";
 import MatchHistory from "./MatchHistory";
+import FriendManagement from "./FriendManagement";
 
 export default function Profile() {
     const {socket} = useContext(SocketContext);
@@ -77,10 +74,7 @@ export default function Profile() {
                 {currentUser === undefined ? (
                     <div id="FriendManagement">
                         {/* <SearchUserBar/> */}
-                        {socket && <FriendList socket={socket} />}
-                        {socket && <PendingList />}
-                        {socket && <RequestsList />}
-                        {socket && <BlockList />}
+                        {socket && <FriendManagement />}
                     </div>
                     ): null}
             </aside>
