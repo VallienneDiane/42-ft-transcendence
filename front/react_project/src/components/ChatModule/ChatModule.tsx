@@ -11,11 +11,11 @@ import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 
-class ChannelDMList extends React.Component<{}, {
+class ChannelDMList extends React.Component<{ dest: string }, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
     dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[], 
     me: JwtPayload}> {
-    constructor(props: {}) {
+    constructor(props: { dest: string }) {
         super(props);
         this.state = {
             channels: [],
@@ -74,7 +74,7 @@ class ChannelDMList extends React.Component<{}, {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
-            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM, && change.userName === channel.loc
+            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM
                 sorted.set(user.userId, {userName: user.userLogin, connected: true, waitingMsg: change.waitingMsg});
             else
                 return;
@@ -113,8 +113,11 @@ class ChannelDMList extends React.Component<{}, {
                 sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(room.login);
-            if (change == undefined) {
+            if (change == undefined && room.login === this.props.dest) {
                 sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: false});
+            }
+            else if (change == undefined && room.login !== this.props.dest) {
+                sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
             }
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
@@ -248,7 +251,7 @@ export default class ChatModule extends React.Component<{}, {
                     <div className="card">
                          <div id="chatLeft">
                             <SearchChat handleHistory={this.handleHistory} changeLoc={this.changeLoc} />
-                            <ChannelDMList />
+                            <ChannelDMList dest={this.state.dest.name}/>
                             <CreateChannel />
                         </div>
                         <div id="chatRight">
