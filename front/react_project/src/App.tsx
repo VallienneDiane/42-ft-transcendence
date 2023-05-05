@@ -13,7 +13,7 @@ import Layout from './components/Layout'
 import Game from './components/Game'
 import Callback from './components/Callback'
 import { io, Socket } from 'socket.io-client';
-import Settings from './components/Settings'
+import Settings from './components/SettingsModule/Settings'
 import VerifyCode2fa from './components/VerifyCode2fa'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import HomeSettings from './components/HomePageSettings';

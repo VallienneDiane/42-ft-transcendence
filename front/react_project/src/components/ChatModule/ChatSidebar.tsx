@@ -348,8 +348,8 @@ class InviteUser extends React.Component<{dest: IDest}, {
     }
 
     displayList(event: any) {
-        console.log("displayList")
-        console.log(this.state.users);
+        // console.log("displayList")
+        // console.log(this.state.users);
         this.setState({ userToInvite: event.target.value });
         if (event.target.value) {
             const filteredUsers: {id: string, name: string}[] = 
@@ -363,7 +363,7 @@ class InviteUser extends React.Component<{dest: IDest}, {
     
     componentDidMount(): void {
         this.context.socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
-            console.log("listUsersChann")
+            // console.log("listUsersChann")
             const members: {user: {id: string, login: string}, status: string}[] = list.map(member => (member));
             userService.getAllUsers()
             .then(response => {
@@ -537,8 +537,11 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
         socket.emit("blockUser", {id: props.dest.id});
     }
 
-    const proposeGame = () => {
-        socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: false}); ///// SUPER_GAME_MODE A CHANGER EN FONCTION DU TYPE DE MATCH DEMANDE
+    const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
+        if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: false});
+        else if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: true});
     }
 
     useEffect(() => {
@@ -559,9 +562,12 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
             <div className="navRight">
                 <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
-                    <li><NavLink to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
+                    <li><NavLink id="navlink" to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
-                    <li onClick={proposeGame}>Propose a game</li>
+                    <li>Propose a game<br></br>
+                        <button onClick={proposeGame} data-type="normal">normal</button>
+                        <button onClick={proposeGame} data-type="super">super</button>
+                    </li>
                     <li onClick={blockUser}>Block</li>
                 </ul>
             </div>
