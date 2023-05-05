@@ -262,13 +262,27 @@
                                 color: rgb(13, 119, 19);
                                 opacity: 80%;
                             }
-                            & #inviteToGame {
-                                color: rgb(228, 16, 16);
+                            & #checkProfileButton {
+                                color: rgb(216, 7, 188);
                                 opacity: 80%;
                             }
-                            & #checkProfileButton {
-                                color: rgb(7, 63, 216);
-                                opacity: 80%;
+                        }
+
+                        & #invite{
+                            display: flex;
+                            align-items: center;
+                            flex-wrap: wrap;
+                            gap: 10px;
+                            font-size: larger;
+                            & .iconAction{
+                                color: rgb(26, 45, 219);
+                            }
+                            & > button{
+                                border:#8BC34A;
+                                border-radius: 15px;
+                                border-style: groove;
+                                background-color: rgb(26, 45, 219);
+                                padding: 3px;
                             }
                         }
                     }
