@@ -11,6 +11,7 @@ import SearchUserBar from "./SearchUserBar"
 import { SocketContext } from "./context"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowDown, faArrowUp, faGear } from "@fortawesome/free-solid-svg-icons"
+import { useLocation } from "react-router"
 // import { faUp, faDown } from '@fortawesome/free-solid-svg-icons';
 
 interface ball {
@@ -59,6 +60,7 @@ interface SpecMode {
 
 
 const Game: React.FC = () => {
+    const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let clearGame: boolean = false;
     // const [clearGame, setClearGame] = useState<boolean>(false);
@@ -80,7 +82,7 @@ const Game: React.FC = () => {
     const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
     let specModeActive: boolean = false;
     let specMatchLogin: string | null = null;
-
+    
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
         console.log("TOGGLE SPEC MODE FUNCTION")
         specModeActive = toggle;
@@ -92,13 +94,13 @@ const Game: React.FC = () => {
         // On click on 'start' button, start the game
         // setTimer(true); ////////////// TO DELETE
         // countDownDiv.current!.classList.add('zoom')
-
+        
         if (socketGame !== null && !matchInProgress) {
             socketGame.emit('Public_Matchmaking', { super_game_mode: false });
             setWaitMatch(true);
         }
     }
-
+    
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socketGame !== null && !matchInProgress) {
@@ -106,7 +108,7 @@ const Game: React.FC = () => {
             setWaitMatch(true);
         }
     }
-
+    
     const informReady = () => {
         // On click on 'ready' button, inform server that the player is ready
         if (socketGame !== null) {
@@ -116,8 +118,23 @@ const Game: React.FC = () => {
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
     
-
-
+    // useEffect(() => {
+    //     let { from } = location.state;
+    //     if (from != null && from === "invitation") {
+        //         console.log("Je viens depuis invite");
+    //     }
+    // }, [from])
+    
+    useEffect(() => {
+        console.log(location.state);
+        if (location.state != null && location.state.from === "invitation") {
+            console.log("Je viens d'invitation");
+            setWaitMatch(false);
+            setMatchInProgress(true);
+            setButtonReady(true);
+        }
+    }, [])
+    
     // countdown handler
     useEffect(() => {
         if (timer === true && countDownDiv.current !== undefined) {

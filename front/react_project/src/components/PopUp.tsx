@@ -3,6 +3,7 @@ import "../styles/PopUp.scss"
 
 import React, { useState, useEffect } from 'react'
 import { SocketContext } from "./context"
+import { useNavigate } from "react-router"
 
 interface invitation {
     for: string,
@@ -12,23 +13,33 @@ interface invitation {
 
 
 const PopUp: React.FC = (props) => {
+    const navigate = useNavigate();
     const {socketGame} = React.useContext(SocketContext);
-    const [asker, setAsker] = useState<string>();
+    const [asker, setAsker] = useState<string | null>();
 
+    useEffect(() => {
+        if (socketGame) {
+            socketGame.emit("Ask_Invitation");
+        }
+    }, [])
+    
     useEffect(() => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
-            socketGame.on('Invitation', (invitation: invitation) => {
+            socketGame.on("Invitation", (invitation: invitation) => {
                 if (invitation.send === true) {
-                    console.log('Invitation Received', invitation);
+                    console.log("Invitation Received", invitation);
                     setAsker(invitation.by);
                 }
             });
+
         }
     }, [socketGame]);
-
+    
     const acceptInvitation = () => {
-        
+        socketGame.emit("Private_Matchmaking", {target: asker});
+        setAsker(null);
+        navigate("/game", {state : {from : "invitation"}});
     }
 
     const declineInvitation = () => {
