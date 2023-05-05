@@ -3,10 +3,6 @@ import "../styles/PopUp.scss"
 
 import React, { useState, useEffect } from 'react'
 import { SocketContext } from "./context"
-import { Socket } from 'socket.io-client'
-import { DefaultEventsMap } from "@socket.io/component-emitter";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircle } from "@fortawesome/free-solid-svg-icons";
 
 interface invitation {
     for: string,
@@ -17,19 +13,31 @@ interface invitation {
 
 const PopUp: React.FC = (props) => {
     const {socketGame} = React.useContext(SocketContext);
+    const [asker, setAsker] = useState<string>();
 
     useEffect(() => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
             socketGame.on('Invitation', (invitation: invitation) => {
                 console.log('Invitation Received', invitation);
+                setAsker(invitation.by);
             });
         }
     }, [socketGame]);
 
+    const acceptInvitation = () => {
+        
+    }
+
+    const declineInvitation = () => {
+
+    }
+
     return (
-        <div id="PopUp">
-            
+        <div id="PopUp" className={asker == null ? "hide" : ""}>
+            <div>{asker} invites you to play a game</div>
+            <div id="accept" onClick={acceptInvitation}>Accept</div>
+            <div id="decline" onClick={declineInvitation}>Decline</div>
         </div>
     )
 }
