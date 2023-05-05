@@ -59,7 +59,6 @@ function App() {
   return (
     <div className="App">
       <SocketContext.Provider value={{ socket, createSocket, disconnect, socketGame, createSocketGame, disconnectGame }} >
-        <PopUp/>
         <BrowserRouter >
             <Routes>
               <Route path="/callback/"element={<Callback />}/>
