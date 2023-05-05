@@ -21,6 +21,7 @@ export default function FriendManagement() {
     const [developRequest, setDevelopRequest] = useState<boolean>(false);
     const [blocked, setBlocked] = useState<{id: string, name: string}[]>([]);
     const [developBlock, setDevelopBlock] = useState<boolean>(false);
+    const [bugReactHook, setBugReactHook] = useState<boolean>(false);
 
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
@@ -63,6 +64,14 @@ export default function FriendManagement() {
 
     const inviteToGameHandler = (e: any) => {
         console.log("invite To Game");
+    }
+
+    const inviteNormal = (e: any) => {
+
+    }
+
+    const inviteSuper = (e: any) => {
+
     }
 
     const invertDevelopFriend = () => {
@@ -139,6 +148,7 @@ export default function FriendManagement() {
 
     useEffect(() => {
         socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+            console.log("new friend: ", friendshipId, id, name);
             let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
                 {
                     key: id,
@@ -160,6 +170,7 @@ export default function FriendManagement() {
             setRequests(requests.filter((elt) => {
                 return elt.friendshipId != friendshipId;
             }));
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("supressFriend", (friendshipId: string) => {
@@ -175,6 +186,7 @@ export default function FriendManagement() {
             setRequests(requests.filter((elt) => {
                 return elt.friendshipId != friendshipId;
             }));
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("usersAreConnected", (userIds: string[]) => {
@@ -189,6 +201,7 @@ export default function FriendManagement() {
                 }
             }
             setFriends(newFriendList);
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
@@ -201,9 +214,11 @@ export default function FriendManagement() {
                 }
             }
             setFriends(newFriendList);
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
+            console.log("disconnected: ", user.userLogin);
             let newFriendList = friends;
             for (let elt of newFriendList) {
                 if (elt.friendId == user.userId) {
@@ -213,6 +228,7 @@ export default function FriendManagement() {
                 }
             }
             setFriends(newFriendList);
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("newFriendRequestSent", (friendshipId: string, friendId: string, friendName: string) => {
@@ -224,12 +240,14 @@ export default function FriendManagement() {
             setRequests(requests.filter((elt) => {
                 return elt.friendshipId != friendshipId;
             }));
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("supressFriendRequest", (friendshipId: string) => {
             setPendings(pendings.filter((elt) => {
                 return elt.friendshipId != friendshipId;
             }))
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
@@ -238,10 +256,12 @@ export default function FriendManagement() {
                 return a.friendName.localeCompare(b.friendName);
             })
             setRequests(newRequests);
+            setBugReactHook(!bugReactHook);
         });
 
         socket.on("listBlock", (data: {id: string, name: string}[]) => {
             setBlocked(data);
+            setBugReactHook(!bugReactHook);
         })
 
         return () => {
@@ -252,10 +272,11 @@ export default function FriendManagement() {
             socket.off("newFriendRequestReceived");
             socket.off("userIsConnected");
             socket.off("userConnected");
+            socket.off("usersAreConnected");
             socket.off("userDisconnected");
             socket.off("listBlock");
         }
-    }, [friends, pendings, requests])
+    }, [friends, pendings, requests, bugReactHook])
 
     return (
         <div id="FriendManagement">
@@ -274,22 +295,24 @@ export default function FriendManagement() {
                                 <div className="name">{elt.friendName}</div>
                                 <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                             </span>
-                        <span id="friendOptions">
-                            <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
-                                <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
-                            </NavLink>
-                            <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={changeLoc}>
-                                <NavLink id="chatButton" to={`/chat`}>
-                                    <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
+                            <span id="friendOptions">
+                                <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
+                                    <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
                                 </NavLink>
-                            </button>
-                            {elt.isConnected && <button value={elt.friendId} data-hover-text="invite to play" id="inviteToGame" onClick={inviteToGameHandler}>
+                                <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={changeLoc}>
+                                    <NavLink id="chatButton" to={`/chat`}>
+                                        <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
+                                    </NavLink>
+                                </button>
+                                <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={unfriendHandler}>
+                                    <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
+                                </button>
+                            </span>
+                            {elt.isConnected && <span id="invite">
                                 <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
-                            </button>}
-                            <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={unfriendHandler}>
-                                <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
-                            </button>
-                        </span>
+                                <button value={elt.friendName} onClick={inviteNormal}>normal</button>
+                                <button value = {elt.friendName} onClick={inviteSuper}>super</button>
+                            </span>}
                         </li>
                         ))}
                 </ul>}
