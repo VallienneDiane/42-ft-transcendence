@@ -2,7 +2,7 @@ import React, { ContextType } from "react";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
-import { IMessage, IDest, IChannel } from "./Chat_models";
+import { IMessage, IDest, IChannel, IMessageReceived } from "./Chat_models";
 import { CreateChannel } from "./ChatNewChannel";
 import { Header } from "./ChatSidebar";
 import SearchChat from "./ChatSearch";
@@ -11,22 +11,21 @@ import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 
-class ChannelDMList extends React.Component<{ dest: string }, {
-    channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
-    dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[], 
-    me: JwtPayload}> {
-    constructor(props: { dest: string }) {
-        super(props);
-        this.state = {
-            channels: [],
-            dms: [],
-            me: accountService.readPayload()!,
-        };
+class ChannelDMList extends React.Component<{ 
+    dest: string, 
+    privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] 
+}, { me: JwtPayload, channels: {channel: IChannel, status: string}[], dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] }> {
+    constructor(props: { 
+        dest: string, 
+        privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[]
+    }) {
+        super(props); 
+        this.state = { me: accountService.readPayload()!, channels: [], dms: this.props.privateMsgs };
         this.changeLoc = this.changeLoc.bind(this);
-        this.initList = this.initList.bind(this);
         this.checkOnline = this.checkOnline.bind(this);
         this.checkOffline = this.checkOffline.bind(this);
         this.checkNewMsg = this.checkNewMsg.bind(this);
+        this.setMyChannels = this.setMyChannels.bind(this);
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
@@ -39,21 +38,6 @@ class ChannelDMList extends React.Component<{ dest: string }, {
             tmpDM[index].waitingMsg = false;
             this.setState({ dms: tmpDM });
         }
-    }
-
-    initList() {
-        this.context.socket.emit('myChannels');
-        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => {
-            // console.log("listMyChannels")
-            this.setState({ channels: channels }) }); 
-        this.context.socket.emit('myDM');
-        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-            // console.log("listMyDM")
-            let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
-            strs.forEach((elt) => {
-                listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
-            });
-            this.setState({ dms: listDM }) });
     }
     
     checkNewMsg() {
@@ -101,8 +85,47 @@ class ChannelDMList extends React.Component<{ dest: string }, {
         })
     }
 
+    setMyChannels() {
+        this.context.socket.emit('myChannels');
+        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => {
+            this.setState({ channels: channels }) }); 
+
+        this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
+            let nextState: {channel: IChannel, status: string}[] = [...this.state.channels, chann];
+            nextState.sort((a, b) => {
+                if (a.status == "god" && b.status != "god")
+                    return (-1)
+                if (a.status == "op") {
+                    if (b.status == "god")
+                        return (1)
+                    if (b.status == "normal")
+                        return (-1) 
+                }
+                if (a.status == "normal" && b.status != "normal")
+                    return (1)
+                return (a.channel.name.localeCompare(b.channel.name))
+            });
+            this.setState({channels: nextState});
+        })
+    
+        this.context.socket.on('channelLeaved', (chann: IChannel) => {
+            let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
+                (elt: {channel: IChannel}) => {return (elt.channel.id != chann.id)}
+                );
+            this.setState({channels: nextState});
+        })
+
+        this.context.socket.on('channelDestroy', (channelId: string) => {
+            let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
+                (elt: {channel: IChannel}) => {return (elt.channel.id != channelId)}
+                );
+            this.setState({channels: nextState});
+        })
+    }
+
     componentDidMount(): void {
-        this.initList();
+        this.setMyChannels();
+
         this.checkOnline();
         this.checkOffline();
         this.checkNewMsg();
@@ -123,50 +146,17 @@ class ChannelDMList extends React.Component<{ dest: string }, {
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
             this.setState({dms: nextState});
         });
-
-        this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
-            let nextState: {channel: IChannel, status: string}[] = [...this.state.channels, chann];
-            nextState.sort((a, b) => {
-                if (a.status == "god" && b.status != "god")
-                    return (-1)
-                if (a.status == "op") {
-                    if (b.status == "god")
-                        return (1)
-                    if (b.status == "normal")
-                        return (-1) 
-                }
-                if (a.status == "normal" && b.status != "normal")
-                    return (1)
-                return (a.channel.name.localeCompare(b.channel.name))
-            });
-            this.setState({channels: nextState});
-        })
-
-        this.context.socket.on('channelLeaved', (chann: IChannel) => {
-            let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
-                (elt: {channel: IChannel}) => {return (elt.channel.id != chann.id)}
-                );
-            this.setState({channels: nextState});
-        })
-
-        this.context.socket.on('channelDestroy', (channelId: string) => {
-            let nextState: {channel: IChannel, status: string}[] = this.state.channels.filter(
-                (elt: {channel: IChannel}) => {return (elt.channel.id != channelId)}
-                );
-            this.setState({channels: nextState});
-        })
     }
     
     componentWillUnmount(): void {
         this.context.socket.off('listMyChannels');
-        this.context.socket.off('listMyDM');
+        this.context.socket.off("channelJoined");
+        this.context.socket.off("channelLeaved");
+        this.context.socket.off("channelDestroy");
         this.context.socket.off('checkNewDM');
         this.context.socket.off('pingedBy');
         this.context.socket.off("userConnected");
         this.context.socket.off("userDisconnected");
-        this.context.socket.off("channelJoined");
-        this.context.socket.off("channelLeaved");
-        this.context.socket.off("channelDestroy");
     }
 
     render() {
@@ -209,28 +199,17 @@ class ChannelDMList extends React.Component<{ dest: string }, {
 
 export default class ChatModule extends React.Component<{}, {
     dest: IDest,
-    history: IMessage[]
+    history: IMessage[],
+    dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[]
 }> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {id: '', name: '', isChannel: true}, history: []};
-        this.changeLoc = this.changeLoc.bind(this);
+        this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: []};
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
-        this.handleHistory = this.handleHistory.bind(this);
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
     
-    componentDidMount(): void {
-        if (this.context.socket != null) {
-            this.context.socket.emit("whereIam");
-        }
-    }
-
-    changeLoc(newDest: IDest) {
-        this.setState({ dest: newDest });
-    }
-
     handleNewMessageOnHistory(newMessage: IMessage) {
         const save: IMessage[] = this.state.history!;
         save.reverse();
@@ -240,8 +219,43 @@ export default class ChatModule extends React.Component<{}, {
         });
     }
 
-    handleHistory(newHistory: IMessage[]) {
-        this.setState({ history: newHistory });
+    componentDidMount() {
+        if (this.context.socket != null) {
+            this.context.socket.emit("whereIam");
+
+            this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
+                let newHistory: IMessage[] = [];
+                for (let elt of array) {
+                    newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
+                }
+                this.setState({ history: newHistory });
+                this.setState({ dest: {id: blop.channel.id!, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status}});
+            }); // récupération du status ici !!
+    
+            this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
+                let newHistory: IMessage[] = [];
+                for (let elt of messages) {
+                    newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
+                }
+                this.setState({ history: newHistory });
+                this.setState({ dest: {id: id, name: login, isChannel: false}});
+            });
+
+            this.context.socket.emit('myDM');
+            this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+                // console.log("listMyDM")
+                let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+                strs.forEach((elt) => {
+                    listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
+                });
+                this.setState({ dms: listDM }) });
+        }
+    }
+
+    componentWillUnmount() {
+        this.context.socket.off('newLocChannel');
+        this.context.socket.off('newLocPrivate');
+        this.context.socket.off('listMyDM');
     }
 
     render() {
@@ -250,8 +264,8 @@ export default class ChatModule extends React.Component<{}, {
                 <div id="chat_page">
                     <div className="card">
                          <div id="chatLeft">
-                            <SearchChat handleHistory={this.handleHistory} changeLoc={this.changeLoc} />
-                            <ChannelDMList dest={this.state.dest.name}/>
+                            <SearchChat privateMsgs={this.state.dms} />
+                            <ChannelDMList dest={this.state.dest.name} privateMsgs={this.state.dms} />
                             <CreateChannel />
                         </div>
                         <div id="chatRight">
