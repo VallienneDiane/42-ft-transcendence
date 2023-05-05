@@ -19,8 +19,10 @@ const PopUp: React.FC = (props) => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
             socketGame.on('Invitation', (invitation: invitation) => {
-                console.log('Invitation Received', invitation);
-                setAsker(invitation.by);
+                if (invitation.send === true) {
+                    console.log('Invitation Received', invitation);
+                    setAsker(invitation.by);
+                }
             });
         }
     }, [socketGame]);

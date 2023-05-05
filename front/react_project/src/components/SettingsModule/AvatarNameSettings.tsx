@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { JwtPayload } from "jsonwebtoken";
-import { accountService } from "../services/account.service";
-import { userService } from "../services/user.service";
-import { LoginSettingsForm } from "../models";
+import { accountService } from "../../services/account.service";
+import { userService } from "../../services/user.service";
+import { LoginSettingsForm } from "../../models";
 import { useForm } from "react-hook-form";
 
 const AvatarNameSettings: React.FC = () => {
@@ -113,12 +113,12 @@ const AvatarNameSettings: React.FC = () => {
         <div id="settings">
             <div id="name">
                 <form onSubmit={handleSubmit(loginSubmit)}>
-                        <h2>Change your login </h2>
-                            <input className="form_element"
-                                value={login}
-                                type="text"
-                                onChange={onChangeLogin}
-                            />
+                    <h2>Change your login </h2>
+                    <input className="form_element"
+                        value={login}
+                        type="text"
+                        onChange={onChangeLogin}
+                    />
                     <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }

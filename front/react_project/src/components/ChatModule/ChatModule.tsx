@@ -11,11 +11,11 @@ import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 
-class ChannelDMList extends React.Component<{}, {
+class ChannelDMList extends React.Component<{ dest: string }, {
     channels: {channel: IChannel, status: string}[], // le status sert juste à trier ma liste ici
     dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[], 
     me: JwtPayload}> {
-    constructor(props: {}) {
+    constructor(props: { dest: string }) {
         super(props);
         this.state = {
             channels: [],
@@ -43,10 +43,12 @@ class ChannelDMList extends React.Component<{}, {
 
     initList() {
         this.context.socket.emit('myChannels');
-        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => { 
+        this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => {
+            // console.log("listMyChannels")
             this.setState({ channels: channels }) }); 
         this.context.socket.emit('myDM');
-        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => { 
+        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+            // console.log("listMyDM")
             let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             strs.forEach((elt) => {
                 listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
@@ -111,7 +113,10 @@ class ChannelDMList extends React.Component<{}, {
                 sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(room.login);
-            if (change == undefined) {
+            if (change == undefined && room.login === this.props.dest) {
+                sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: false});
+            }
+            else if (change == undefined && room.login !== this.props.dest) {
                 sorted.set(room.login, {userName: room.login, userId: room.id, connected: connected, waitingMsg: true});
             }
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
@@ -167,7 +172,7 @@ class ChannelDMList extends React.Component<{}, {
     render() {
         let displayDM: boolean = false;
         if (this.state.dms.length !== 0)
-        displayDM = true;
+            displayDM = true;
         return (
             <div id="channelListWrapper">
             <h2>Channels</h2>
@@ -185,7 +190,7 @@ class ChannelDMList extends React.Component<{}, {
                         return (
                         <li key={id}>
                             <button onClick={() => this.changeLoc({loc: dm.userId, isChannel: false})} className={dm.waitingMsg ? "waitingMsg" : ""}>
-                                {dm.userName}
+                                { dm.userName }
                                 { dm.waitingMsg ? <FontAwesomeIcon id="msg" icon={faCommentDots} /> : ""  }
                             </button>
                             <div className={dm.connected? "circle online" : "circle offline"}></div>
@@ -246,7 +251,7 @@ export default class ChatModule extends React.Component<{}, {
                     <div className="card">
                          <div id="chatLeft">
                             <SearchChat handleHistory={this.handleHistory} changeLoc={this.changeLoc} />
-                            <ChannelDMList />
+                            <ChannelDMList dest={this.state.dest.name}/>
                             <CreateChannel />
                         </div>
                         <div id="chatRight">

@@ -2,8 +2,6 @@
 
 #chat_page {
 	display: flex;
-	align-items: center;
-	justify-content: space-around;
 
 	& .card {
 		display: flex;
@@ -14,6 +12,7 @@
 		width: 70%;
 		height: 85%;
 		min-width: 450px;
+		min-height: 450px;
 		border-radius: 10px;
 		border: 1px solid rgb(214, 214, 214);
 		box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
@@ -309,7 +308,7 @@
 				right: 0;
 				width: 270px;
 				height: 100%;
-				background: #000000d7;
+				background: #13364dd8;
 				transition: transform 0.5s ease-in-out;
 				transform: translateX(100%);
 				&.show {
@@ -334,6 +333,8 @@
 								background: transparent;
 							}
 							& .paramMenu {
+								display: flex;
+								flex-direction: column;
 								background: transparent;
 								width: 100%;
 								font-size: 17px;
@@ -345,10 +346,34 @@
 									& a {
 										background: transparent;
 									}
+
+									& > button {
+										padding: 0.7ch;
+										margin: 0.7ch;
+										margin-top: 1ch;
+										font-family: 'Courier New', Courier, monospace;
+										border-color: rgb(214, 214, 214);
+										border-radius: 15px;
+										border-style: groove;
+										color: rgb(214, 214, 214);
+									}
 									&:hover {
 										background:#ddd;
 										color:#000000;
 										cursor: pointer;
+										& #navlink{
+											color:#000000;
+										}
+										& > button{
+											color: #000000;
+											background-color: #989e90;
+											&:hover {
+												background-color: #016d06;
+												font-style: oblique;
+												color:#000000;
+												cursor: pointer;
+											}
+										}
 									}
 								}
 								& .memberList {
