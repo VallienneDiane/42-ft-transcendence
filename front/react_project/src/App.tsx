@@ -51,6 +51,7 @@ function App() {
   function disconnect() {
     console.log("avant", socket);
     if (socket) {
+      console.log("before disconnect", socket.id);
       socket.disconnect();
       setSocket(null!);
     }

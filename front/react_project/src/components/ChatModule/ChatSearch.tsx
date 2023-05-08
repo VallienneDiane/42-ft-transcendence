@@ -108,7 +108,7 @@ class SearchElement extends React.Component<{popupAction: any, handleClose: any,
     }
 }
 
-class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
+class SearchChat extends React.Component<{ privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] }, {
     text: string,
     popupIsOpen: boolean,
     channelToUnlock: ISearch,
@@ -117,7 +117,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
     filtered: ISearch[],
     isDropdown: boolean}
     > {
-    constructor(props:{handleHistory: any, changeLoc: any}) {
+    constructor(props: { privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] }) {
         super(props);
         this.state = {
             text: '',
@@ -134,6 +134,7 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
         this.displayList = this.displayList.bind(this);
         this.resetFiltered = this.resetFiltered.bind(this);
         this.onClickPopup = this.onClickPopup.bind(this);
+        this.setChannels = this.setChannels.bind(this);
     }
     ref = createRef<HTMLUListElement>();
     static contextType = SocketContext;
@@ -141,12 +142,6 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
 
     onClickPopup(chan: ISearch) {
         this.setState({ popupIsOpen: !this.state.popupIsOpen, channelToUnlock: chan });
-    }
-    
-    closeSearchList(e: any) {
-        if (this.ref.current && !this.ref.current.contains(e.target)) {
-            this.setState({ isDropdown: !this.state.isDropdown });
-        }
     }
 
     fetchUsers() { // récupération de tous les users, sauf moi-même, et les users que j'ai déjà DM
@@ -157,23 +152,55 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
             response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login)); // à revoir
             let newUserList: ISearch[] = [];
             users.forEach((login, id) => {
-                if (payload.sub !== id)
+                let ok: boolean = true;
+                if (payload.sub == id)
+                    ok = false;
+                else {
+                    for (let elt of this.props.privateMsgs) {
+                        if (elt.userId == id)
+                            ok = false;
+                    }
+                }   
+                if (ok)
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             });
             newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
             // console.log("fetchUsers", newUserList);
             this.setState({users: newUserList});
-            this.context.socket.emit('myDM');
-            this.setState(() => {
-                const filtered: ISearch[] = this.compileFiltered(newUserList, this.state.channels);
-                return { filtered };
-            })
         })
         .catch(error => {
             console.log(error);
         })
     }
-    
+
+    showSearchList(event: any) {
+        this.setState({ isDropdown: !this.state.isDropdown });
+        this.displayList(event);
+    }
+
+    displayList(event: any) {
+        this.setState({ text: event.target.value });
+
+        if (event.target.value) {
+            this.setState(() => {
+                const filteredUsers: ISearch[] =
+                this.state.users.filter((user: ISearch) =>
+                    user.name.startsWith(event.target.value));
+                const filteredChannels: ISearch[] =
+                this.state.channels.filter((channel: ISearch) =>
+                    channel.name.startsWith(event.target.value));
+                const filtered = this.compileFiltered(filteredUsers, filteredChannels);
+                return { filtered };
+            });
+        }
+        else {
+            this.setState(() => {
+                const filtered: ISearch[] = this.compileFiltered(this.state.users, this.state.channels);
+                return { filtered };
+            })
+        }
+    }
+
     compileFiltered(users: ISearch[], channels: ISearch[]) {
         let newFiltered: ISearch[] = [];
 
@@ -193,44 +220,18 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
         return filtered;
     }
 
-    showSearchList(event: any) {
-        this.setState({ isDropdown: !this.state.isDropdown });
-        this.displayList(event);
-    }
-
-    displayList(event: any) {
-        this.setState({ text: event.target.value });
-
-        if (event.target.value) {
-            this.setState(() => {
-                const filteredUsers: ISearch[] =
-                this.state.users.filter((user: ISearch) =>
-                    user.name.startsWith(event.target.value));
-                const filteredChannels: ISearch[] =
-                this.state.channels.filter((channel: ISearch) =>
-                    channel.name.startsWith(event.target.value));
-
-                const filtered = this.compileFiltered(filteredUsers, filteredChannels);
-                return { filtered };
-            });
-        }
-        else {
-            this.setState(() => {
-                const filtered: ISearch[] = this.compileFiltered(this.state.users, this.state.channels);
-                return { filtered };
-            })
-        }
-    }
-
     resetFiltered() {
         this.setState({text: '', filtered: []});
         this.setState({ isDropdown: !this.state.isDropdown });
     }
 
-    componentDidMount(): void {
-        document.addEventListener("mousedown", this.closeSearchList);
-        this.fetchUsers();
-
+    closeSearchList(e: any) {
+        if (this.ref.current && !this.ref.current.contains(e.target)) {
+            this.setState({ isDropdown: !this.state.isDropdown });
+        }
+    }
+    
+    setChannels() {
         this.context.socket.emit('listChannel');
         this.context.socket.on('listChannel', (strs: IChannel[]) => {
             let newChanList: {id: string, name: string, isChannel: boolean, password: boolean, isClickable: boolean}[] = [];
@@ -238,26 +239,12 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
                 newChanList.push({id: str.id!, name: str.name, password: str.password, isChannel: true, isClickable: true});
             newChanList.sort((a, b) => {return a.name.localeCompare(b.name);})
             this.setState({channels: newChanList});
-            let newFiltered = this.compileFiltered(this.state.users, newChanList);
-            this.setState({filtered: newFiltered});
         });
-        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-            let newList: ISearch[] = [];
-            for (let user of this.state.users) {
-                let ok: boolean = true;
-                for (let elt of strs) {
-                    if (elt.userId == user.id)
-                        ok = false;
-                }
-                if (ok)
-                    newList.push(user);
-            }
-            this.setState({users: newList});
-        });
+
         this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
             let nextState: ISearch[] = this.state.channels.filter(
                 elt => {return (elt.id != chann.channel.id)}
-                );
+            );
             this.setState({channels: nextState});
         })
 
@@ -268,52 +255,41 @@ class SearchChat extends React.Component<{handleHistory: any, changeLoc: any}, {
                 return (a.name.localeCompare(b.name))
             });
             this.setState({channels: nextState});
-            let newFiltered: ISearch[] = this.compileFiltered(this.state.users, nextState);
-            this.setState({filtered: newFiltered});
         })
+
+        this.context.socket.on('channelDestroy', (channelId: string) => {
+            let nextState: ISearch[] = this.state.channels.filter(
+                elt => {return (elt.id != channelId)}
+            );
+            this.setState({channels: nextState});
+        })
+    }
+
+    componentDidMount(): void {
+        document.addEventListener("mousedown", this.closeSearchList);
+        this.setChannels();
+        this.fetchUsers();
 
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}) => { 
             let newList: ISearch[] = this.state.users.filter(
                 elt => {return (elt.id != room.id)}
-                );
+            );
             this.setState({users: newList});
         });
 
-        this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
-            let newHistory: IMessage[] = [];
-            for (let elt of array) {
-                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
-            }
-            this.props.handleHistory(newHistory);
-            this.props.changeLoc({id: blop.channel.id, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status});
-        }); // récupération du status ici !!
-
-        this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
-            let newHistory: IMessage[] = [];
-            for (let elt of messages) {
-                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
-            }
-            this.props.handleHistory(newHistory);
-            this.props.changeLoc({id: id, name: login, isChannel: false});
-        });
-    }
-
-    componentDidUpdate(): void {
-        this.context.socket.off('userConnected');
         this.context.socket.on('userConnected', (user: {userId: string, userLogin: string}) => {
-            this.fetchUsers()});
-    }
-
+            // this.fetchUsers() a finir !!! verifier si le user est dans mes dm, si oui ne pas l'ajouter a users
+            });
+        }
+        
     componentWillUnmount(): void {
         document.removeEventListener("mousedown", this.closeSearchList);
         this.context.socket.off('listChannel');
-        this.context.socket.off('listMyDM');
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
-        this.context.socket.off('newUserConnected');
+        this.context.socket.off("channelDestroy");
         this.context.socket.off('checkNewDM');
-        this.context.socket.off('newLocChannel');
-        this.context.socket.off('newLocPrivate');
+        this.context.socket.off('userConnected');
     }
 
     render() {
