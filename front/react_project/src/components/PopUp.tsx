@@ -33,6 +33,10 @@ const PopUp: React.FC = (props) => {
                 }
             });
 
+            socketGame.on("Players", () => {
+                console.log('Player info received');
+            })
+
         }
     }, [socketGame]);
     
@@ -48,9 +52,11 @@ const PopUp: React.FC = (props) => {
 
     return (
         <div id="PopUp" className={asker == null ? "hide" : ""}>
-            <div>{asker} invites you to play a game</div>
-            <div id="accept" onClick={acceptInvitation}>Accept</div>
-            <div id="decline" onClick={declineInvitation}>Decline</div>
+            <div className="container">
+                <div>{asker} invites you to play a game</div>
+                <div id="accept" onClick={acceptInvitation}>Accept</div>
+                <div id="decline" onClick={declineInvitation}>Decline</div>
+            </div>
         </div>
     )
 }

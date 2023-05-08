@@ -2,6 +2,7 @@
 
 #Game {
     width: 100%;
+    min-height: 1000px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -196,6 +197,7 @@
 
             & #gameModes, #controls {
                 flex: 1;
+                max-width: 350px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
