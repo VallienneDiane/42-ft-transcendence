@@ -16,6 +16,7 @@
 ---Pour Diane---
 
 - image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
+- lorsqu'on logout quelqu'un, la console nous signale : Axios.post('/auth/logout') --> error 404, not found
 
 ---Pour Nicolas---
 
