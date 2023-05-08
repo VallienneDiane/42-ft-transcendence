@@ -5,7 +5,6 @@
   box-sizing: border-box;
   margin:0;
   padding:0;
-  font-family: 'MuseoModerno', cursive;
   user-select: none;
 }
 
@@ -23,8 +22,9 @@ button:hover {
 }
 
 .App {
+  font-family: 'Rubik','Times New Roman', Times, serif;
   background-color: var(--prim-color);
-  background: url(./assets/trianglyfy5.png) no-repeat center center fixed;
+  background: url(./assets/Background3.jpg) no-repeat center center fixed;
   background-size: cover;
   display: flex;
   align-items: center;
