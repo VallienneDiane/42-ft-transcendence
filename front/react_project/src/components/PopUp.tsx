@@ -31,6 +31,9 @@ const PopUp: React.FC = (props) => {
                     console.log("Invitation Received", invitation);
                     setAsker(invitation.by);
                 }
+                if (invitation.send === false) {
+                    console.log("Invitation not send", invitation);
+                }
             });
 
             socketGame.on("Players", () => {

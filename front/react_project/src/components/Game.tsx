@@ -82,6 +82,7 @@ const Game: React.FC = () => {
     const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
     let specModeActive: boolean = false;
     let specMatchLogin: string | null = null;
+    const [winner, setWinner] = useState<string>();
     
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
         console.log("TOGGLE SPEC MODE FUNCTION")
@@ -233,6 +234,7 @@ const Game: React.FC = () => {
                 setPlayerReady(false);
                 setButtonReady(false);
                 setPlayers(null);
+                setWinner(matchEnd.winner);
                 setSpecMode({active: false, player1_login: null});
                 ready = false;
                 clearGame = true;
@@ -373,6 +375,7 @@ const Game: React.FC = () => {
                             null
                             :
                             <div id="gameSelector">
+                                {winner != null ? <div id="winner">Winner: {winner} !</div>:null}
                                 <h2>Select your game</h2>
                                 <div id="gameButtons">
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>

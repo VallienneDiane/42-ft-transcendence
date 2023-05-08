@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=MuseoModerno:wght@200&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Alumni+Sans+Inline+One:wght@200&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
 
 :root {
     
@@ -33,12 +34,20 @@
     --text-color: #ffe5db;
     --ball-color: #ff5a5f; */
 
-    /* 5 */
+    /* 5
     --prim-color: #0b3954;
     --second-color: #1374b2;
     --second-color: #33469c77;
     --third-color: #21c787e1;
     --fourth-color: #13b4c0e1;
     --text-color: #fff6fa;
-    --ball-color: #f6f7ffe1; 
+    --ball-color: #f6f7ffe1;  */
+
+    /* 5 */
+    --prim-color: #36b3fb;
+    --second-color: rgb(207,73,125);
+    --third-color: rgb(155,159,201);
+    --fourth-color: #13b4c0e1;
+    --text-color: rgb(73, 61, 91);
+    --ball-color: #ffe5d1fe; 
 }
