@@ -59,7 +59,7 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
 
     return (
         <div className="popup">
-            <div className="box" ref={ref}>
+            <div className="boxPassword" ref={ref}>
                 <h1>{props.channelName}</h1>
                 <form onSubmit={handlerJoinPass}>
                     <input type="password" placeholder="Enter channel pass here..." value={pass} onChange={handlePass} />

@@ -3,7 +3,7 @@ import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { IMessage, IDest, IChannel, IMessageReceived } from "./Chat_models";
-import { CreateChannel } from "./ChatNewChannel";
+import { Popup } from "./ChatNewChannel";
 import { Header } from "./ChatSidebar";
 import SearchChat from "./ChatSearch";
 import { SendMessageForm, MessageList } from "./ChatMessages";
@@ -200,16 +200,22 @@ class ChannelDMList extends React.Component<{
 export default class ChatModule extends React.Component<{}, {
     dest: IDest,
     history: IMessage[],
-    dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[]
+    dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[],
+    popupIsOpen: boolean
 }> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: []};
+        this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: [], popupIsOpen: false};
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
+        this.onClickPopup = this.onClickPopup.bind(this);
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
-    
+
+    onClickPopup() {
+        this.setState({ popupIsOpen: !this.state.popupIsOpen});
+    }
+
     handleNewMessageOnHistory(newMessage: IMessage) {
         const save: IMessage[] = this.state.history!;
         save.reverse();
@@ -263,10 +269,13 @@ export default class ChatModule extends React.Component<{}, {
             return (
                 <div id="chat_page">
                     <div className="card">
+                        {this.state.popupIsOpen && <Popup handleClose={this.onClickPopup} />}   
                          <div id="chatLeft">
                             <SearchChat privateMsgs={this.state.dms} />
                             <ChannelDMList dest={this.state.dest.name} privateMsgs={this.state.dms} />
-                            <CreateChannel />
+                            <div id="createChannel">
+                                <p className="btn" onClick={this.onClickPopup}>+ New Channel</p>
+                            </div>
                         </div>
                         <div id="chatRight">
                             <Header dest={this.state.dest}/>
