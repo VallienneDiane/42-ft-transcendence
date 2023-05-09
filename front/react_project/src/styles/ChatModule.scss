@@ -131,7 +131,6 @@
 					margin-left: -2rem;
 					opacity: 25%;
 					color: var(--text-color);
-					background-color: #c8c3dd77;
 				}
 				& ul {
 					color: var(--text-color);
@@ -303,173 +302,116 @@
 				z-index: 9999;
 				top: 0;
 				right: 0;
-				width: 270px;
+				width: 220px;
 				height: 100%;
-				background: #13364dd8;
+				background: rgba(233, 230, 240, 0.95);
 				transition: transform 0.5s ease-in-out;
 				transform: translateX(100%);
 				&.show {
 					transform: translateX(0%);
-					box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
-					
+					box-shadow: 2px 3px 10px 1px rgba(99, 99, 99, 0.2);	
 					& .sidebarContent {
 						width: 100%;
-						background: transparent;
 						overflow-y: auto;
 						& .closeIcon {
 							padding: 1rem;
 							font-size: 20px;
-							background: transparent;
+							color: var(--third-color);
 						}
 						& .navRight {
-							background: transparent;
 							text-align: end;
-							width: 100%;
-							& > h1 {
+							& h1 {
 								padding: 0.5rem 1rem;
-								background: transparent;
+								font-weight: bolder;
 							}
 							& .paramMenu {
 								display: flex;
 								flex-direction: column;
-								background: transparent;
-								width: 100%;
-								font-size: 17px;
 								& > li {
-									width: 100%;
 									padding: 0.4rem 1rem;
-									background: transparent;
-									border-bottom: 2px solid rgb(214, 214, 214);
-									& a {
-										background: transparent;
-									}
-
+									border-bottom: 2px solid rgb(202, 202, 202);
 									& > button {
-										padding: 0.7ch;
-										margin: 0.7ch;
-										margin-top: 1ch;
-										font-family: 'Courier New', Courier, monospace;
-										border-color: rgb(214, 214, 214);
-										border-radius: 15px;
-										border-style: groove;
-										color: rgb(214, 214, 214);
+										padding: 2px 15px 2px 15px;
+										margin-left: 0.7ch;
+										margin-top: 2px;
+										border-radius: 10px;
+										background-color: #dbb8d9e1;
+										&:hover {
+											background-color: var(--third-color);
+											font-style: oblique;
+											color: white;
+										}
 									}
 									&:hover {
-										background:#ddd;
-										color:#000000;
+										background: #33469c4f;
 										cursor: pointer;
 										& #navlink{
-											color:#000000;
-										}
-										& > button{
-											color: #000000;
-											background-color: #989e90;
-											&:hover {
-												background-color: #016d06;
-												font-style: oblique;
-												color:#000000;
-												cursor: pointer;
-											}
+											background: transparent;
 										}
 									}
 								}
 								& .memberList {
 									display: flex;
 									flex-direction: column;
-									background-color: #b9cbce;
-									padding: 0.3rem 1.5rem;
+									background-color: #33469c1a;
+									padding: 0.3rem 1rem;
 									& > li {
 										display: flex;
 										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
-										background: transparent;
-										& div {
-											background: transparent;
-										}
 										& .iconStatus {
-											background: transparent;
-											width: 15px;
-											padding-left: 6px;
+											width: 13px;
+											padding-left: 7px;
 											opacity: 70%;
-										}
-										& button {
-											background: transparent;
-											&:hover {
-												font-weight: bolder;
-												color: #0f1a83;
-											}
 										}
 									}
 								}
 								& .memberButton {
-									background: transparent;
 									position: relative;
 									& .iconAction {
-										background: transparent;
 										width: 15px;
 										padding-left: 12px;
 										opacity: 70%;
 										&:hover {
-											// outline: none;
-											// width: 20px;
-											color: #016d06;
-											// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+											color: var(--third-color);
 										}
 									}
 									&:hover::before {
-										color: rgb(2, 129, 214);
+										color: var(--third-color);
 										font-weight: bold;
 										content: attr(data-hover-text);
 										position: absolute;
 										z-index: 10;
-										top: -1rem;
-										right: 10px;
-										// margin-bottom: 1rem;
-										background-color: rgba(184, 179, 179, 0.3);
-										padding: 0.1rem 0.4rem;
+										top: -26px;
+										right: 0px;
+										padding: 0.1rem 0.6rem;
+										background-color: rgba(255, 255, 255, 0.815);
+										border-radius: 6px;
 									}
-									& .mute {
+								}
+								& .mute {
+									display: flex;
+									flex-direction: column;
+									align-items: end;
+									&:hover {
+										cursor: initial;
+									}
+									& div {
 										display: flex;
-										flex-direction: column;
-										background: transparent;
-										&:hover {
-											background: rgba(223, 223, 223, 0.95);
-											color: var(--text-color);
-											cursor: initial;
+										align-items: center;
+										padding-left: 15px;
+										& button {
+											padding:0 0.2rem;
+											margin: 0 0.2rem;
+											&:hover {
+												color: var(--third-color);
+											}
 										}
-										& div {
-											display: flex;
-											justify-content: space-between;
-											background: transparent;
-											align-items: center;
-											& button {
-												// font-size: 2rem;
-												background: transparent;
-												padding:0 0.2rem;
-												margin: 0 0.2rem;
-												border-radius: 100%;
-												// box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .6);
-											}
-											& span {
-												width: 1.8rem;
-												font-size: 1.4rem;
-												font-weight: bold;
-												background: transparent;
-											}
-											& .muteButton {
-												color: var(--text-color);
-												width: 25%;
-												font-size: 1rem;
-												// font-size: 18px;
-												margin: 3px 0 5px 0;
-												// padding: 3px 0;
-												background-color:#b9cbce;
-												border-radius: 50px;
-												position: relative;
-												z-index: 1;
-												overflow: hidden;
-											}
+										& span {
+											width: 1.8rem;
+											font-size: 1.4rem;
+											font-weight: bold;
 										}
 									}
 								}
@@ -477,12 +419,10 @@
 									display: flex;
 									align-items: center;
 									justify-content: center;
-									background-color: #b9cbce;
 									padding: 0.5rem 1.5rem;
 									& input {
 										width: 100%;
-										background: rgb(238, 238, 238);
-										color: rgb(77, 77, 77);
+										background: #c1bbd877;
 										padding: 0.3rem 2rem 0.3rem 1rem;
 										border-radius: 2rem;
 										border: none;
@@ -492,21 +432,18 @@
 								& .invite {
 									display: flex;
 									flex-direction: column;
-									background-color: #b9cbce;
+									background-color: #33469c1a;
 									& ul {
 										padding: 0 1.5rem 0.3rem 1.5rem;
-										background: transparent;
 										& li {
 											display: flex;
 											justify-content: space-between;
 											text-align: start;
 											font-size: 15px;
-											background: transparent;
 											& button {
-												background: transparent;
 												&:hover {
 													font-weight: bolder;
-													color: #0f1a83;
+													color: var(--third-color);
 												}
 											}
 										}
@@ -515,25 +452,32 @@
 								& .settingList {
 									display: flex;
 									flex-direction: column;
-									background-color: #b9cbce;
-									width: 100%;
+									background-color: #33469c1a;
 									padding: 0.5rem 0;
 									& > li {
 										display: flex;
 										flex-direction: row;
 										align-items: center;
 										justify-content: space-between;
-										background: transparent;
 										font-size: 15px;
-										width: 100%;
 										padding: 0.3rem 1.5rem;
-										// border-bottom: 1px solid rgb(217, 223, 243);
+										& > button {
+											padding: 2px 15px 2px 15px;
+											margin-top: 2px;
+											border-radius: 10px;
+											background-color: #dbb8d9e1;
+											&:hover {
+												background-color: var(--third-color);
+												font-style: oblique;
+												color: white;
+											}
+										}
 									}
 									& .inputChannel {
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: #b0c1c4;
+										background: #c1bbd877;
 										width: 60%;
 										padding: 0.2rem 0.5rem;
 										border-radius: 0.5rem;
@@ -542,21 +486,14 @@
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: #b0c1c4;
+										background: #c1bbd877;
 										width: 100%;
 										padding: 0.2rem 0.5rem;
 										border-radius: 0.5rem;
 									}
-									& button {
-										background: transparent;
-										color: #088f03;
-										font-weight: bold;
-										font-size: 17px;
-									}
 								}
 								& .outChannel {
 									color: red;
-									background: transparent;
 								}	
 							}
 						}
@@ -657,7 +594,7 @@
 					& input {
 						width: 100%;
 						background-color: #c8c3dd77;
-						color: black;
+						color: var(--text-color);
 						border-radius: 0.5rem;
 						padding: 0.7rem 3rem 0.7rem 1rem;
 						margin: 0 1.5rem;
@@ -671,11 +608,9 @@
 						width: 1.3rem;
 						height: 2rem;
 						margin-left: -4rem;
-						opacity: 40%;
-						background-color: transparent;
+						opacity: 23%;
 						& .svgSend {
 							height: 70%;
-							background: rgb(238, 238, 238);
 						}
 					}
 				}
@@ -686,5 +621,7 @@
 
 .logError {
 	color: red;
+	font-size: 13px;
+	// margin-right: 5px;
   }
   
