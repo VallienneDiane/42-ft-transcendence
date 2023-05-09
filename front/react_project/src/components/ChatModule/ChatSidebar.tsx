@@ -158,8 +158,8 @@ function MuteFor(props: {user: string, dest: IDest, handleClose: () => void}) {
                             <span>{minutes}</span>m
                         <button value="minute, +" onClick={handleClick} onMouseDown={handleMouse} onMouseUp={handleMouse}>+</button>
                     </div>
-                    <button className="muteButton" onClick={mute}>Save</button>
                 </div>
+                <button className="muteButton" onClick={mute}>Save</button>
             </li>
         </React.Fragment>
     )
