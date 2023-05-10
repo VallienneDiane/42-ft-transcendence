@@ -11,7 +11,8 @@
 
 ---Pour BouleMan---
 
-- des matchs sont lancees en trop !
+////- des matchs sont lancees en trop !
+fait.
 
 ---Pour Diane---
 
@@ -25,4 +26,44 @@
 
 ---A faire---
 
-les invitation en game
+////les invitation en game
+fait pour le back reste a tester
+
+
+
+bug sur le jeu :
+
+	-numero 1 :
+		.joueur 1 click sur un mod de jeu
+		.joueur 2 click sur le meme mod de jeu ils sont match
+		.un des deux joueur quitte la page ou rafraichit
+		! l'autre joueur a toujours le message ready on top of the game selection message
+
+	-numero 2:
+		.joueur 1 click sur un mod de jeu
+		.joueur 2 click sur le meme mod de jeu ils sont match
+		.joueur 1 click ready, il a donc le message game will start second_loop
+		.joueur 2 rafraichit la page ou se deconnect
+		! joueur 1 voie le message ready on top of the game selection message
+
+	-numero 3:
+		.joueur 1 click sur un mod de jeu
+		.joueur 2 click sur le meme mod de jeu ils sont match
+		.joueur 1 click ready
+		.joueur 1 click sur setting
+		.joueur 1 revient sur game
+		! joueur 1 revient sur la selection des matchs
+		! si je joueur 2 click sur ready le match commence mais le joueur 1 voie les boutons au dessus du match
+
+	-numero 4:
+		.joueur 1 click sur un mod de jeu
+		.joueur 2 click sur le meme mod de jeu ils sont match
+		.joueur 1 click ready
+		.joueur 1 click sur setting
+		.joueur 1 revient sur game
+		! joueur 1 revient sur la selection des matchs
+		.joueur 1 click sur un mod de jeu il voie donc le already on match message
+		! si je joueur 2 click sur ready le match commence mais le joueur 1 ne voie rien et est toujours bloquer sur le already on match
+
+
+
