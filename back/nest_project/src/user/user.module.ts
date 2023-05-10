@@ -5,6 +5,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "src/auth/auth.module";
 import { AuthService } from "src/auth/auth.service";
 import { JwtStrategy } from "../auth_strategies/jwt.strategy";
+import { AvatarModule } from "./avatar/avatar.module";
 import { UserController } from "./user.controller";
 import { UserEntity } from "./user.entity";
 import { UserService } from "./user.service";
@@ -20,6 +21,7 @@ import { UserService } from "./user.service";
             secret: process.env.SECRET, 
             signOptions: { expiresIn: '1d' },
         }),
+        AvatarModule,
     ],
     controllers: [UserController],
     providers: [UserService, JwtStrategy, AuthService],
