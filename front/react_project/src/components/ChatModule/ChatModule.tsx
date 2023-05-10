@@ -226,7 +226,7 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     componentDidMount() {
-        if (this.context.socket != null) {
+        if (this.context.socket !== null) {
             this.context.socket.emit("whereIam");
 
             this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
