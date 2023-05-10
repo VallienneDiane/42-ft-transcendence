@@ -10,10 +10,11 @@ const ProtectedRoutes = () => {
    
     useEffect(() => {
         if (token !== null && socket === null && socketGame === null) {
+            console.log("socket");
             createSocket();
             createSocketGame();
         }
-    })
+    }, [])
         
     return accountService.isLogged() ? <Outlet/> : <Navigate to="/login" replace state={{ from: location }}/>;
 }

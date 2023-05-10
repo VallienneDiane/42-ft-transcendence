@@ -68,6 +68,7 @@ export class ChatService {
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
         let newUser = roomHandler.addUser(user.id, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
+        this.goBackToGeneral(client);
         if (newUser) {
             chatNamespace.sockets.forEach( (socket) => {
                 socket.emit('userConnected', {userId: user.id, userLogin: user.login});
