@@ -3,7 +3,7 @@ import { SocketContext } from "../context";
 import { useForm } from 'react-hook-form';
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
-import { IDest, IChannel, ISearch } from "./Chat_models";
+import { IDest, IChannel } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faBroom, faCommentSlash, faEllipsisVertical, faFeather, faKiwiBird, faMagnifyingGlass, faRightFromBracket, faUser, faUserGroup, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
 import { NavLink } from "react-router-dom";

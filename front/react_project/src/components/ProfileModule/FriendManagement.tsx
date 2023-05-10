@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCommentDots, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 
 export default function FriendManagement() {
@@ -280,25 +280,24 @@ export default function FriendManagement() {
 
     return (
         <div id="FriendManagement">
-            {friends.length > 0 && <div id="friend">
-                <div id="titleFriend">
+            {friends.length > 0 && <div>
+                <div className="title">
                     <h3>My friend{friends.length > 1 && "s"}</h3>
-                    <button id="developButton" onClick={invertDevelopFriend}>
-                        {developFriend  ?   <FontAwesomeIcon icon={faArrowUp} />
-                                        :   <FontAwesomeIcon icon={faArrowDown} />}
+                    <button className="developButton" onClick={invertDevelopFriend}>
+                        {developFriend  ?   <FontAwesomeIcon icon={faCaretUp} />
+                                        :   <FontAwesomeIcon icon={faCaretDown} />}
                 </button>
                 </div>
-                {developFriend && <ul id="friendList">
+                {developFriend && <ul className="list">
                     {friends.map((elt) => (
-                        <li id="friendElement" key={elt.key}>
-                            <span id="friendInfo">
-                                <div className="name">{elt.friendName}</div>
+                        <li className="element" key={elt.key}>
+                            <span>
+                                <NavLink to={`/profile/${elt.friendId}`}>
+                                    <div className="name">{elt.friendName}</div>
+                                </NavLink>
                                 <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                             </span>
-                            <span id="friendOptions">
-                                <NavLink id="checkProfileButton" data-hover-text="check profile" to={`/profile/${elt.friendId}`}>
-                                    <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
-                                </NavLink>
+                            <span>
                                 <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={changeLoc}>
                                     <NavLink id="chatButton" to={`/chat`}>
                                         <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
@@ -317,22 +316,19 @@ export default function FriendManagement() {
                         ))}
                 </ul>}
             </div>}
-            {pendings.length > 0 && <div id="pending">
-                <div id="titlePending">
-                    <h3>
-                        My pending request{pendings.length > 1 && "s"}
-                    </h3>
-                    <button id="developButton" onClick={invertDevelopPending}>
-                        {developPending ? <FontAwesomeIcon icon={faArrowUp} />
-                                        : <FontAwesomeIcon icon={faArrowDown} />}
+            {pendings.length > 0 && <div>
+                <div className="title">
+                    <h3>My pending request{pendings.length > 1 && "s"}</h3>
+                    <button className="developButton" onClick={invertDevelopPending}>
+                        {developPending ? <FontAwesomeIcon icon={faCaretUp} />
+                                        : <FontAwesomeIcon icon={faCaretDown} />}
                     </button>
                 </div>
-                {developPending && <ul id="pendingList">
+                {developPending && <ul className="list">
                     {pendings.map((elt) => (
-                        <li id="pendingElement" key={elt.friendId}>
-                            <span className="name">{elt.friendName}</span>
-                            <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
-                                <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        <li className="element" key={elt.friendId}>
+                            <NavLink to={`/profile/${elt.friendId}`}>
+                                <span className="name">{elt.friendName}</span>
                             </NavLink>
                             <button value={elt.friendshipId} onClick={cancelHandler} id="cancelRequestButton">
                                 <FontAwesomeIcon className="iconAction" icon={faCancel} />
@@ -341,19 +337,19 @@ export default function FriendManagement() {
                     ))}
                 </ul>}
             </div>}
-            {requests.length > 0 && <div id="request">
-                <div id="titleRequest">
+            {requests.length > 0 && <div>
+                <div className="title">
                     <h3>Request{requests.length > 1 && "s"} I received</h3>
-                    <button id="developButton" onClick={invertDevelopRequest}>
-                        {developRequest ? <FontAwesomeIcon icon={faArrowUp} />
-                                        : <FontAwesomeIcon icon={faArrowDown} />}
+                    <button className="developButton" onClick={invertDevelopRequest}>
+                        {developRequest ? <FontAwesomeIcon icon={faCaretUp} />
+                                        : <FontAwesomeIcon icon={faCaretDown} />}
                     </button>
                 </div>
-                {developRequest && <ul id = "requestList">
+                {developRequest && <ul className="list">
                     {requests.map((elt) => (
-                        <li id="requestElement" key={elt.friendshipId}><span className="name">{elt.friendName}</span>
-                            <NavLink id="checkProfileButton" to={`/profile/${elt.friendId}`}>
-                                <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        <li className="element" key={elt.friendshipId}>
+                            <NavLink to={`/profile/${elt.friendId}`}>
+                                <span className="name">{elt.friendName}</span>
                             </NavLink>
                             <button value={elt.friendshipId} onClick={acceptHandler} id="acceptFriendButton">
                                 <FontAwesomeIcon className="iconAction" icon={faThumbsUp} />
@@ -365,22 +361,19 @@ export default function FriendManagement() {
                     ))}
                 </ul>}
             </div>}
-            {blocked.length > 0 && <div id="block">
-                <div id="titleBlock">
-                    <h3>
-                        User{blocked.length > 1 && "s"} I blocked
-                    </h3>
-                    <button id="developButton" onClick={invertDevelopBlock}>
-                        {developBlock   ? <FontAwesomeIcon icon={faArrowUp} />
-                                        : <FontAwesomeIcon icon={faArrowDown} />}
+            {blocked.length > 0 && <div>
+                <div className="title">
+                    <h3>User{blocked.length > 1 && "s"} I blocked</h3>
+                    <button className="developButton" onClick={invertDevelopBlock}>
+                        {developBlock   ? <FontAwesomeIcon icon={faCaretUp} />
+                                        : <FontAwesomeIcon icon={faCaretDown} />}
                     </button>
                 </div>
-                {developBlock && <ul id="blockList">
+                {developBlock && <ul className="list">
                     {blocked.map((elt, id) => (
-                        <li id="blockElement" key={id}>
-                            <span className="name">{elt.name}</span>
-                            <NavLink id="checkProfileButton" to={`/profile/${elt.id}`}>
-                                <FontAwesomeIcon className="iconAction" icon={faAddressCard} />
+                        <li className="element" key={id}>
+                            <NavLink to={`/profile/${elt.id}`}>
+                                <span className="name">{elt.name}</span>
                             </NavLink>
                             <button id="unblockButton" value={elt.id} onClick={unblockEvent}>
                                 <FontAwesomeIcon className="iconAction" icon={faPeace} />

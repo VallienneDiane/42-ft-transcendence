@@ -10,7 +10,6 @@ import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
-import { Socket } from "socket.io-client";
 
 class ChannelDMList extends React.Component<{ 
     dest: string, 
@@ -209,6 +208,7 @@ export default class ChatModule extends React.Component<{}, {
         this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: [], popupIsOpen: false};
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.onClickPopup = this.onClickPopup.bind(this);
+        this.initList = this.initList.bind(this);
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
@@ -227,44 +227,47 @@ export default class ChatModule extends React.Component<{}, {
         });
     }
 
+    initList() {
+        this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
+            let newHistory: IMessage[] = [];
+            for (let elt of array) {
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
+            }
+            this.setState({ history: newHistory });
+            this.setState({ dest: {id: blop.channel.id!, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status}});
+        }); // récupération du status ici !!
+
+        this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
+            let newHistory: IMessage[] = [];
+            for (let elt of messages) {
+                newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
+            }
+            this.setState({ history: newHistory });
+            this.setState({ dest: {id: id, name: login, isChannel: false}});
+        });
+
+        this.context.socket.emit('myDM');
+        this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
+            console.log("listMyDM")
+            let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            strs.forEach((elt) => {
+                listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
+            });
+            this.setState({ dms: listDM })
+        });
+    }
+
     componentDidMount() {
         this.previousContext = this.context;
         if (this.context.socket !== null) {
-            console.log("blop");
             this.context.socket.emit("whereIam");
-            this.previousContext = null;
+            this.initList();
         }
     }
 
     componentDidUpdate() {
         if (this.previousContext !== this.context) {
-            console.log("prune")
-            this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
-                let newHistory: IMessage[] = [];
-                for (let elt of array) {
-                    newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
-                }
-                this.setState({ history: newHistory });
-                this.setState({ dest: {id: blop.channel.id!, name: blop.channel.name, isChannel: true, channel: blop.channel, status: blop.status}});
-            }); // récupération du status ici !!
-    
-            this.context.socket.on('newLocPrivate', (id: string, login: string, messages: IMessageReceived[]) => {
-                let newHistory: IMessage[] = [];
-                for (let elt of messages) {
-                    newHistory.push({id: elt.date.toString(), content: elt.content, senderName: elt.senderName, senderId: elt.senderId})
-                }
-                this.setState({ history: newHistory });
-                this.setState({ dest: {id: id, name: login, isChannel: false}});
-            });
-
-            this.context.socket.emit('myDM');
-            this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-                // console.log("listMyDM")
-                let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
-                strs.forEach((elt) => {
-                    listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
-                });
-                this.setState({ dms: listDM }) });
+            this.initList();
         }
         this.previousContext = this.context;
     }

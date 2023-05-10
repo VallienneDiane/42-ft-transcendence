@@ -521,9 +521,9 @@
 			& #messageList {
 				display: flex;
 				flex-direction: column-reverse;
-				height: 80%;
+				height: 85%;
 				background-color: #c8c3dd77;
-				padding: 1.5rem 1.5rem 1.5rem 1rem;
+				padding: 1.5rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
@@ -581,7 +581,7 @@
 
 			& #sendMessage {
 				display: flex;
-				height: 100px;
+				height: 90px;
 				padding: 1.3rem;
 				& .sendMessageForm {
 					display: flex;

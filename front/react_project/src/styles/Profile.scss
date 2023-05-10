@@ -3,6 +3,7 @@
 #profilePage {
     display: flex;
     flex-direction: row;
+    margin-top: 25px;
 
     & aside {
         display: flex;
@@ -11,8 +12,6 @@
         width: 30%;
         max-width: 350px;
         height: fit-content;
-        // min-height: fit-content;
-        // max-height: 95%;
         border-radius: 20px;
         background-color:  rgba(255, 255, 255, 0.719);
         box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
@@ -35,14 +34,12 @@
             border-bottom: 1px solid var(--second-color);
             & h1 {
                 width: 75%;
-                // margin: 0 15px;
                 text-align: center;
                 margin-bottom: 2px;
             }
             & .gear {
-                // width: 15%;
-                height: 20px;
-                opacity: 70%;
+                height: 25px;
+                opacity: 65%;
                 margin: 0 0.9rem;
                 color: var(--third-color);
             }
@@ -51,309 +48,107 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            padding: 10px 0;
-            width: 90%;
+            padding: 10px 10px;
+            width: 100%;
             height: 100%;
 
-            & .name {
-                word-break: break-all;
-            }
-
-            & .iconAction {
-                background: transparent;
+            & .developButton {
+                padding-left: 3px;
+                padding-top: 5px;
+                font-size: 15px;
+                opacity: 75%;
                 &:hover {
-                    color: #ffffff;
-                }
+					color: var(--third-color);
+				}
             }
-
-            & #pending {
+            & .title {
                 display: flex;
-                flex-direction: column;
-                font-size: larger;
+                flex-direction: row;
+                justify-content: center;
                 width: 100%;
                 gap: 10px;
-                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                align-items: center;
-
-                & #titlePending {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    width: 100%;
-                    gap: 10px;
-                    & h3 {
-                        font-size: x-large;
-                        color:rgb(0, 0, 0);
-                    }
-                    & #developButton {
-                        color:rgb(255, 0, 140);
-                    }
-                }
-
-                & #pendingList {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 90%;
-                    background-color: #24bdb588;
-                    border-radius: 15px;
-                    
-                    & #pendingElement {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: baseline;
-                        gap: 15px;
-                        flex-wrap: wrap;
-                        font-size: x-large;
-                        
-                        & span {
-                            color: rgb(6, 114, 21);
-                            font-family: 'Alumni Sans Inline One', cursive;
-                            font-size: xx-large;
-                        }
-
-                        & #cancelRequestButton {
-                            color:rgb(228, 16, 16);
-                        }
-
-                        & #checkProfileButton {
-                            color:rgb(7, 63, 216);
-                        }
-                    }
-                }
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                clip-path: inset(1px 2px -15px 1px);
             }
-
-            & #request {
+            & .list {
                 display: flex;
                 flex-direction: column;
-                font-size: larger;
-                width: 100%;
-                gap: 10px;
-                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
                 align-items: center;
-
-                & #titleRequest {
+                width: 100%;
+                padding: 5px 20px 0 20px;
+                & .element {
                     display: flex;
                     flex-direction: row;
-                    align-items: center;
-                    width: 100%;
-                    gap: 10px;
-                    & h3 {
-                        font-size: x-large;
-                        color:rgb(0, 0, 0);
-                    }
-                    & #developButton {
-                        color:rgb(255, 0, 140);
-                    }
-                }
-                & #requestList {
-                    background-color: #24bdb588;
-                    border-radius: 15px;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 90%;
-                    
-                    & #requestElement {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: center;
-                        gap: 15px;
-                        flex-wrap: wrap;
-                        font-size: x-large;
-                        
-                        & span {
-                            color: rgb(6, 114, 21);
-                            font-family: 'Alumni Sans Inline One', cursive;
-                            font-size: xx-large;
-                        }
-
-                        & #acceptFriendButton {
-                            color:rgb(13, 119, 19);
-                        }
-
-                        & #declineFriendButton {
-                            color:rgb(228, 16, 16);
-                        }
-
-                        & #checkProfileButton {
-                            color:rgb(7, 63, 216);
-                        }
-                    }
-                }
-            }
-
-            & #friend {
-                display: flex;
-                flex-direction: column;
-                font-size: larger;
-                align-items: center;
-                justify-content: space-around;
-                gap: 10px;
-                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                width: 100%;
-
-                & #titleFriend {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    width: 100%;
-                    gap: 10px;
-                    & h3 {
-                        font-size: x-large;
-                        color:rgb(0, 0, 0);
-                    }
-                    & #developButton {
-                        color:rgb(255, 0, 140);
-                    }
-                }
-
-
-                & #friendList {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 7px;
+                    align-items: baseline;
+                    gap: 11px;
                     flex-wrap: wrap;
-                    width: 100%;
-
-                    & #friendElement {
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        border-radius: 15px;
-                        background-color: #24bdb588;
-                        border-style: double;
-                        border-color: #a4a4d1;
-                        width: 90%;
-                        & #friendInfo {
-                            display: flex;
-                            flex-direction: row;
-                            justify-content: center;
-                            flex-wrap: wrap;
-                            align-items: baseline;
-                            width: 100%;
-
-                            & .name {
-                                color: rgb(6, 114, 21);
-                                word-wrap: break-word;
-                                font-size: xx-large;
-                                font-family: 'Alumni Sans Inline One', cursive;
-                            }
-                            & .circle {
-                                width: 15%;
-                                width: 8px;
-                                height: 8px;
-                                border-radius: 50%;
-                                margin: 0 1rem;
-                                &.online {
-                                    background-color: #8BC34A;
-                                }
-                                &.offline {
-                                    background-color: #fa6969;
-                                }
-                            }
+                    font-size: x-large;
+                    & .name {
+                        word-break: break-all;
+                        &:hover {
+                            font-weight: bolder;
+                            color: var(--third-color);
                         }
-
-                        & #friendOptions {
-                            display: flex;
-                            flex-direction: row;
-                            flex-wrap: wrap;
-                            align-items: center;
-                            justify-content: space-around;
-                            font-size: x-large;
-                            width: 100%;
-
-                            & #unfriendButton {
-                                color: rgb(0, 0, 0);
-                                opacity: 80%;
-                            }
-                            & #chatButton {
-                                color: rgb(13, 119, 19);
-                                opacity: 80%;
-                            }
-                            & #checkProfileButton {
-                                color: rgb(216, 7, 188);
-                                opacity: 80%;
-                            }
+                    }
+                    & .iconAction {
+                        font-size: 20px;
+                        padding-left: 3px;
+                        opacity: 65%;
+                        &:hover {
+                            color: var(--third-color);
                         }
-
-                        & #invite{
-                            display: flex;
-                            align-items: center;
-                            flex-wrap: wrap;
-                            gap: 10px;
-                            font-size: larger;
-                            & .iconAction{
-                                color: rgb(26, 45, 219);
-                            }
-                            & > button{
-                                border:#8BC34A;
-                                border-radius: 15px;
-                                border-style: groove;
-                                background-color: rgb(26, 45, 219);
-                                padding: 3px;
-                            }
-                        }
+                    }
+                    & #cancelRequestButton {
+                        color:rgb(228, 16, 16);
+                    }
+                    & #acceptFriendButton {
+                        color:rgb(13, 119, 19);
+                    }
+                    & #declineFriendButton {
+                        color:rgb(228, 16, 16);
+                    }
+                    & #unblockButton {
+                        color:rgba(22, 161, 3, 0.897);
+                    }
+                    & #unfriendButton {
+                        color: rgb(0, 0, 0);
+                        opacity: 80%;
+                    }
+                    & #chatButton {
+                        color: rgb(13, 119, 19);
+                        opacity: 80%;
                     }
                 }
             }
-
-            & #block {
-                display: flex;
-                flex-direction: column;
-                font-size: larger;
-                width: 100%;
-                gap: 10px;
-                font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-                align-items: center;
-    
-                & #titleBlock {
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    width: 100%;
-                    gap: 10px;
-                    & h3 {
-                        font-size: x-large;
-                        color:rgb(0, 0, 0);
-                    }
-                    & #developButton {
-                        color:rgb(255, 0, 140);
-                    }
+            & .circle {
+                width: 15%;
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                margin: 0 1rem;
+                &.online {
+                    background-color: #8BC34A;
                 }
-    
-                & #blockList {
-                    background-color: #000000;
-                    border-radius: 30%;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    width: 100%;
-                    
-                    & #blockElement {
-                        display: flex;
-                        flex-direction: row;
-                        align-items: baseline;
-                        gap: 15px;
-                        flex-wrap: wrap;
-                        font-size: x-large;
-                        
-                        & span {
-                            color:rgb(163, 113, 5);
-                            font-family: 'Alumni Sans Inline One', cursive;
-                            font-size: xx-large;
-                        }
-    
-                        & #unblockButton {
-                            color:rgba(22, 161, 3, 0.897);
-                        }
-    
-                        & #checkProfileButton {
-                            color:rgb(7, 63, 216);
-                        }
-                    }
+                &.offline {
+                    background-color: #fa6969;
+                }
+            }
+
+            & #invite {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                font-size: larger;
+                & .iconAction {
+                    color: rgb(26, 45, 219);
+                }
+                & > button {
+                    border:#8BC34A;
+                    border-radius: 15px;
+                    border-style: groove;
+                    background-color: rgb(26, 45, 219);
+                    padding: 3px;
                 }
             }
         } 
