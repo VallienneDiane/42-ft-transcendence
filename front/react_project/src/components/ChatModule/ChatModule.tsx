@@ -10,6 +10,7 @@ import { SendMessageForm, MessageList } from "./ChatMessages";
 import '../../styles/ChatModule.scss'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
+import { Socket } from "socket.io-client";
 
 class ChannelDMList extends React.Component<{ 
     dest: string, 
@@ -227,6 +228,8 @@ export default class ChatModule extends React.Component<{}, {
 
     componentDidMount() {
         if (this.context.socket != null) {
+            console.log("lol", this.context.socket.id);
+            console.log("pouet");
             this.context.socket.emit("whereIam");
 
             this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
