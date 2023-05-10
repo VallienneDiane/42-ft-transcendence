@@ -68,7 +68,7 @@ export default function Profile() {
                 {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>
-                    { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon icon={faGear} /></NavLink> : null }
+                    { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon className="gear" icon={faGear} /></NavLink> : null }
                 </div>
 
                 {currentUser === undefined ? (
