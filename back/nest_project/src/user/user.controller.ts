@@ -1,6 +1,6 @@
 import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe, ParseUUIDPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { idDto, SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
+import { idDto, LoadAvatarDto, SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
 import * as bcrypt from 'bcrypt';
 import { JwtService } from "@nestjs/jwt";
@@ -150,10 +150,10 @@ export class UserController {
     async findAvatar(@Param('user', ParseUUIDPipe) id: string ): Promise<string> {
         return await this.userService.getAvatar(id);
     }
-    //update avatar picture
-    // @UseGuards(JwtAuthGuard)
-    // @Post('user/uploadAvatar')
-    // async uploadAvatar(@Body() data: LoadAvatarDto): Promise<void> {
-    //     return this.userService.loadAvatar(data.id, data.file);
-    // }
+    // update avatar picture
+    @UseGuards(JwtAuthGuard)
+    @Post('user/uploadAvatar')
+    async uploadAvatar(@Body() data: LoadAvatarDto): Promise<void> {
+        return this.userService.loadAvatar(data.id, data.file);
+    }
 }
