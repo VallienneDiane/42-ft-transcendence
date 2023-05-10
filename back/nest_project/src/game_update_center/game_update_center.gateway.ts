@@ -338,6 +338,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   find_and_remove(@ConnectedSocket() client: Socket) {
     console.log("entering find_and_remove function");
 
+    this.clean_match();
     // check if the client is in a ongoing game
     for (let i = 0; i < this.game_instance.length; i++) {
       const game = this.game_instance[i];
