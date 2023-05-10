@@ -13,7 +13,7 @@ const ProtectedRoutes = () => {
             createSocket();
             createSocketGame();
         }
-    })
+    }, [])
         
     return accountService.isLogged() ? <Outlet/> : <Navigate to="/login" replace state={{ from: location }}/>;
 }
