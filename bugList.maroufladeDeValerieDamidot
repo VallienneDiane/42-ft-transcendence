@@ -1,0 +1,28 @@
+---Pour Alexi---
+
+- image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
+- page settings : pas responsive
+- il faut que le protected route controle si le token contient un user existant dans la base de donnee
+
+---Pour Clemence---
+
+- a la creation d'un utilisateur, fetchuser ne fonctionne pas ?
+- ajouter boutons invite game = classic
+
+---Pour BouleMan---
+
+- des matchs sont lancees en trop !
+
+---Pour Diane---
+
+- image provenant de avataaars ne s'affiche plus dans la page profil depuis le merge de Diane
+- lorsqu'on logout quelqu'un, la console nous signale : Axios.post('/auth/logout') --> error 404, not found
+
+---Pour Nicolas---
+
+- 
+
+
+---A faire---
+
+les invitation en game

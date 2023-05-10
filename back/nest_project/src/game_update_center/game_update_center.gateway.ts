@@ -3,7 +3,7 @@
  */
 
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'; // socket event handling stuff
-import { GameInputDTO, PrivateGameRequestDTO, PublicGameRequestDTO, SpectatorRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
+import { GameInputDTO, matchHistoryDto, PrivateGameRequestDTO, PublicGameRequestDTO, SpectatorRequestDTO } from './game_update_center.dto'; // all the DTO (struct use to verified field of incoming request)
 import { GameEngineService } from 'src/game_engine/game_engine.service'; // use to acces the gameEngine of the super mode
 import { PongEngineService } from 'src/pong_engine/pong_engine.service'; // use to acces the gameEngine of the classic mode
 import { MatchService } from 'src/match/Match.service'; // use to acces function for the MatchEntity in the gameEngine to store goal
@@ -121,6 +121,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     if (user_entity === null) { // TODO test if it work
       console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
       client.disconnect();
+      return;
     }
 
     // if token is ok then store the UserEntity for quick acces
@@ -477,6 +478,24 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
+  @SubscribeMessage("matchHistory")
+  handleMatchHistory(@MessageBody() data: matchHistoryDto, @ConnectedSocket() client: Socket) {
+    this.tokenChecker(client)
+    .then((user) => {
+      this.matchservice.findMatch()
+      .then(pouet => {
+        // console.log("matchos: ", pouet);
+      })
+      if (user) {
+        this.matchservice.matchHistory(data.userId)
+        .then((matches) => {
+          // console.log("tableau : ", matches);
+          client.emit("matchHistory", matches);
+        })
+      }
+    })
+  }
+
   /**
    * nicolas' function
    * @param client 
@@ -504,7 +523,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let id: string = object.sub;
     return id;
   }
-
+  
   /**
    * nicolas' function
    * @param client 
@@ -522,22 +541,26 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the client disconnected
    */
   handleDisconnect(@ConnectedSocket() client: Socket) { // log client disconnection
-    this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
-    this.find_and_remove(client);
-    let user_login = this.socketID_UserEntity.get(client.id).login;
-    let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
-    console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
-    if (nbr_of_socket <= 1) {
-      this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
-      this.logger.debug("client was removed from waiting on game due to disconnection");
-    }
-    else {
-      console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
-    }
-    this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
-    if (this.socketID_UserEntity.delete(client.id) === false) {
-      this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
-    }
+    let user = this.tokenChecker(client)
+    .then((user) => {
+      if (!user)
+        return;
+      this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
+      this.find_and_remove(client);
+      let user_login = this.socketID_UserEntity.get(client.id).login;
+      let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
+      console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
+      if (nbr_of_socket <= 1) {
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
+        this.logger.debug("client was removed from waiting on game due to disconnection");
+      }
+      else {
+        console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
+      }
+      this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
+      if (this.socketID_UserEntity.delete(client.id) === false) {
+        this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
+      }
+    })
   }
-
 }

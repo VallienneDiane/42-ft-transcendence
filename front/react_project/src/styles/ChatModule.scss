@@ -3,74 +3,69 @@
 #chat_page {
 	display: flex;
 	align-items: center;
-	justify-content: space-around;	
+	backdrop-filter: blur(7px);
+    background-color:  rgba(255, 255, 255, 0.31);
 
 	& .card {
 		display: flex;
-		flex-direction: row;
-		justify-content: space-around;
+		justify-content: space-between;
 		overflow: hidden;
-		width: 70%;
-		height: 85%;
-		min-width: 450px;
-		border-radius: 10px;
-		border: 1px solid rgb(214, 214, 214);
-		box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .1);
+		background: transparent;
+		padding: 2rem 8rem;
+		width: 100%;
+		height: 100%;
+		// min-width: 450px;
+		// min-height: 450px;
 		
 		& .popup {
 			position: fixed;
+			display: flex;
+			justify-content: center;
+			align-items: center;
 			top: 0;
 			left: 0;
-			margin-top: 3rem;
-			z-index: 9;
-			background: transparent;
 			width: 100%;
+			height: 100%;
+			z-index: 9;
 			cursor: default;
-			
 			& .box {
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				width: 40%;
-				height: auto;
-				max-height: 70vh;
-				padding: 20px;
-				margin: 0 auto;
-				margin-top: calc(100vh - 85vh - 20px);
-				font-size: 16px;
-				color: var(--text-color);
-				background: var(--prim-color);
-				border: 1px solid var(--text-color);
-				border-radius: 4px;
-				overflow: auto;
+				justify-content: center;
+				width: 500px;
+				height: 340px;
+				background-color:  rgba(255, 255, 255, 0.95);
+				border-radius: 30px;
+				box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
 				& > h1 {
 					font-size: 23px;
-					padding: 0.7rem;
+					font-weight: bolder;
+					margin: 20px 0px;
+					border-bottom: 1px solid var(--text-color);
 				}
 				& .formNewChannel {
 					display: flex;
 					flex-direction: column;
 					align-items: center;
-					justify-content: center;
-					width: 100%;
 					& .rawCheckbox {
 						display: flex;
-						flex-wrap: wrap;
-						justify-content: space-around;
 						align-items: center;
 					}
 					& section {
-						padding: 0.5rem 1rem;
+						padding: 3px 10px;
 						& .labelName {
 							padding: 0.3rem;
 						}
 					}
 					& input {
-						border: 1px solid var(--second-color);
+						background: #c1bbd877;
+						color: var(--text-color);
+						border: none;
+						outline: none;
 						border-radius: 50px;
 						padding: 0.3rem 1rem;
 						margin: 10px;
-						// font-size: 1.2em;
 					}
 					& .button {
 						color: var(--text-color);
@@ -93,7 +88,7 @@
 						height: 100%;
 						background-color: var(--second-color);
 						filter: brightness(95%);
-						transform: skewX(50deg) translateX(-105%);
+						transform: skewX(50deg) translateX(-110%);
 						transition: all 400ms ease-in-out;
 						z-index: -1;
 						}
@@ -109,100 +104,91 @@
 		& #chatLeft {
 			display: flex;
 			flex-direction: column;
-			width: 20%;
+			justify-content: space-between;
+			min-width: 200px;
+			max-width: 350px;
+			min-height: 450px;
+			border-radius: 20px;
+			background-color:  rgba(255, 255, 255, 0.85);
+			box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
 
 			& #searchbarWrapper {
 				display: flex;
 				flex-direction: column;
-				height: 15%;
+				height: 60px;
 				padding: 1rem;
-				& .searchbar {
-					position: relative;
+				& input {
 					width: 100%;
-					display: flex;
-					flex-direction: row;
-					align-items: center;
-					& input {
-						width: 100%;
-						background: rgb(238, 238, 238);
-						color: grey;
-						padding: 0.5rem 2rem 0.5rem 1rem;
-						border-radius: 2rem;
-						transition: all .2s ease;
-						&:focus {
-							outline: none;
-							box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
-						}
-						border: none;
-						outline: none;
-					}
-					& .svgSearch {
-						height: 1.1rem;
-						margin-left: -2rem;
-						opacity: 50%;
-						background-color: #eee;
-					}
+					background: #c1bbd877;
+					color: var(--text-color);
+					padding: 0.5rem 2rem 0.5rem 1rem;
+					border-radius: 2rem;
+					border: none;
+					outline: none;
+				}
+				& .svgSearch {
+					height: 15px;
+					margin-left: -2rem;
+					opacity: 25%;
+					color: var(--text-color);
 				}
 				& ul {
+					color: var(--text-color);
 					position: absolute;
-					z-index: 9999;
-					width: 10.2rem;
+					z-index: 9;
+					width: 160px;
 					margin: 2.4rem 0;
 					padding: 0.3rem 1rem;
 					background-color: rgb(255, 255, 255);
 					box-shadow: 0 1px 2px rgb(204, 204, 204);
 					overflow: hidden;
 					overflow-y: auto;
+					& button {
+						color: #000000;
+					}
 				}
-				& .popup {
-					position: fixed;
-					z-index: 9;
-					background: transparent;
-					width: 80%;
-					
-					& .box {
+				& .boxPassword {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					justify-content: center;
+					width: 370px;
+					height: 220px;
+					background-color:  rgba(255, 255, 255, 0.95);
+					border-radius: 30px;
+					box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
+					& > h1 {
+						font-size: 23px;
+						font-weight: bolder;
+						margin: 20px 0px;
+						border-bottom: 1px solid var(--text-color);
+					}
+					& form {
 						display: flex;
 						flex-direction: column;
 						align-items: center;
-						width: 30%;
-						padding: 20px;
-						margin: 0 auto;
-						margin-top: calc(100vh - 85vh - 20px);
-						font-size: 16px;
-						color: var(--text-color);
-						background: var(--prim-color);
-						border: 1px solid var(--text-color);
-						border-radius: 4px;
-						& > h1 {
-							font-size: 23px;
-							padding: 0.7rem;
+						justify-content: center;
+						& input {
+							background: #c1bbd877;
+							color: var(--text-color);
+							border: none;
+							outline: none;
+							border-radius: 50px;
+							padding: 10px 1rem;
+							margin-bottom: 10px;
 						}
-						& form {
-							display: flex;
-							flex-direction: column;
-							align-items: center;
-							justify-content: center;
-							width: 100%;
-							& input {
-								border: 1px solid var(--second-color);
-								border-radius: 50px;
-								padding: 0.3rem 1rem;
-								margin: 10px;
-								// font-size: 1.2em;
-							}
-							& button {
-								color: var(--text-color);
-								width: 30%;
-								// font-size: 18px;
-								margin: 6px 0;
-								padding: 3px 0;
-								background-color: var(--second-color);
-								border-radius: 50px;
-								position: relative;
-								z-index: 1;
-								overflow: hidden;
-									
-								&::after {
+						& button {
+							color: var(--text-color);
+							width: 50%;
+							font-size: 18px;
+							margin: 10px 0;
+							padding: 5px 0;
+							background-color: var(--second-color);
+							border-radius: 50px;
+							position: relative;
+							z-index: 1;
+							overflow: hidden;
+							&::after {
 								content: '';
 								position: absolute;
 								top: 0;
@@ -211,53 +197,73 @@
 								height: 100%;
 								background-color: var(--second-color);
 								filter: brightness(95%);
-								transform: skewX(50deg) translateX(-105%);
+								transform: skewX(50deg) translateX(-120%);
 								transition: all 400ms ease-in-out;
 								z-index: -1;
-								}
-							
-								&:hover::after {
+							}
+							&:hover::after {
 								transform: skewX(-10deg) translateX(-10%);
-								}
 							}
 						}
 					}
-				}
+				}	
 			}
 
-			& #channelListWrapper {
-				position: relative;
+			& #createChannel {
 				display: flex;
-				height: 75%;
+				height: 70px;
+				padding-bottom: 20px;
+				align-items: center;
+				justify-content: center;
+				& p {
+					color: var(--text-color);
+					font-size: 15px;
+					font-weight: bold;
+					padding: 5px 15px;
+					background-color: #dbb8d9e1;
+					border-radius: 10px;
+					cursor: pointer;
+				}
+			}	
+
+			& #channelListWrapper {
+				display: flex;
 				flex-direction: column;
 				align-items: left;
+				height: 80%;
 				padding-left: 1.5rem;
 				& h2 {
 					font-size: 20px;
-					font-weight: bold;
+					border-bottom: 1px solid rgb(0, 0, 0, 0.2);
+					margin-top: 10px;
+					margin-bottom: 5px;
 				}
 				& .channelList {
 					overflow-y: auto;
-					padding-bottom: 1rem;
 					& li {
 						display: flex;
 						flex-direction: row;
 						align-items: center;
 						justify-content: space-between;
-						padding: 0.2rem 0.5rem;
+						padding: 0.6px 1px;
 						& button {
 							width: 85%;
 							text-align: left;
+							word-break: break-all;
 							cursor: pointer;
+							&:hover {
+								font-weight: bolder;
+								color: var(--third-color);
+								transition: all 100ms ease-in-out;
+							}
 							& #msg {
 								padding-left: 0.5em;
-								opacity: 70%;
+								opacity: 60%;
 							}
 						}
 						& .waitingMsg {
 							font-style: bold;
 						}
-						
 						& .circle {
 							width: 15%;
 							width: 8px;
@@ -274,22 +280,20 @@
 					}
 				}
 			}
-
-			& #createChannel {
-				display: flex;
-				height: 10%;
-				align-items: center;
-				justify-content: space-around;
-				cursor: pointer;
-			}	
 		}
 		
 		& #chatRight {
 			position: relative;
 			display: flex;
 			flex-direction: column;
-			width: 80%;
-			border-left: 1px solid rgb(214, 214, 214);
+			overflow: hidden;
+			width: 100%;
+			min-width: 450px;
+			min-height: 450px;
+			border-radius: 20px;
+			margin-left: 2%;
+			background-color:  rgba(255, 255, 255, 0.65);
+			box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
 
 			& .sidebar {
 				position: absolute;
@@ -298,147 +302,116 @@
 				z-index: 9999;
 				top: 0;
 				right: 0;
-				width: 270px;
+				width: 220px;
 				height: 100%;
-				background: rgba(223, 223, 223, 0.95);
+				background: rgba(233, 230, 240, 0.95);
 				transition: transform 0.5s ease-in-out;
 				transform: translateX(100%);
 				&.show {
 					transform: translateX(0%);
-					box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
-					
+					box-shadow: 2px 3px 10px 1px rgba(99, 99, 99, 0.2);	
 					& .sidebarContent {
 						width: 100%;
-						background: transparent;
 						overflow-y: auto;
 						& .closeIcon {
 							padding: 1rem;
 							font-size: 20px;
-							background: transparent;
+							color: var(--third-color);
 						}
 						& .navRight {
-							background: transparent;
 							text-align: end;
-							width: 100%;
-							& > h1 {
+							& h1 {
 								padding: 0.5rem 1rem;
-								background: transparent;
+								font-weight: bolder;
 							}
 							& .paramMenu {
-								background: transparent;
-								width: 100%;
-								font-size: 17px;
+								display: flex;
+								flex-direction: column;
 								& > li {
-									width: 100%;
 									padding: 0.4rem 1rem;
-									background: transparent;
-									border-bottom: 2px solid rgb(214, 214, 214);
-									& a {
-										background: transparent;
+									border-bottom: 2px solid rgb(202, 202, 202);
+									& > button {
+										padding: 2px 15px 2px 15px;
+										margin-left: 0.7ch;
+										margin-top: 2px;
+										border-radius: 10px;
+										background-color: #dbb8d9e1;
+										&:hover {
+											background-color: var(--third-color);
+											font-style: oblique;
+											color: white;
+										}
 									}
 									&:hover {
-										background:#ddd;
-										color:#000000;
+										background: #33469c4f;
 										cursor: pointer;
+										& #navlink{
+											background: transparent;
+										}
 									}
 								}
 								& .memberList {
 									display: flex;
 									flex-direction: column;
-									background-color: #b9cbce;
-									padding: 0.3rem 1.5rem;
+									background-color: #33469c1a;
+									padding: 0.3rem 1rem;
 									& > li {
 										display: flex;
 										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
-										background: transparent;
-										& div {
-											background: transparent;
-										}
 										& .iconStatus {
-											background: transparent;
-											width: 15px;
-											padding-left: 6px;
+											width: 13px;
+											padding-left: 7px;
 											opacity: 70%;
-										}
-										& button {
-											background: transparent;
-											&:hover {
-												font-weight: bolder;
-												color: #0f1a83;
-											}
 										}
 									}
 								}
 								& .memberButton {
-									background: transparent;
 									position: relative;
 									& .iconAction {
-										background: transparent;
 										width: 15px;
 										padding-left: 12px;
 										opacity: 70%;
 										&:hover {
-											// outline: none;
-											// width: 20px;
-											color: #016d06;
-											// box-shadow: 2px 3px 7px 1px rgba(99, 99, 99, 0.3);
+											color: var(--third-color);
 										}
 									}
 									&:hover::before {
-										color: rgb(2, 129, 214);
+										color: var(--third-color);
 										font-weight: bold;
 										content: attr(data-hover-text);
 										position: absolute;
 										z-index: 10;
-										top: -1rem;
-										right: 10px;
-										// margin-bottom: 1rem;
-										background-color: rgba(184, 179, 179, 0.3);
-										padding: 0.1rem 0.4rem;
+										top: -26px;
+										right: 0px;
+										padding: 0.1rem 0.6rem;
+										background-color: rgba(255, 255, 255, 0.815);
+										border-radius: 6px;
 									}
-									& .mute {
+								}
+								& .mute {
+									display: flex;
+									flex-direction: column;
+									align-items: end;
+									&:hover {
+										cursor: initial;
+									}
+									& div {
 										display: flex;
-										flex-direction: column;
-										background: transparent;
-										&:hover {
-											background: rgba(223, 223, 223, 0.95);
-											color: var(--text-color);
-											cursor: initial;
+										align-items: center;
+										padding-left: 15px;
+										& button {
+											padding:0 0.2rem;
+											margin: 0 0.2rem;
+											&:hover {
+												color: var(--third-color);
+											}
 										}
-										& div {
-											display: flex;
-											justify-content: space-between;
-											background: transparent;
-											align-items: center;
-											& button {
-												// font-size: 2rem;
-												background: transparent;
-												padding:0 0.2rem;
-												margin: 0 0.2rem;
-												border-radius: 100%;
-												// box-shadow: .5rem .5rem 2rem rgba(0, 0, 0, .6);
-											}
-											& span {
-												width: 1.8rem;
-												font-size: 1.4rem;
-												font-weight: bold;
-												background: transparent;
-											}
-											& .muteButton {
-												color: var(--text-color);
-												width: 25%;
-												font-size: 1rem;
-												// font-size: 18px;
-												margin: 3px 0 5px 0;
-												// padding: 3px 0;
-												background-color:#b9cbce;
-												border-radius: 50px;
-												position: relative;
-												z-index: 1;
-												overflow: hidden;
-											}
+										& span {
+											width: 1.8rem;
+											font-size: 1.4rem;
+											font-weight: bold;
 										}
 									}
 								}
@@ -446,47 +419,65 @@
 									display: flex;
 									align-items: center;
 									justify-content: center;
-									background-color: #b9cbce;
 									padding: 0.5rem 1.5rem;
 									& input {
 										width: 100%;
-										background: rgb(238, 238, 238);
-										color: rgb(77, 77, 77);
+										background: #c1bbd877;
 										padding: 0.3rem 2rem 0.3rem 1rem;
 										border-radius: 2rem;
 										border: none;
 										outline: none;
 									}
-									& .svgSearch {
-										height: 1.1rem;
-										margin-left: -2rem;
-										opacity: 50%;
-										background-color: #eee;
-										cursor: pointer;
+								}
+								& .invite {
+									display: flex;
+									flex-direction: column;
+									background-color: #33469c1a;
+									& ul {
+										padding: 0 1.5rem 0.3rem 1.5rem;
+										& li {
+											display: flex;
+											justify-content: space-between;
+											text-align: start;
+											font-size: 15px;
+											& button {
+												&:hover {
+													font-weight: bolder;
+													color: var(--third-color);
+												}
+											}
+										}
 									}
 								}
 								& .settingList {
 									display: flex;
 									flex-direction: column;
-									background-color: #b9cbce;
-									width: 100%;
+									background-color: #33469c1a;
 									padding: 0.5rem 0;
 									& > li {
 										display: flex;
 										flex-direction: row;
 										align-items: center;
 										justify-content: space-between;
-										background: transparent;
 										font-size: 15px;
-										width: 100%;
 										padding: 0.3rem 1.5rem;
-										// border-bottom: 1px solid rgb(217, 223, 243);
+										& > button {
+											padding: 2px 15px 2px 15px;
+											margin-top: 2px;
+											border-radius: 10px;
+											background-color: #dbb8d9e1;
+											&:hover {
+												background-color: var(--third-color);
+												font-style: oblique;
+												color: white;
+											}
+										}
 									}
 									& .inputChannel {
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: #b0c1c4;
+										background: #c1bbd877;
 										width: 60%;
 										padding: 0.2rem 0.5rem;
 										border-radius: 0.5rem;
@@ -495,21 +486,14 @@
 										outline: 0;
 										border-width: 0 0 1px;
 										border-color: rgb(42, 42, 43, 0.5);
-										background: #b0c1c4;
+										background: #c1bbd877;
 										width: 100%;
 										padding: 0.2rem 0.5rem;
 										border-radius: 0.5rem;
 									}
-									& button {
-										background: transparent;
-										color: #088f03;
-										font-weight: bold;
-										font-size: 17px;
-									}
 								}
 								& .outChannel {
 									color: red;
-									background: transparent;
 								}	
 							}
 						}
@@ -521,89 +505,78 @@
 				display: flex;
 				justify-content: flex-end;
 				align-items: center;
-				height: 15%;
+				height: 60px;
+				border-bottom: 1px solid rgb(209, 209, 209);
 				padding: .75rem 1.5rem;
 				& h1 {
+					word-break: break-all;
 					font-size: 1.125rem;
 				}
 				& .iconChannels {
 					height: 15px;
-					opacity: 50%;
-					padding: 0 0.7rem;
+					opacity: 70%;
+					padding: 0 0.9rem;
 					position: relative;
+					color: var(--third-color);
 				}
 			}
 
 			& #messageList {
 				display: flex;
 				flex-direction: column-reverse;
-				height: 70%;
-				background: rgb(231, 231, 231);
-				// padding: 1.5rem;
+				height: 80%;
+				background-color: #c8c3dd77;
 				padding: 1.5rem 1.5rem 1.5rem 1rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
 					display: flex;
 					flex-direction: row;
-					background: transparent;
 					vertical-align: top;
 					padding: 0.1rem 0;
 					&.received {
 						float: left;
+						display: flex;
 						align-self: flex-start;
-						background: transparent;
 						& .bubble {
 							padding: 0.3em;
 							padding-left: 1em;
 							padding-right: 1em;
 							color: black;
-							background-color: #f7fcff;
-							align-self: flex-start;
+							background-color: #aa9aa677;
 							border-radius: 0 .75rem .75rem .75rem;
 						}
 					}
 					&.sent {
 						float: right;
+						display: flex;
 						align-self: flex-end;
-						background: transparent;
 						& .bubble {
 							padding: 0.3em;
 							padding-left: 1em;
 							padding-right: 1em;
 							color: white;
-							background-color: rgb(2, 129, 214);
+							background-color: var(--third-color);
 							border-radius: .75rem 0 .75rem .75rem;
 						}
 					}
 				}
-				& .messageBlock {
-					background: transparent;
-				}
 				& .avatar {
 					width: 3.2rem;
-					background: transparent;
 					& #profilePicture {
-					border-radius: 100%;
-					aspect-ratio: 1/1;
-					object-fit: cover;
-					margin-right: 0.5rem;
-					width: 3rem;
-					background: transparent;
+						border-radius: 100%;
+						aspect-ratio: 1/1;
+						object-fit: cover;
+						margin-right: 0.5rem;
+						width: 3rem;
 					}
-				}
-				& .messageUserName {
-					color: var(--prim-color);
-					background: transparent;
 				}
 				& .messageText {
 					word-break: break-all;
-					background: transparent;
 				}
 				& .messageDate {
 					display: flex;
 					justify-content: flex-end;
-					background: transparent;
 					font-size: 11px;
 					color: #3b3b3b;
 				}
@@ -611,21 +584,17 @@
 
 			& #sendMessage {
 				display: flex;
-				justify-content: center;
-				align-items: center;
-				width: 100%;
-				height: 15%;
+				height: 100px;
 				padding: 1.3rem;
 				& .sendMessageForm {
 					display: flex;
-					justify-content: center;
 					align-items: center;
 					width: 100%;
 					padding-right: 3rem;
 					& input {
 						width: 100%;
-						background: rgb(238, 238, 238);
-						color: black;
+						background-color: #c8c3dd77;
+						color: var(--text-color);
 						border-radius: 0.5rem;
 						padding: 0.7rem 3rem 0.7rem 1rem;
 						margin: 0 1.5rem;
@@ -639,11 +608,9 @@
 						width: 1.3rem;
 						height: 2rem;
 						margin-left: -4rem;
-						opacity: 40%;
-						background-color: transparent;
+						opacity: 23%;
 						& .svgSend {
 							height: 70%;
-							background: rgb(238, 238, 238);
 						}
 					}
 				}
@@ -654,5 +621,7 @@
 
 .logError {
 	color: red;
+	font-size: 13px;
+	// margin-right: 5px;
   }
   

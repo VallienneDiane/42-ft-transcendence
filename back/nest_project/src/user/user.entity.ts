@@ -3,8 +3,9 @@ import { ChannelEntity } from 'src/chat/channel/channel.entity';
 import { MessageChannelEntity } from 'src/chat/messageChannel/messageChannel.entity';
 import { MessagePrivateEntity } from 'src/chat/messagePrivate/messagePrivate.entity';
 import { MuteEntity } from 'src/chat/mute/mute.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany, JoinTable, ManyToOne, OneToMany, JoinColumn, OneToOne } from 'typeorm';
 import { FriendEntity } from '../chat/friend/friend.entity';
+import { AvatarEntity } from './avatar/avatar.entity';
 
 @Entity()
 export class UserEntity {
@@ -63,8 +64,9 @@ export class UserEntity {
   @Column({nullable: true})
   qrCode: string;
 
-  @Column({nullable: true})
-  avatarSvg: string;
+  @OneToOne(() => AvatarEntity, {cascade: true})
+  @JoinColumn()
+  avatarSvg: AvatarEntity;
 
   @OneToMany(() => Match, (match) => match.winner)
   @JoinColumn({ name: "winner_id" })

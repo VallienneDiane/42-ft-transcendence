@@ -8,10 +8,10 @@ import { SocketContext } from "../context";
 import LogoOrdi from'../../assets/LogoOrdi.jpg';
 
 class MessageDisplay extends React.Component<{message: IMessage, prevSender: string, last: boolean}, {
-    playload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
+    payload: JwtPayload, me: boolean, sameSender: boolean, avatar: string}> {
     constructor(props: {message: IMessage, prevSender: string, last: boolean}) {
         super(props);
-        this.state = { playload: accountService.readPayload()!, 
+        this.state = { payload: accountService.readPayload()!, 
         me: false,
         sameSender: false, 
         avatar: '' };
@@ -22,10 +22,11 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
     componentDidMount(): void {
         if (this.props.prevSender === this.props.message.senderName)
             this.setState({ sameSender: true });
-        if (this.state.playload.login === this.props.message.senderName)
-            this.setState({me: true});
-        if (this.props.prevSender !== this.props.message.senderName && this.state.playload.login !== this.props.message.senderName)
+        if (this.state.payload.sub === this.props.message.senderId)
+            this.setState({ me: true });
+        if (this.props.prevSender !== this.props.message.senderName && this.state.payload.sub !== this.props.message.senderId) {
             this.getProfilePicture();
+        }
     }
 
     setTimeAgo() {
@@ -48,7 +49,7 @@ class MessageDisplay extends React.Component<{message: IMessage, prevSender: str
         if (this.props.message.senderName !== "WARNING") {
             accountService.getAvatar(this.props.message.senderId!)
                 .then(response => { 
-                   this.setState({avatar: response.data.user_avatarSvg});
+                    this.setState({avatar: response.data});
                 })
                 .catch(error => console.log(error));
         }
@@ -112,6 +113,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     checkBlock(senderName: string) {
         let block: boolean = false;
         for (let elt of this.state.usersBlocked) {
+
             if (elt.name == senderName) {
                 block = true;
             }
