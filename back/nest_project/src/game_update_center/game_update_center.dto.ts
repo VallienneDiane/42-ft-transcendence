@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsString, MaxLength } from "class-validator";
+import { IsBoolean, IsNotEmpty, IsString, IsUUID, MaxLength } from "class-validator";
 
 /**
  * DTO use for private matchmaking request
@@ -24,4 +24,8 @@ export class GameInputDTO {
 
 export class SpectatorRequestDTO {
 	@IsString() @IsNotEmpty() @MaxLength(64) player1_login: string;
+}
+
+export class matchHistoryDto {
+	@IsNotEmpty() @IsUUID() userId: string;
 }

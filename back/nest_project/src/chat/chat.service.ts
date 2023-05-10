@@ -170,18 +170,17 @@ export class ChatService {
                 let connected = dest != undefined;
                 this.userService.findById(room.room)
                 .then(
-                    (user) => {
-                        client.emit('checkNewDM', {id: room.room, login: user.login}, connected);
+                    (tropdevariables) => {
+                        client.emit('checkNewDM', {id: tropdevariables.id, login: tropdevariables.login}, connected);
                     }
                 )
                 if (connected) {
-                    let userToEmit: IUserToEmit = user;
-                    dest.emit('checkNewDM', userToEmit, true);
+                    dest.emit('checkNewDM', {id: user.id, login: user.login}, true);
                     dest.sockets.forEach((data, socket) => {
                         if (!data.isChannel && data.room == user.id)
                             socket.emit("newMessage", toSend);
                         else
-                            socket.emit("pingedBy", userToEmit);
+                            socket.emit("pingedBy", user.id);
                     })
                 }
             }
@@ -269,6 +268,7 @@ export class ChatService {
                         else
                             arrayToEmit.push({userId: elt.id, userName: elt.login, connected: false});
                     }
+                    console.log("blop")
                     client.emit("listMyDM", arrayToEmit);
                 })
     }
@@ -906,6 +906,7 @@ export class ChatService {
                             else
                                 this.channelService.delBannedUser(userEntity.id, channelId)
                                 .then(() => {
+                                    console.log("ICI")
                                     roomHandler.roomMap.of(channelId).emit("newUnban", userEntity.id);
                                 });
                         })
