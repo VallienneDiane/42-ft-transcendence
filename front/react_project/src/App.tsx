@@ -28,7 +28,6 @@ function App() {
     });
     setSocket(newSocket);
     newSocket.emit("whereIam");
-    console.log("zouz")
   }
 
   const [socketGame, setSocketGame] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
