@@ -30,10 +30,10 @@
             & input {
                 width: 200px;
                 height: 45px;
-                font-size: 1em;
+                font-size: 1.2em;
                 background: #c1bbd877;
                 color: var(--text-color);
-                padding: 0.5rem 2rem 0.5rem 1rem;
+                padding: 0.5rem 1rem 0.5rem 1rem;
                 border: none;
 				outline: none;
 				border-radius: 2rem;
@@ -82,7 +82,7 @@
             display: flex;
             flex-direction: column;
             margin: 10px 0;
-            border: 2px dashed var(--text-color);
+            border: 2px dashed var(--second-color);
             color: var(--text-color);
             border-radius: 15px;
             display: flex;
