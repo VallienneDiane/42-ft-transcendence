@@ -212,6 +212,7 @@ export default class ChatModule extends React.Component<{}, {
     }
     static contextType = SocketContext;
     declare context: ContextType<typeof SocketContext>;
+    private previousContext: any;
 
     onClickPopup() {
         this.setState({ popupIsOpen: !this.state.popupIsOpen});
@@ -227,9 +228,17 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     componentDidMount() {
+        this.previousContext = this.context;
         if (this.context.socket !== null) {
+            console.log("blop");
             this.context.socket.emit("whereIam");
+            this.previousContext = null;
+        }
+    }
 
+    componentDidUpdate() {
+        if (this.previousContext !== this.context) {
+            console.log("prune")
             this.context.socket.on('newLocChannel', (blop: {channel: IChannel, status: string}, array: IMessageReceived[]) => {
                 let newHistory: IMessage[] = [];
                 for (let elt of array) {
@@ -257,6 +266,7 @@ export default class ChatModule extends React.Component<{}, {
                 });
                 this.setState({ dms: listDM }) });
         }
+        this.previousContext = this.context;
     }
 
     componentWillUnmount() {
