@@ -452,7 +452,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.server.to(client.id).emit("Already_On_Match");
       return;
     }
-
+    
     
     // check the existing waiting socket to find a potential match
     for (let i = 0; i < this.private_space.length; i++) {
@@ -463,11 +463,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
       // if match and target not occupied
-      else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login && !this.waiting_on_match.has(body.target)) {
+      else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
-        this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
         this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
+        this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
         
         // remove the waiting socket from the waiting space
         this.private_space.splice(i, 1);
@@ -498,7 +498,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handlePrivateMatching function");
   }
   
-  @SubscribeMessage("Decline_invitation")
+  @SubscribeMessage("Decline_Invitation")
   handle_denied(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO ) {
     console.log("Entering decline invitation 1");
     for (let index = 0; index < this.private_space.length; index++) {
