@@ -4,7 +4,7 @@ import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { IChannel, ISearch, IMessage, IMessageReceived } from "./Chat_models";
+import { IChannel, ISearch } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
@@ -59,7 +59,7 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
 
     return (
         <div className="popup">
-            <div className="box" ref={ref}>
+            <div className="boxPassword" ref={ref}>
                 <h1>{props.channelName}</h1>
                 <form onSubmit={handlerJoinPass}>
                     <input type="password" placeholder="Enter channel pass here..." value={pass} onChange={handlePass} />

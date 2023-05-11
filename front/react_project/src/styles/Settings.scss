@@ -3,7 +3,7 @@
 #settingsPage {
     display: flex;
     flex-direction: row;
-    // overflow-y: auto;
-    // overflow-x: auto;
-    // flex-flow: row;
+    height: fit-content;
+    padding-bottom: 20px;
+    align-items: center;
 }
