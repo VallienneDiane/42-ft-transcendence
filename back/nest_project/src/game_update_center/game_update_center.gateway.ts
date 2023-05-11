@@ -453,13 +453,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
 
-    // check if the target is connected
-    if (!this.get_socketid_by_login(this.socketID_UserEntity, body.target) || this.waiting_on_match.has(body.target))
-    {
-      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: body.super_game_mode})
-      return;
-    }
-
+    
     // check the existing waiting socket to find a potential match
     for (let i = 0; i < this.private_space.length; i++) {
       const private_waiting_socket = this.private_space[i];
@@ -481,7 +475,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
     }
-
+    
+    // check if the target is connected
+    if (!(this.get_socketid_by_login(this.socketID_UserEntity, body.target) && !this.waiting_on_match.has(body.target)))
+    {
+      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: body.super_game_mode})
+      return;
+    }
     
     // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
