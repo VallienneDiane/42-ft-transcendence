@@ -29,17 +29,19 @@ const PopUp: React.FC = () => {
     const [invite, setInvite] = useState<invite | null>();
     const [popUpContent, setPopUpContent] = useState<JSX.Element>();
 
-    let decodedToken: JwtPayload = accountService.readPayload()!;
-    const id = decodedToken.sub;
-    userService.getUserWithAvatar(id!)
-    .then(response => {
-        console.log(response.data);
-        user = response.data;
-        console.log("apres requete", user);
-    })
-    .catch(error => {
-        console.log(error);
-    });
+    if (accountService.isLogged()) {
+        let decodedToken: JwtPayload = accountService.readPayload()!;
+        const id = decodedToken.sub;
+        userService.getUserWithAvatar(id!)
+        .then(response => {
+            console.log(response.data);
+            user = response.data;
+            console.log("apres requete", user);
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
     
     useEffect(() => {
         
