@@ -2,6 +2,8 @@ import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPercent } from "@fortawesome/free-solid-svg-icons";
 
 export default function MatchHistory(props: {userId: string}) {
     const {socketGame} = useContext(SocketContext);
@@ -52,10 +54,19 @@ export default function MatchHistory(props: {userId: string}) {
     return (
         <div id="score">
             <div id="stats">
-                    <h2>Statistics</h2>
-                    <h3>total win = {matchWon}</h3>
-                    <h3>total lost = {matchLost}</h3>
-                    <h3>ratio = {matchLost == 0 ? (matchWon == 0 ? "NaN" : "full perfect") : matchWon / matchLost}</h3>
+                <h2>Statistics</h2>
+                <div className="bloc">
+                    <div className="element">
+                        <span>{matchWon}</span><h3>win{matchWon > 1 && "s"}</h3>
+                    </div>
+                    <div className="element">
+                        <span>{matchLost}</span><h3>lost{matchLost > 1 && "s"}</h3>
+                    </div>
+                    <div className="element">
+                        <span>{matchLost + matchWon != 0 ? 100 * matchWon / (matchLost + matchWon) : null}</span>
+                        <h3>%</h3>
+                    </div>
+                </div>
             </div>
             <div id="history">
                     <h2>Match history</h2>
