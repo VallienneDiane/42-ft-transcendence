@@ -490,6 +490,19 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handlePrivateMatching function");
   }
 
+  @SubscribeMessage("Invitation_Refused")
+  handle_denied(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO ) {
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.waiting_client_socket.id === this.get_socketid_by_login(this.socketID_UserEntity, body.player1_login) && element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        this.server.to(element.waiting_client_socket.id).emit("Send_False");
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(element.waiting_client_socket.id).login)
+        this.private_space.splice(index, 1);
+        return;
+      }
+    }
+  }
+
   /**
    * process the input if the client is a player
    * @param body the input of the client containg one non empty string
