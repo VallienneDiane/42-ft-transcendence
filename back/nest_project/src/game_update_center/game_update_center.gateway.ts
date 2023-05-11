@@ -466,7 +466,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
         this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
-
+        this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
+        
         // remove the waiting socket from the waiting space
         this.private_space.splice(i, 1);
         console.log("leaving handlePrivateMatching function");
@@ -501,6 +502,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
     }
+  }
+
+  @SubscribeMessage("Invitation_Accepted")
+  handle_accepted(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
+
   }
 
   /**
