@@ -65,6 +65,10 @@ const PopUp: React.FC = () => {
                     setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation not send", invitation);
                 }
+                if (invitation.by === invite?.by && invitation.for === invite.for) {
+                    setInvite(null);
+                    console.log("Invitation has been canceled by asker", invitation);
+                }
             });
 
             socketGame.on("Players", () => {
@@ -73,7 +77,6 @@ const PopUp: React.FC = () => {
             
             socketGame.on("Invite_Declined", () => {
                 // if (invite?.status === "send") {
-                    console.log("status changed");
                     setInvite((prevState) => ({
                         ...prevState!,
                         status: "declined",
@@ -138,20 +141,21 @@ const PopUp: React.FC = () => {
     }, [invite])
     
     const acceptInvitation = () => {
+        console.log("accept invite");
         socketGame.emit("Private_Matchmaking", {target: invite?.by, super_game_mode: invite?.super_game_mode});
         setInvite(null);
         navigate("/game", {state : {from : "invitation"}});
     }
     
     const declineInvitation = () => {
-        console.log("try to decline invite");
-        socketGame.emit("Decline_invitation", {player1_login: invite?.by})
+        console.log("decline invite");
+        socketGame.emit("Decline_Invitation", {player1_login: invite?.by})
         setInvite(null);
     }
     
     const cancelInvitation = () => {
-        console.log("try to cancel invite");
-        socketGame.emit("Cancel_invitation", {player1_login: invite?.by})
+        console.log("cancel invite");
+        socketGame.emit("Cancel_Invitation")
         setInvite(null);
     }
     
