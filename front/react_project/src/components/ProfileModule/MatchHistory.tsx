@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
@@ -62,29 +62,29 @@ export default function MatchHistory(props: {userId: string}) {
                     <div className="element">
                         <span>{matchLost}</span><h3>lost{matchLost > 1 && "s"}</h3>
                     </div>
-                    <div className="element">
-                        <span>{matchLost + matchWon != 0 ? 100 * matchWon / (matchLost + matchWon) : null}</span>
-                        <h3>%</h3>
-                    </div>
+                    {matchLost + matchWon != 0 ? 
+                        <div className="element">
+                            <span>{(100 * matchWon / (matchLost + matchWon)).toFixed(0)}</span><h3>% of success</h3>
+                        </div> : null}
                 </div>
             </div>
             <div id="history">
                     <h2>Match history</h2>
             {history.length > 0 && <ul id="matchList">
                 <div id="firstRow" className="scoreTab">
-                    <span className="winner">Winner</span>
-                    <span className="scores">Scores</span>
-                    <span className="loser">Loser</span>
+                    <span>Winner</span>
+                    <span>Scores</span>
+                    <span>Loser</span>
                 </div>
                 {history.map((elt) => (
                     <li id="historyElement" className="scoreTab" key={elt.matchId}>
-                        <div id="winner">
-                            <span id="nameW" >{elt.winnerLogin}</span>
+                        <div className="row winner">
+                            <span id="name" >{elt.winnerLogin}</span>
                             <span id="scoreW">{elt.scoreWinner}</span>
                         </div>
-                        <div id="loser">
+                        <div className="row loser">
                             <span id="scoreL">{elt.scoreLoser == -1 ? "give up" : elt.scoreLoser}</span>
-                            <span id="nameL" >{elt.loserLogin}</span>
+                            <span id="name" >{elt.loserLogin}</span>
                         </div>
                     </li>
                 ))}
