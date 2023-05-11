@@ -479,7 +479,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
-        this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
+        this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, private_waiting_socket.super_game_mode);
         this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
         
         // remove the waiting socket from the waiting space
