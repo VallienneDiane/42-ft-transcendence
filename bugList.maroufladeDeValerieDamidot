@@ -33,6 +33,8 @@ persistance base de donnees
 mise en reseau du site
 docker-compose up qui marche sans erreur dans un ordi qui ne contient pas de node-modules
 
+- limiter l'input du pseudo a X caractere et securiser les caracter non imprimable peut etre ?
+
 
 
 bug sur le jeu :
