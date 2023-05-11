@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faMagnifyingGlass, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 
 export default function FriendManagement() {
@@ -280,6 +280,10 @@ export default function FriendManagement() {
 
     return (
         <div id="FriendManagement">
+            {/* <div className="searchbar">
+                <input type="text" onChange={this.displayList} onClick={this.showSearchList} value={this.state.text} placeholder="Search"/>
+                <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
+            </div> */}
             {friends.length > 0 && <div>
                 <div className="title">
                     <h3>My friend{friends.length > 1 && "s"}</h3>
