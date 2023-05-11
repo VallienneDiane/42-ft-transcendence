@@ -272,7 +272,7 @@ export class PongEngineService {
             this.pl2_score++;
             this.update_match_state();
         }
-        if (this.pl1_score > 2 || this.pl2_score >2) { // if end of match then save the score and close the game ///////////////////////// A REMTTRE A 0 (alexi)
+        if (this.pl1_score > 20 || this.pl2_score >20) { // if end of match then save the score and close the game ///////////////////////// A REMTTRE A 0 (alexi)
             this.game_must_stop = true;
             this.close_the_game();
             console.log("past close_game");
