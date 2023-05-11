@@ -1,7 +1,7 @@
 import "../styles/Base.css"
 import "../styles/PopUp.scss"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { SocketContext } from "./context"
 import { useNavigate } from "react-router"
 import { accountService } from "../services/account.service"
@@ -29,6 +29,7 @@ const PopUp: React.FC = () => {
     let user: User;
     const {socketGame} = React.useContext(SocketContext);
     const [invite, setInvite] = useState<invite | null>();
+    const inviteRef = useRef<invite | null>(null);
     const [popUpContent, setPopUpContent] = useState<JSX.Element>();
 
     if (accountService.isLogged()) {
@@ -43,17 +44,34 @@ const PopUp: React.FC = () => {
         });
     }
     
+    ////// TODO
     useEffect(() => {
-        
         if (socketGame) {
             socketGame.emit("Ask_Invitation");
         }
     }, [])
+
+    useEffect(() => {
+        if (invite) {
+            console.log("invite status", invite.status);
+        }
+        if (invite?.status === "received") {
+            inviteRef.current = invite;
+        }
+    }, [invite])
     
     useEffect(() => {
         if (socketGame) {
             socketGame.on("Invitation", (invitation: invitation) => {
-                if (invitation.for === user?.login) {
+                
+                console.log("inviteRef.current", inviteRef.current)
+                console.log("invitation", invitation)
+                if (inviteRef.current != null && invitation.by === inviteRef.current!.by && invitation.for === inviteRef.current!.for) {
+                    setInvite(null);
+                    inviteRef.current = null;
+                    console.log("Invitation has been canceled by asker", invitation);
+                }
+                else if (invitation.for === user?.login) {
                     setInvite({for: invitation.for, by: invitation.by, status: "received", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation Received", invitation);
                 }
@@ -65,12 +83,8 @@ const PopUp: React.FC = () => {
                     setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation not send", invitation);
                 }
-                if (invitation.by === invite?.by && invitation.for === invite.for) {
-                    setInvite(null);
-                    console.log("Invitation has been canceled by asker", invitation);
-                }
             });
-
+            
             socketGame.on("Players", () => {
                 console.log('Player info received');
             })
@@ -81,13 +95,14 @@ const PopUp: React.FC = () => {
                         ...prevState!,
                         status: "declined",
                     }));
-                // }
-            })
-            
-            socketGame.on("Invitation_Accepted", () => {
-                // if (invite?.status === "send") {
-                    console.log("invite has been accepted by target");
-                    setInvite(null);
+                    // }
+                })
+                
+                socketGame.on("Invitation_Accepted", () => {
+                    // if (invite?.status === "send") {
+                        console.log("invite has been accepted by target");
+                        setInvite(null);
+                    inviteRef.current = null;
                     navigate("/game", {state : {from : "invitation"}});
                 // }
             })
@@ -98,27 +113,27 @@ const PopUp: React.FC = () => {
         if (invite) {
             switch (invite?.status) {
                 case "received":
-                  setPopUpContent(
-                    <div className="container">
+                    setPopUpContent(
+                        <div className="container">
                         <div>{invite?.by} invites you to play a game</div>
                         <div id="accept" onClick={acceptInvitation}>Accept</div>
                         <div id="decline" onClick={declineInvitation}>Decline</div>
                     </div>
                   );
                   break;
-
-                case "send":
-                  setPopUpContent(
+                  
+                  case "send":
+                      setPopUpContent(
                     <div className="container">
                         <div>Invitation successfully sent to {invite?.for}</div>
                         <div onClick={cancelInvitation}>Cancel invitation</div>
                     </div>
                   );
                   break;
-
-                case "notSend":
-                  setPopUpContent(
-                    <div className="container">
+                  
+                  case "notSend":
+                      setPopUpContent(
+                          <div className="container">
                         <div>{invite?.for} is not available</div>
                         <div id="close_popUp" onClick={closePopUp}>X</div>
                     </div>
@@ -135,8 +150,8 @@ const PopUp: React.FC = () => {
                   break;
 
                 default:
-                  break;
-              }
+                    break;
+                }
         }
     }, [invite])
     
@@ -144,6 +159,7 @@ const PopUp: React.FC = () => {
         console.log("accept invite");
         socketGame.emit("Private_Matchmaking", {target: invite?.by, super_game_mode: invite?.super_game_mode});
         setInvite(null);
+        inviteRef.current = null;
         navigate("/game", {state : {from : "invitation"}});
     }
     
@@ -151,6 +167,7 @@ const PopUp: React.FC = () => {
         console.log("decline invite");
         socketGame.emit("Decline_Invitation", {player1_login: invite?.by})
         setInvite(null);
+        inviteRef.current = null;
     }
     
     const cancelInvitation = () => {
@@ -162,7 +179,7 @@ const PopUp: React.FC = () => {
     const closePopUp = () => {
         setInvite(null);
     }
-
+    
     return (
         <div id="PopUp" className={invite == null ? "hide" : ""}>
             {popUpContent}
