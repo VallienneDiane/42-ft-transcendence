@@ -168,9 +168,7 @@ class SearchChat extends React.Component<{ privateMsgs: {userName: string, userI
             // console.log("fetchUsers", newUserList);
             this.setState({users: newUserList});
         })
-        .catch(error => {
-            console.log(error);
-        })
+        .catch(error => { console.log(error); })
     }
 
     showSearchList(event: any) {

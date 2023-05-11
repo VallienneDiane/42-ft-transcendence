@@ -381,9 +381,7 @@ class InviteUser extends React.Component<{dest: IDest}, {
                 newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
                 this.setState({ users: newUserList, filtered: newUserList });
             })
-            .catch(error => {
-                console.log(error);
-            })
+            .catch(error => { console.log(error); })
         })
     }
 
