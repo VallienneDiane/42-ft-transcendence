@@ -13,14 +13,14 @@ interface invitation {
     for: string,
     by: string,
     send: boolean,
-    super_game_mode: string,
+    super_game_mode: boolean,
 }
 
 interface invite {
     for: string,
     by: string,
     status: string,
-    super_game_mode: string,
+    super_game_mode: boolean,
 }
 
 
@@ -108,6 +108,7 @@ const PopUp: React.FC = () => {
                   setPopUpContent(
                     <div className="container">
                         <div>Invitation successfully sent to {invite?.for}</div>
+                        <div onClick={cancelInvitation}>Cancel invitation</div>
                     </div>
                   );
                   break;
@@ -116,6 +117,7 @@ const PopUp: React.FC = () => {
                   setPopUpContent(
                     <div className="container">
                         <div>{invite?.for} is not available</div>
+                        <div id="close_popUp" onClick={closePopUp}>X</div>
                     </div>
                   );
                   break;
@@ -124,6 +126,7 @@ const PopUp: React.FC = () => {
                   setPopUpContent(
                     <div className="container">
                       <div>{invite?.for} declined your invitation</div>
+                      <div id="close_popUp" onClick={closePopUp}>X</div>
                     </div>
                   );
                   break;
@@ -135,7 +138,7 @@ const PopUp: React.FC = () => {
     }, [invite])
     
     const acceptInvitation = () => {
-        socketGame.emit("Private_Matchmaking", {target: invite?.by});
+        socketGame.emit("Private_Matchmaking", {target: invite?.by, super_game_mode: invite?.super_game_mode});
         setInvite(null);
         navigate("/game", {state : {from : "invitation"}});
     }
@@ -143,6 +146,16 @@ const PopUp: React.FC = () => {
     const declineInvitation = () => {
         console.log("try to decline invite");
         socketGame.emit("Decline_invitation", {player1_login: invite?.by})
+        setInvite(null);
+    }
+    
+    const cancelInvitation = () => {
+        console.log("try to cancel invite");
+        socketGame.emit("Cancel_invitation", {player1_login: invite?.by})
+        setInvite(null);
+    }
+    
+    const closePopUp = () => {
         setInvite(null);
     }
 
