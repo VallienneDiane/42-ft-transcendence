@@ -310,8 +310,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * find in witch game instance the client is a player and toggle his ready state
    * @param client the Socket from Socket.io
    */
- @SubscribeMessage("Ready")
-  handleReady(@ConnectedSocket() client: Socket) { // TODO check on the engine side what happen if the player send a ready message in a ongoing match
+  @SubscribeMessage("Ready")
+  handleReady(@ConnectedSocket() client: Socket) {
     console.log("JUST RECEIVED READY EVENT -------------------------------------------------------------------------------------");
 
     console.log("entering handleReady function");
@@ -329,6 +329,36 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handleReady function");
   }
   
+  @SubscribeMessage("Get_Status")
+  handleStatus(@ConnectedSocket() client: Socket) {
+    if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
+      this.server.to(client.id).emit("nothing");
+      return;
+    }
+    for (let index = 0; index < this.public_space.length; index++) {
+      const element = this.public_space[index];
+      if (element.waiting_client_socket === client) {
+        this.server.to(client.id).emit("in matchmaking");
+        return;
+      }
+    }
+    for (let index = 0; index < this.game_instance.length; index++) {
+      const element = this.game_instance[index];
+      if (element.players[0] === client || element.players[1] === client) {
+        let player = element.players[0] === client ? 0 : 1;
+        if (element.game_engine.pl1_ready && element.game_engine.pl2_ready) {
+          this.server.to(client.id).emit("ongoing match");
+          return;
+        }
+        if ((player === 0 && element.game_engine.pl1_ready) || (player === 1 && element.game_engine.pl2_ready)) {
+          this.server.to(client.id).emit("ready in match");
+          return;
+        }
+        this.server.to(client.id).emit("in match");
+        return;
+      }
+    }
+  }
 
   /**
    * find and remove the client from the correct struct, stopping the game if needed
@@ -436,7 +466,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
         this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
-
+        this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
+        
         // remove the waiting socket from the waiting space
         this.private_space.splice(i, 1);
         console.log("leaving handlePrivateMatching function");
@@ -458,6 +489,24 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true});
 
     console.log("leaving handlePrivateMatching function");
+  }
+
+  @SubscribeMessage("Invitation_Refused")
+  handle_denied(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO ) {
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.waiting_client_socket.id === this.get_socketid_by_login(this.socketID_UserEntity, body.player1_login) && element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        this.server.to(element.waiting_client_socket.id).emit("Send_False");
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(element.waiting_client_socket.id).login)
+        this.private_space.splice(index, 1);
+        return;
+      }
+    }
+  }
+
+  @SubscribeMessage("Invitation_Accepted")
+  handle_accepted(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
+
   }
 
   /**
