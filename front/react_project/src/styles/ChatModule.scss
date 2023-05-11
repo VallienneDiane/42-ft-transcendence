@@ -2,13 +2,10 @@
 
 #chat_page {
 	display: flex;
-	backdrop-filter: blur(7px);
-    background-color:  rgba(255, 255, 255, 0.31);
 	min-height: 500px;
-
+	
 	& .card {
 		display: flex;
-		// justify-content: space-between;
 		background: transparent;
 		padding: 2rem 8rem;
 		width: 100%;
@@ -227,7 +224,7 @@
 				display: flex;
 				flex-direction: column;
 				align-items: left;
-				height: 80%;
+				height: 90%;
 				padding-left: 1.5rem;
 				& h2 {
 					font-size: 20px;
@@ -242,7 +239,7 @@
 						flex-direction: row;
 						align-items: center;
 						justify-content: space-between;
-						padding: 0.6px 1px;
+						padding: 3px 1px;
 						& button {
 							width: 85%;
 							text-align: left;
@@ -283,14 +280,16 @@
 			position: relative;
 			display: flex;
 			flex-direction: column;
+			justify-content: space-between;
 			overflow: hidden;
 			width: 100%;
 			min-width: 450px;
 			min-height: 450px;
 			border-radius: 20px;
 			margin-left: 2%;
-			background-color:  rgba(255, 255, 255, 0.65);
+			background-color: rgba(255, 255, 255, 0.65);
 			box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
+	
 
 			& .sidebar {
 				position: absolute;
@@ -311,21 +310,21 @@
 						width: 100%;
 						overflow-y: auto;
 						& .closeIcon {
-							padding: 1rem;
+							padding: 5px;
 							font-size: 20px;
 							color: var(--third-color);
 						}
 						& .navRight {
 							text-align: end;
 							& h1 {
-								padding: 0.5rem 1rem;
+								padding: 1rem 1rem;
 								font-weight: bolder;
 							}
 							& .paramMenu {
 								display: flex;
 								flex-direction: column;
 								& > li {
-									padding: 0.4rem 1rem;
+									padding: 0.7rem 1rem;
 									border-bottom: 2px solid rgb(202, 202, 202);
 									& > button {
 										padding: 2px 15px 2px 15px;
@@ -521,7 +520,7 @@
 			& #messageList {
 				display: flex;
 				flex-direction: column-reverse;
-				height: 85%;
+				height: 100%;
 				background-color: #c8c3dd77;
 				padding: 1.5rem;
 				overflow-y: auto;
@@ -581,7 +580,7 @@
 
 			& #sendMessage {
 				display: flex;
-				height: 90px;
+				height: 5rem;
 				padding: 1.3rem;
 				& .sendMessageForm {
 					display: flex;

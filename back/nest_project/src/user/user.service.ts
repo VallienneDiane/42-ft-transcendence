@@ -22,7 +22,7 @@ export class UserService {
      * @returns UserEntity
      */
     async create(newUser: SignUpDto): Promise<UserEntity> {
-        const avatar: AvatarEntity = await this.avatarService.create(null);
+        const avatar: AvatarEntity = await this.avatarService.create(newUser.avatarSvg);
         const user: UserEntity = {
             id: undefined,
             id42: null,

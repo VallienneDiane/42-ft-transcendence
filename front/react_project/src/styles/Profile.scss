@@ -47,6 +47,7 @@
                 height: 25px;
                 // opacity: 65%;
                 margin: 0 0.9rem;
+                margin-bottom: 5px;
                 color: var(--third-color);
             }
         }
@@ -89,6 +90,7 @@
                     justify-content: center;
                     align-items: baseline;
                     flex-wrap: wrap;
+                    gap: 10px;
                     font-size: x-large;
                     padding-bottom: 12px;
                     & .name {
@@ -222,72 +224,53 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            // min-height: 50%;
             padding-top: 5px;
-
             & #matchList {
                 display: flex;
-                width: 75%;
-                background-color: #00000057;
-                border-style: double;
                 flex-direction: column;
-
+                width: 85%;
+                background-color: #c8c3dd77;
+                border-radius: 5px;
+                margin-top: 15px;
                 & #firstRow{
                     display: flex;
                     flex-direction: row;
-                    padding: 1.3%;
+                    padding: 1rem;
                     justify-content: space-evenly;
                     font-weight: 900;
                     font-size: larger;
                 }
-
                 & #historyElement {
                     display: flex;
-                    padding: 0.5%;
-                    border-style: groove;
                     flex-direction: row;
-                    flex-wrap: wrap;
                     justify-content: center;
-
-                    & #winner {
-                        font-weight: 900;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    padding: 2px;
+                    border: 1px solid var(--second-color);
+                    border-style: dashed;
+                    & .row {
                         display: flex;
-                        width: 50%;
-                        background-color: #8bc34a57;
-                        border-style: solid;
-                        border-right-color: #00000086;
-                        border-right-style: dotted;
-                        justify-content: space-between;
                         flex-direction: row;
-
-                        & #nameW {
-                            display: flex;
-                            padding: 3px;
-                            word-break: break-all;
+                        justify-content: space-between;
+                        width: 50%;
+                        font-weight: 900;
+                        padding: 0px 5px;
+                        border: 1px solid var(--second-color);
+                        &.winner {
+                            background-color: #c8ef9b36;
                         }
-
+                        &.loser {
+                            background-color: #da2e2e18;
+                        }
+                        & #name {
+                            word-break: break-all;
+                            padding: 3px;
+                        }
                         & #scoreW {
                             padding: 3px;
                             padding-right: 2%;
                         }
-                    }
-
-                    & #loser {
-                        font-weight: 900;
-                        display: flex;
-                        width: 50%;
-                        background-color: #da2e2e86;
-                        border-style: solid;
-                        border-left-color: #00000086;
-                        border-left-style: dotted;
-                        flex-direction: row;
-                        justify-content: space-between;
-
-                        & #nameL {
-                            padding: 3px;
-                            word-break: break-all;
-                        }
-
                         & #scoreL {
                             padding: 3px;
                             padding-left: 2%;
