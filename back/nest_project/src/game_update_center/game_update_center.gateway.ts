@@ -456,7 +456,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if the target is connected
     if (!this.get_socketid_by_login(this.socketID_UserEntity, body.target) || this.waiting_on_match.has(body.target))
     {
-      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false})
+      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: body.super_game_mode})
       return;
     }
 
@@ -492,8 +492,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).login);
     //this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
     this.private_space.push(private_room);
-    this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true})
-    this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true});
+    this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode})
+    this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, private_room.target_client_login)).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode});
 
     console.log("leaving handlePrivateMatching function");
   }

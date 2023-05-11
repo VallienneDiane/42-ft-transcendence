@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber } from "class-validator";
+import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber, IsOptional } from "class-validator";
 import { Optional } from "@nestjs/common";
 import { Match } from "src/match/Match";
 import { ChannelDto } from "src/chat/channel/channel.dto";
@@ -39,6 +39,7 @@ export class SignUpDto {
     @IsNotEmpty() @IsString() readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(10) password: string;
+    @IsOptional() @IsString() avatarSvg: string;
 }
 
 export class LoginDto {
