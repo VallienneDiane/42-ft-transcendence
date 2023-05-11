@@ -29,11 +29,8 @@ fait.
 ////les invitation en game
 fait pour le back reste a tester
 
-persistance base de donnees
 mise en reseau du site
 docker-compose up qui marche sans erreur dans un ordi qui ne contient pas de node-modules
-
-
 
 bug sur le jeu :
 
