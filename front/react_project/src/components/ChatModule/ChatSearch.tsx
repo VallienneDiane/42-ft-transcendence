@@ -4,7 +4,7 @@ import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
-import { IChannel, ISearch, IMessage, IMessageReceived } from "./Chat_models";
+import { IChannel, ISearch } from "./Chat_models";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
