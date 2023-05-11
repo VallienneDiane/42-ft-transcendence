@@ -456,7 +456,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if the target is connected
     if (!this.get_socketid_by_login(this.socketID_UserEntity, body.target) || this.waiting_on_match.has(body.target))
     {
-      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false})
+      this.server.to(client.id).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: body.super_game_mode})
       return;
     }
 
