@@ -299,7 +299,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let index = 0; index < this.game_instance.length; index++) {
       const game = this.game_instance[index];
       if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
+        for (let index = 0; index < game.spectators.length; index++) {
+          const spec = game.spectators[index];
+          if (spec.id === client.id) {
+            return;
+          }
+        }
         game.spectators.push(client);
+        console.log("join in spec mod the same game");
         client.join(game.players[0].id);
         game.game_engine.update_match_state();
       }
@@ -502,11 +509,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
     }
-  }
-
-  @SubscribeMessage("Invitation_Accepted")
-  handle_accepted(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
-
   }
 
   /**

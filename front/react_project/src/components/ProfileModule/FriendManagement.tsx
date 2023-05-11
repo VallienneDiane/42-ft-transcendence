@@ -5,7 +5,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
 
 
 export default function FriendManagement() {
@@ -291,13 +291,11 @@ export default function FriendManagement() {
                 {developFriend && <ul className="list">
                     {friends.map((elt) => (
                         <li className="element" key={elt.key}>
-                            <span>
+                            <div className="friend">
+                                <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                                 <NavLink to={`/profile/${elt.friendId}`}>
                                     <div className="name">{elt.friendName}</div>
                                 </NavLink>
-                                <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
-                            </span>
-                            <span>
                                 <button value={elt.friendId} id="chatButton" data-hover-text="chat with" onClick={changeLoc}>
                                     <NavLink id="chatButton" to={`/chat`}>
                                         <FontAwesomeIcon className="iconAction" icon={faCommentDots} />
@@ -306,12 +304,12 @@ export default function FriendManagement() {
                                 <button value={elt.friendshipId} data-hover-text="unfriend" id="unfriendButton" onClick={unfriendHandler}>
                                     <FontAwesomeIcon className="iconAction" icon={faTrashCan} />
                                 </button>
-                            </span>
-                            {elt.isConnected && <span id="invite">
-                                <FontAwesomeIcon className="iconAction" icon={faPingPongPaddleBall} />
+                            </div>
+                            {elt.isConnected && <div id="invite">
                                 <button value={elt.friendName} onClick={inviteNormal}>normal</button>
+                                <FontAwesomeIcon className="iconAction" icon={faGamepad} />
                                 <button value = {elt.friendName} onClick={inviteSuper}>super</button>
-                            </span>}
+                            </div>}
                         </li>
                         ))}
                 </ul>}

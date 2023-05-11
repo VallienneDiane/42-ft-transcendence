@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Outlet } from "react-router-dom"
 import NavBar from "./Navbar"
+import PopUp from "./PopUp";
 
 // type LayoutProps = {
 //     children: ReactNode;
@@ -18,6 +19,7 @@ import NavBar from "./Navbar"
 const Layout = () => {
     return (
         <div>
+            <PopUp/>
             <NavBar />
             <Outlet />
         </div>

@@ -381,9 +381,7 @@ class InviteUser extends React.Component<{dest: IDest}, {
                 newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
                 this.setState({ users: newUserList, filtered: newUserList });
             })
-            .catch(error => {
-                console.log(error);
-            })
+            .catch(error => { console.log(error); })
         })
     }
 
@@ -526,6 +524,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
 
 export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const ref = useRef<HTMLDivElement>(null);
 
     const addFriend = () => {
@@ -534,6 +533,13 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
 
     const blockUser = () => {
         socket.emit("blockUser", {id: props.dest.id});
+    }
+
+    const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
+        if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: false});
+        else if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: true});
     }
 
     useEffect(() => {
@@ -557,8 +563,8 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
                     <li><NavLink id="navlink" to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game<br></br>
-                        <button>normal</button>
-                        <button>super</button>
+                        <button onClick={proposeGame} data-type="normal">normal</button>
+                        <button onClick={proposeGame} data-type="super">super</button>
                     </li>
                     <li onClick={blockUser}>Block</li>
                 </ul>
