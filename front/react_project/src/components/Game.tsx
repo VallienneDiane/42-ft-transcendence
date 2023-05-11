@@ -9,6 +9,10 @@ import { DefaultEventsMap } from "@socket.io/component-emitter";
 import MatchsInProgress from "./MatchsInProgress"
 import SearchUserBar from "./SearchUserBar"
 import { SocketContext } from "./context"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowDown, faArrowUp, faGear } from "@fortawesome/free-solid-svg-icons"
+import { useLocation } from "react-router"
+// import { faUp, faDown } from '@fortawesome/free-solid-svg-icons';
 
 interface ball {
     x: number,
@@ -49,8 +53,14 @@ interface Players {
     player2_score: number,
 }
 
+interface SpecMode {
+    active: boolean,
+    player1_login: string | null
+}
+
 
 const Game: React.FC = () => {
+    const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let clearGame: boolean = false;
     // const [clearGame, setClearGame] = useState<boolean>(false);
@@ -63,24 +73,35 @@ const Game: React.FC = () => {
     let ready: boolean = false;
     const [timer, setTimer] = useState<boolean>(false); // A init à false
     const [countdown, setCountdown] = useState<number | string>(3);
-    const countDownDiv = useRef<HTMLElement>(null);
-    const [players, setPlayers] = useState<Players>();
+    const countDownDiv = useRef<HTMLDivElement>(null);
+    const [players, setPlayers] = useState<Players | null >();
     // const [players, setPlayers] = useState<Players>({ player1_login: "", player1_score: 0, player2_score: 0, player2_login: "" });
     const playersRef = useRef<Players>();
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
+    const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
+    let specModeActive: boolean = false;
+    let specMatchLogin: string | null = null;
+    const [winner, setWinner] = useState<string>();
+    
+    const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
+        console.log("TOGGLE SPEC MODE FUNCTION")
+        specModeActive = toggle;
+        specMatchLogin = player1_login;
+        setSpecMode({active: toggle, player1_login: player1_login});
+    }
 
     const launchClassic = () => {
         // On click on 'start' button, start the game
         // setTimer(true); ////////////// TO DELETE
         // countDownDiv.current!.classList.add('zoom')
-
+        
         if (socketGame !== null && !matchInProgress) {
             socketGame.emit('Public_Matchmaking', { super_game_mode: false });
             setWaitMatch(true);
         }
     }
-
+    
     const launchGame = () => {
         // On click on 'start' button, start the game
         if (socketGame !== null && !matchInProgress) {
@@ -88,7 +109,7 @@ const Game: React.FC = () => {
             setWaitMatch(true);
         }
     }
-
+    
     const informReady = () => {
         // On click on 'ready' button, inform server that the player is ready
         if (socketGame !== null) {
@@ -97,21 +118,24 @@ const Game: React.FC = () => {
         setPlayerReady(true);
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
-
-
+    
     // useEffect(() => {
-    //     // Set the initial position of elements based on the width and height of the canvas element
-    //     if (canvasRef.current) {
-    //         setGameState({
-    //             BallPosition: [
-    //                 { x: canvasRef.current ? canvasRef.current.width / 2 : 0, y: canvasRef.current ? canvasRef.current.height / 2 : 0, r: 5 },
-    //             ],
-    //             paddleOne: { x: 0, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 },
-    //             paddleTwo: { x: 1, y: canvasRef.current ? canvasRef.current.height / 2 - 25 : 0 }
-    //         });
+    //     let { from } = location.state;
+    //     if (from != null && from === "invitation") {
+        //         console.log("Je viens depuis invite");
     //     }
-    // }, []);
-
+    // }, [from])
+    
+    useEffect(() => {
+        console.log(location.state);
+        if (location.state != null && location.state.from === "invitation") {
+            console.log("Je viens d'invitation");
+            setWaitMatch(false);
+            setMatchInProgress(true);
+            setButtonReady(true);
+        }
+    }, [])
+    
     // countdown handler
     useEffect(() => {
         if (timer === true && countDownDiv.current !== undefined) {
@@ -147,6 +171,7 @@ const Game: React.FC = () => {
             });
 
             socketGame.on('Players', (gamePlayers: Players) => {
+                console.log("Players", gamePlayers);
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(true);
@@ -165,12 +190,12 @@ const Game: React.FC = () => {
             })
 
             socketGame.on('Game_Update', (gameState: gameState) => {
+                // console.log("game update");
                 if (ready === true) {
                     setTimer(true);
                 }
                 setButtonReady(false);
                 ready = false;
-                // setGameState(gameState);
                 if (clearGame === false) {
                     setGameState((prevState) => ({
                         ...prevState,
@@ -187,10 +212,13 @@ const Game: React.FC = () => {
             });
 
             socketGame.on('Match_Update', (matchUpdate: MatchState) => {
-                if (playersRef.current?.player1_login === matchUpdate.player1_login) {
+                clearGame = false;
+                if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
                     setPlayers(prevPlayers => {
                         return {
                             ...prevPlayers!,
+                            player1_login: matchUpdate.player1_login,
+                            player2_login: matchUpdate.player2_login,
                             player1_score: matchUpdate.player1_score,
                             player2_score: matchUpdate.player2_score,
                         }
@@ -201,8 +229,13 @@ const Game: React.FC = () => {
             socketGame.on('Match_End', (matchEnd: MatchEnd) => {
                 setWaitMatch(false);
                 setMatchInProgress(false);
+                setTimer(false);
                 setCountdown(3);
-                setPlayerReady(false)
+                setPlayerReady(false);
+                setButtonReady(false);
+                setPlayers(null);
+                setWinner(matchEnd.winner);
+                setSpecMode({active: false, player1_login: null});
                 ready = false;
                 clearGame = true;
                 // setClearGame(true);
@@ -265,8 +298,8 @@ const Game: React.FC = () => {
         }
     };
 
-    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.8 * 0.8);
-    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.8 * 0.8 / (16 / 9));
+    const [gameWidth, setGameWidth] = useState<number>(window.innerWidth * 0.96 * 0.75);
+    const [gameHeight, setGameHeight] = useState<number>(window.innerWidth * 0.96 * 0.75 / (16 / 9));
     // Handle windows resizing
     useEffect(() => {
         function handleResize() {
@@ -320,10 +353,10 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socketGame} />
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode}/>
             <div id="gameContainer">
                 <div id="gamePanel">
-                    {matchInProgress ?
+                    {(matchInProgress || specMode.active) ?
                         <div id="players">
                             <div className="player">
                                 <div>{players?.player1_login}</div>
@@ -338,12 +371,11 @@ const Game: React.FC = () => {
                         : null}
                     <div id="gameField">
                         <canvas ref={canvasRef} tabIndex={0} width={gameWidth} height={gameHeight}></canvas>
-                        {matchInProgress || waitMatch ?
+                        {matchInProgress || waitMatch || specMode.active ?
                             null
                             :
                             <div id="gameSelector">
-                                {/* <h2>Select your opponent</h2>
-                            <SearchUserBar /> */}
+                                {winner != null ? <div id="winner">Winner: {winner} !</div>:null}
                                 <h2>Select your game</h2>
                                 <div id="gameButtons">
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
@@ -359,9 +391,34 @@ const Game: React.FC = () => {
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
                 <div id="instructions">
-                        <h2>Instructions</h2>
-                        <div>Classic : Le pong originel</div>
-                        <div>Super : Super mode</div>
+                    <div id="gameModes">
+                        <h3>Game Modes</h3>
+                        <div>
+                            <h3>Classic</h3>
+                            <p>The original pong game from 1972</p>
+                        </div>
+                        <div>
+                            <h3>Super</h3>
+                            <p>Keep an eye on every moving objects !</p>
+                        </div>
+                    </div>
+                    <div id="controls">
+                        <h3>Controls</h3>
+                        <div>
+                            <div className="icon">
+                                <FontAwesomeIcon className="arrow" icon={faArrowUp} />
+                                <div></div>
+                            </div>
+                            <p>Move your paddle up</p>
+                        </div>
+                        <div>
+                            <div className="icon">
+                                <FontAwesomeIcon className="arrow" icon={faArrowDown} />
+                                <div></div>
+                            </div>
+                            <p>Move your paddle up</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -369,6 +426,3 @@ const Game: React.FC = () => {
 }
 
 export default Game;
-
-// Match_Update
-// Match_End

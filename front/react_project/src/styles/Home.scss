@@ -4,7 +4,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-
+    font-family: 'MuseoModerno';
+    
+    
     // background: linear-gradient(180deg, rgba(114,211,179,1) 0%, rgba(255,249,253,1) 0%, rgba(216,255,242,1) 100%);
     // background-color: transparent;
     & .navbar {
@@ -50,7 +52,7 @@
                     left: -5px;
                     width: 15px;
                     height: 15px;
-                    // background-color: var(--second-color);
+                    background-color: var(--second-color);
                     // filter: brightness(0.9);
                     transform: rotate(45deg);
                     z-index: -1;
@@ -66,7 +68,7 @@
                     right: -8px;
                     width: 15px;
                     height: 8px;
-                    // background-color: var(--second-color);
+                    background-color: var(--second-color);
                     // filter: brightness(0.9);
                     transform: rotate(45deg);
                     z-index: -1;
