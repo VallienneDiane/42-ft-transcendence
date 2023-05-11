@@ -436,6 +436,19 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     return null;
   }
 
+  @SubscribeMessage("Cancel_Invitation")
+  handle_canceled(@ConnectedSocket() client: Socket) {
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.waiting_client_socket === client) {
+        this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, element.target_client_login)).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
+        this.private_space.splice(index, 1);
+        return;
+      }
+    }
+  }
+
   /**
    * handle private invitation
    * @param body a PrivateGameRequestDTO containing a non empty target string and a super_game_mode boolean
@@ -463,7 +476,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
       // if match and target not occupied
-      else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login && !this.waiting_on_match.has(body.target)) {
+      else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
         this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, body.super_game_mode);
