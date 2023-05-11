@@ -72,8 +72,8 @@ export class PongEngineService {
     pl2: Socket;
     user1: UserEntity;
     user2: UserEntity;
-    pl1_ready: boolean;
-    pl2_ready: boolean;
+    public pl1_ready: boolean;
+    public pl2_ready: boolean;
     pl1_score: number;
     pl2_score: number;
     victory_condition: string;
