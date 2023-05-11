@@ -23,19 +23,28 @@ interface MatchEnd {
     disconnection_occure: boolean;
 }
 
+interface SpecMode {
+    active: boolean,
+    player1_login: string | null
+}
+
 interface inProgressProps {
     socket: Socket<DefaultEventsMap, DefaultEventsMap>,
+    setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>,
+    toggleSpecMode: (toggle: boolean, player1_login: string | null) => void,
+    // specModeActive: boolean,
+    // specMatchLogin: string | null
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
     const [matchs, setMatchs] = useState<MatchState[]>([
-        {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
+        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
+        // {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
         // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
         // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiiifez", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
         // {player1_login: "Michellangelloooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
+        // {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
     ]);
 
     
@@ -44,17 +53,21 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     //     console.log("display matchs", matchs);
     // }, [matchs])
 
+        
+    useEffect(() => {
+        setMatchs([]);
+        if (props.socket !== null) {
+            console.log("ASK FOR MATCHS");
+            props.socket.emit('Get_Matches');      
+        }
+    }, []);
+
 
     useEffect(() => {
         // triggered when receiving socket data, update match list
         if (props.socket) {
 
             props.socket.on('Match_Update', (matchUpdate: MatchState) => {
-                // console.log('match update', matchUpdate);
-                // matchs.map((match) => {
-                //     console.log(match.player1_login, matchUpdate.player1_login);
-                // })
-                
                 setMatchs(prevMatchs => {
                     const updatedMatchs = prevMatchs.map(match => {
                       if (match.player1_login === matchUpdate.player1_login) {
@@ -81,9 +94,8 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     }, [props.socket]);
 
     const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
-        // console.log("event", event.currentTarget.attributes);
-        // console.log("je veux voir le match de ", event.currentTarget.getAttribute('data-key'));
-        props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')} )
+        props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key')),
+        props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')});
     }
 
     return (
