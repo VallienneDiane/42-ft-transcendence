@@ -310,8 +310,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * find in witch game instance the client is a player and toggle his ready state
    * @param client the Socket from Socket.io
    */
- @SubscribeMessage("Ready")
-  handleReady(@ConnectedSocket() client: Socket) { // TODO check on the engine side what happen if the player send a ready message in a ongoing match
+  @SubscribeMessage("Ready")
+  handleReady(@ConnectedSocket() client: Socket) {
     console.log("JUST RECEIVED READY EVENT -------------------------------------------------------------------------------------");
 
     console.log("entering handleReady function");
@@ -329,6 +329,36 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("leaving handleReady function");
   }
   
+  @SubscribeMessage("Get_Status")
+  handleStatus(@ConnectedSocket() client: Socket) {
+    if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
+      this.server.to(client.id).emit("nothing");
+      return;
+    }
+    for (let index = 0; index < this.public_space.length; index++) {
+      const element = this.public_space[index];
+      if (element.waiting_client_socket === client) {
+        this.server.to(client.id).emit("in matchmaking");
+        return;
+      }
+    }
+    for (let index = 0; index < this.game_instance.length; index++) {
+      const element = this.game_instance[index];
+      if (element.players[0] === client || element.players[1] === client) {
+        let player = element.players[0] === client ? 0 : 1;
+        if (element.game_engine.pl1_ready && element.game_engine.pl2_ready) {
+          this.server.to(client.id).emit("ongoing match");
+          return;
+        }
+        if ((player === 0 && element.game_engine.pl1_ready) || (player === 1 && element.game_engine.pl2_ready)) {
+          this.server.to(client.id).emit("ready in match");
+          return;
+        }
+        this.server.to(client.id).emit("in match");
+        return;
+      }
+    }
+  }
 
   /**
    * find and remove the client from the correct struct, stopping the game if needed
