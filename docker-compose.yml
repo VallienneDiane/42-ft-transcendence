@@ -13,7 +13,7 @@ services:
     networks:
       - transcendence_network
     volumes:
-      - ./postgres:/var/lib/postgresql/users
+      - database:/var/lib/postgresql/data
 
 ########################################## BACK-END NEST JS ##################################
   back:
@@ -60,24 +60,7 @@ services:
   #   restart: always
 ########################################### VOLUMES  #########################################
 volumes:
-  db:
-    driver: local
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./postgres
-  back:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./back
-  front:
-    driver: local
-    driver_opts:
-      type: none 
-      o: bind
-      device: ./front
+  database:
   # pgadmin:
   #   driver: local
   #   driver_opts:
