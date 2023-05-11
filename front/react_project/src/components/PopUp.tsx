@@ -29,17 +29,17 @@ const PopUp: React.FC = () => {
     const [invite, setInvite] = useState<invite | null>();
     const [popUpContent, setPopUpContent] = useState<JSX.Element>();
 
-    let decodedToken: JwtPayload = accountService.readPayload()!;
-    const id = decodedToken.sub;
-    userService.getUserWithAvatar(id!)
-    .then(response => {
-        console.log(response.data);
-        user = response.data;
-        console.log("apres requete", user);
-    })
-    .catch(error => {
-        console.log(error);
-    });
+    if (accountService.isLogged()) {
+        let decodedToken: JwtPayload = accountService.readPayload()!;
+        const id = decodedToken.sub;
+        userService.getUserWithAvatar(id!)
+        .then(response => {
+            user = response.data;
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
     
     useEffect(() => {
         
@@ -49,17 +49,14 @@ const PopUp: React.FC = () => {
     }, [])
     
     useEffect(() => {
-        console.log("dans socket", user);
         if (socketGame) {
             socketGame.on("Invitation", (invitation: invitation) => {
-                console.log("Invitation SOcket", invitation, user);
-                
                 if (invitation.for === user?.login) {
                     setInvite({for: invitation.for, by: invitation.by, status: "received"});
                     console.log("Invitation Received", invitation);
                 }
                 if (invitation.send === true && invitation.by === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "sen"});
+                    setInvite({for: invitation.for, by: invitation.by, status: "send"});
                     console.log("Invitation successfuly sent" , invitation);
                 }
                 if (invitation.send === false && invitation.by === user?.login) {
@@ -71,20 +68,59 @@ const PopUp: React.FC = () => {
             socketGame.on("Players", () => {
                 console.log('Player info received');
             })
+
+            socketGame.on("Invite_Declined", () => {
+                // if (invite?.by === user.login) {
+                    console.log("status changed");
+                    setInvite((prevState) => ({
+                        ...prevState!,
+                        status: "declined",
+                    }));
+                // }
+            })
         }
     }, [socketGame]);
 
     useEffect(() => {
         if (invite) {
-            if (invite?.status === "received") {
-                setPopUpContent(
+            switch (invite?.status) {
+                case "received":
+                  setPopUpContent(
                     <div className="container">
                         <div>{invite?.by} invites you to play a game</div>
                         <div id="accept" onClick={acceptInvitation}>Accept</div>
                         <div id="decline" onClick={declineInvitation}>Decline</div>
                     </div>
-                )
-            }
+                  );
+                  break;
+
+                case "send":
+                  setPopUpContent(
+                    <div className="container">
+                        <div>Invitation successfully sent to {invite?.for}</div>
+                    </div>
+                  );
+                  break;
+
+                case "notSend":
+                  setPopUpContent(
+                    <div className="container">
+                        <div>{invite?.for} is not available</div>
+                    </div>
+                  );
+                  break;
+
+                case "declined":
+                  setPopUpContent(
+                    <div className="container">
+                      <div>{invite?.for} declined your invitation</div>
+                    </div>
+                  );
+                  break;
+                  
+                default:
+                  break;
+              }
         }
     }, [invite])
     
@@ -93,9 +129,11 @@ const PopUp: React.FC = () => {
         setInvite(null);
         navigate("/game", {state : {from : "invitation"}});
     }
-
+    
     const declineInvitation = () => {
-
+        console.log("try to decline invite");
+        socketGame.emit("Decline_invitation", {player1_login: invite?.by})
+        setInvite(null);
     }
 
     return (
