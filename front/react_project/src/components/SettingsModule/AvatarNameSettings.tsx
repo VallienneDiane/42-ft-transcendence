@@ -4,6 +4,7 @@ import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
 import { LoginSettingsForm } from "../../models";
 import { useForm } from "react-hook-form";
+import Auth2faSettings from "./Auth2faSettings";
 
 const AvatarNameSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;

@@ -61,7 +61,7 @@ const Callback: React.FC = () => {
         <div id="loadingPage">
             <div className="spinner">
                 <p>Loading</p>
-                <GridLoader size="28px" color="#36d7b7" loading={true}/>
+                <GridLoader size="28px" color="#33469c77" loading={true}/>
             </div>
         </div>
     );
