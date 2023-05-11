@@ -12,13 +12,15 @@ import { JwtPayload } from "jsonwebtoken"
 interface invitation {
     for: string,
     by: string,
-    send: boolean
+    send: boolean,
+    super_game_mode: string,
 }
 
 interface invite {
     for: string,
     by: string,
     status: string,
+    super_game_mode: string,
 }
 
 
@@ -52,15 +54,15 @@ const PopUp: React.FC = () => {
         if (socketGame) {
             socketGame.on("Invitation", (invitation: invitation) => {
                 if (invitation.for === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "received"});
+                    setInvite({for: invitation.for, by: invitation.by, status: "received", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation Received", invitation);
                 }
                 if (invitation.send === true && invitation.by === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "send"});
+                    setInvite({for: invitation.for, by: invitation.by, status: "send", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation successfuly sent" , invitation);
                 }
                 if (invitation.send === false && invitation.by === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "notSend"});
+                    setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
                     console.log("Invitation not send", invitation);
                 }
             });

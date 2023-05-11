@@ -78,9 +78,9 @@ const BallContainer = (props: BallContainerProps) => {
 }
 
 const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WIDTH: number, pageElements: { element: DOMRect | null, hit: boolean }[]) => {
-    const gravity = 0.01;
-    const frottement = 0.998;
-    const restitution = 0.93;
+    const gravity = 0.011;
+    const frottement = 0.999;
+    const restitution = 0.95;
 
     for (let i = 0; i < balls.length; i++) {
         const ball = balls[i];
@@ -268,7 +268,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const initBalls: BallProps[] = [];
 
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 21; i++) {
             let id = i;
             let x = (Math.random() - 0.5) * CONTAINER_WIDTH;
             let y = Math.random() * -1000;
