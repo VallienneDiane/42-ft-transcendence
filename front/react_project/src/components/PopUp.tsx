@@ -68,14 +68,22 @@ const PopUp: React.FC = () => {
             socketGame.on("Players", () => {
                 console.log('Player info received');
             })
-
+            
             socketGame.on("Invite_Declined", () => {
-                // if (invite?.by === user.login) {
+                // if (invite?.status === "send") {
                     console.log("status changed");
                     setInvite((prevState) => ({
                         ...prevState!,
                         status: "declined",
                     }));
+                // }
+            })
+            
+            socketGame.on("Invitation_Accepted", () => {
+                // if (invite?.status === "send") {
+                    console.log("invite has been accepted by target");
+                    setInvite(null);
+                    navigate("/game", {state : {from : "invitation"}});
                 // }
             })
         }
@@ -117,7 +125,7 @@ const PopUp: React.FC = () => {
                     </div>
                   );
                   break;
-                  
+
                 default:
                   break;
               }
