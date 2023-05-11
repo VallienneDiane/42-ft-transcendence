@@ -276,9 +276,23 @@ class SearchChat extends React.Component<{ privateMsgs: {userName: string, userI
         });
 
         this.context.socket.on('userConnected', (user: {userId: string, userLogin: string}) => {
-            // this.fetchUsers() a finir !!! verifier si le user est dans mes dm, si oui ne pas l'ajouter a users
+            let isDM = this.props.privateMsgs.findIndex((dm) => {
+                return dm.userId == user.userId;
             });
-        }
+            if (isDM != -1)
+                return;
+            let isInSearch = this.state.users.findIndex((inSearch) => {
+                return inSearch.id == user.userId;
+            });
+            if (isInSearch == -1) {
+                let newList = [...this.state.users, {id: user.userId, name: user.userLogin, isChannel: false, password: false, isClickable: true}];
+                newList.sort((a, b) => {
+                    return a.name.localeCompare(b.name);
+                });
+                this.setState({users: newList});
+            }
+        });
+    }
         
     componentWillUnmount(): void {
         document.removeEventListener("mousedown", this.closeSearchList);
