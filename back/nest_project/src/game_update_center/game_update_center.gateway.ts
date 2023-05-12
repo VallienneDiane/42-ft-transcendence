@@ -407,6 +407,38 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     return result;
   }
 
+  find_and_remove_private(@ConnectedSocket() client: Socket) {
+    console.log("entering find_and_remove_private function");
+
+    this.clean_match();
+     // if the client was waiting for a private match or is the target of a match
+    for (let i = 0; i < this.private_space.length; i++) {
+      const ws = this.private_space[i];
+      if (ws.waiting_client_socket === client) {
+        let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
+        for (let index = 0; index < all_socket.length; index++) {
+          const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all target socket if the client disconnecting is the waiter");
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
+        }
+        this.private_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in private_space");
+        return;
+      }
+      if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
+        for (let index = 0; index < all_socket.length; index++) {
+          const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all waiter socket if socket disconnecting is the last socket of the target");
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
+        }
+        this.private_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in private_space");
+        return;
+      }
+    }
+  }
+
   /**
    * find and remove the client from the correct struct, stopping the game if needed
    * @param client the client who got disconnected
@@ -450,33 +482,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (ws.waiting_client_socket === client) {
         this.public_space.splice(i, 1);
         console.log("leaving find_and_remove function having find a waiting socket in public_space");
-        return;
-      }
-    }
-
-    // if the client was waiting for a private match or is the target of a match
-    for (let i = 0; i < this.private_space.length; i++) {
-      const ws = this.private_space[i];
-      if (ws.waiting_client_socket === client) {
-        let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
-        for (let index = 0; index < all_socket.length; index++) {
-          const element = all_socket[index];
-          console.log("sending in find and remove invitation send false to all target socket if the client disconnecting is the waiter");
-          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
-        }
-        this.private_space.splice(i, 1);
-        console.log("leaving find_and_remove function having find a waiting socket in private_space");
-        return;
-      }
-      if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
-        for (let index = 0; index < all_socket.length; index++) {
-          const element = all_socket[index];
-          console.log("sending in find and remove invitation send false to all waiter socket if socket disconnecting is the last socket of the target");
-          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
-        }
-        this.private_space.splice(i, 1);
-        console.log("leaving find_and_remove function having find a waiting socket in private_space");
         return;
       }
     }
@@ -704,6 +709,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
       console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
       if (nbr_of_socket <= 1) {
+        this.find_and_remove_private(client);
         this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
         this.logger.debug("client was removed from waiting on game due to disconnection");
       }
