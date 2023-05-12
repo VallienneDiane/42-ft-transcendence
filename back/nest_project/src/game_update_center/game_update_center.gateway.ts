@@ -153,8 +153,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
       if (element.target_client_login === this.socketID_UserEntity.get(client.id).login || client === element.waiting_client_socket) {
-        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
         console.log("INVITE RESEND");
+        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
     }
   }
