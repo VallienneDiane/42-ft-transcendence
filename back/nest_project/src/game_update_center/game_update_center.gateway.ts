@@ -118,7 +118,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let user_entity = await this.tokenChecker(client);
   
     // if not remove him
-    if (user_entity === null) { // TODO test if it work
+    if (user_entity === null) {
       console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
       client.disconnect();
       return;
@@ -131,6 +131,12 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if undefined is it is then set the value to 0 instead
     nbr_of_socket = nbr_of_socket ?? 0;
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+      }
+    }
     //this.transfer_all_match(client);
     console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);

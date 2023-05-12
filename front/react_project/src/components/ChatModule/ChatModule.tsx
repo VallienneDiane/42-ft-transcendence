@@ -14,13 +14,13 @@ import { faCommentDots } from '@fortawesome/free-solid-svg-icons';
 class ChannelDMList extends React.Component<{ 
     dest: string, 
     privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] 
-}, { me: JwtPayload, channels: {channel: IChannel, status: string}[], dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] }> {
+}, { me: JwtPayload, channels: {channel: IChannel, status: string}[], privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] }> {
     constructor(props: { 
         dest: string, 
         privateMsgs: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[]
     }) {
         super(props); 
-        this.state = { me: accountService.readPayload()!, channels: [], dms: this.props.privateMsgs };
+        this.state = { me: accountService.readPayload()!, channels: [], privateMsgs: props.privateMsgs };
         this.changeLoc = this.changeLoc.bind(this);
         this.checkOnline = this.checkOnline.bind(this);
         this.checkOffline = this.checkOffline.bind(this);
@@ -32,21 +32,21 @@ class ChannelDMList extends React.Component<{
     
     changeLoc(channel: {loc: string, isChannel: boolean}) {
         this.context.socket.emit('changeLoc', channel);
-        const index = this.state.dms.findIndex(dm => dm.userId === channel.loc);
+        const index = this.state.privateMsgs.findIndex(dm => dm.userId === channel.loc);
         if (index != -1) {
-            const tmpDM = [...this.state.dms];
+            const tmpDM = [...this.state.privateMsgs];
             tmpDM[index].waitingMsg = false;
-            this.setState({ dms: tmpDM });
+            this.setState({ privateMsgs: tmpDM });
         }
     }
     
     checkNewMsg() {
         this.context.socket.on('pingedBy', (id: string) => {
-            const index = this.state.dms.findIndex(dm => dm.userId == id);
+            const index = this.state.privateMsgs.findIndex(dm => dm.userId == id);
             if (index != -1) {
-                const tmpDM = [...this.state.dms];
+                const tmpDM = [...this.state.privateMsgs];
                 tmpDM[index].waitingMsg = true;
-                this.setState({ dms: tmpDM });
+                this.setState({ privateMsgs: tmpDM });
             }
         })
     }
@@ -54,7 +54,7 @@ class ChannelDMList extends React.Component<{
     checkOnline() {
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
-            for (let elt of this.state.dms) {
+            for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
@@ -64,14 +64,14 @@ class ChannelDMList extends React.Component<{
                 return;
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
-            this.setState({dms: nextState});
+            this.setState({privateMsgs: nextState});
         })
     }
 
     checkOffline() {
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
-            for (let elt of this.state.dms) {
+            for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
@@ -81,7 +81,7 @@ class ChannelDMList extends React.Component<{
                 return;
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
-            this.setState({dms: nextState});
+            this.setState({privateMsgs: nextState});
         })
     }
 
@@ -124,6 +124,7 @@ class ChannelDMList extends React.Component<{
     }
 
     componentDidMount(): void {
+        console.log("1", this.state.privateMsgs)
         this.setMyChannels();
 
         this.checkOnline();
@@ -132,7 +133,7 @@ class ChannelDMList extends React.Component<{
         
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
             let sorted = new Map<string, {userName: string, userId: string, connected: boolean, waitingMsg: boolean}>();
-            for (let elt of this.state.dms) {
+            for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userName, {userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: elt.waitingMsg});
             }
             const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(room.login);
@@ -144,7 +145,7 @@ class ChannelDMList extends React.Component<{
             }
             let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             sorted.forEach( (room, login) => nextState.push({userName: login, userId: room.userId, connected: room.connected, waitingMsg: room.waitingMsg}));
-            this.setState({dms: nextState});
+            this.setState({privateMsgs: nextState});
         });
     }
     
@@ -160,8 +161,9 @@ class ChannelDMList extends React.Component<{
     }
 
     render() {
+        console.log(this.state.privateMsgs)
         let displayDM: boolean = false;
-        if (this.state.dms.length !== 0)
+        if (this.state.privateMsgs.length !== 0)
             displayDM = true;
         return (
             <div id="channelListWrapper">
@@ -175,7 +177,7 @@ class ChannelDMList extends React.Component<{
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
-                    {this.state.dms.map((dm, id) => {
+                    {this.state.privateMsgs.map((dm, id) => {
                     if (this.state.me.sub !== dm.userId) {
                         return (
                         <li key={id}>
@@ -201,11 +203,12 @@ export default class ChatModule extends React.Component<{}, {
     dest: IDest,
     history: IMessage[],
     dms: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[],
-    popupIsOpen: boolean
+    popupIsOpen: boolean,
+    show: boolean
 }> {
     constructor(props : {}) {
         super(props);
-        this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: [], popupIsOpen: false};
+        this.state = {dest: {id: '', name: '', isChannel: true}, history: [], dms: [], popupIsOpen: false, show: false};
         this.handleNewMessageOnHistory = this.handleNewMessageOnHistory.bind(this);
         this.onClickPopup = this.onClickPopup.bind(this);
         this.initList = this.initList.bind(this);
@@ -253,7 +256,7 @@ export default class ChatModule extends React.Component<{}, {
             strs.forEach((elt) => {
                 listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
             });
-            this.setState({ dms: listDM })
+            this.setState({ dms: listDM, show: true })
         });
     }
 
@@ -261,12 +264,14 @@ export default class ChatModule extends React.Component<{}, {
         this.previousContext = this.context;
         if (this.context.socket !== null) {
             this.context.socket.emit("whereIam");
+            console.log("componentDidMount")
             this.initList();
         }
     }
 
     componentDidUpdate() {
         if (this.previousContext !== this.context) {
+            console.log("componentDidUpdate")
             this.initList();
         }
         this.previousContext = this.context;
@@ -279,7 +284,8 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     render() {
-        if (this.context.socket != null) {
+        if (this.context.socket != null && this.state.show) {
+            console.log("blop", this.state.dms);
             return (
                 <div id="chat_page">
                     <div className="card">
