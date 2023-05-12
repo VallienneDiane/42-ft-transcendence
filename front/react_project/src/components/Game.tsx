@@ -125,6 +125,10 @@ const Game: React.FC = () => {
         //         console.log("Je viens depuis invite");
     //     }
     // }, [from])
+
+    useEffect(() => {
+        socketGame.emit('Get_Status')
+    }, [])
     
     useEffect(() => {
         console.log(location.state);
