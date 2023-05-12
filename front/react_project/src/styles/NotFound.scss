@@ -1,0 +1,12 @@
+@import url("Base.css");
+
+#notFound {
+	display: flex;
+    flex-direction: column;
+    align-items: center;
+	& h1 {
+		font-size: 10rem;
+		// color: var(--second-color);
+		font-family: 'MuseoModerno';
+	}
+}
