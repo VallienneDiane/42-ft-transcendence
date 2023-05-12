@@ -20,7 +20,22 @@
         border-radius: 20px;
         background-color:  rgba(255, 255, 255, 0.719);
         box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
-        padding-top: 25px;
+        // padding-top: 25px;
+        & > a {
+            width: 100%;
+            display: flex;
+            background: transparent;
+            justify-content: flex-end;
+            // align-items: center;
+            & .gear {
+                height: 25px;
+                // opacity: 65%;
+                margin: 0.9rem;
+                // margin-top: 10px;
+                color: var(--third-color);
+               
+            }
+        }
         & #profilePicture {
             object-fit: cover;
             width: 90%;
@@ -39,22 +54,15 @@
             justify-content: flex-end;
             border-bottom: 1px solid var(--second-color);
             & h1 {
-                width: 75%;
+                width: 100%;
                 text-align: center;
                 margin-bottom: 2px;
-            }
-            & .gear {
-                height: 25px;
-                // opacity: 65%;
-                margin: 0 0.9rem;
-                margin-bottom: 5px;
-                color: var(--third-color);
             }
         }
         & #FriendManagement {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            // gap: 20px;
             padding: 10px 10px;
             width: 100%;
             height: 100%;
@@ -63,7 +71,7 @@
 				display: flex;
 				flex-direction: column;
 				height: 60px;
-				padding: 1rem;
+				padding: 0 1.2rem;
 				& input {
 					width: 100%;
 					background: #c1bbd877;
@@ -83,8 +91,8 @@
 					color: var(--text-color);
 					position: absolute;
 					z-index: 9;
-					width: 160px;
-					margin: 2.4rem 0;
+					width: 260px;
+					margin: 34px 0;
 					padding: 0.3rem 1rem;
 					background-color: rgb(255, 255, 255);
 					box-shadow: 0 1px 2px rgb(204, 204, 204);

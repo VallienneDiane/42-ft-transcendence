@@ -63,20 +63,16 @@ export default function Profile() {
         <div id="profilePage">
             
             <aside>
-                {/* { user?.avatarSvg} */}
+                { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon className="gear" icon={faGear} /></NavLink> : null }
                 <img id="profilePicture" src={user?.avatarSvg!} />
-                {/* Online or not */}
                 <div id="login">
                     <h1>{user?.login}</h1>
-                    { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon className="gear" icon={faGear} /></NavLink> : null }
                 </div>
-
                 {currentUser === undefined ? (
-                    <div id="FriendManagement">
-                        {/* <SearchUserBar/> */}
-                        {socket && <FriendManagement />}
-                    </div>
-                    ): null}
+                <div id="FriendManagement">
+                    {socket && <FriendManagement />}
+                </div>
+                ): null}
             </aside>
             {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
