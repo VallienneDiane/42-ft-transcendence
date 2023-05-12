@@ -461,6 +461,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
         for (let index = 0; index < all_socket.length; index++) {
           const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all target socket if the client disconnecting is the waiter");
           this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
         }
         this.private_space.splice(i, 1);
@@ -471,6 +472,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
         for (let index = 0; index < all_socket.length; index++) {
           const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all waiter socket if socket disconnecting is the last socket of the target");
           this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
         }
         this.private_space.splice(i, 1);
@@ -534,11 +536,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
+        console.log("sending invitation accepted to the waiter socket");
         this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
         let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login);
         for (let index = 0; index < all_waiter_socket.length; index++) {
           const element = all_waiter_socket[index];
           if (element != private_waiting_socket.waiting_client_socket.id) {
+            console.log("private matchmaking happenning: sending to all waiter socket that are not the main one sending to :", element);
             this.server.to(element).emit("Clear_Invite");
           }
         }
@@ -546,6 +550,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         for (let index = 0; index < all_target_socket.length; index++) {
           const element = all_target_socket[index];
           if (element != client.id) {
+            console.log("private matchmaking happenning: sending to all target socket that are not the socket matching the event right now so sending to :", element);
             this.server.to(element).emit("Clear_Invite");
           }
         }
@@ -577,11 +582,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let all_client_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
     for (let index = 0; index < all_client_socket.length; index++) {
       const element = all_client_socket[index];
+      console.log("posting invite: sending to all sender socket");
       this.server.to(element).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode})
     }
     let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
     for (let index = 0; index < all_target_socket.length; index++) {
       const element = all_target_socket[index];
+      console.log("posting invite: sending to all receiver socket");
       this.server.to(element).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode});
     }
 
