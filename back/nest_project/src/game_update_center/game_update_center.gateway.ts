@@ -108,38 +108,36 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.debug("GameupdateCenter correctly initialized");
   }
 
-  @SubscribeMessage("Ask_Invitation")
-  handle_resend_invite(@ConnectedSocket() client: Socket) {
-    console.log("ASK INVITE RESEND");
-    for (let index = 0; index < this.private_space.length; index++) {
-      const element = this.private_space[index];
-      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
-        console.log("INVITE RESEND");
-      }
-    }
-  }
-
+  // @SubscribeMessage("Ask_Invitation")
+  // handle_resend_invite(@ConnectedSocket() client: Socket) {
+  //   for (let index = 0; index < this.private_space.length; index++) {
+  //     const element = this.private_space[index];
+  //     if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+  //       this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+  //     }
+  //   }
+  // }
+  
   /**
    * happend on connection to the game page
    * @param client the socket connecting
-   */
-  async handleConnection(@ConnectedSocket() client: Socket) {
+  */
+ async handleConnection(@ConnectedSocket() client: Socket) {
+   
+   // checking if the socket have a valid token
+   let user_entity = await this.tokenChecker(client);
     
-    // checking if the socket have a valid token
-    let user_entity = await this.tokenChecker(client);
-  
-    // if not remove him
-    if (user_entity === null) {
-      console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
-      client.disconnect();
-      return;
+   // if not remove him
+   if (user_entity === null) {
+     console.log("user_entity : ", user_entity, "has no valide token and so was kicked");
+     client.disconnect();
+     return;
     }
-
+    
     // if token is ok then store the UserEntity for quick acces
     this.socketID_UserEntity.set(client.id, user_entity);
     let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_entity.login);
-
+    
     // check if undefined is it is then set the value to 0 instead
     nbr_of_socket = nbr_of_socket ?? 0;
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
@@ -147,6 +145,18 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     //this.transfer_all_match(client);
     console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
+  }
+  
+  @SubscribeMessage("Ask_Invitation")
+  handle_resend_invite(@ConnectedSocket() client: Socket) {
+    console.log("ASK INVITE RESEND");
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login || client === element.waiting_client_socket) {
+        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+        console.log("INVITE RESEND");
+      }
+    }
   }
 
   @SubscribeMessage("Get_Matches")
@@ -635,6 +645,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (nbr_of_socket <= 1) {
         this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
         this.logger.debug("client was removed from waiting on game due to disconnection");
+        for (let index = 0; index < this.private_space.length; index++) {
+          const element = this.private_space[index];
+          if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+            this.server.to(element.waiting_client_socket.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+          }
+          if (element.waiting_client_socket === client) {
+            this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, element.target_client_login)).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+          }
+        }
       }
       else {
         console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
