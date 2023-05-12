@@ -22,6 +22,8 @@ export default function FriendManagement() {
     const [blocked, setBlocked] = useState<{id: string, name: string}[]>([]);
     const [developBlock, setDevelopBlock] = useState<boolean>(false);
     const [bugReactHook, setBugReactHook] = useState<boolean>(false);
+    const [text, setText] = useState<string>("");
+    const [isDropdown, setIsDropdown] = useState<boolean>(false);
 
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
@@ -124,6 +126,34 @@ export default function FriendManagement() {
 
     const unblockEvent = (e : any) => {
         socket.emit("unblockUser", {id: e.currentTarget.value})
+    }
+
+    const showSearchList = (event: any) => {
+        setIsDropdown(!isDropdown);
+        displayList(event);
+    }
+
+    const displayList = (event: any) => {
+        setText(event.target.value);
+
+        if (event.target.value) {
+            this.setState(() => {
+                const filteredUsers: ISearch[] =
+                this.state.users.filter((user: ISearch) =>
+                    user.name.startsWith(event.target.value));
+                const filteredChannels: ISearch[] =
+                this.state.channels.filter((channel: ISearch) =>
+                    channel.name.startsWith(event.target.value));
+                const filtered = this.compileFiltered(filteredUsers, filteredChannels);
+                return { filtered };
+            });
+        }
+        else {
+            this.setState(() => {
+                const filtered: ISearch[] = this.compileFiltered(this.state.users, this.state.channels);
+                return { filtered };
+            })
+        }
     }
 
     useEffect(() => {
@@ -280,10 +310,17 @@ export default function FriendManagement() {
 
     return (
         <div id="FriendManagement">
-            {/* <div className="searchbar">
-                <input type="text" onChange={this.displayList} onClick={this.showSearchList} value={this.state.text} placeholder="Search"/>
+            <div className="searchbar">
+                <input type="text" onChange={displayList} onClick={showSearchList} value={text} placeholder="Add new friend..."/>
                 <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-            </div> */}
+            </div>
+            {(this.state.filtered.length != 0 && isDropdown) &&
+            <ul ref={this.ref}>
+                {this.state.filtered.map((elt: ISearch, id: number) => (
+                    <SearchElement  key={id} handleClose={this.resetFiltered}
+                                    popupAction={this.onClickPopup} elt={elt} />
+                ))}
+            </ul>}
             {friends.length > 0 && <div>
                 <div className="title">
                     <h3>My friend{friends.length > 1 && "s"}</h3>
