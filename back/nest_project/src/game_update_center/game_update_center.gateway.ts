@@ -528,6 +528,20 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
         this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
+        let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login);
+        for (let index = 0; index < all_waiter_socket.length; index++) {
+          const element = all_waiter_socket[index];
+          if (element != private_waiting_socket.waiting_client_socket.id) {
+            this.server.to(element).emit("Clear_Invite");
+          }
+        }
+        let all_target_socket: string[] = this.get_all_socket_of_user(private_waiting_socket.target_client_login);
+        for (let index = 0; index < all_target_socket.length; index++) {
+          const element = all_target_socket[index];
+          if (element != client.id) {
+            this.server.to(element).emit("Clear_Invite");
+          }
+        }
         this.StartGameRoom(private_waiting_socket.waiting_client_socket, client, private_waiting_socket.super_game_mode);
         
         // remove the waiting socket from the waiting space
