@@ -89,6 +89,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         })
     }
 
+    @SubscribeMessage("listConnectedUsers")
+    handleListUsersConnected(@ConnectedSocket() client: Socket) {
+        this.tokenChecker(client)
+        .then((user) => {
+            if (user != null)
+                this.chatService.allUsersConnectedEvent(client, this.chatRoomHandler);
+        })
+    }
+
     @SubscribeMessage('addMessage')
     handleNewMessage(@MessageBody() data: addMessageDto, @ConnectedSocket() client: Socket) {
         this.tokenChecker(client)
