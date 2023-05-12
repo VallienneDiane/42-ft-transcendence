@@ -57,7 +57,7 @@ const ballShadowColor = DarkenColor(ballColor, 80);
 const BallContainer = (props: BallContainerProps) => {
 
     const Ball = (ball: BallProps) => {
-        if (ball.id === 1) {
+        if (ball.id === 0) {
             return (
                 <circle key={ball.id} className='ball' cx={ball.x + props.CONTAINER_WIDTH / 2} cy={ball.y} r={ball.r} fill="url(#grad2)" /> //fill='red' style={{ boxShadow: ' 0px 30px 10px rgba(0,0,0,0.78)' }}
             )
@@ -278,7 +278,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const initBalls: BallProps[] = [];
 
-        for (let i = 0; i < 21; i++) {
+        for (let i = 0; i < 150; i++) {
             let id = i;
             let x = (Math.random() - 0.5) * CONTAINER_WIDTH;
             let y = Math.random() * -1000;
