@@ -55,7 +55,7 @@ export class ChatService {
         let socketMap = roomHandler.userMap.get(userId);
         if (socketMap != undefined) {
             let channel: IChannelToEmit = await this.channelService.getOneById(channelId);
-            socketMap.sockets.forEach((user, socket) => {
+            socketMap.socks.sockets.forEach((user, socket) => {
                 socket.emit("channelLeaved", channel);
                 if (user.isChannel && user.room == channelId) {
                     roomHandler.joinRoom(userId, socket, "00000000-0000-0000-0000-000000000000", true, false, false);
@@ -67,7 +67,7 @@ export class ChatService {
 
     public connectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.set(user.id, client);
-        let newUser = roomHandler.addUser(user.id, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
+        let newUser = roomHandler.addUser(user.id, user.login, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
         this.goBackToGeneral(client);
         if (newUser) {
             chatNamespace.sockets.forEach( (socket) => {
@@ -130,6 +130,14 @@ export class ChatService {
         client.emit("usersAreConnected", idsToEmit);
     }
 
+    public allUsersConnectedEvent(client: Socket, roomHandler: UserRoomHandler) {
+        let usersConnected: {userId: string, userLogin: string}[] = [];
+        roomHandler.userMap.users.forEach((user, id) => {
+            usersConnected.push({userId: id, userLogin: user.login});
+        })
+        client.emit("allConnectedUsers", usersConnected);
+    }
+
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
         logger.debug(`${user.login} send : ${message}`);
         let room = roomHandler.socketMap.sockets.get(client);
@@ -162,7 +170,7 @@ export class ChatService {
                 });
                 let senderSockets = roomHandler.userMap.get(user.id);
                 if (senderSockets != undefined) {
-                    senderSockets.sockets.forEach((data, socket) => {
+                    senderSockets.socks.sockets.forEach((data, socket) => {
                         if (!data.isChannel && data.room == room.room)
                             socket.emit('selfMessage', toSend);
                     })
@@ -176,8 +184,8 @@ export class ChatService {
                     }
                 )
                 if (connected) {
-                    dest.emit('checkNewDM', {id: user.id, login: user.login}, true);
-                    dest.sockets.forEach((data, socket) => {
+                    dest.socks.emit('checkNewDM', {id: user.id, login: user.login}, true);
+                    dest.socks.sockets.forEach((data, socket) => {
                         if (!data.isChannel && data.room == user.id)
                             socket.emit("newMessage", toSend);
                         else
@@ -375,7 +383,7 @@ export class ChatService {
                                                         this.channelService.getOneById(channelId)
                                                         .then((channelEntity) => {
                                                             let channelToEmit: IChannelToEmit = channelEntity;
-                                                            logged.sockets.forEach(({}, socket) => {
+                                                            logged.socks.sockets.forEach(({}, socket) => {
                                                                 socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
                                                             })
                                                         })
@@ -418,7 +426,7 @@ export class ChatService {
                                                                 let logged = roomHandler.userMap.get(userEntity.id);
                                                                 if (logged != undefined) {
                                                                     let channelToEmit: IChannelToEmit = chanOpts;
-                                                                    logged.sockets.forEach(({}, socket) => {
+                                                                    logged.socks.sockets.forEach(({}, socket) => {
                                                                         socket.emit("channelJoined", {channel: channelToEmit, status: "normal"});
                                                                     })
                                                                 }
@@ -702,13 +710,13 @@ export class ChatService {
                                 .then((friendship: FriendEntity) => {
                                     let senderSockets = roomHandler.userMap.get(sender.id);
                                     if (senderSockets != undefined) {
-                                        senderSockets.emit("notice", "Your request has been sent.");
-                                        senderSockets.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
+                                        senderSockets.socks.emit("notice", "Your request has been sent.");
+                                        senderSockets.socks.emit("newFriendRequestSent", friendship.id, receiver.id, receiver.login);
                                     }
                                     // roomHandler.emitToUserHavingThisSocket(client, "notice", "Your request has been sent.");
                                     let receiverSockets = roomHandler.userMap.get(receiver.id);
                                     if (receiverSockets != undefined)
-                                        receiverSockets.emit("newFriendRequestReceived", friendship.id, sender.id, sender.login);
+                                        receiverSockets.socks.emit("newFriendRequestReceived", friendship.id, sender.id, sender.login);
                                 })
                             })
                         }
@@ -725,10 +733,10 @@ export class ChatService {
             .then(() => {
                 let receiverSockets = roomHandler.userMap.get(request.receiver.id);
                 if (receiverSockets != undefined)
-                    receiverSockets.emit("newFriend", request.id, request.sender.id, request.sender.login);
+                    receiverSockets.socks.emit("newFriend", request.id, request.sender.id, request.sender.login);
                 let senderSockets = roomHandler.userMap.get(request.sender.id);
                 if (senderSockets != undefined)
-                    senderSockets.emit("newFriend", request.id, request.receiver.id, request.receiver.login);
+                    senderSockets.socks.emit("newFriend", request.id, request.receiver.id, request.receiver.login);
             })
         })
     }
@@ -740,10 +748,10 @@ export class ChatService {
             .then(() => {
                 let receiverSockets = roomHandler.userMap.get(request.receiver.id);
                 if (receiverSockets != undefined)
-                    receiverSockets.emit("supressFriendRequest", friendshipId);
+                    receiverSockets.socks.emit("supressFriendRequest", friendshipId);
                 let senderSockets = roomHandler.userMap.get(request.sender.id);
                 if (senderSockets != undefined)
-                    senderSockets.emit("supressFriendRequest", friendshipId);
+                    senderSockets.socks.emit("supressFriendRequest", friendshipId);
             })
         })
     }
@@ -763,10 +771,10 @@ export class ChatService {
                 .then(() => {
                     let meSockets = roomHandler.userMap.get(me.id);
                     if (meSockets != undefined)
-                        meSockets.emit("supressFriend", friendshipId);
+                        meSockets.socks.emit("supressFriend", friendshipId);
                     let friendSockets = roomHandler.userMap.get(friend.id);
                     if (friendSockets != undefined)
-                        friendSockets.emit("supressFriend", friendshipId);
+                        friendSockets.socks.emit("supressFriend", friendshipId);
                 })
             }
         })
@@ -818,7 +826,7 @@ export class ChatService {
                         })
                         let sockets = roomHandler.userMap.get(user.id);
                         if (sockets != undefined)
-                        sockets.sockets.forEach(({}, socket) => {
+                        sockets.socks.sockets.forEach(({}, socket) => {
                             this.listBlockEvent(socket, user.id);
                         })
                         client.emit("notice", `You blocked ${found.login}.`);
@@ -838,7 +846,7 @@ export class ChatService {
                 .then(() => {
                     let sockets = roomHandler.userMap.get(user.id);
                     if (sockets != undefined)
-                    sockets.sockets.forEach(({}, socket) => {
+                    sockets.socks.sockets.forEach(({}, socket) => {
                         this.listBlockEvent(socket, user.id);
                     })
                 })

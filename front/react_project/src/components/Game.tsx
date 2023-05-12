@@ -269,10 +269,7 @@ const Game: React.FC = () => {
                 socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
-            setInputState((prevState) => ({
-                ...prevState,
-                down: true
-            }));
+
         }
     };
 
