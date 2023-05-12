@@ -261,6 +261,7 @@ const Game: React.FC = () => {
 
             socketGame.on('in matchmaking', () => {
                 console.log("in matchmaking status received");
+                setWaitMatch(true);
             })
 
             socketGame.on('ongoing match', () => {
