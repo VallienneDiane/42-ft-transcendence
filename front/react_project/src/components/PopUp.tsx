@@ -46,10 +46,12 @@ const PopUp: React.FC = () => {
     
     ////// TODO
     useEffect(() => {
+        console.log("ask invite function");
         if (socketGame) {
             socketGame.emit("Ask_Invitation");
+            console.log("ask invite send");
         }
-    }, [])
+    }, [socketGame])
 
     useEffect(() => {
         if (invite) {

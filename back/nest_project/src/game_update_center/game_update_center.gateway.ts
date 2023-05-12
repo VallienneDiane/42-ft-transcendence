@@ -108,6 +108,18 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.logger.debug("GameupdateCenter correctly initialized");
   }
 
+  @SubscribeMessage("Ask_Invitation")
+  handle_resend_invite(@ConnectedSocket() client: Socket) {
+    console.log("ASK INVITE RESEND");
+    for (let index = 0; index < this.private_space.length; index++) {
+      const element = this.private_space[index];
+      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+        console.log("INVITE RESEND");
+      }
+    }
+  }
+
   /**
    * happend on connection to the game page
    * @param client the socket connecting
@@ -131,12 +143,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if undefined is it is then set the value to 0 instead
     nbr_of_socket = nbr_of_socket ?? 0;
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
-    for (let index = 0; index < this.private_space.length; index++) {
-      const element = this.private_space[index];
-      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
-      }
-    }
+    
     //this.transfer_all_match(client);
     console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
