@@ -6,10 +6,44 @@ import { userService } from "../../services/user.service";
 import { accountService } from "../../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { faGamepad, faGear } from '@fortawesome/free-solid-svg-icons';
 import { SocketContext } from "../context";
 import MatchHistory from "./MatchHistory";
 import FriendManagement from "./FriendManagement";
+
+function OtherProfile(props: {userId: string, userName: string}) {
+    const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
+
+    const addFriend = () => {
+        socket.emit("friendRequest", {userId: props.userId});
+    }
+
+    const blockUser = () => {
+        socket.emit("blockUser", {id: props.userId});
+    }
+
+    const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
+        if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: false});
+        else if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: true});
+    }
+    
+    return (
+        <div id="actionProfile">
+            <ul className="buttonList">
+                <li onClick={addFriend}>Add Friend</li>
+                <li>Propose a game<br></br>
+                    <button onClick={proposeGame} data-type="normal">normal</button>
+                    <FontAwesomeIcon className="iconAction" icon={faGamepad} />
+                    <button onClick={proposeGame} data-type="super">super</button>
+                </li>
+                <li onClick={blockUser}>Block</li>
+            </ul>
+        </div>
+    )
+}
 
 export default function Profile() {
     const {socket} = useContext(SocketContext);
@@ -59,9 +93,7 @@ export default function Profile() {
     }, [currentUser, navigate])
     
     return (
-        
-        <div id="profilePage">
-            
+        <div id="profilePage"> 
             <aside>
                 { currentUser === undefined ? <NavLink to="/settings"><FontAwesomeIcon className="gear" icon={faGear} /></NavLink> : null }
                 <img id="profilePicture" src={user?.avatarSvg!} />
@@ -72,7 +104,7 @@ export default function Profile() {
                 <div id="FriendManagement">
                     {socket && <FriendManagement />}
                 </div>
-                ): null}
+                ) : <OtherProfile userId={user?.id!} userName={user?.login!} />}
             </aside>
             {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
