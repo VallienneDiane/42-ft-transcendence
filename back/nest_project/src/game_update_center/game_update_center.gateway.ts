@@ -435,7 +435,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         return;
       }
       if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        this.server.to(ws.waiting_client_socket.id).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
+        this.server.to(ws.waiting_client_socket.id).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
         this.private_space.splice(i, 1);
         console.log("leaving find_and_remove function having find a waiting socket in private_space");
         return;
