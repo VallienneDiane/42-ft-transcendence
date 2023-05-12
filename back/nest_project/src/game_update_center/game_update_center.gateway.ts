@@ -707,9 +707,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
         this.logger.debug("client was removed from waiting on game due to disconnection");
       }
-      else {
-        console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
-      }
+      // else {
+      //   // console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
+      // }
       this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
       if (this.socketID_UserEntity.delete(client.id) === false) {
         this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
