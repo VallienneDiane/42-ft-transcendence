@@ -92,21 +92,27 @@ const PopUp: React.FC = () => {
             })
             
             socketGame.on("Invite_Declined", () => {
-                // if (invite?.status === "send") {
-                    setInvite((prevState) => ({
-                        ...prevState!,
-                        status: "declined",
-                    }));
-                    // }
-                })
-                
-                socketGame.on("Invitation_Accepted", () => {
-                    // if (invite?.status === "send") {
-                        console.log("invite has been accepted by target");
-                        setInvite(null);
-                    inviteRef.current = null;
-                    navigate("/game", {state : {from : "invitation"}});
+            // if (invite?.status === "send") {
+                setInvite((prevState) => ({
+                    ...prevState!,
+                    status: "declined",
+                }));
                 // }
+            })
+            
+            socketGame.on("Invitation_Accepted", () => {
+            // if (invite?.status === "send") {
+                console.log("invite has been accepted by target");
+                setInvite(null);
+                inviteRef.current = null;
+                navigate("/game", {state : {from : "invitation"}});
+                // }
+            })
+            
+            socketGame.on("Clear_Invite", () => {
+                console.log("clear invite request");
+                setInvite(null);
+                inviteRef.current = null;
             })
         }
     }, [socketGame]);

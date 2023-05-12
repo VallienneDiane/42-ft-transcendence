@@ -254,6 +254,26 @@ const Game: React.FC = () => {
                     paddleTwo: null
                 })
             })
+
+            socketGame.on('nothing', () => {
+                console.log("nothing status received");
+            })
+
+            socketGame.on('in matchmaking', () => {
+                console.log("in matchmaking status received");
+            })
+
+            socketGame.on('ongoing match', () => {
+                console.log("ongoing match status received");
+            })
+
+            socketGame.on('ready in match', () => {
+                console.log("ready in match status received");
+            })
+
+            socketGame.on('in match', () => {
+                console.log("in match status received");
+            })
         }
     }, [socketGame]);
 
