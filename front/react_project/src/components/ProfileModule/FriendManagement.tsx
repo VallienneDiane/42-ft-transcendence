@@ -10,7 +10,8 @@ import { userService } from "../../services/user.service";
 
 function SearchbarFriend(props: {
     friendList: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[], 
-    requestSend: {friendshipId: string, friendId: string, friendName: string}[]
+    requestSend: {friendshipId: string, friendId: string, friendName: string}[], 
+    blockList: {id: string, name: string}[]
 }) {
     const {socket} = useContext(SocketContext);
     const ref = useRef<HTMLUListElement>(null);
@@ -19,7 +20,6 @@ function SearchbarFriend(props: {
     const [filtered, setFiltered] = useState<{ id: string, login: string }[]>([]);
 
     const addFriend = (event: any) => {
-        console.log(event.target.value);
         socket.emit("friendRequest", {userId: event.target.value});
         resetFiltered();
     }
@@ -48,6 +48,10 @@ function SearchbarFriend(props: {
                     }
                     for (let elt of props.requestSend) {
                         if (elt.friendId == id)
+                            ok = false;
+                    }
+                    for (let elt of props.blockList) {
+                        if (elt.id == id)
                             ok = false;
                     }
                 }   
@@ -102,7 +106,7 @@ function SearchbarFriend(props: {
             {(filtered.length != 0 && isDropdown) &&
             <ul ref={ref}>
                 {filtered.map((elt: { id: string, login: string }, id: number) => (
-                    <li className="searchElement">
+                    <li className="searchElement" key={elt.id}>
                         <button value={elt.id} onClick={addFriend}>{elt.login}</button>
                     </li>
                 ))}
@@ -113,11 +117,14 @@ function SearchbarFriend(props: {
 
 export default function FriendManagement() {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [friends, setFriends] = useState<{key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
     const [developFriend, setDevelopFriend] = useState<boolean>(false);
     const [askIfConnectedDone, setAsk] = useState<boolean>(false);
     const [fetchDone, setFetch] = useState<boolean>(false);
+    const [requestDone, setRequestDone] = useState<boolean>(false);
+    const [blockDone, setBlockDone] = useState<boolean>(false);
     const [pendings, setPendings] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
     const [developPending, setDevelopPending] = useState<boolean>(false);
     const [requests, setRequests] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
@@ -150,6 +157,7 @@ export default function FriendManagement() {
         Axios.get("listRequestsPendingSend/" + me.sub)
         .then((response) => {
             setPendings(response.data);
+            setRequestDone(true);
         });
     }
 
@@ -165,16 +173,11 @@ export default function FriendManagement() {
         socket.emit("unfriend", {friendshipId: e.currentTarget.value});
     }
 
-    const inviteToGameHandler = (e: any) => {
-        console.log("invite To Game");
-    }
-
-    const inviteNormal = (e: any) => {
-
-    }
-
-    const inviteSuper = (e: any) => {
-
+    const proposeGame = (event: any) => {
+        if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: false});
+        else if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: true});
     }
 
     const invertDevelopFriend = () => {
@@ -233,6 +236,7 @@ export default function FriendManagement() {
         fetchBlocked();
         socket.on("listBlock", (data: {id: string, name: string}[]) => {
             setBlocked(data);
+            setBlockDone(true);
         })
     }, []);
 
@@ -365,6 +369,7 @@ export default function FriendManagement() {
         socket.on("listBlock", (data: {id: string, name: string}[]) => {
             setBlocked(data);
             setBugReactHook(!bugReactHook);
+            setBlockDone(true);
         })
 
         return () => {
@@ -383,7 +388,7 @@ export default function FriendManagement() {
 
     return (
         <div id="FriendManagement">
-            <SearchbarFriend friendList={friends} requestSend={requests} />
+            {fetchDone && requestDone && blockDone && <SearchbarFriend friendList={friends} requestSend={pendings} blockList={blocked} />}
             {friends.length > 0 && <div>
                 <div className="title">
                     <h3>My friend{friends.length > 1 && "s"}</h3>
@@ -410,9 +415,9 @@ export default function FriendManagement() {
                                 </button>
                             </div>
                             {elt.isConnected && <div id="invite">
-                                <button value={elt.friendName} onClick={inviteNormal}>normal</button>
+                                <button value={elt.friendName} onClick={proposeGame} data-type="normal">normal</button>
                                 <FontAwesomeIcon className="iconAction" icon={faGamepad} />
-                                <button value = {elt.friendName} onClick={inviteSuper}>super</button>
+                                <button value={elt.friendName} onClick={proposeGame} data-type="super">super</button>
                             </div>}
                         </li>
                         ))}
