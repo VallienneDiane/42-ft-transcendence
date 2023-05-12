@@ -127,7 +127,8 @@ const Game: React.FC = () => {
     // }, [from])
 
     useEffect(() => {
-        socketGame.emit('Get_Status')
+        socketGame.emit('Get_Status');
+        console.log("ASK FOR STATUS")
     }, [])
     
     useEffect(() => {
