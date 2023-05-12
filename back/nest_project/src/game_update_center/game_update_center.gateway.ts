@@ -122,7 +122,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * happend on connection to the game page
    * @param client the socket connecting
   */
- async handleConnection(@ConnectedSocket() client: Socket) {
+  async handleConnection(@ConnectedSocket() client: Socket) {
    
    // checking if the socket have a valid token
    let user_entity = await this.tokenChecker(client);
@@ -390,8 +390,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
-  get_all_socket_of_user(login: string): Socket[] {
-    let result: Socket[] = [];
+  get_all_socket_of_user(login: string): string[] {
+    let result: string[] = [];
     for (let [key, value] of this.socketID_UserEntity.entries()) {
       if (value.login === login){
         result.push(key);
@@ -451,20 +451,20 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let i = 0; i < this.private_space.length; i++) {
       const ws = this.private_space[i];
       if (ws.waiting_client_socket === client) {
-        let all_socket: Socket[] = this.get_all_socket_of_user(ws.target_client_login);
+        let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
         for (let index = 0; index < all_socket.length; index++) {
           const element = all_socket[index];
-          this.server.to(element.id).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
         }
         this.private_space.splice(i, 1);
         console.log("leaving find_and_remove function having find a waiting socket in private_space");
         return;
       }
       if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        let all_socket: Socket[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
+        let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
         for (let index = 0; index < all_socket.length; index++) {
           const element = all_socket[index];
-          this.server.to(element.id).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
         }
         this.private_space.splice(i, 1);
         console.log("leaving find_and_remove function having find a waiting socket in private_space");
