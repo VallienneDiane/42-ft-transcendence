@@ -64,7 +64,7 @@ interface SpecMode {
 
 
 const Game: React.FC = () => {
-    let user: User;
+    let user: User | null = null;
     const navigate = useNavigate();
     const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -90,17 +90,7 @@ const Game: React.FC = () => {
     let specMatchLogin: string | null = null;
     const [winner, setWinner] = useState<string>();
 
-    if (accountService.isLogged()) {
-        let decodedToken: JwtPayload = accountService.readPayload()!;
-        const id = decodedToken.sub;
-        userService.getUserWithAvatar(id!)
-        .then(response => {
-            user = response.data;
-        })
-        .catch(error => {
-            console.log(error);
-        });
-    }
+ 
     
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
         console.log("TOGGLE SPEC MODE FUNCTION")
@@ -146,8 +136,10 @@ const Game: React.FC = () => {
     
     useEffect(() => {
         if (socketGame) {
-            socketGame.emit('Get_Status');
-            console.log("ASK FOR STATUS")
+            // socketGame.emit('Get_Status');
+            socketGame.emit('Get_Matches');
+            // console.log("ASK FOR STATUS");
+            console.log("ASK FOR MATCHS");
         }
     }, [socketGame])
     
@@ -196,13 +188,16 @@ const Game: React.FC = () => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
             socketGame.on("Connection_Accepted", () => {
-                socketGame.emit('Get_Status');
-                console.log("ASK FOR STATUS")
+                // socketGame.emit('Get_Status');
+                // console.log("ASK FOR STATUS")
+                socketGame.emit('Get_Matches');
+                console.log("ASK FOR MATCHS");
             });
             
             socketGame.on('Already_On_Match', () => {
                 console.log('Already on match');
-                document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
+                setWaitMatch(false);
+                // document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
             });
             
             socketGame.on('connect', () => {
@@ -314,15 +309,26 @@ const Game: React.FC = () => {
             })
 
             socketGame.on('ready in match', (ask_by: string) => {
-                if (ask_by === user.login) {
-                    console.log("ready in match status received");
-                    setWaitMatch(false);
-                    setMatchInProgress(true);
-                    setButtonReady(true);
-                    ready = true;
-                    clearGame = false;
-                    setPlayerReady(true);
-                    document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
+                if (accountService.isLogged() && user === null) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                    .then(response => {
+                        user = response.data;
+                        if (ask_by === user!.login) {
+                            console.log("ready in match status received");
+                            setWaitMatch(false);
+                            setMatchInProgress(true);
+                            setButtonReady(true);
+                            ready = true;
+                            clearGame = false;
+                            setPlayerReady(true);
+                            document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
+                        }
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
                 }
             })
 
@@ -354,6 +360,10 @@ const Game: React.FC = () => {
                 socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
+            setInputState((prevState) => ({
+                ...prevState,
+                down: true
+            }));
 
         }
     };
