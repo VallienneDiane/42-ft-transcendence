@@ -174,6 +174,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Get_Status") // lorsqu'on revient ou arrive sur la page game pour afficher le bon truc
   handleStatus(@ConnectedSocket() client: Socket) {
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("user is not yet recognize");
+      return;
+    }
     if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
       this.server.to(client.id).emit("nothing");
       return;
