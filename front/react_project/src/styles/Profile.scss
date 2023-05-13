@@ -3,10 +3,10 @@
 #profilePage {
     display: flex;
     flex-direction: row;
+    align-items: center;
     margin-top: 25px;
     height: fit-content;
     padding-bottom: 20px;
-    align-items: center;
 
     & aside {
         display: flex;
