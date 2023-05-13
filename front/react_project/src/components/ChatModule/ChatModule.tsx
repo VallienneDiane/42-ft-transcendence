@@ -130,8 +130,6 @@ class ChannelDMList extends React.Component<{
     }
 
     componentDidMount(): void {
-        console.log("MOUNTING DM MODULE");
-
         this.setMyChannels();
         // this.checkOnline();
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
@@ -186,7 +184,6 @@ class ChannelDMList extends React.Component<{
     }
 
     componentWillUnmount(): void {
-        console.log("UNMOUNTING DM MODULE");
         this.context.socket.off('listMyChannels');
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
