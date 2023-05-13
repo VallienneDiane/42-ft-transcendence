@@ -630,7 +630,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
           for (let index3 = 0; index3 < all_target_socket.length; index3++) {
             const target = all_target_socket[index3];
-            this.server.to(target).emit("Clear_Invitation", {for: private_room.target_client_login, by: this.socketID_UserEntity.get(private_room.waiting_client_socket.id).login, send: true, super_game_mode: private_room.super_game_mode})
+            if (target != client.id) {
+              this.server.to(target).emit("Clear_Invitation", {for: private_room.target_client_login, by: this.socketID_UserEntity.get(private_room.waiting_client_socket.id).login, send: true, super_game_mode: private_room.super_game_mode})
+            }
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
             const waiter2 = all_waiter_socket[index4];
