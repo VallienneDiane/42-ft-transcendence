@@ -20,7 +20,19 @@
         border-radius: 20px;
         background-color:  rgba(255, 255, 255, 0.719);
         box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
-        padding-top: 25px;
+        padding-top: 10px;
+        & > a {
+            width: 100%;
+            display: flex;
+            background: transparent;
+            justify-content: flex-end;
+            & .gear {
+                height: 25px;
+                color: var(--third-color);
+                margin: 0px 10px -25px 0px;
+               
+            }
+        }
         & #profilePicture {
             object-fit: cover;
             width: 90%;
@@ -28,7 +40,7 @@
             max-width: 225px;
             max-height: 225px;
             border-radius: 100%;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
         & #login {
             width: 100%;
@@ -36,28 +48,88 @@
             text-align: center;
             word-break: break-all;
             align-items: center;
-            justify-content: flex-end;
             border-bottom: 1px solid var(--second-color);
             & h1 {
-                width: 75%;
+                width: 100%;
                 text-align: center;
                 margin-bottom: 2px;
             }
-            & .gear {
-                height: 25px;
-                // opacity: 65%;
-                margin: 0 0.9rem;
-                margin-bottom: 5px;
-                color: var(--third-color);
+        }
+        & #actionProfile {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            width: 100%;
+            & li {
+                padding: 13px 1rem;
+                border-bottom: 2px solid rgb(202, 202, 202);
+                & .iconAction {
+                    margin: 0px 10px;
+                    color: #33469cd8;
+                }
+                & button {
+                    padding: 7px 15px 7px 15px;
+                    margin-top: 7px;
+                    border-radius: 10px;
+                    background-color: #dbb8d9e1;
+                    &:hover {
+                        background-color: var(--third-color);
+                        font-style: oblique;
+                        color: white;
+                    }
+                }
+                &:hover {
+                    background: #33469c4f;
+                    cursor: pointer;
+                    & #navlink{
+                        background: transparent;
+                    }
+                }
             }
         }
         & #FriendManagement {
             display: flex;
             flex-direction: column;
-            gap: 20px;
             padding: 10px 10px;
             width: 100%;
             height: 100%;
+
+            & #searchbarWrapper {
+				display: flex;
+				flex-direction: column;
+				height: 40px;
+				padding: 0 1.2rem;
+				& input {
+					width: 100%;
+					background: #c1bbd877;
+					color: var(--text-color);
+					padding: 0.5rem 2rem 0.5rem 1rem;
+					border-radius: 2rem;
+					border: none;
+					outline: none;
+				}
+				& .svgSearch {
+					height: 15px;
+					margin-left: -2rem;
+					opacity: 25%;
+					color: var(--text-color);
+				}
+				& ul {
+					color: var(--text-color);
+					position: absolute;
+					z-index: 9;
+					width: 260px;
+					margin: 34px 0;
+					padding: 0.3rem 1rem;
+					background-color: rgb(255, 255, 255);
+					box-shadow: 0 1px 2px rgb(204, 204, 204);
+					overflow: hidden;
+					overflow-y: auto;
+					& button {
+						color: #33469cb9;
+					}
+				}
+            }
 
             & .developButton {
                 padding-left: 3px;
@@ -74,6 +146,7 @@
                 justify-content: center;
                 width: 100%;
                 gap: 10px;
+                padding-top: 20px;
                 box-shadow: 0px -3px 23px -010px var(--second-color);
                 clip-path: inset(1px 2px -15px 1px);
                 font-weight: bolder;
@@ -92,7 +165,7 @@
                     flex-wrap: wrap;
                     gap: 10px;
                     font-size: x-large;
-                    padding-bottom: 12px;
+                    padding: 2px 0;
                     & .name {
                         word-break: break-all;
                         &:hover {

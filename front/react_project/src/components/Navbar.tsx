@@ -29,7 +29,7 @@ const NavBar: React.FC = () => {
 
   return (
     <nav id="navbar">
-      <div id='logo'><NavLink onClick={homeClick} to="/">ft_transcendance</NavLink></div>
+      <div id='logo'><NavLink onClick={homeClick} to="/">ft_transcendence</NavLink></div>
       <div id="burger" onClick={burgerClick}>
         <div className="bar"></div>
         <div className="bar"></div>
