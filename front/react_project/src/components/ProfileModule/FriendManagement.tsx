@@ -1,20 +1,130 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Axios from "../../services/caller.service";
 import { SocketContext } from "../context";
 import { JwtPayload } from "jsonwebtoken";
 import { accountService } from "../../services/account.service";
 import { NavLink } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faArrowDown, faArrowUp, faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faMagnifyingGlass, faPeace, faPingPongPaddleBall, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faMagnifyingGlass, faPeace, faThumbsDown, faThumbsUp, faTrashCan } from "@fortawesome/free-solid-svg-icons";
+import { userService } from "../../services/user.service";
 
+function SearchbarFriend(props: {
+    friendList: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[], 
+    requestSend: {friendshipId: string, friendId: string, friendName: string}[], 
+    blockList: {id: string, name: string}[]
+}) {
+    const {socket} = useContext(SocketContext);
+    const ref = useRef<HTMLUListElement>(null);
+    const [text, setText] = useState<string>("");
+    const [isDropdown, setIsDropdown] = useState<boolean>(false);
+    const [filtered, setFiltered] = useState<{ id: string, login: string }[]>([]);
+
+    const addFriend = (event: any) => {
+        socket.emit("friendRequest", {userId: event.target.value});
+        resetFiltered();
+    }
+
+    const showSearchList = (event: any) => {
+        fetchUsers();
+        setIsDropdown(!isDropdown);
+        displayList(event);
+    }
+
+    const fetchUsers = () => {
+        userService.getAllUsers()
+        .then(response => {
+            const payload: JwtPayload = accountService.readPayload()!;
+            const users = new Map<string, string>();
+            response.data.forEach((user: {id: string, login: string}) => users.set(user.id, user.login));
+            let newUserList: { id: string, login: string }[] = [];
+            users.forEach((login, id) => {
+                let ok: boolean = true;
+                if (payload.sub == id)
+                    ok = false;
+                else {
+                    for (let elt of props.friendList) {
+                        if (elt.friendId == id)
+                            ok = false;
+                    }
+                    for (let elt of props.requestSend) {
+                        if (elt.friendId == id)
+                            ok = false;
+                    }
+                    for (let elt of props.blockList) {
+                        if (elt.id == id)
+                            ok = false;
+                    }
+                }   
+                if (ok)
+                    newUserList.push({id: id, login: login});
+            });
+            newUserList.sort((a, b) => {return a.login.localeCompare(b.login);});
+            // console.log("fetchUsers", newUserList);
+            setFiltered(newUserList);
+        })
+        .catch(error => { console.log(error); })
+    }
+
+    const displayList = (event: any) => {
+        setText(event.target.value);
+
+        if (event.target.value) {
+            setFiltered(() => {
+                const filteredUsers: { id: string, login: string }[] =
+                filtered.filter((user: { id: string, login: string }) =>
+                    user.login.startsWith(event.target.value));
+                return filteredUsers;
+            });
+        }
+    }
+
+    const resetFiltered = () => {
+        setText("");
+        setFiltered([]);
+        setIsDropdown(!isDropdown);
+    }
+
+    const closeSearchList = (e: any) => {
+        if (ref.current && !ref.current.contains(e.target)) {
+            setIsDropdown(!isDropdown);
+        }
+    }
+
+    useEffect(() => {
+        document.addEventListener("mousedown", closeSearchList);
+        return () => {
+            document.removeEventListener("mousedown", closeSearchList);
+        }
+    }, [ref]);
+    
+    return (
+        <div id="searchbarWrapper">
+            <div className="searchbar">
+                <input type="text" onChange={displayList} onClick={showSearchList} value={text} placeholder="Add new friend..."/>
+                <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
+            </div>
+            {(filtered.length != 0 && isDropdown) &&
+            <ul ref={ref}>
+                {filtered.map((elt: { id: string, login: string }, id: number) => (
+                    <li className="searchElement" key={elt.id}>
+                        <button value={elt.id} onClick={addFriend}>{elt.login}</button>
+                    </li>
+                ))}
+            </ul>}
+        </div>
+    )
+}
 
 export default function FriendManagement() {
     const {socket} = useContext(SocketContext);
+    const {socketGame} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [friends, setFriends] = useState<{key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
     const [developFriend, setDevelopFriend] = useState<boolean>(false);
     const [askIfConnectedDone, setAsk] = useState<boolean>(false);
     const [fetchDone, setFetch] = useState<boolean>(false);
+    const [requestDone, setRequestDone] = useState<boolean>(false);
+    const [blockDone, setBlockDone] = useState<boolean>(false);
     const [pendings, setPendings] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
     const [developPending, setDevelopPending] = useState<boolean>(false);
     const [requests, setRequests] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
@@ -22,8 +132,6 @@ export default function FriendManagement() {
     const [blocked, setBlocked] = useState<{id: string, name: string}[]>([]);
     const [developBlock, setDevelopBlock] = useState<boolean>(false);
     const [bugReactHook, setBugReactHook] = useState<boolean>(false);
-    const [text, setText] = useState<string>("");
-    const [isDropdown, setIsDropdown] = useState<boolean>(false);
 
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
@@ -49,6 +157,7 @@ export default function FriendManagement() {
         Axios.get("listRequestsPendingSend/" + me.sub)
         .then((response) => {
             setPendings(response.data);
+            setRequestDone(true);
         });
     }
 
@@ -64,16 +173,11 @@ export default function FriendManagement() {
         socket.emit("unfriend", {friendshipId: e.currentTarget.value});
     }
 
-    const inviteToGameHandler = (e: any) => {
-        console.log("invite To Game");
-    }
-
-    const inviteNormal = (e: any) => {
-
-    }
-
-    const inviteSuper = (e: any) => {
-
+    const proposeGame = (event: any) => {
+        if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: false});
+        else if (event.currentTarget.getAttribute('data-type') === "normal")
+            socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: true});
     }
 
     const invertDevelopFriend = () => {
@@ -128,38 +232,11 @@ export default function FriendManagement() {
         socket.emit("unblockUser", {id: e.currentTarget.value})
     }
 
-    const showSearchList = (event: any) => {
-        setIsDropdown(!isDropdown);
-        displayList(event);
-    }
-
-    const displayList = (event: any) => {
-        setText(event.target.value);
-
-        if (event.target.value) {
-            this.setState(() => {
-                const filteredUsers: ISearch[] =
-                this.state.users.filter((user: ISearch) =>
-                    user.name.startsWith(event.target.value));
-                const filteredChannels: ISearch[] =
-                this.state.channels.filter((channel: ISearch) =>
-                    channel.name.startsWith(event.target.value));
-                const filtered = this.compileFiltered(filteredUsers, filteredChannels);
-                return { filtered };
-            });
-        }
-        else {
-            this.setState(() => {
-                const filtered: ISearch[] = this.compileFiltered(this.state.users, this.state.channels);
-                return { filtered };
-            })
-        }
-    }
-
     useEffect(() => {
         fetchBlocked();
         socket.on("listBlock", (data: {id: string, name: string}[]) => {
             setBlocked(data);
+            setBlockDone(true);
         })
     }, []);
 
@@ -292,6 +369,7 @@ export default function FriendManagement() {
         socket.on("listBlock", (data: {id: string, name: string}[]) => {
             setBlocked(data);
             setBugReactHook(!bugReactHook);
+            setBlockDone(true);
         })
 
         return () => {
@@ -310,17 +388,7 @@ export default function FriendManagement() {
 
     return (
         <div id="FriendManagement">
-            <div className="searchbar">
-                <input type="text" onChange={displayList} onClick={showSearchList} value={text} placeholder="Add new friend..."/>
-                <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-            </div>
-            {(this.state.filtered.length != 0 && isDropdown) &&
-            <ul ref={this.ref}>
-                {this.state.filtered.map((elt: ISearch, id: number) => (
-                    <SearchElement  key={id} handleClose={this.resetFiltered}
-                                    popupAction={this.onClickPopup} elt={elt} />
-                ))}
-            </ul>}
+            {fetchDone && requestDone && blockDone && <SearchbarFriend friendList={friends} requestSend={pendings} blockList={blocked} />}
             {friends.length > 0 && <div>
                 <div className="title">
                     <h3>My friend{friends.length > 1 && "s"}</h3>
@@ -347,9 +415,9 @@ export default function FriendManagement() {
                                 </button>
                             </div>
                             {elt.isConnected && <div id="invite">
-                                <button value={elt.friendName} onClick={inviteNormal}>normal</button>
+                                <button value={elt.friendName} onClick={proposeGame} data-type="normal">normal</button>
                                 <FontAwesomeIcon className="iconAction" icon={faGamepad} />
-                                <button value = {elt.friendName} onClick={inviteSuper}>super</button>
+                                <button value={elt.friendName} onClick={proposeGame} data-type="super">super</button>
                             </div>}
                         </li>
                         ))}
