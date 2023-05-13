@@ -1,46 +1,45 @@
 @import url("Base.css");
 
 #Game {
+    width: 100%;
+    min-height: 1000px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 25px;
-    padding-bottom: 20px;
-    min-height: 1000px;
-    padding: 0 8rem;
-	width: 90%;
-	height: 95%;
+    justify-content: space-around;
 
     & #gameContainer {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 74%;
-        width: 100%;
-
+        width: 96%;
+        height: 70%;
+        padding: 20px 0;
+        
         & #gamePanel {
+            width: 75%;
+            min-width: 600px;
+            max-width: 1400px;
+
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 75%;
-            height: 95%;
-            min-width: 600px;
-            max-width: 1400px;
-
+            
             & #players {
-                display: flex;
                 width: 100%;
-                height: 10%;
                 max-width: 800px;
+                display: flex;
+                // justify-content: space-between;
                 height: 6vh;
-                background-color: var(--fourth-color);  
+                background-color: var(--fourth-color);
+                
                 & .player {
                     height: 100%;
                     width: 45%;
                     display: flex;
                     align-items: center;
+    
                     & > div {
                         width: 50%;
                         text-align: center;
@@ -49,14 +48,18 @@
                         font-weight: 900;
                         overflow: hidden;
                     }
+    
                     &:first-child {
                         background-color: var(--third-color);
+                        // clip-path: polygon(0 0, 100% 0, 30% 100%, 0% 100%);
                     }
-                } 
+                }
+                
                 & #separator {
                     width: 10%;
                     background-color: var(--third-color);
                     clip-path: polygon(0 0, 100% 0, 0 100%, 0% 100%);
+    
                 }
             }
     
@@ -64,33 +67,40 @@
                 position: relative;
                 display: flex;
                 align-items: center;
-                justify-content: center; 
-                height: 90%;
-                width: 99%;
+                justify-content: center;
+                // margin-top: 6vh;
+                // margin-bottom: 3vh;
+                
                 & #gameSelector {
                     position: absolute;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
+
                     & #winner {
                         font-size: 2.8em;
-                        padding-bottom: 25px;
+
                     }
+    
                     & > h2 {
                         font-size: 2.5em;
                         letter-spacing: 8px;
                     }
+                    
                     & #gameButtons {
+    
                         & .gameButton {
-                            border-radius: 10px;
+                            border-radius: 8px;
                             border: 1px solid;
                             margin: 15px 30px;
                             height: 45px;
                             width: 120px;
                             font-weight: 900;
+                            // transition: all ease-out 0.1s;
                             position: relative;
                             transition: all 150ms ease-in-out;
                             z-index: 0;
+                            
                             &::after {
                                 content: '';
                                 position: absolute;
@@ -104,41 +114,51 @@
                                 transition: all 0.2s ease-in-out;
                                 z-index: -1;
                             }
+                    
                             &:hover::after {
                                 width: 100%;
                                 height: 100%;
                             }
+                    
                             &:hover {
                                 transition-delay: 100ms;
-                                box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.262);
+                                box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.75);
                             }
                         }
                     }
+                    
+                
                     & .locked {
                         pointer-events: none;
-                        background-color: rgba(170, 170, 170, 0.236);
+                        background-color: rgb(170, 170, 170);
                     }
                 }
+    
                 & #waitingMsg {
                     position: absolute;
                     background-color: transparent;
                 }
+    
                 & #readyButton {
-                    position: absolute;
                     width: 100%;
                     height: 100%;
-                    border-radius: 20px;
+                    border-radius: 10px;
                     font-size: 7cqw;
-                    padding: 20px;
-                    background-color:  rgba(255, 255, 255, 0.582);
+                    position: absolute;
+                    background-color: var(--second-color);
                 }
+                
                 & .notReady {
                     animation: notReady 1000ms infinite ease-in-out;
+                    
                 }
+                
                 & .ready {
                     animation: ready 200ms ease-in-out;
+                    // animation-iteration-count: 5;
                     filter: brightness(1.3);
                 }
+                
                 & #countDown {
                     position: absolute;
                     background-color: transparent;
@@ -146,14 +166,15 @@
                     transition: all 0ms ease;
                     animation: countdown 800ms infinite;
                 }
+                
                 & canvas {
-                    height: 100%;
                     min-width: 600px;
-                    max-width: 1300px;
-                    border-radius: 20px;
-                    background-color: #c8c3dd77;
+                    max-width: 1400px;
+                    border-radius: 10px;
+                    background-color: var(--second-color);
                     border: solid 5px var(--third-color);
                     backdrop-filter: blur(7px);
+                    
                     &:focus {
                         outline: none;
                     }
