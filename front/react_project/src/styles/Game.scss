@@ -1,49 +1,45 @@
 @import url("Base.css");
 
 #Game {
-    width: 100%;
-    min-height: 1000px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    margin-bottom: 25px;
+    padding: 0 1rem;
+    min-height: 1000px;
+	height: 95%;
 
     & #gameContainer {
-        // border: 3px solid green;
         display: flex;
         align-items: center;
         justify-content: center;
-        
-        width: 96%;
-        // min-width: 600px;
-        // max-width: 1400px;
-        // height: calc(80vw / (16 /9) + 7vh);
-        height: 70%;
-        
+        height: fit-content;
+        width: 100%;
+
         & #gamePanel {
-            width: 75%;
-            min-width: 600px;
-            max-width: 1400px;
-            // border: 3px solid white;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            
+            width: 78%;
+            height: 95%;
+            min-width: 686px;
+            // max-width: 1600px;
+
             & #players {
-                width: 100%;
-                max-width: 800px;
                 display: flex;
-                // justify-content: space-between;
-                height: 6vh;
+                width: 90%;
+                height: 10%;
+                max-width: 800px;
+                height: 50px;
                 background-color: var(--fourth-color);
-                
+                border-radius: 50px 50px 0px 0px; 
                 & .player {
                     height: 100%;
                     width: 45%;
                     display: flex;
                     align-items: center;
-    
                     & > div {
                         width: 50%;
                         text-align: center;
@@ -52,18 +48,15 @@
                         font-weight: 900;
                         overflow: hidden;
                     }
-    
                     &:first-child {
+                        border-radius: 50px 0px 0px 0px; 
                         background-color: var(--third-color);
-                        // clip-path: polygon(0 0, 100% 0, 30% 100%, 0% 100%);
                     }
-                }
-                
+                } 
                 & #separator {
                     width: 10%;
                     background-color: var(--third-color);
                     clip-path: polygon(0 0, 100% 0, 0 100%, 0% 100%);
-    
                 }
             }
     
@@ -71,40 +64,34 @@
                 position: relative;
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                // margin-top: 6vh;
-                // margin-bottom: 3vh;
-                
+                justify-content: center; 
+                // height: 90%;
+                max-height: 90%;
+                width: 99%;
                 & #gameSelector {
                     position: absolute;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-
                     & #winner {
                         font-size: 2.8em;
-
+                        padding-bottom: 25px;
                     }
-    
                     & > h2 {
                         font-size: 2.5em;
                         letter-spacing: 8px;
                     }
-                    
                     & #gameButtons {
-    
                         & .gameButton {
-                            border-radius: 8px;
+                            border-radius: 10px;
                             border: 1px solid;
                             margin: 15px 30px;
                             height: 45px;
                             width: 120px;
                             font-weight: 900;
-                            // transition: all ease-out 0.1s;
                             position: relative;
                             transition: all 150ms ease-in-out;
                             z-index: 0;
-                            
                             &::after {
                                 content: '';
                                 position: absolute;
@@ -118,51 +105,41 @@
                                 transition: all 0.2s ease-in-out;
                                 z-index: -1;
                             }
-                    
                             &:hover::after {
                                 width: 100%;
                                 height: 100%;
                             }
-                    
                             &:hover {
                                 transition-delay: 100ms;
-                                box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.75);
+                                box-shadow: 0px 0px 20px -3px rgba(0, 0, 0, 0.262);
                             }
                         }
                     }
-                    
-                
                     & .locked {
                         pointer-events: none;
-                        background-color: rgb(170, 170, 170);
+                        background-color: rgba(170, 170, 170, 0.236);
                     }
                 }
-    
                 & #waitingMsg {
                     position: absolute;
                     background-color: transparent;
                 }
-    
                 & #readyButton {
-                    width: 100%;
-                    height: 100%;
-                    border-radius: 10px;
-                    font-size: 7cqw;
                     position: absolute;
-                    background-color: var(--second-color);
+                    width: 90%;
+                    height: 100%;
+                    border-radius: 20px;
+                    font-size: 6rem;
+                    padding: 50px;
+                    background: radial-gradient(rgba(255, 255, 255, 0.582) 10%, transparent 60%)
                 }
-                
                 & .notReady {
                     animation: notReady 1000ms infinite ease-in-out;
-                    
                 }
-                
                 & .ready {
                     animation: ready 200ms ease-in-out;
-                    // animation-iteration-count: 5;
                     filter: brightness(1.3);
                 }
-                
                 & #countDown {
                     position: absolute;
                     background-color: transparent;
@@ -170,15 +147,14 @@
                     transition: all 0ms ease;
                     animation: countdown 800ms infinite;
                 }
-                
                 & canvas {
-                    min-width: 600px;
-                    max-width: 1400px;
-                    border-radius: 10px;
-                    background-color: var(--second-color);
+                    min-width: 686px;
+                    max-width: 1600px;
+                    height: 100%;
+                    border-radius: 20px;
+                    background-color: #c8c3dd77;
                     border: solid 5px var(--third-color);
                     backdrop-filter: blur(7px);
-                    
                     &:focus {
                         outline: none;
                     }
@@ -187,47 +163,50 @@
         }
 
         & #instructions {
-            // border: 3px solid yellow;
+            width: 23%;
             flex: 1;
-            height: 80%;
+            height: 98%;
+            padding-right: 2rem;
+            gap: 10px;
             display: flex;
-            // flex-direction: column;
-            align-items: center;
+            align-items: start;
             justify-content: center;
-            margin-left: 2vw;
-            
+            margin-left: 2rem;
             & p {
                 text-align: center;
             }
-
+            & h2 {
+                text-align: center;
+                width: 80%;
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                clip-path: inset(1px 2px -15px 1px);
+                margin: 10px;
+                margin-bottom: 20px;
+            }
             & #gameModes, #controls {
-                flex: 1;
-                max-width: 350px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                background-color: var(--second-color);
                 width: 100%;
+                max-width: 350px;
+                height: fit-content;
                 margin: 10px 0;
-                border-radius: 10px;
-                border: solid 5px var(--third-color);
-                padding: 10px;
-                
+                padding: 30px 20px;
+                border-radius: 20px;
+                background-color:  rgba(255, 255, 255, 0.719);
+                box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.222);
                 & > h3 {
                     margin: 10px 0;
                 }
-                
                 & > div {
                     display: flex;
                     align-items: center;
                     margin: 10px 0;
                 }
             }
-
             & #gameModes > div {
                 flex-direction: column;
             }
-
             & #controls .icon {
                 display: flex;
                 align-items: center;
@@ -236,38 +215,33 @@
                 width: 30px;
                 padding: 4px;
                 margin-right: 15px;
-                background-color: rgb(201, 201, 201);
+                border-radius: 5px;
+                background-color: #33469c22;
                 border: 1px solid rgb(66, 66, 66);
                 position: relative;
                 z-index: 1;
-                transition: all 100ms ease;
-                
+                transition: all 100ms ease;  
                 & > .arrow {
                     z-index: -2;
-                }
-                
+                }     
                 & > div {
-                    background-color: rgb(117, 117, 117);
+                    background-color: var(--second-color);
                     width: 100%;
                     height: 5px;
                     position: absolute;
                     top: 30px;
                     z-index: -2;
                     transition: all 100ms ease;
-                    // transform: translateX(40px);
-                }
-                
+                }  
                 &:hover {
                     transform: translateY(3px);
-                }
-                
+                }           
                 &:hover > div{
                     transform: translateY(-3px);
                     height: 2px;
                     top: 33px;
                 }
             }
-
         }
     }
 }
@@ -276,7 +250,7 @@
     #Game {
         & #gameContainer {
             flex-direction: column;
-    
+            padding-top: 30px;
             & #instructions {
                 width: 80%;
                 justify-content: space-around;

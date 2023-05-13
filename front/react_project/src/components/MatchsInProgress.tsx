@@ -101,7 +101,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     return (
         <div id="matchsInProgress">
             <div id="header">
-                <div>Matchs in progress</div>
+                <h2>Matchs in progress</h2>
                 <div id="colHeader">
                     <div>PLAYER 1</div>
                     <div>SCORE</div>

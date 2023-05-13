@@ -32,27 +32,16 @@ const PopUp: React.FC = () => {
     const inviteRef = useRef<invite | null>(null);
     const [popUpContent, setPopUpContent] = useState<JSX.Element>();
 
-    if (accountService.isLogged()) {
-        let decodedToken: JwtPayload = accountService.readPayload()!;
-        const id = decodedToken.sub;
-        userService.getUserWithAvatar(id!)
-        .then(response => {
-            user = response.data;
-        })
-        .catch(error => {
-            console.log(error);
-        });
-    }
     
     ////// TODO
-    useEffect(() => {
-        console.log("ask invite function");
-        if (socketGame) {
-            socketGame.emit("Ask_Invitation");
-            console.log("ask invite send");
-        }
-    }, [socketGame])
-
+    // useEffect(() => {
+    //     console.log("ask invite function");
+    //     if (socketGame) {
+    //         socketGame.emit("Ask_Invitation");
+    //         console.log("ask invite send");
+    //     }
+    // }, [socketGame])
+    
     useEffect(() => {
         if (invite) {
             console.log("invite status", invite.status);
@@ -64,10 +53,27 @@ const PopUp: React.FC = () => {
     
     useEffect(() => {
         if (socketGame) {
+            socketGame.on("Connection_Accepted", () => {
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                    .then(response => {
+                        user = response.data;
+                        socketGame.emit("Ask_Invitation");
+                        console.log("ask invite send");
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                }
+            });
+
             socketGame.on("Invitation", (invitation: invitation) => {
                 
                 console.log("inviteRef.current", inviteRef.current)
-                console.log("invitation", invitation)
+                console.log("user login", user.login)
+                console.log("invitation received", invitation)
                 if (inviteRef.current != null && invitation.by === inviteRef.current!.by && invitation.for === inviteRef.current!.for) {
                     setInvite(null);
                     inviteRef.current = null;
@@ -92,21 +98,28 @@ const PopUp: React.FC = () => {
             })
             
             socketGame.on("Invite_Declined", () => {
-                // if (invite?.status === "send") {
-                    setInvite((prevState) => ({
-                        ...prevState!,
-                        status: "declined",
-                    }));
-                    // }
-                })
-                
-                socketGame.on("Invitation_Accepted", () => {
-                    // if (invite?.status === "send") {
-                        console.log("invite has been accepted by target");
-                        setInvite(null);
-                    inviteRef.current = null;
-                    navigate("/game", {state : {from : "invitation"}});
+                console.log("invite declined request");
+            // if (invite?.status === "send") {
+                setInvite((prevState) => ({
+                    ...prevState!,
+                    status: "declined",
+                }));
                 // }
+            })
+            
+            socketGame.on("Invitation_Accepted", () => {
+            // if (invite?.status === "send") {
+                console.log("invite has been accepted by target");
+                setInvite(null);
+                inviteRef.current = null;
+                navigate("/game", {state : {from : "invitation"}});
+                // }
+            })
+            
+            socketGame.on("Clear_Invite", () => {
+                console.log("clear invite request");
+                setInvite(null);
+                inviteRef.current = null;
             })
         }
     }, [socketGame]);

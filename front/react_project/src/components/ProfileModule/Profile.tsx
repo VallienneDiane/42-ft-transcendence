@@ -143,7 +143,8 @@ export default function Profile() {
                 <div id="FriendManagement">
                     {socket && <FriendManagement />}
                 </div>
-                ) : <OtherProfile userId={user?.id!} userName={user?.login!} />}
+                ) : null}
+                {currentUser !== undefined && <OtherProfile userId={user?.id!} userName={user?.login!} />}
             </aside>
             {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
