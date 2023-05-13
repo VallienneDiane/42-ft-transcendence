@@ -4,19 +4,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    margin-top: 25px;
-    padding-bottom: 20px;
+    justify-content: space-around;
+    margin-bottom: 25px;
+    padding: 0 1rem;
     min-height: 1000px;
-    padding: 0 8rem;
-	width: 90%;
 	height: 95%;
 
     & #gameContainer {
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 74%;
+        height: fit-content;
         width: 100%;
 
         & #gamePanel {
@@ -24,18 +22,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 75%;
+            width: 80%;
             height: 95%;
-            min-width: 600px;
-            max-width: 1400px;
+            min-width: 686px;
+            // max-width: 1600px;
 
             & #players {
                 display: flex;
-                width: 100%;
+                width: 90%;
                 height: 10%;
                 max-width: 800px;
-                height: 6vh;
-                background-color: var(--fourth-color);  
+                height: 50px;
+                background-color: var(--fourth-color);
+                border-radius: 50px; 
                 & .player {
                     height: 100%;
                     width: 45%;
@@ -50,6 +49,7 @@
                         overflow: hidden;
                     }
                     &:first-child {
+                        border-radius: 50px 0px 0px 50px; 
                         background-color: var(--third-color);
                     }
                 } 
@@ -65,7 +65,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center; 
-                height: 90%;
+                // height: 90%;
+                max-height: 90%;
                 width: 99%;
                 & #gameSelector {
                     position: absolute;
@@ -125,12 +126,12 @@
                 }
                 & #readyButton {
                     position: absolute;
-                    width: 100%;
+                    width: 90%;
                     height: 100%;
                     border-radius: 20px;
-                    font-size: 7cqw;
-                    padding: 20px;
-                    background-color:  rgba(255, 255, 255, 0.582);
+                    font-size: 6rem;
+                    padding: 50px;
+                    background: radial-gradient(rgba(255, 255, 255, 0.582) 10%, transparent 60%)
                 }
                 & .notReady {
                     animation: notReady 1000ms infinite ease-in-out;
@@ -147,9 +148,9 @@
                     animation: countdown 800ms infinite;
                 }
                 & canvas {
+                    min-width: 686px;
+                    max-width: 1600px;
                     height: 100%;
-                    min-width: 600px;
-                    max-width: 1300px;
                     border-radius: 20px;
                     background-color: #c8c3dd77;
                     border: solid 5px var(--third-color);
@@ -162,47 +163,50 @@
         }
 
         & #instructions {
-            // border: 3px solid yellow;
+            width: 20%;
             flex: 1;
-            height: 80%;
+            height: 98%;
+            padding-right: 2rem;
+            gap: 10px;
             display: flex;
-            // flex-direction: column;
-            align-items: center;
+            align-items: start;
             justify-content: center;
-            margin-left: 2vw;
-            
+            margin-left: 2rem;
             & p {
                 text-align: center;
             }
-
+            & h2 {
+                text-align: center;
+                width: 80%;
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                clip-path: inset(1px 2px -15px 1px);
+                margin: 10px;
+                margin-bottom: 20px;
+            }
             & #gameModes, #controls {
-                flex: 1;
-                max-width: 350px;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                background-color: var(--second-color);
                 width: 100%;
+                max-width: 350px;
+                height: fit-content;
                 margin: 10px 0;
-                border-radius: 10px;
-                border: solid 5px var(--third-color);
-                padding: 10px;
-                
+                padding: 30px 20px;
+                border-radius: 20px;
+                background-color:  rgba(255, 255, 255, 0.719);
+                box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.222);
                 & > h3 {
                     margin: 10px 0;
                 }
-                
                 & > div {
                     display: flex;
                     align-items: center;
                     margin: 10px 0;
                 }
             }
-
             & #gameModes > div {
                 flex-direction: column;
             }
-
             & #controls .icon {
                 display: flex;
                 align-items: center;
@@ -211,38 +215,33 @@
                 width: 30px;
                 padding: 4px;
                 margin-right: 15px;
-                background-color: rgb(201, 201, 201);
+                border-radius: 5px;
+                background-color: #33469c22;
                 border: 1px solid rgb(66, 66, 66);
                 position: relative;
                 z-index: 1;
-                transition: all 100ms ease;
-                
+                transition: all 100ms ease;  
                 & > .arrow {
                     z-index: -2;
-                }
-                
+                }     
                 & > div {
-                    background-color: rgb(117, 117, 117);
+                    background-color: var(--second-color);
                     width: 100%;
                     height: 5px;
                     position: absolute;
                     top: 30px;
                     z-index: -2;
                     transition: all 100ms ease;
-                    // transform: translateX(40px);
-                }
-                
+                }  
                 &:hover {
                     transform: translateY(3px);
-                }
-                
+                }           
                 &:hover > div{
                     transform: translateY(-3px);
                     height: 2px;
                     top: 33px;
                 }
             }
-
         }
     }
 }
@@ -251,7 +250,7 @@
     #Game {
         & #gameContainer {
             flex-direction: column;
-    
+            padding-top: 30px;
             & #instructions {
                 width: 80%;
                 justify-content: space-around;

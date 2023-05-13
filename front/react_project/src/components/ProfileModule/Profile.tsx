@@ -58,6 +58,10 @@ function OtherProfile(props: {userId: string, userName: string}) {
             .catch(error => { console.log(error); })
         })
         .catch(error => { console.log(error); })
+        
+        return () => {
+            socket.off("listBlock")
+        }
     }, [])
     
     return (
@@ -134,7 +138,8 @@ export default function Profile() {
                 <div id="FriendManagement">
                     {socket && <FriendManagement />}
                 </div>
-                ) : <OtherProfile userId={user?.id!} userName={user?.login!} />}
+                ) : null}
+                {currentUser !== undefined && <OtherProfile userId={user?.id!} userName={user?.login!} />}
             </aside>
             {socketGame && user != undefined && <MatchHistory userId={user.id!} />}
         </div>
