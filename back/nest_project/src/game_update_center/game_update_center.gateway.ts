@@ -152,14 +152,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("ASK INVITE RESEND");
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
-      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login || client === element.waiting_client_socket) {
-        console.log("INVITE RESEND");
+      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        console.log("INVITE RESEND as invited");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
       let all_soket_of_waiter: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
-      for (let index = 0; index < all_soket_of_waiter.length; index++) {
-        const element2 = all_soket_of_waiter[index];
+      for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
+        const element2 = all_soket_of_waiter[index2];
         if (client.id === element2) {
+          console.log("resending invite as inviter");
           this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
         }
       }
@@ -608,7 +609,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       console.log("posting invite: sending to a receiver socket");
       this.server.to(target).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode});
     }
-
     console.log("leaving handlePrivateMatching function after posting an invite");
   }
   
