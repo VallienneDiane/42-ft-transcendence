@@ -527,6 +527,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           this.logger.debug("private matchmaking found");
           console.log("sending invitation accepted to the waiter socket");
           this.server.to(private_room.waiting_client_socket.id).emit("Invitation_Accepted");
+          this.server.to(client.id).emit("Invitation_Accepted");
           for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
             const waiter2 = all_waiter_socket[index2];
             if (waiter2 != private_room.waiting_client_socket.id) {
