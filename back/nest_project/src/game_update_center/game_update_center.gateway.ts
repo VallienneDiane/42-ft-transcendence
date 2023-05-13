@@ -432,6 +432,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           console.log("sending in find and remove invitation send false to all waiter socket if socket disconnecting is the last socket of the target");
           this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
         }
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login)
         this.private_space.splice(i, 1);
         console.log("leaving find_and_remove function having find a waiting socket in private_space");
         return;
@@ -500,13 +501,29 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Cancel_Invitation")
   handle_canceled(@ConnectedSocket() client: Socket) {
-    for (let index = 0; index < this.private_space.length; index++) {
-      const element = this.private_space[index];
-      if (element.waiting_client_socket === client) {
-        this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, element.target_client_login)).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
-        this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
-        this.private_space.splice(index, 1);
-        return;
+    console.log("entering cancel invitation by : ", client.id);
+    for (let index1 = 0; index1 < this.private_space.length; index1++) {
+      let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
+      const element = this.private_space[index1];
+      for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
+        const waiter = all_waiter_socket[index2];
+        if (waiter === element.waiting_client_socket.id) {
+          let all_target_socket: string[] = this.get_all_socket_of_user(element.target_client_login);
+          for (let index3 = 0; index3 < all_target_socket.length; index3++) {
+            const element2 = all_target_socket[index3];
+            this.server.to(element2).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+          }
+          for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
+            const element2 = all_waiter_socket[index4];
+            if (element2 != client.id) {
+              console.log("emiting invitation to a waiter socket");
+              this.server.to(element2).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+            }
+          }
+          this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
+          this.private_space.splice(index1, 1);
+          return;
+        }
       }
     }
   }
