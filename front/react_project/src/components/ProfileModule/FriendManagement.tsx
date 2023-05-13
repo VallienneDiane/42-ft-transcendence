@@ -9,7 +9,7 @@ import { faCancel, faCaretDown, faCaretUp, faCommentDots, faGamepad, faMagnifyin
 import { userService } from "../../services/user.service";
 
 function SearchbarFriend(props: {
-    friendList: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[], 
+    friendList: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[], 
     requestSend: {friendshipId: string, friendId: string, friendName: string}[], 
     blockList: {id: string, name: string}[]
 }) {
@@ -119,7 +119,7 @@ export default function FriendManagement() {
     const {socket} = useContext(SocketContext);
     const {socketGame} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [friends, setFriends] = useState<{key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
+    const [friends, setFriends] = useState<{friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[]>([]);
     const [developFriend, setDevelopFriend] = useState<boolean>(true);
     const [askIfConnectedDone, setAsk] = useState<boolean>(false);
     const [fetchDone, setFetch] = useState<boolean>(false);
@@ -136,21 +136,22 @@ export default function FriendManagement() {
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
         .then((response) => {
-            let friendsArray: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
+            console.log(response);
+            let friendsArray: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
             for (let elt of response.data) {
-                let toPush: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} = {
-                    key: elt.friendId,
+                let toPush: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean} = {
                     friendshipId: elt.friendshipId,
                     friendId: elt.friendId,
                     friendName: elt.friendName,
                     isConnected: false};
-                    toPush.key.concat('0');
                     friendsArray.push(toPush);
                 }
             friendsArray.sort((a, b) => {return a.friendName.localeCompare(b.friendName)})
             setFriends(friendsArray);
             setFetch(true);
-        });
+            console.log("friends array: ", friendsArray);
+        })
+        .catch(error => { console.log(error); });
     }
 
     const fetchPending = () => {
@@ -158,7 +159,8 @@ export default function FriendManagement() {
         .then((response) => {
             setPendings(response.data);
             setRequestDone(true);
-        });
+        })
+        .catch(error => { console.log(error); });
     }
 
     const invertDevelopPending = () => {
@@ -182,15 +184,14 @@ export default function FriendManagement() {
 
     const invertDevelopFriend = () => {
         setDevelopFriend(!developFriend);
-        if (!developFriend)
-            askIfConnected();
     }
 
     const fetchRequests = () => {
         Axios.get("listRequestsPendingReceived/" + me.sub)
         .then((response) => {
             setRequests(response.data);
-        });
+        })
+        .catch(error => { console.log(error); });
     }
 
     const invertDevelopRequest = () => {
@@ -210,6 +211,7 @@ export default function FriendManagement() {
     }
 
     const askIfConnected = () => {
+        console.log("in Ask", friends)
         if (friends.length) {
             let arrayToAskIfConnected: {userId: string}[] = [];
             friends.forEach((friend) => {
@@ -233,158 +235,152 @@ export default function FriendManagement() {
     }
 
     useEffect(() => {
-        fetchBlocked();
-        socket.on("listBlock", (data: {id: string, name: string}[]) => {
-            setBlocked(data);
-            setBlockDone(true);
-        })
-    }, []);
+        if (socket) {
+            console.log(askIfConnectedDone, fetchDone, friends);
+            if (!fetchDone)
+                fetchFriends();
+            if (fetchDone && !askIfConnectedDone)
+                askIfConnected();
+        }
+    }, [socket, friends]);
 
     useEffect(() => {
-        if (!fetchDone)
-            fetchFriends();
-        if (fetchDone && !askIfConnectedDone)
-            askIfConnected();
-    }, [fetchDone]);
+        if (socket) {
+            fetchPending();
+            fetchRequests();
+            fetchBlocked();
+        }
+    }, [socket]);
 
     useEffect(() => {
-        fetchPending();
-        fetchRequests();
-        fetchBlocked();
-    }, []);
-
-    useEffect(() => {
-        socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
-            console.log("new friend: ", friendshipId, id, name);
-            let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
-                {
-                    key: id,
-                    friendshipId: friendshipId,
-                    friendId: id,
-                    friendName: name,
-                    isConnected: false,
+        if (socket) {
+            socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
+                console.log("new friend: ", friendshipId, id, name);
+                let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
+                    {
+                        key: id,
+                        friendshipId: friendshipId,
+                        friendId: id,
+                        friendName: name,
+                        isConnected: false,
+                    }
+                let newFriendList = [...friends, newFriend];
+                newFriendList.sort((a, b) => {
+                    return (a.friendName.localeCompare(b.friendName));
+                });
+                setFriends(newFriendList);
+                socket.emit("isConnected", [{userId: id}]);
+                setPendings(pendings.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
+                setRequests(requests.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("supressFriend", (friendshipId: string) => {
+                const newFriendList = friends.filter(friend => {
+                    return friend.friendshipId != friendshipId;
+                });
+                if (newFriendList.length == 0)
+                    setDevelopFriend(false);
+                setFriends(newFriendList);
+                setPendings(pendings.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
+                setRequests(requests.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("usersAreConnected", (userIds: string[]) => {
+                let newFriendList = friends;
+                for (let eltData of userIds) {
+                    for (let elt of newFriendList) {
+                        if (elt.friendId == eltData) {
+                            elt.isConnected = true;
+                            break;
+                        }
+                    }
                 }
-            newFriend.key.concat('0');
-            let newFriendList = [...friends, newFriend];
-            newFriendList.sort((a, b) => {
-                return (a.friendName.localeCompare(b.friendName));
+                setFriends(newFriendList);
+                setBugReactHook(!bugReactHook);
             });
-            setFriends(newFriendList);
-            socket.emit("isConnected", [{userId: id}]);
-            setPendings(pendings.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }));
-            setRequests(requests.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }));
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("supressFriend", (friendshipId: string) => {
-            const newFriendList = friends.filter(friend => {
-                return friend.friendshipId != friendshipId;
-            });
-            if (newFriendList.length == 0)
-                setDevelopFriend(false);
-            setFriends(newFriendList);
-            setPendings(pendings.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }));
-            setRequests(requests.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }));
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("usersAreConnected", (userIds: string[]) => {
-            let newFriendList = friends;
-            for (let eltData of userIds) {
+    
+            socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
+                let newFriendList = friends;
                 for (let elt of newFriendList) {
-                    if (elt.friendId == eltData) {
-                        elt.key = elt.key.slice(0, -1).concat('1');
+                    if (elt.friendId == user.userId) {
                         elt.isConnected = true;
                         break;
                     }
                 }
-            }
-            setFriends(newFriendList);
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
-            let newFriendList = friends;
-            for (let elt of newFriendList) {
-                if (elt.friendId == user.userId) {
-                    elt.key = elt.key.slice(0, -1).concat('1');
-                    elt.isConnected = true;
-                    break;
+                setFriends(newFriendList);
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
+                let newFriendList = friends;
+                for (let elt of newFriendList) {
+                    if (elt.friendId == user.userId) {
+                        elt.isConnected = false;
+                        break;
+                    }
                 }
-            }
-            setFriends(newFriendList);
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
-            console.log("disconnected: ", user.userLogin);
-            let newFriendList = friends;
-            for (let elt of newFriendList) {
-                if (elt.friendId == user.userId) {
-                    elt.key = elt.key.slice(0, -1).concat('0');
-                    elt.isConnected = false;
-                    break;
-                }
-            }
-            setFriends(newFriendList);
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("newFriendRequestSent", (friendshipId: string, friendId: string, friendName: string) => {
-            let newPendings = [...pendings, {friendshipId: friendshipId, friendId: friendId, friendName: friendName}];
-            newPendings.sort((a, b) => {
-                return a.friendName.localeCompare(b.friendName);
+                setFriends(newFriendList);
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("newFriendRequestSent", (friendshipId: string, friendId: string, friendName: string) => {
+                let newPendings = [...pendings, {friendshipId: friendshipId, friendId: friendId, friendName: friendName}];
+                newPendings.sort((a, b) => {
+                    return a.friendName.localeCompare(b.friendName);
+                })
+                setPendings(newPendings);
+                setRequests(requests.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("supressFriendRequest", (friendshipId: string) => {
+                setPendings(pendings.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }))
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
+                let newRequests = [...requests, {friendshipId: friendshipId, friendId: id, friendName: name}];
+                newRequests.sort((a, b) => {
+                    return a.friendName.localeCompare(b.friendName);
+                })
+                setRequests(newRequests);
+                setBugReactHook(!bugReactHook);
+            });
+    
+            socket.on("listBlock", (data: {id: string, name: string}[]) => {
+                setBlocked(data);
+                setBugReactHook(!bugReactHook);
+                setBlockDone(true);
             })
-            setPendings(newPendings);
-            setRequests(requests.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }));
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("supressFriendRequest", (friendshipId: string) => {
-            setPendings(pendings.filter((elt) => {
-                return elt.friendshipId != friendshipId;
-            }))
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("newFriendRequestReceived", (friendshipId: string, id: string, name: string) => {
-            let newRequests = [...requests, {friendshipId: friendshipId, friendId: id, friendName: name}];
-            newRequests.sort((a, b) => {
-                return a.friendName.localeCompare(b.friendName);
-            })
-            setRequests(newRequests);
-            setBugReactHook(!bugReactHook);
-        });
-
-        socket.on("listBlock", (data: {id: string, name: string}[]) => {
-            setBlocked(data);
-            setBugReactHook(!bugReactHook);
-            setBlockDone(true);
-        })
-
-        return () => {
-            socket.off("newFriendRequestSent");
-            socket.off("newFriend");
-            socket.off("supressFriendRequest");
-            socket.off("supressFriend");
-            socket.off("newFriendRequestReceived");
-            socket.off("userIsConnected");
-            socket.off("userConnected");
-            socket.off("usersAreConnected");
-            socket.off("userDisconnected");
-            socket.off("listBlock");
+    
+            return () => {
+                socket.off("newFriendRequestSent");
+                socket.off("newFriend");
+                socket.off("supressFriendRequest");
+                socket.off("supressFriend");
+                socket.off("newFriendRequestReceived");
+                socket.off("userIsConnected");
+                socket.off("userConnected");
+                socket.off("usersAreConnected");
+                socket.off("userDisconnected");
+                socket.off("listBlock");
+            }
         }
-    }, [friends, pendings, requests, bugReactHook])
+    }, [socket, friends, pendings, requests, bugReactHook])
 
     return (
         <div id="FriendManagement">
@@ -399,7 +395,7 @@ export default function FriendManagement() {
                 </div>
                 {developFriend && <ul className="list">
                     {friends.map((elt) => (
-                        <li className="element" key={elt.key}>
+                        <li className="element" key={elt.friendId}>
                             <div className="friend">
                                 <div className={elt.isConnected ? "circle online" : "circle offline"}></div>
                                 <NavLink to={`/profile/${elt.friendId}`}>

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe, ParseUUIDPipe } from "@nestjs/common";
+import { Controller, Post, Get, Body, Delete, Param, Patch, UseGuards, Headers, UsePipes, ValidationPipe, ParseUUIDPipe, ParseArrayPipe } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { idDto, LoadAvatarDto, SignUp42Dto, SignUpDto, UpdateAvatarDto, UpdateLoginDto } from "./user.dto";
 import { UserEntity } from "./user.entity";
@@ -16,6 +16,7 @@ import { AvatarEntity } from "./avatar/avatar.entity";
  * UsePipes()
  * Activate dto
  */
+
 @UsePipes(ValidationPipe)
 @Controller()
 export class UserController {
@@ -127,7 +128,15 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('userWithAvatar/:id')
     async getUserWithAvatar(@Param('id', ParseUUIDPipe) id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
+        //console.log("id: ", id);
         return await this.userService.findByIdWithAvatar(id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('userWithAvatarUsingLogin/:login')
+    async getUserWithAvatarUsingLogin(@Param('login') login: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
+        console.log("login: ", login);
+        return await this.userService.findByLoginWithAvatar(login);
     }
 
     /**

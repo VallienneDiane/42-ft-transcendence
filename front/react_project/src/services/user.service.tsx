@@ -12,6 +12,11 @@ let getUserWithAvatar = (id: string) => {
     return Axios.get("userWithAvatar/" + id);
 }
 
+let getUserWithAvatarUsingLogin = (login: string) => {
+    console.log(login);
+    return Axios.get("userWithAvatarUsingLogin/" + login);
+}
+
 export const userService = {
-    getAllUsers, getUser, getUserWithAvatar
+    getAllUsers, getUser, getUserWithAvatar, getUserWithAvatarUsingLogin
 }
