@@ -156,7 +156,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
-      let all_soket_of_waiter: string[] = [];this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
+      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
       for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
         const element2 = all_soket_of_waiter[index2];
         if (client.id === element2) {
@@ -174,6 +174,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Get_Status") // lorsqu'on revient ou arrive sur la page game pour afficher le bon truc
   handleStatus(@ConnectedSocket() client: Socket) {
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("user is not yet recognize");
+      return;
+    }
     if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
       this.server.to(client.id).emit("nothing");
       return;
