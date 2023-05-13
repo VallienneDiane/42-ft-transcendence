@@ -452,6 +452,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       const ws = this.public_space[i];
       if (ws.waiting_client_socket === client) {
         this.public_space.splice(i, 1);
+        if (this.socketID_UserEntity.delete(client.id) === false) {
+          this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
+        }
         console.log("leaving find_and_remove function having find a waiting socket in public_space");
         return;
       }
@@ -511,7 +514,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.clean_match();
     // check if client is already in a waiting queu or game
     if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
-      this.server.to(client.id).emit("Already_On_Match");
+      this.logger.debug("client is already in waiting on match : ", client.id);
+      this.server.to(client.id).emit("You_Are_Occupied");
       return;
     }
     
