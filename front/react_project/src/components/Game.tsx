@@ -128,12 +128,12 @@ const Game: React.FC = () => {
             //     }
     // }, [from])
     
-    useEffect(() => {
-        if (socketGame) {
-            socketGame.emit('Get_Status');
-            console.log("ASK FOR STATUS")
-        }
-    }, [socketGame])
+    // useEffect(() => {
+    //     if (socketGame) {
+    //         socketGame.emit('Get_Status');
+    //         console.log("ASK FOR STATUS")
+    //     }
+    // }, [socketGame])
     
     useEffect(() => {
         console.log(location.state);
@@ -167,7 +167,7 @@ const Game: React.FC = () => {
             };
         }
     }, [timer, countdown])
-
+    
     useEffect(() => {
         console.log('Changes on players', players);
         if (players) {
@@ -175,10 +175,15 @@ const Game: React.FC = () => {
             playersRef.current = players;
         }
     }, [players])
-
+    
     useEffect(() => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
+            socketGame.on("Connection_Accepted", () => {
+                socketGame.emit('Get_Status');
+                console.log("ASK FOR STATUS")
+            });
+            
             socketGame.on('Already_On_Match', () => {
                 console.log('Already on match');
                 document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
