@@ -11,8 +11,8 @@ const AvatarNameSettings: React.FC = () => {
     const id = decodedToken.sub;
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
-    const [avatar, setAvatar] = useState<string>();
-    const [login, setLogin] = useState<string>();
+    const [avatar, setAvatar] = useState<string>('');
+    const [login, setLogin] = useState<string>('');
     const [error, setError] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
     const { handleSubmit } = useForm<LoginSettingsForm>({}); 
