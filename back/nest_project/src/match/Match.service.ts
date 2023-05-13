@@ -28,8 +28,7 @@ export class MatchService {
 	}
 	
 	async matchHistory(userId: string): Promise<{matchId: string, winnerId: string, winnerLogin: string, scoreWinner: number, loserId: string, loserLogin: string, scoreLoser: number}[]> {
-		console.log("userId: ", userId);
-		let blbl = await this.MatchRepository
+		return await this.MatchRepository
 			.createQueryBuilder("match")
 			.innerJoinAndSelect("match.winner", "winner")
 			.innerJoinAndSelect("match.loser", "loser")
@@ -43,8 +42,6 @@ export class MatchService {
 			.addSelect("loser.login", "loserLogin")
 			.addSelect("match.score_loser", "scoreLoser")
 			.getRawMany();
-		// console.log("blbl: ", blbl);
-		return blbl;
 	}
 
 }
