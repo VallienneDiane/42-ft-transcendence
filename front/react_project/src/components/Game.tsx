@@ -13,6 +13,9 @@ import { SocketContext } from "./context"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowDown, faArrowUp, faGear } from "@fortawesome/free-solid-svg-icons"
 import { useLocation } from "react-router"
+import { User } from "../models"
+import { JwtPayload } from "jsonwebtoken"
+import { userService } from "../services/user.service"
 // import { faUp, faDown } from '@fortawesome/free-solid-svg-icons';
 
 interface ball {
@@ -61,6 +64,7 @@ interface SpecMode {
 
 
 const Game: React.FC = () => {
+    let user: User;
     const navigate = useNavigate();
     const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -85,6 +89,20 @@ const Game: React.FC = () => {
     let specModeActive: boolean = false;
     let specMatchLogin: string | null = null;
     const [winner, setWinner] = useState<string>();
+
+    if (accountService.isLogged()) {
+        let decodedToken: JwtPayload = accountService.readPayload()!;
+        const id = decodedToken.sub;
+        userService.getUserWithAvatar(id!)
+        .then(response => {
+            user = response.data;
+            socketGame.emit("Ask_Invitation");
+            console.log("ask invite send");
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
     
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
         console.log("TOGGLE SPEC MODE FUNCTION")
@@ -128,12 +146,12 @@ const Game: React.FC = () => {
             //     }
     // }, [from])
     
-    // useEffect(() => {
-    //     if (socketGame) {
-    //         socketGame.emit('Get_Status');
-    //         console.log("ASK FOR STATUS")
-    //     }
-    // }, [socketGame])
+    useEffect(() => {
+        if (socketGame) {
+            socketGame.emit('Get_Status');
+            console.log("ASK FOR STATUS")
+        }
+    }, [socketGame])
     
     useEffect(() => {
         console.log(location.state);
@@ -297,15 +315,17 @@ const Game: React.FC = () => {
                 ready = false;
             })
 
-            socketGame.on('ready in match', () => {
-                console.log("ready in match status received");
-                setWaitMatch(false);
-                setMatchInProgress(true);
-                setButtonReady(true);
-                ready = true;
-                clearGame = false;
-                setPlayerReady(true);
-                document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
+            socketGame.on('ready in match', (ask_by: string) => {
+                if (ask_by === user.login) {
+                    console.log("ready in match status received");
+                    setWaitMatch(false);
+                    setMatchInProgress(true);
+                    setButtonReady(true);
+                    ready = true;
+                    clearGame = false;
+                    setPlayerReady(true);
+                    document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
+                }
             })
 
             socketGame.on('in match', () => {

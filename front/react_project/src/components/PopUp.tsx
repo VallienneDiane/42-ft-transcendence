@@ -32,17 +32,6 @@ const PopUp: React.FC = () => {
     const inviteRef = useRef<invite | null>(null);
     const [popUpContent, setPopUpContent] = useState<JSX.Element>();
 
-    if (accountService.isLogged()) {
-        let decodedToken: JwtPayload = accountService.readPayload()!;
-        const id = decodedToken.sub;
-        userService.getUserWithAvatar(id!)
-        .then(response => {
-            user = response.data;
-        })
-        .catch(error => {
-            console.log(error);
-        });
-    }
     
     ////// TODO
     // useEffect(() => {
@@ -52,7 +41,7 @@ const PopUp: React.FC = () => {
     //         console.log("ask invite send");
     //     }
     // }, [socketGame])
-
+    
     useEffect(() => {
         if (invite) {
             console.log("invite status", invite.status);
@@ -65,8 +54,19 @@ const PopUp: React.FC = () => {
     useEffect(() => {
         if (socketGame) {
             socketGame.on("Connection_Accepted", () => {
-                socketGame.emit("Ask_Invitation");
-                console.log("ask invite send");
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                    .then(response => {
+                        user = response.data;
+                        socketGame.emit("Ask_Invitation");
+                        console.log("ask invite send");
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                }
             });
 
             socketGame.on("Invitation", (invitation: invitation) => {
