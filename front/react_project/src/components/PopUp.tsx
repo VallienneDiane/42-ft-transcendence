@@ -45,13 +45,13 @@ const PopUp: React.FC = () => {
     }
     
     ////// TODO
-    useEffect(() => {
-        console.log("ask invite function");
-        if (socketGame) {
-            socketGame.emit("Ask_Invitation");
-            console.log("ask invite send");
-        }
-    }, [socketGame])
+    // useEffect(() => {
+    //     console.log("ask invite function");
+    //     if (socketGame) {
+    //         socketGame.emit("Ask_Invitation");
+    //         console.log("ask invite send");
+    //     }
+    // }, [socketGame])
 
     useEffect(() => {
         if (invite) {
@@ -64,6 +64,11 @@ const PopUp: React.FC = () => {
     
     useEffect(() => {
         if (socketGame) {
+            socketGame.on("Connection_Accepted", () => {
+                socketGame.emit("Ask_Invitation");
+                console.log("ask invite send");
+            });
+
             socketGame.on("Invitation", (invitation: invitation) => {
                 
                 console.log("inviteRef.current", inviteRef.current)
