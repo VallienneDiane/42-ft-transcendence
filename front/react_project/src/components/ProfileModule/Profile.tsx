@@ -35,30 +35,36 @@ function OtherProfile(props: {userId: string, userName: string}) {
     }
 
     useEffect(() => {
-        socket.emit("listBlock");
-        socket.on("listBlock", (data: {id: string, name: string}[]) => {
-            data.forEach((user) => {
-                if (user.id === props.userId)
-                    setIsBlock(true);
+        if (socket) {
+            socket.emit("listBlock");
+            socket.on("listBlock", (data: {id: string, name: string}[]) => {
+                data.forEach((user) => {
+                    if (user.id === props.userId)
+                        setIsBlock(true);
+                })
             })
-        })
-        Axios.get("listFriends/" + me.sub)
-        .then((friends) => {
-            Axios.get("listRequestsPendingSend/" + me.sub)
-            .then((pending) => {
-                for (let elt of friends.data) {
-                    if (elt.friendId === props.userId)
-                        setIsFriend(true);
-                }
-                for (let elt of pending.data) {
-                    if (elt.friendId === props.userId)
-                        setIsFriend(true);
-                }
+            Axios.get("listFriends/" + me.sub)
+            .then((friends) => {
+                Axios.get("listRequestsPendingSend/" + me.sub)
+                .then((pending) => {
+                    for (let elt of friends.data) {
+                        if (elt.friendId === props.userId)
+                            setIsFriend(true);
+                    }
+                    for (let elt of pending.data) {
+                        if (elt.friendId === props.userId)
+                            setIsFriend(true);
+                    }
+                })
+                .catch(error => { console.log(error); })
             })
             .catch(error => { console.log(error); })
-        })
-        .catch(error => { console.log(error); })
-    }, [])
+    
+            return () => {
+                socket.off("listBlock");
+            }
+        }
+    }, [socket])
     
     return (
         <div id="actionProfile">
@@ -83,17 +89,33 @@ export default function Profile() {
     const currentUser = useParams().login;
     
     useEffect(() => {
-        if (currentUser !== undefined){
-            userService.getUserWithAvatar(currentUser)
-            .then(response => {
-                if (response.data === "") {
-                    navigate('/profile');
-                }
-                setUser(response.data);
-            })
-            .catch(error => {
-                console.log(error);
-            });
+        if (currentUser !== undefined) {
+            console.log(currentUser, currentUser.length);
+            if (currentUser.length > 15) {
+                userService.getUserWithAvatar(currentUser)
+                .then(response => {
+                    if (response.data === "") {
+                        navigate('/profile');
+                    }
+                    setUser(response.data);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            }
+            else {
+                userService.getUserWithAvatarUsingLogin(currentUser)
+                .then(response => {
+                    console.log(response);
+                    if (response.data === "") {
+                        navigate('/profile');
+                    }
+                    setUser(response.data);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+            }
         }
         else {
             let decodedToken: JwtPayload = accountService.readPayload()!;
@@ -107,19 +129,6 @@ export default function Profile() {
             });
         }
 
-        return () => {
-            if (socket) {
-                socket.off("newFriendRequestSent");
-                socket.off("newFriend");
-                socket.off("supressFriendRequest");
-                socket.off("supressFriend");
-                socket.off("newFriendRequestReceived");
-                socket.off("userIsConnected");
-                socket.off("userConnected");
-                socket.off("userDisconnected");
-                socketGame.off("matchHistory");
-            }
-        }
     }, [currentUser, navigate])
     
     return (
