@@ -139,7 +139,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
   
   @SubscribeMessage("Ask_Invitation") // lors d'un refresh de page pour reafficher la popup
-  handle_resend_invite(@ConnectedSocket() client: Socket) {
+  handle_resend_invite(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
     this.logger.debug("received Ask_Invitation message of : ", client.id);
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
@@ -156,7 +156,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
-      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
+      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(body.player1_login);
       for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
         const element2 = all_soket_of_waiter[index2];
         if (client.id === element2) {
@@ -169,6 +169,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Get_Matches") // resend all ongoing match to a client
   givematches(@ConnectedSocket() client: Socket) {
+    this.logger.debug("received a Get_Matches event");
     this.transfer_all_match(client);
   }
 
@@ -733,7 +734,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
 
   transfer_all_match(@ConnectedSocket() client: Socket) { //utility function
-    this.logger.debug("transfering all the match to : ", client.id);
+    this.logger.debug("transfering all the match to : ", client.id, this.all_the_match);
     for (let index = 0; index < this.all_the_match.length; index++) {
       const match = this.all_the_match[index];
       this.server.to(client.id).emit("Match_Update", match);
