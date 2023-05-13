@@ -53,6 +53,7 @@ class ChannelDMList extends React.Component<{
 
     checkOnline() {
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
+            // console.log("userConnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -70,6 +71,7 @@ class ChannelDMList extends React.Component<{
 
     checkOffline() {
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
+            // console.log("userDisconnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -88,6 +90,10 @@ class ChannelDMList extends React.Component<{
     setMyChannels() {
         this.context.socket.emit('myChannels');
         this.context.socket.on('listMyChannels', (channels: {channel: IChannel, status: string}[]) => {
+            let orderedList = channels;
+            orderedList.sort((a, b) => {
+                return a.channel.name.localeCompare(b.channel.name);
+            })
             this.setState({ channels: channels }) }); 
 
         this.context.socket.on('channelJoined', (chann: {channel: IChannel, status: string}) => {
@@ -124,11 +130,41 @@ class ChannelDMList extends React.Component<{
     }
 
     componentDidMount(): void {
-        console.log("1", this.state.privateMsgs)
-        this.setMyChannels();
+        console.log("MOUNTING DM MODULE");
 
-        this.checkOnline();
-        this.checkOffline();
+        this.setMyChannels();
+        // this.checkOnline();
+        this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
+            // console.log("userConnected: ", user);
+            let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
+            for (let elt of this.state.privateMsgs) {
+                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
+            }
+            const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
+            if (change != undefined) // vérifier si le login se trouve dans ma liste de DM
+                sorted.set(user.userId, {userName: user.userLogin, connected: true, waitingMsg: change.waitingMsg});
+            else
+                return;
+            let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
+            this.setState({privateMsgs: nextState});
+        })
+        // this.checkOffline();
+        this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
+            // console.log("userDisconnected: ", user);
+            let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
+            for (let elt of this.state.privateMsgs) {
+                sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
+            }
+            const change: {userName: string, connected: boolean, waitingMsg: boolean} | undefined = sorted.get(user.userId);
+            if (change != undefined)
+                sorted.set(user.userId, {userName: user.userLogin, connected: false, waitingMsg: change.waitingMsg});
+            else
+                return;
+            let nextState: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
+            sorted.forEach( (user, id) => nextState.push({userName: user.userName, userId: id, connected: user.connected, waitingMsg: user.waitingMsg}));
+            this.setState({privateMsgs: nextState});
+        })
         this.checkNewMsg();
         
         this.context.socket.on('checkNewDM', (room: {id: string, login: string}, connected: boolean) => {
@@ -148,8 +184,9 @@ class ChannelDMList extends React.Component<{
             this.setState({privateMsgs: nextState});
         });
     }
-    
+
     componentWillUnmount(): void {
+        console.log("UNMOUNTING DM MODULE");
         this.context.socket.off('listMyChannels');
         this.context.socket.off("channelJoined");
         this.context.socket.off("channelLeaved");
@@ -161,7 +198,6 @@ class ChannelDMList extends React.Component<{
     }
 
     render() {
-        console.log(this.state.privateMsgs)
         let displayDM: boolean = false;
         if (this.state.privateMsgs.length !== 0)
             displayDM = true;
