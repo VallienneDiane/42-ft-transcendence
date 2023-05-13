@@ -60,7 +60,7 @@ const PopUp: React.FC = () => {
                     userService.getUserWithAvatar(id!)
                     .then(response => {
                         user = response.data;
-                        socketGame.emit("Ask_Invitation");
+                        socketGame.emit("Ask_Invitation", {player1_login: user.login});
                         console.log("ask invite send");
                     })
                     .catch(error => {
@@ -106,6 +106,14 @@ const PopUp: React.FC = () => {
                 }));
                 // }
             })
+            
+            socketGame.on('Already_On_Match', () => {
+                console.log('Already on match');
+                setInvite((prevState) => ({
+                    ...prevState!,
+                    status: "you_are_in_match",
+                }));
+            });
             
             socketGame.on("Invitation_Accepted", () => {
             // if (invite?.status === "send") {
@@ -159,6 +167,15 @@ const PopUp: React.FC = () => {
                   setPopUpContent(
                     <div className="container">
                       <div>{invite?.for} declined your invitation</div>
+                      <div id="close_popUp" onClick={closePopUp}>X</div>
+                    </div>
+                  );
+                  break;
+
+                case "you_are_in_match":
+                  setPopUpContent(
+                    <div className="container">
+                      <div>You are already in a match</div>
                       <div id="close_popUp" onClick={closePopUp}>X</div>
                     </div>
                   );

@@ -139,7 +139,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   }
   
   @SubscribeMessage("Ask_Invitation") // lors d'un refresh de page pour reafficher la popup
-  handle_resend_invite(@ConnectedSocket() client: Socket) {
+  handle_resend_invite(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
     this.logger.debug("received Ask_Invitation message of : ", client.id);
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
@@ -156,7 +156,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
-      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
+      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(body.player1_login);
       for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
         const element2 = all_soket_of_waiter[index2];
         if (client.id === element2) {
@@ -169,6 +169,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Get_Matches") // resend all ongoing match to a client
   givematches(@ConnectedSocket() client: Socket) {
+    this.logger.debug("received a Get_Matches event");
     this.transfer_all_match(client);
   }
 
@@ -181,12 +182,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
+      this.logger.debug("leaving get_status sending : nothing");
       this.server.to(client.id).emit("nothing");
       return;
     }
     for (let index = 0; index < this.public_space.length; index++) {
       const element = this.public_space[index];
       if (element.waiting_client_socket === client) {
+        this.logger.debug("leaving get_status sending : in matchmaking");
         this.server.to(client.id).emit("in matchmaking", user.login);
         return;
       }
@@ -197,16 +200,20 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         let player = element.players[0] === client ? 0 : 1;
         if (element.game_engine.pl1_ready && element.game_engine.pl2_ready) {
           this.server.to(client.id).emit("ongoing match", user.login);
+          this.logger.debug("leaving get_status sending : ongoing match");
           return;
         }
         if ((player === 0 && element.game_engine.pl1_ready) || (player === 1 && element.game_engine.pl2_ready)) {
           this.server.to(client.id).emit("ready in match", user.login);
+          this.logger.debug("leaving get_status sending : ready in math");
           return;
         }
         this.server.to(client.id).emit("in match", user.login);
+        this.logger.debug("leaving get_status sending : in match");
         return;
       }
     }
+    this.logger.debug("leaving get_status without sending anything ");
   }
 
   /**
@@ -452,6 +459,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       const ws = this.public_space[i];
       if (ws.waiting_client_socket === client) {
         this.public_space.splice(i, 1);
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
         if (this.socketID_UserEntity.delete(client.id) === false) {
           this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
         }
@@ -705,8 +713,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (!user)
       return;
       this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
-      this.find_and_remove(client);
       let user_login = this.socketID_UserEntity.get(client.id).login;
+      this.find_and_remove(client);
       let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
       console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
       if (nbr_of_socket <= 1) {
@@ -718,14 +726,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       //   // console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
       // }
       this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
-      if (this.socketID_UserEntity.delete(client.id) === false) {
-        this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
-      }
+      this.socketID_UserEntity.delete(client.id)
+      // if (this.socketID_UserEntity.delete(client.id) === false) {
+      //   this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
+      // }
     })
   }
 
   transfer_all_match(@ConnectedSocket() client: Socket) { //utility function
-    this.logger.debug("transfering all the match to : ", client.id);
+    this.logger.debug("transfering all the match to : ", client.id, this.all_the_match);
     for (let index = 0; index < this.all_the_match.length; index++) {
       const match = this.all_the_match[index];
       this.server.to(client.id).emit("Match_Update", match);

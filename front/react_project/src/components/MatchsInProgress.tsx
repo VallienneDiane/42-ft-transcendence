@@ -54,13 +54,13 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     // }, [matchs])
 
         
-    useEffect(() => {
-        setMatchs([]);
-        if (props.socket !== null) {
-            console.log("ASK FOR MATCHS");
-            props.socket.emit('Get_Matches');      
-        }
-    }, []);
+    // useEffect(() => {
+    //     setMatchs([]);
+    //     if (props.socket !== null) {
+    //         console.log("ASK FOR MATCHS");
+    //         props.socket.emit('Get_Matches');      
+    //     }
+    // }, []);
 
 
     useEffect(() => {
@@ -68,6 +68,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         if (props.socket) {
 
             props.socket.on('Match_Update', (matchUpdate: MatchState) => {
+                console.log('match update in MatchInProgress');
                 setMatchs(prevMatchs => {
                     const updatedMatchs = prevMatchs.map(match => {
                       if (match.player1_login === matchUpdate.player1_login) {
