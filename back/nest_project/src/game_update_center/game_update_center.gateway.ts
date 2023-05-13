@@ -135,13 +135,23 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     //this.transfer_all_match(client);
     console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
+    this.server.to(client.id).emit("Connection_Accepted");
   }
   
   @SubscribeMessage("Ask_Invitation") // lors d'un refresh de page pour reafficher la popup
   handle_resend_invite(@ConnectedSocket() client: Socket) {
-    this.logger.debug("received Ask_Invitation message");
+    this.logger.debug("received Ask_Invitation message of : ", client.id);
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
+      let login = this.socketID_UserEntity.get(client.id);
+      if (!login) {
+        this.logger.debug("error with login null shouldn't happenned");
+        return;
+      }
+      if (!element.target_client_login) {
+        this.logger.debug("error with private_room login null shouldn't happenned");
+        return;
+      }
       if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
@@ -400,7 +410,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @returns 
   */
  find_and_remove(@ConnectedSocket() client: Socket) {
-   console.log("entering find_and_remove function");
+    console.log("entering find_and_remove function");
    
     this.clean_match();
     // check if the client is in a ongoing game
