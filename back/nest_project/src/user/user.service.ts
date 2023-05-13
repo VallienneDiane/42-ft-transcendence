@@ -107,6 +107,19 @@ export class UserService {
             .addSelect("avatar.avatarSvg", "avatarSvg")
             .getRawOne();
     }
+
+    async findByLoginWithAvatar(login: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
+        return await this.usersRepository
+            .createQueryBuilder("user")
+            .innerJoinAndSelect("user.avatarSvg", "avatar")
+            .where("user.login = :userLogin", {userLogin: login})
+            .select("user.id", "id")
+            .addSelect("login", "login")
+            .addSelect("email", "email")
+            .addSelect("avatar.avatarSvg", "avatarSvg")
+            .getRawOne();
+    }
+
     public findById42(id42: string): Promise<UserEntity> {
         return this.usersRepository.findOneBy({id42});
     }
