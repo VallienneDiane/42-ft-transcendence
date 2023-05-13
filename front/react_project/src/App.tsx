@@ -18,6 +18,7 @@ import VerifyCode2fa from './components/VerifyCode2fa'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events';
 import HomeSettings from './components/HomePageSettings';
 import PopUp from './components/PopUp';
+import NotFound from './components/NotFound';
 
 function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
@@ -69,6 +70,7 @@ function App() {
                 <Route path='/signup' element={<SignupPage />} />
                 <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
                 <Route element={<ProtectedRoutes />}>
+                  <Route path='*' element={<NotFound />}/>
                   <Route path='/' element={<Home />} />
                   <Route path='/game' element={<Game />} />
                   <Route path='/profile' element={<Profile />} />
