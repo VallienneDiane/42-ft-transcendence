@@ -1,6 +1,7 @@
 import "../styles/Base.css"
 import "../styles/Game.scss"
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from "react-router"
 import socketIOClient from 'socket.io-client'
 import io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
@@ -60,6 +61,7 @@ interface SpecMode {
 
 
 const Game: React.FC = () => {
+    const navigate = useNavigate();
     const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let clearGame: boolean = false;
@@ -140,9 +142,7 @@ const Game: React.FC = () => {
             setWaitMatch(false);
             setMatchInProgress(true);
             setButtonReady(true);
-        }
-        return () => {
-            location.state = null;
+            navigate("", { replace: true, state: null });
         }
     }, [])
     
@@ -232,11 +232,11 @@ const Game: React.FC = () => {
                 clearGame = false;
                 console.log("Match Update received", matchUpdate)
                 // if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
-                    console.log("Players set"),
-                    console.log(matchUpdate.player1_login),
-                    console.log(matchUpdate.player2_login),
-                    console.log(matchUpdate.player1_score),
-                    console.log(matchUpdate.player2_score),
+                    // console.log("Players set"),
+                    // console.log(matchUpdate.player1_login),
+                    // console.log(matchUpdate.player2_login),
+                    // console.log(matchUpdate.player1_score),
+                    // console.log(matchUpdate.player2_score),
                     setPlayers(prevPlayers => {
                         return {
                             ...prevPlayers!,
@@ -277,13 +277,6 @@ const Game: React.FC = () => {
             
             socketGame.on('nothing', () => {
                 console.log("nothing status received");
-                setWaitMatch(false);
-                setMatchInProgress(false);
-                setTimer(false);
-                setCountdown(3);
-                setPlayerReady(false);
-                setButtonReady(false);
-                setPlayers(null);
             })
             
             socketGame.on('in matchmaking', () => {
@@ -338,6 +331,10 @@ const Game: React.FC = () => {
                 socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
+            setInputState((prevState) => ({
+                ...prevState,
+                down: true
+            }));
 
         }
     };
