@@ -348,8 +348,6 @@ class InviteUser extends React.Component<{dest: IDest}, {
     }
 
     displayList(event: any) {
-        // console.log("displayList")
-        // console.log(this.state.users);
         this.setState({ userToInvite: event.target.value });
         if (event.target.value) {
             const filteredUsers: {id: string, name: string}[] = 
@@ -363,7 +361,6 @@ class InviteUser extends React.Component<{dest: IDest}, {
     
     componentDidMount(): void {
         this.context.socket.on('listUsersChann', (list: {user: {id: string, login: string}, status: string}[]) => {
-            // console.log("listUsersChann")
             const members: {user: {id: string, login: string}, status: string}[] = list.map(member => (member));
             userService.getAllUsers()
             .then(response => {
@@ -538,7 +535,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
     const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
         if (event.currentTarget.getAttribute('data-type') === "normal")
             socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: false});
-        else if (event.currentTarget.getAttribute('data-type') === "normal")
+        else if (event.currentTarget.getAttribute('data-type') === "super")
             socketGame.emit("Private_Matchmaking", {target: props.dest.name, super_game_mode: true});
     }
 
