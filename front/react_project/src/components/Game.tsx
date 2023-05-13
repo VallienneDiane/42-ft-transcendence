@@ -96,8 +96,6 @@ const Game: React.FC = () => {
         userService.getUserWithAvatar(id!)
         .then(response => {
             user = response.data;
-            socketGame.emit("Ask_Invitation");
-            console.log("ask invite send");
         })
         .catch(error => {
             console.log(error);
