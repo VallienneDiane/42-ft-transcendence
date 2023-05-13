@@ -67,6 +67,7 @@ const PopUp: React.FC = () => {
             socketGame.on("Invitation", (invitation: invitation) => {
                 
                 console.log("inviteRef.current", inviteRef.current)
+                console.log("user login", user.login)
                 console.log("invitation", invitation)
                 if (inviteRef.current != null && invitation.by === inviteRef.current!.by && invitation.for === inviteRef.current!.for) {
                     setInvite(null);
