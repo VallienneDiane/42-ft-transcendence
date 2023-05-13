@@ -335,7 +335,6 @@ const Game: React.FC = () => {
                 ...prevState,
                 down: true
             }));
-
         }
     };
 
