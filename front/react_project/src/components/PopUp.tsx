@@ -60,7 +60,7 @@ const PopUp: React.FC = () => {
                     userService.getUserWithAvatar(id!)
                     .then(response => {
                         user = response.data;
-                        socketGame.emit("Ask_Invitation");
+                        socketGame.emit("Ask_Invitation", user.login);
                         console.log("ask invite send");
                     })
                     .catch(error => {
