@@ -174,9 +174,10 @@ export default function FriendManagement() {
     }
 
     const proposeGame = (event: any) => {
+        console.log(event.target.value);
         if (event.currentTarget.getAttribute('data-type') === "normal")
             socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: false});
-        else if (event.currentTarget.getAttribute('data-type') === "normal")
+        else if (event.currentTarget.getAttribute('data-type') === "super")
             socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: true});
     }
 
@@ -434,7 +435,7 @@ export default function FriendManagement() {
                 {developPending && <ul className="list">
                     {pendings.map((elt) => (
                         <li className="element" key={elt.friendId}>
-                            <NavLink to={`/profile/${elt.friendId}`}>
+                            <NavLink id="navlink" to={`/profile/${elt.friendId}`}>
                                 <span className="name">{elt.friendName}</span>
                             </NavLink>
                             <button value={elt.friendshipId} onClick={cancelHandler} id="cancelRequestButton">
@@ -455,7 +456,7 @@ export default function FriendManagement() {
                 {developRequest && <ul className="list">
                     {requests.map((elt) => (
                         <li className="element" key={elt.friendshipId}>
-                            <NavLink to={`/profile/${elt.friendId}`}>
+                            <NavLink id="navlink" to={`/profile/${elt.friendId}`}>
                                 <span className="name">{elt.friendName}</span>
                             </NavLink>
                             <button value={elt.friendshipId} onClick={acceptHandler} id="acceptFriendButton">
@@ -479,7 +480,7 @@ export default function FriendManagement() {
                 {developBlock && <ul className="list">
                     {blocked.map((elt, id) => (
                         <li className="element" key={id}>
-                            <NavLink to={`/profile/${elt.id}`}>
+                            <NavLink id="navlink" to={`/profile/${elt.id}`}>
                                 <span className="name">{elt.name}</span>
                             </NavLink>
                             <button id="unblockButton" value={elt.id} onClick={unblockEvent}>
