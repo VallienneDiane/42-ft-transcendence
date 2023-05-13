@@ -141,6 +141,9 @@ const Game: React.FC = () => {
             setMatchInProgress(true);
             setButtonReady(true);
         }
+        return () => {
+            location.state = null;
+        }
     }, [])
     
     // countdown handler

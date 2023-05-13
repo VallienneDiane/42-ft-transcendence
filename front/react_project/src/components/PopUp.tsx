@@ -68,7 +68,7 @@ const PopUp: React.FC = () => {
                 
                 console.log("inviteRef.current", inviteRef.current)
                 console.log("user login", user.login)
-                console.log("invitation", invitation)
+                console.log("invitation received", invitation)
                 if (inviteRef.current != null && invitation.by === inviteRef.current!.by && invitation.for === inviteRef.current!.for) {
                     setInvite(null);
                     inviteRef.current = null;
@@ -93,6 +93,7 @@ const PopUp: React.FC = () => {
             })
             
             socketGame.on("Invite_Declined", () => {
+                console.log("invite declined request");
             // if (invite?.status === "send") {
                 setInvite((prevState) => ({
                     ...prevState!,

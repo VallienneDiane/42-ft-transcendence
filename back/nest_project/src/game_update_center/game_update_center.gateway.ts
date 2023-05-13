@@ -511,13 +511,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           let all_target_socket: string[] = this.get_all_socket_of_user(element.target_client_login);
           for (let index3 = 0; index3 < all_target_socket.length; index3++) {
             const element2 = all_target_socket[index3];
-            this.server.to(element2).emit("Clear_Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+            this.server.to(element2).emit("Clear_Invite", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
             const element2 = all_waiter_socket[index4];
             if (element2 != client.id) {
-              console.log("emiting clear_invitation to a waiter socket");
-              this.server.to(element2).emit("Clear_Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+              console.log("emiting clear_invite to a waiter socket");
+              this.server.to(element2).emit("Clear_Invite", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
             }
           }
           this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
@@ -631,7 +631,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           for (let index3 = 0; index3 < all_target_socket.length; index3++) {
             const target = all_target_socket[index3];
             if (target != client.id) {
-              this.server.to(target).emit("Clear_Invitation", {for: private_room.target_client_login, by: this.socketID_UserEntity.get(private_room.waiting_client_socket.id).login, send: true, super_game_mode: private_room.super_game_mode})
+              this.server.to(target).emit("Clear_Invite", {for: private_room.target_client_login, by: this.socketID_UserEntity.get(private_room.waiting_client_socket.id).login, send: true, super_game_mode: private_room.super_game_mode})
             }
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
