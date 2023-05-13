@@ -128,7 +128,7 @@ export class UserController {
     @UseGuards(JwtAuthGuard)
     @Get('userWithAvatar/:id')
     async getUserWithAvatar(@Param('id', ParseUUIDPipe) id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
-        console.log("id: ", id);
+        //console.log("id: ", id);
         return await this.userService.findByIdWithAvatar(id);
     }
 
