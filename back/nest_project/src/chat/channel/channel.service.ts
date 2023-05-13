@@ -150,7 +150,6 @@ export class ChannelService {
 	 * returns null if the user don't belong to this channel or if the channel doesn't exists
 	 */
 	async getUserInChannel(channelId: string, userId: string): Promise<{user: UserEntity, status: string}> {
-		console.log("getUserInChannel: ", channelId, userId);
 		const usersArray = await this.listUsersInChannel(channelId, false);
 		for (let elt of usersArray) {
 			if (elt.user.id == userId)

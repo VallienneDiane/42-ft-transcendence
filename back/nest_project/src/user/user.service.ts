@@ -329,13 +329,11 @@ export class UserService {
     }
 
     async getAvatar(id : string): Promise<string> {
-        console.log("getAvatar");
         const userAvatar: AvatarEntity = await this.usersRepository.createQueryBuilder("user")
             .innerJoinAndSelect("user.avatarSvg", "avatar")
             .where("user.id = :id", { id: id })
             .select("avatar.*", "avatarSvg")
             .getRawOne();
-        console.log("userAvatar:" , userAvatar.avatarSvg);
         return userAvatar.avatarSvg;
     }
 
