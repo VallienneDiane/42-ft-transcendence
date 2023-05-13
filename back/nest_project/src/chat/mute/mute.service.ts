@@ -67,15 +67,11 @@ export class MuteService {
     }
 
     async muteUser(userId: string, channelId: string, minutes: number) {
-        console.log("weojowed2");
         const channelMute = await this.channelService.getMutedListWithJoin(channelId);
-        console.log(channelMute);
         let muteDate = new Date(new Date().getTime() + (minutes * 60000));
         for (let elt of channelMute) {
             const eltUserId = this.retypeAsId(elt);
-            console.log(eltUserId, userId);
             if (eltUserId == userId) {
-                console.log("fqwqwf'");
                 this.muteRepository.update({id: eltUserId}, {deletedAt: muteDate});
                 return;
             }

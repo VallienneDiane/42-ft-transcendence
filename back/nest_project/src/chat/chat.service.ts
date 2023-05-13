@@ -277,7 +277,6 @@ export class ChatService {
                         else
                             arrayToEmit.push({userId: elt.id, userName: elt.login, connected: false});
                     }
-                    console.log("blop")
                     client.emit("listMyDM", arrayToEmit);
                 })
     }
@@ -757,7 +756,6 @@ export class ChatService {
     }
 
     public unfriendEvent(client: Socket, me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
-        console.log(me.login, "wants to delete : ", friendshipId);
         client.emit("supressFriend", "wefnwkgnasgfs");
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
@@ -915,7 +913,6 @@ export class ChatService {
                             else
                                 this.channelService.delBannedUser(userEntity.id, channelId)
                                 .then(() => {
-                                    console.log("ICI")
                                     roomHandler.roomMap.of(channelId).emit("newUnban", userEntity.id);
                                 });
                         })
