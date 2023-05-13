@@ -32,20 +32,20 @@ mise en reseau du site
 
 bug sur le jeu :
 
-	-numero 1 :
+	-numero 1 : FAIT
 		.joueur 1 click sur un mod de jeu
 		.joueur 2 click sur le meme mod de jeu ils sont match
 		.un des deux joueur quitte la page ou rafraichit
 		! l'autre joueur a toujours le message ready on top of the game selection message
 
-	-numero 2:
+	-numero 2: FAIT
 		.joueur 1 click sur un mod de jeu
 		.joueur 2 click sur le meme mod de jeu ils sont match
 		.joueur 1 click ready, il a donc le message game will start second_loop
 		.joueur 2 rafraichit la page ou se deconnect
 		! joueur 1 voie le message ready on top of the game selection message
 
-	-numero 3:
+	-numero 3: TOUJOUR BUGUER mais differement
 		.joueur 1 click sur un mod de jeu
 		.joueur 2 click sur le meme mod de jeu ils sont match
 		.joueur 1 click ready
@@ -54,7 +54,7 @@ bug sur le jeu :
 		! joueur 1 revient sur la selection des matchs
 		! si je joueur 2 click sur ready le match commence mais le joueur 1 voie les boutons au dessus du match
 
-	-numero 4:
+	-numero 4: TOUJOUR BUGGUER mais differement
 		.joueur 1 click sur un mod de jeu
 		.joueur 2 click sur le meme mod de jeu ils sont match
 		.joueur 1 click ready
