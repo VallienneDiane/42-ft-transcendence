@@ -354,10 +354,7 @@ const Game: React.FC = () => {
                 socketGame.emit('Game_Input', { input: "ArrowDown" });
             }
             // setInputState({ up: false, down: true });
-            setInputState((prevState) => ({
-                ...prevState,
-                down: true
-            }));
+
         }
     };
 
@@ -473,9 +470,9 @@ const Game: React.FC = () => {
                 </div>
                 <div id="instructions">
                     <div id="gameModes">
-                        <h3>Game Modes</h3>
+                        <h2>Game Modes</h2>
                         <div>
-                            <h3>Classic</h3>
+                        <h3>Classic</h3>
                             <p>The original pong game from 1972</p>
                         </div>
                         <div>
@@ -484,7 +481,7 @@ const Game: React.FC = () => {
                         </div>
                     </div>
                     <div id="controls">
-                        <h3>Controls</h3>
+                        <h2>Controls</h2>
                         <div>
                             <div className="icon">
                                 <FontAwesomeIcon className="arrow" icon={faArrowUp} />
