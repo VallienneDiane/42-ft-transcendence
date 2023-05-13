@@ -174,6 +174,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Get_Status") // lorsqu'on revient ou arrive sur la page game pour afficher le bon truc
   handleStatus(@ConnectedSocket() client: Socket) {
+    this.logger.debug("entering get_status function as : ", client.id);
     let user = this.socketID_UserEntity.get(client.id);
     if (!user) {
       this.logger.debug("user is not yet recognize");
@@ -186,7 +187,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let index = 0; index < this.public_space.length; index++) {
       const element = this.public_space[index];
       if (element.waiting_client_socket === client) {
-        this.server.to(client.id).emit("in matchmaking");
+        this.server.to(client.id).emit("in matchmaking", user.login);
         return;
       }
     }
@@ -195,14 +196,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (element.players[0] === client || element.players[1] === client) {
         let player = element.players[0] === client ? 0 : 1;
         if (element.game_engine.pl1_ready && element.game_engine.pl2_ready) {
-          this.server.to(client.id).emit("ongoing match");
+          this.server.to(client.id).emit("ongoing match", user.login);
           return;
         }
         if ((player === 0 && element.game_engine.pl1_ready) || (player === 1 && element.game_engine.pl2_ready)) {
-          this.server.to(client.id).emit("ready in match");
+          this.server.to(client.id).emit("ready in match", user.login);
           return;
         }
-        this.server.to(client.id).emit("in match");
+        this.server.to(client.id).emit("in match", user.login);
         return;
       }
     }
