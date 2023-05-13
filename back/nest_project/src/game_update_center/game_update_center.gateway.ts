@@ -508,7 +508,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     for (let index1 = 0; index1 < this.private_space.length; index1++) {
-      let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
+      let all_waiter_socket: string[] = this.get_all_socket_of_user(user.login);
       const element = this.private_space[index1];
       for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
         const waiter = all_waiter_socket[index2];
@@ -525,7 +525,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
               this.server.to(element2).emit("Clear_Invite", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
             }
           }
-          this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
+          this.waiting_on_match.delete(user.login)
           this.private_space.splice(index1, 1);
           return;
         }
