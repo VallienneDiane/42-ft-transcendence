@@ -156,6 +156,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         console.log("INVITE RESEND");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
       }
+      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(element.waiting_client_socket.id).login);
+      for (let index = 0; index < all_soket_of_waiter.length; index++) {
+        const element2 = all_soket_of_waiter[index];
+        if (client.id === element2) {
+          this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(element.waiting_client_socket.id).login, send: true, super_game_mode: element.super_game_mode});
+        }
+      }
     }
   }
 
@@ -400,6 +407,39 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     return result;
   }
 
+  find_and_remove_private(@ConnectedSocket() client: Socket) {
+    console.log("entering find_and_remove_private function");
+
+    this.clean_match();
+     // if the client was waiting for a private match or is the target of a match
+    for (let i = 0; i < this.private_space.length; i++) {
+      const ws = this.private_space[i];
+      if (ws.waiting_client_socket === client) {
+        let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
+        for (let index = 0; index < all_socket.length; index++) {
+          const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all target socket if the client disconnecting is the waiter");
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
+        }
+        this.private_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in private_space");
+        return;
+      }
+      if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
+        for (let index = 0; index < all_socket.length; index++) {
+          const element = all_socket[index];
+          console.log("sending in find and remove invitation send false to all waiter socket if socket disconnecting is the last socket of the target");
+          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
+        }
+        this.waiting_on_match.delete(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login)
+        this.private_space.splice(i, 1);
+        console.log("leaving find_and_remove function having find a waiting socket in private_space");
+        return;
+      }
+    }
+  }
+
   /**
    * find and remove the client from the correct struct, stopping the game if needed
    * @param client the client who got disconnected
@@ -447,31 +487,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       }
     }
 
-    // if the client was waiting for a private match or is the target of a match
-    for (let i = 0; i < this.private_space.length; i++) {
-      const ws = this.private_space[i];
-      if (ws.waiting_client_socket === client) {
-        let all_socket: string[] = this.get_all_socket_of_user(ws.target_client_login);
-        for (let index = 0; index < all_socket.length; index++) {
-          const element = all_socket[index];
-          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: false, super_game_mode: ws.super_game_mode})
-        }
-        this.private_space.splice(i, 1);
-        console.log("leaving find_and_remove function having find a waiting socket in private_space");
-        return;
-      }
-      if (ws.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-        let all_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(ws.waiting_client_socket.id).login);
-        for (let index = 0; index < all_socket.length; index++) {
-          const element = all_socket[index];
-          this.server.to(element).emit("Invitation", {for: ws.target_client_login, by: this.socketID_UserEntity.get(ws.waiting_client_socket.id).login, send: false, super_game_mode: ws.super_game_mode})
-        }
-        this.private_space.splice(i, 1);
-        console.log("leaving find_and_remove function having find a waiting socket in private_space");
-        return;
-      }
-    }
-
     console.log("leaving find_and_remove function");
   }
   
@@ -486,13 +501,29 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   @SubscribeMessage("Cancel_Invitation")
   handle_canceled(@ConnectedSocket() client: Socket) {
-    for (let index = 0; index < this.private_space.length; index++) {
-      const element = this.private_space[index];
-      if (element.waiting_client_socket === client) {
-        this.server.to(this.get_socketid_by_login(this.socketID_UserEntity, element.target_client_login)).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
-        this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
-        this.private_space.splice(index, 1);
-        return;
+    console.log("entering cancel invitation by : ", client.id);
+    for (let index1 = 0; index1 < this.private_space.length; index1++) {
+      let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
+      const element = this.private_space[index1];
+      for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
+        const waiter = all_waiter_socket[index2];
+        if (waiter === element.waiting_client_socket.id) {
+          let all_target_socket: string[] = this.get_all_socket_of_user(element.target_client_login);
+          for (let index3 = 0; index3 < all_target_socket.length; index3++) {
+            const element2 = all_target_socket[index3];
+            this.server.to(element2).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+          }
+          for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
+            const element2 = all_waiter_socket[index4];
+            if (element2 != client.id) {
+              console.log("emiting invitation to a waiter socket");
+              this.server.to(element2).emit("Invitation", {for: element.target_client_login, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: element.super_game_mode});
+            }
+          }
+          this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login)
+          this.private_space.splice(index1, 1);
+          return;
+        }
       }
     }
   }
@@ -527,11 +558,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       else if (private_waiting_socket.target_client_login === this.socketID_UserEntity.get(client.id).login && body.target === this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login) {
         this.logger.debug("private matchmaking occuring");
         // creat the game instance
+        console.log("sending invitation accepted to the waiter socket");
         this.server.to(private_waiting_socket.waiting_client_socket.id).emit("Invitation_Accepted");
         let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(private_waiting_socket.waiting_client_socket.id).login);
         for (let index = 0; index < all_waiter_socket.length; index++) {
           const element = all_waiter_socket[index];
           if (element != private_waiting_socket.waiting_client_socket.id) {
+            console.log("private matchmaking happenning: sending to all waiter socket that are not the main one sending to :", element);
             this.server.to(element).emit("Clear_Invite");
           }
         }
@@ -539,6 +572,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         for (let index = 0; index < all_target_socket.length; index++) {
           const element = all_target_socket[index];
           if (element != client.id) {
+            console.log("private matchmaking happenning: sending to all target socket that are not the socket matching the event right now so sending to :", element);
             this.server.to(element).emit("Clear_Invite");
           }
         }
@@ -570,11 +604,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let all_client_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
     for (let index = 0; index < all_client_socket.length; index++) {
       const element = all_client_socket[index];
+      console.log("posting invite: sending to all sender socket");
       this.server.to(element).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode})
     }
     let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
     for (let index = 0; index < all_target_socket.length; index++) {
       const element = all_target_socket[index];
+      console.log("posting invite: sending to all receiver socket");
       this.server.to(element).emit("Invitation", {for: body.target, by: this.socketID_UserEntity.get(client.id).login, send: true, super_game_mode: body.super_game_mode});
     }
 
@@ -690,12 +726,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
       console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
       if (nbr_of_socket <= 1) {
+        this.find_and_remove_private(client);
         this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
         this.logger.debug("client was removed from waiting on game due to disconnection");
       }
-      else {
-        console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
-      }
+      // else {
+      //   // console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
+      // }
       this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
       if (this.socketID_UserEntity.delete(client.id) === false) {
         this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
