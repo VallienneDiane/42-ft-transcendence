@@ -1,6 +1,7 @@
 import "../styles/Base.css"
 import "../styles/Game.scss"
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useNavigate } from "react-router"
 import socketIOClient from 'socket.io-client'
 import io from 'socket.io-client'
 import { Socket } from 'socket.io-client'
@@ -12,6 +13,9 @@ import { SocketContext } from "./context"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowDown, faArrowUp, faGear } from "@fortawesome/free-solid-svg-icons"
 import { useLocation } from "react-router"
+import { User } from "../models"
+import { JwtPayload } from "jsonwebtoken"
+import { userService } from "../services/user.service"
 // import { faUp, faDown } from '@fortawesome/free-solid-svg-icons';
 
 interface ball {
@@ -60,6 +64,8 @@ interface SpecMode {
 
 
 const Game: React.FC = () => {
+    let user: User;
+    const navigate = useNavigate();
     const location = useLocation();
     const canvasRef = useRef<HTMLCanvasElement>(null);
     let clearGame: boolean = false;
@@ -74,7 +80,7 @@ const Game: React.FC = () => {
     const [timer, setTimer] = useState<boolean>(false); // A init à false
     const [countdown, setCountdown] = useState<number | string>(3);
     const countDownDiv = useRef<HTMLDivElement>(null);
-    const [players, setPlayers] = useState<Players | null >();
+    const [players, setPlayers] = useState<Players | null >(null);
     // const [players, setPlayers] = useState<Players>({ player1_login: "", player1_score: 0, player2_score: 0, player2_login: "" });
     const playersRef = useRef<Players>();
     const [gameState, setGameState] = useState<gameState>();
@@ -83,6 +89,20 @@ const Game: React.FC = () => {
     let specModeActive: boolean = false;
     let specMatchLogin: string | null = null;
     const [winner, setWinner] = useState<string>();
+
+    if (accountService.isLogged()) {
+        let decodedToken: JwtPayload = accountService.readPayload()!;
+        const id = decodedToken.sub;
+        userService.getUserWithAvatar(id!)
+        .then(response => {
+            user = response.data;
+            socketGame.emit("Ask_Invitation");
+            console.log("ask invite send");
+        })
+        .catch(error => {
+            console.log(error);
+        });
+    }
     
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
         console.log("TOGGLE SPEC MODE FUNCTION")
@@ -120,11 +140,18 @@ const Game: React.FC = () => {
     }
     
     // useEffect(() => {
-    //     let { from } = location.state;
-    //     if (from != null && from === "invitation") {
-        //         console.log("Je viens depuis invite");
-    //     }
+        //     let { from } = location.state;
+        //     if (from != null && from === "invitation") {
+            //         console.log("Je viens depuis invite");
+            //     }
     // }, [from])
+    
+    useEffect(() => {
+        if (socketGame) {
+            socketGame.emit('Get_Status');
+            console.log("ASK FOR STATUS")
+        }
+    }, [socketGame])
     
     useEffect(() => {
         console.log(location.state);
@@ -133,6 +160,7 @@ const Game: React.FC = () => {
             setWaitMatch(false);
             setMatchInProgress(true);
             setButtonReady(true);
+            navigate("", { replace: true, state: null });
         }
     }, [])
     
@@ -157,19 +185,32 @@ const Game: React.FC = () => {
             };
         }
     }, [timer, countdown])
-
+    
+    useEffect(() => {
+        console.log('Changes on players', players);
+        if (players) {
+            console.log('set players ref');
+            playersRef.current = players;
+        }
+    }, [players])
+    
     useEffect(() => {
         // triggered when receiving socketGame data, update position of elements
         if (socketGame) {
+            socketGame.on("Connection_Accepted", () => {
+                socketGame.emit('Get_Status');
+                console.log("ASK FOR STATUS")
+            });
+            
             socketGame.on('Already_On_Match', () => {
                 console.log('Already on match');
                 document.getElementById("gamePanel")!.innerHTML = "<div>ALREADY ON MATCH !!!!</div>";
             });
-
+            
             socketGame.on('connect', () => {
                 console.log('Connected to server!');
             });
-
+            
             socketGame.on('Players', (gamePlayers: Players) => {
                 console.log("Players", gamePlayers);
                 setWaitMatch(false);
@@ -186,9 +227,9 @@ const Game: React.FC = () => {
                         player2_score: 0
                     }
                 })
-                playersRef.current = gamePlayers;;
+                playersRef.current = gamePlayers;
             })
-
+            
             socketGame.on('Game_Update', (gameState: gameState) => {
                 // console.log("game update");
                 if (ready === true) {
@@ -207,13 +248,18 @@ const Game: React.FC = () => {
                         paddleOne: { x: gameState.paddleOne!.x / (16 / 9), y: gameState.paddleOne!.y },
                         paddleTwo: { x: gameState.paddleTwo!.x / (16 / 9), y: gameState.paddleTwo!.y }
                     }));
-
                 }
             });
-
+            
             socketGame.on('Match_Update', (matchUpdate: MatchState) => {
                 clearGame = false;
-                if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
+                console.log("Match Update received", matchUpdate)
+                // if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
+                    // console.log("Players set"),
+                    // console.log(matchUpdate.player1_login),
+                    // console.log(matchUpdate.player2_login),
+                    // console.log(matchUpdate.player1_score),
+                    // console.log(matchUpdate.player2_score),
                     setPlayers(prevPlayers => {
                         return {
                             ...prevPlayers!,
@@ -223,9 +269,11 @@ const Game: React.FC = () => {
                             player2_score: matchUpdate.player2_score,
                         }
                     })
-                }
+                    // playersRef.current! = matchUpdate;
+                    // console.log("playersRef apres l'avoir set normalement...", playersRef);
+                // }
             })
-
+            
             socketGame.on('Match_End', (matchEnd: MatchEnd) => {
                 setWaitMatch(false);
                 setMatchInProgress(false);
@@ -249,9 +297,48 @@ const Game: React.FC = () => {
                     paddleTwo: null
                 })
             })
+            
+            socketGame.on('nothing', () => {
+                console.log("nothing status received");
+            })
+            
+            socketGame.on('in matchmaking', () => {
+                console.log("in matchmaking status received");
+                setWaitMatch(true);
+            })
+            
+            socketGame.on('ongoing match', () => {
+                console.log("ongoing match status received");
+                setWaitMatch(false);
+                setMatchInProgress(true);
+                setButtonReady(false);
+                ready = false;
+            })
+
+            socketGame.on('ready in match', (ask_by: string) => {
+                if (ask_by === user.login) {
+                    console.log("ready in match status received");
+                    setWaitMatch(false);
+                    setMatchInProgress(true);
+                    setButtonReady(true);
+                    ready = true;
+                    clearGame = false;
+                    setPlayerReady(true);
+                    document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
+                }
+            })
+
+            socketGame.on('in match', () => {
+                console.log("in match status received");
+                setWaitMatch(false);
+                setMatchInProgress(true);
+                setButtonReady(true);
+                ready = true;
+                clearGame = false;
+            })
         }
     }, [socketGame]);
-
+    
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
         event.preventDefault();
         if (event.key === "ArrowUp") {
@@ -342,10 +429,6 @@ const Game: React.FC = () => {
             }
         }
     }, [gameState, gameWidth]);
-
-    const TEST = () => {
-        socketGame.emit('Test');
-    }
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
