@@ -1,113 +1,65 @@
 @import url("Base.css");
 
 #navbar {
-    box-sizing: border-box;
     display: flex;
     align-items: center;
-    // text-shadow: 0px 0px 9px rgba(0, 0, 0, 0.979);
     font-family: 'MuseoModerno';
     
-    
     & > #logo {
+        display: flex;
+        justify-content: flex-start;
         text-transform: uppercase;
         font-weight: 900;
-        font-size: 2em;
+        font-size: 2.3em;
         flex-grow: 1;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        margin-left: 40px;
     }
-    
     & > #burger {
         display: none;
     }
-    
     & > #links {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 2rem;
         flex-grow: 2;
         padding-left: 20%;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-around;
+        margin-right: 40px;
         height: 100%;
     }
     & li {
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
         min-width: 90px;
-        height: 35px;
         font-size: 1.7em;
     }
-    
     & li > a, li > button {
-        width: 100%;
-        height: 100%;
         display: flex;
-        align-items: center;
         justify-content: center;
         font-weight: 900;
         font-family: 'MuseoModerno';
-        // text-shadow: 0px 0px 9px rgba(0, 0, 0, 0.979);
-    }
-    
-}
-
-@media (min-width: 1000px) {
-    #navbar {
-        & li > a, li > button {
-            transition: all 300ms;
-            position: relative;
-            
-            &::after {
-                content: '';
-                position: absolute;
-                border-bottom: 1px solid var(--text-color);
-                height: 100%;
-                width: 0%;
-                transition: all ease-in-out 200ms;
-            }
-            
-            &:hover::after {
-                width: 100%;
-            }
-        }
-        
-        & li > a:hover, li > button:hover {
-            transform: translateY(7%);
-        }
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1350px) {
     #navbar {
         position: relative;
         justify-content: flex-end;
-        // border: 5px solid red;
-        & #logo {
-            position: absolute;
-            width: 100%;
-        }
         
         & > #links {
-            background-color: var(--second-color);
-            border: 1px solid rgb(199, 199, 199);
-            width: 120px;
-            display: none;
-            padding: 0 ;
             position: absolute;
-            top: 0;
-            right: 0;
-            height: auto;
-            flex-direction: column;
             z-index: 5;
+            top: 0;
+            right: -12px;
+            display: none;
+            flex-direction: column;
+            height: fit-content;
+            gap: -2rem;
             backdrop-filter: blur(5px);
-            transform: translateY(8vh);
-
+            transform: translateY(70px);
+            background-color:  rgba(255, 255, 255, 0.719);
+            box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
+            border-radius: 10px;
             & > li {
-                margin: 0.6vh 0;
+                // margin: 2px 0;
                 width: 100%;
                 transition: all 200ms;
                 &:hover {
@@ -115,34 +67,27 @@
                 }
             }
         }
-        
-        & > .burgerList {
+        & .burgerList {
             transition: all 200ms;
             display: flex !important;
         }
-
-        & > #burger {
-            cursor: pointer;
-            height: 50px;
-            // height: 10vh;
-            // width: 10vh;
-            aspect-ratio: 1;
-            // background-color: blue;
-            padding: 7px 5px;
-            margin: 0 10px;
+        & #burger {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-around;
             z-index: 1;
-
+            aspect-ratio: 1;
+            height: 50px;
+            padding: 7px 5px;
+            margin-right: 20px;
+            cursor: pointer;
             & > .bar {
                 width: 80%;
                 height: 4px;
                 background-color: var(--text-color);
                 border-radius: 5px;
             }
-
             &:hover {
                 & > .bar {
                     animation: barAnim 1 800ms;
