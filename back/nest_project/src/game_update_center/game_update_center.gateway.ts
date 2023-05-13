@@ -319,6 +319,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         this.logger.debug("client : ", element.waiting_client_socket.id, "and client : ", client.id, "have been match together in a game instance with super_game_mode : ", body.super_game_mode);
 
         // create a game instance for them
+        this.find_and_remove_spect(client);
+        this.find_and_remove_spect(element.waiting_client_socket);
         this.StartGameRoom(element.waiting_client_socket, client, body.super_game_mode)
         // remove the waiting socket from the queu
         this.public_space.splice(index, 1);
@@ -441,7 +443,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @param client the client who got disconnected
    * @returns 
   */
- find_and_remove(@ConnectedSocket() client: Socket) {
+  find_and_remove(@ConnectedSocket() client: Socket) {
     console.log("entering find_and_remove function");
    
     this.clean_match();
@@ -488,6 +490,32 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
     
     console.log("leaving find_and_remove function");
+  }
+
+  @SubscribeMessage("Quit_Spectator")
+  handle_spectator_quitting(@ConnectedSocket() client: Socket) {
+    this.find_and_remove_spect(client);
+  }
+
+  find_and_remove_spect(@ConnectedSocket() client: Socket) {
+    this.logger.debug("entering remove spectator");
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("not ready yet to remove spec");
+      return;
+    }
+    for (let index1 = 0; index1 < this.game_instance.length; index1++) {
+      const game = this.game_instance[index1];
+      for (let index2 = 0; index2 < game.spectators.length; index2++) {
+        const spec = game.spectators[index2];
+        if (spec === client) {
+          this.server.to(game.players[0].id).emit('Spectator_Disconnection');
+          game.spectators.splice(index2, 1);
+          console.log("leaving find_and_remove function finding a spectator to be removed");
+          return;
+        }
+      }
+    }
   }
   
   get_socketid_by_login(table: Map<string, UserEntity>, login: string) : string {
@@ -584,6 +612,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
               this.server.to(accepter).emit("Clear_Invite");
             }
           }
+          this.find_and_remove_spect(client);
+          this.find_and_remove_spect(private_room.waiting_client_socket);
           this.StartGameRoom(private_room.waiting_client_socket, client, private_room.super_game_mode);
           this.private_space.splice(i, 1);
           console.log("leaving handlePrivateMatching function afte a match started");
