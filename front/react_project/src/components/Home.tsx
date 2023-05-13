@@ -278,7 +278,7 @@ const Home: React.FC = () => {
     useEffect(() => {
         const initBalls: BallProps[] = [];
 
-        for (let i = 0; i < 150; i++) {
+        for (let i = 0; i < 21; i++) {
             let id = i;
             let x = (Math.random() - 0.5) * CONTAINER_WIDTH;
             let y = Math.random() * -1000;
