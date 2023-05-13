@@ -17,7 +17,7 @@
         width: 30%;
         max-width: 400px;
         min-width: 350px;
-        min-height: 700px;
+        // min-height: 500px;
         height: fit-content;
         border-radius: 20px;
         background-color:  rgba(255, 255, 255, 0.719);
@@ -62,6 +62,7 @@
             flex-direction: column;
             text-align: center;
             width: 100%;
+            padding-bottom: 25px;
             & li {
                 padding: 13px 1rem;
                 border-bottom: 2px solid rgb(202, 202, 202);
@@ -81,7 +82,7 @@
                     }
                 }
                 &:hover {
-                    background: #33469c4f;
+                    background: #33469c19;
                     cursor: pointer;
                     & #navlink{
                         background: transparent;
@@ -92,15 +93,16 @@
         & #FriendManagement {
             display: flex;
             flex-direction: column;
-            padding: 10px 10px;
+            padding: 10px 0px;
             width: 100%;
             height: 100%;
+            padding-bottom: 20px;
 
             & #searchbarWrapper {
 				display: flex;
 				flex-direction: column;
 				height: 40px;
-				padding: 0 1.2rem;
+				padding: 0 3rem;
 				& input {
 					width: 100%;
 					background: #c1bbd877;
@@ -158,8 +160,8 @@
                 flex-direction: column;
                 align-items: center;
                 width: 100%;
-                padding: 5px 20px 0 20px;
                 & .element {
+                    width: 100%;
                     display: flex;
                     flex-direction: row;
                     justify-content: center;
@@ -168,6 +170,18 @@
                     gap: 10px;
                     font-size: x-large;
                     padding: 2px 0;
+                    padding: 13px 3rem;
+                    border-bottom: 2px solid rgb(202, 202, 202);
+                    &:hover {
+                        background: #33469c19;
+                        cursor: pointer;
+                        & #navlink{
+                            background: transparent;
+                        }
+                        & button {
+                            background: transparent;
+                        }
+                    }
                     & .name {
                         word-break: break-all;
                         &:hover {
@@ -233,7 +247,7 @@
                     color: #33469cd8;
                 }
                 & > button {
-                    padding: 0px 15px 0px 15px;
+                    padding: 7px 15px 7px 15px;
 					border-radius: 10px;
 					background-color: #dbb8d9e1;
 					&:hover {
