@@ -164,6 +164,7 @@
 
         & #instructions {
             width: 23%;
+            min-width: 300px;
             flex: 1;
             height: 98%;
             padding-right: 2rem;
@@ -183,7 +184,7 @@
                 margin: 10px;
                 margin-bottom: 20px;
             }
-            & #gameModes, #controls {
+            & #gameModes, #controls, #proposeGame {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -202,6 +203,65 @@
                     display: flex;
                     align-items: center;
                     margin: 10px 0;
+                }
+                & .buttons {
+                    display: flex;
+                    align-items: center;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    font-size:large;
+                    margin-bottom: 20px;
+                    & .iconAction {
+                        color: #33469cd8;
+                    }
+                    & .button {
+                        padding: 7px 15px 7px 15px;
+                        border-radius: 10px;
+                        background-color: #dbb8d9e1;
+                        &:hover {
+                            background-color: var(--third-color);
+                            font-style: oblique;
+                            color: white;
+                        }
+                        &.push {
+                            background-color: #d73272;
+                            color: white;
+                        }
+                    }
+                }
+            }
+            & #searchbarWrapper {
+                display: flex;
+                flex-direction: column;
+                & input {
+                    width: 100%;
+                    background: #c1bbd877;
+                    color: var(--text-color);
+                    padding: 0.5rem 2rem 0.5rem 1rem;
+                    border-radius: 2rem;
+                    border: none;
+                    outline: none;
+                }
+                & .svgSearch {
+                    height: 15px;
+                    margin-left: -2rem;
+                    opacity: 25%;
+                    color: var(--text-color);
+                }
+                & ul {
+                    color: var(--text-color);
+                    position: absolute;
+                    z-index: 9;
+                    width: 260px;
+                    margin: 34px 0;
+                    padding: 0.3rem 1rem;
+                    background-color: rgb(255, 255, 255);
+                    box-shadow: 0 1px 2px rgb(204, 204, 204);
+                    overflow: hidden;
+                    overflow-y: auto;
+                    & button {
+                        color: #33469cb9;
+                    }
                 }
             }
             & #gameModes > div {
@@ -254,7 +314,7 @@
             & #instructions {
                 width: 80%;
                 justify-content: space-around;
-                & #gameModes, #controls {
+                & #gameModes, #controls, #proposeGame {
                     flex: none;
                     width: 40%;
                     min-width: 250px;
@@ -264,7 +324,6 @@
                 }
             }
         }
-
     }
 }
 
