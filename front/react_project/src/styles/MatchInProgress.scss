@@ -1,43 +1,38 @@
 @import url("Base.css");
 
 #matchsInProgress {
-    border: 3px solid var(--ball-color);
     width: 60%;
     min-width: 600px;
     max-width: 1000px;
-    height: 20%;
+    height: 25%;
     min-height: 200px;
     font-size: 1em;
     font-weight: 900;
-    color: var(--text-color);
+    background-color:  rgba(255, 255, 255, 0.719);
+    border-radius: 5px;
+    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.257);
+    margin-bottom: 15px;
 
     & #header {
-        height: 30%;
+        height: 90px;
         width: 100%;
+        padding-top: 10px;
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: var(--second-color);
-        backdrop-filter: blur(5px);
-        
-        & > div {
+        & h2 {
             text-align: center;
-            width: 100%;
-            height: 50%;
-            background-color: var(--second-color);
-
-            &:first-child {
-                font-size: 1.5em;
-            }
+            width: 80%;
+            box-shadow: 0px -3px 23px -010px var(--second-color);
+            clip-path: inset(1px 2px -15px 1px);
+            margin: 10px;
         }
     }
-    
+
     & #colHeader {
         display: flex;
         width: 100%;
-        
         & div {
-            // width: 100%;
             text-align: center;
             flex-grow: 1;
         }
@@ -45,71 +40,58 @@
     
     & #content {
         overflow-y: auto;
-        height: 70%;
+        height: 75%;
         backdrop-filter: blur(7px);
-
         & .match {
-            cursor: pointer;
-            height: 20%;
             display: flex;
-            
+            height: 20%;
+            cursor: pointer;
             & > div:not(.watchMatch) {
-                
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 text-align: center;
-                
-                // width: 25%;
                 white-space: nowrap;
                 overflow: hidden;
                 flex: 1;
-                
                 & > span {
                     display: block;
                     white-space: nowrap;
                     overflow: hidden;
-                    
                 }
             }
-            
             &:nth-child(odd) > div:not(.watchMatch) {
-                background-color: var(--third-color);
-            }
-            
+                background-color: #ca507f5b;
+            } 
             &:nth-child(even) > div:not(.watchMatch) {
                 background-color: var(--fourth-color);
             }
-
             & .redDot {
                 color: rgb(221, 0, 0);
                 margin: 1vw;
                 animation: redDot infinite 1000ms;
             }
-
             & .watchMatch {
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 width: 0%;
                 overflow: hidden;
-                background-color: var(--second-color);
+                background-color: #33469c48;
                 white-space: nowrap;
                 transition: all 200ms ease-in-out;
             }
-
             &:hover .watchMatch {
                 width: 50%;
             }
         }
-
         & #noMatch {
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             width: 100%;
             height: 100%;
-
+            padding-bottom: 3rem;
             & > p {
                 font-size: 1.8em;
                 letter-spacing: -1px;
@@ -117,15 +99,12 @@
                 color: var(--second-color);
             }
         }
-
         &::-webkit-scrollbar {
             width: 5px;
         }
-
         &::-webkit-scrollbar-track {
             background-color: rgb(49, 49, 42);
         }
-        
         &::-webkit-scrollbar-thumb {
             background-color: rgb(159, 159, 148);
             border-radius: 100px;
