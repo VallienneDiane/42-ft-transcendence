@@ -134,7 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
     
     //this.transfer_all_match(client);
-    console.log("in hadle connection nbr_of socket vaut : ", nbr_of_socket);
+    console.log("in hndle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
     this.server.to(client.id).emit("Connection_Accepted");
   }
@@ -152,7 +152,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
-        return;
       }
       let all_soket_of_waiter: string[] = this.get_all_socket_of_user(body.player1_login);
       for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
@@ -183,6 +182,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     if (!user) {
       this.logger.debug("user is not yet recognize");
       return;
+    }
+    for (let index1 = 0; index1 < this.game_instance.length; index1++) {
+      const game = this.game_instance[index1];
+      for (let index2 = 0; index2 < game.spectators.length; index2++) {
+        const spec = game.spectators[index2];
+        if (spec === client) {
+          this.server.to(client.id).emit("spectator");
+        }
+      }
     }
     if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
       this.logger.debug("leaving get_status sending : nothing");
@@ -516,6 +524,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = game.spectators[index2];
         if (spec === client) {
           this.server.to(game.players[0].id).emit('Spectator_Disconnection');
+          spec.leave(game.players[0].id);
           game.spectators.splice(index2, 1);
           console.log("leaving find_and_remove function finding a spectator to be removed");
           return;
