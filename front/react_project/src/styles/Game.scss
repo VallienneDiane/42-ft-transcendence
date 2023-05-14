@@ -4,11 +4,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-around;
     margin-bottom: 25px;
     padding: 0 1rem;
-    min-height: 1000px;
-	height: 95%;
+	height: 100%;
 
     & #gameContainer {
         display: flex;
@@ -23,9 +21,9 @@
             align-items: center;
             justify-content: center;
             width: 78%;
-            height: 95%;
+            max-height: 1000px;
             min-width: 686px;
-            // max-width: 1600px;
+            max-width: 1600px;
 
             & #players {
                 display: flex;
@@ -65,8 +63,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center; 
-                // height: 90%;
-                max-height: 90%;
+                max-height: 100%;
                 width: 99%;
                 & #gameSelector {
                     position: absolute;
@@ -167,12 +164,10 @@
             min-width: 300px;
             flex: 1;
             height: 98%;
-            padding-right: 2rem;
             gap: 10px;
             display: flex;
             align-items: start;
             justify-content: center;
-            margin-left: 2rem;
             & p {
                 text-align: center;
             }
@@ -310,7 +305,7 @@
     #Game {
         & #gameContainer {
             flex-direction: column;
-            padding-top: 30px;
+            padding-top: 10px;
             & #instructions {
                 width: 80%;
                 justify-content: space-around;
@@ -330,6 +325,35 @@
 @media (min-width: 1200px) {
     #instructions {
         flex-direction: column;
+    }
+}
+
+@media (max-width: 800px) {
+    #Game {
+        height:100%;
+        & #gameContainer {
+            display: flex;
+            align-content: flex-start;
+            height:80%;
+            width:300px;
+            & #gameField {
+                min-width: 100%;
+            }
+            & #instructions {
+                height:100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-wrap: wrap;
+                align-items: center;
+                overflow-x: scroll;
+                max-height: 90%;
+                gap:10px;
+                & #gameModes, #controls, #proposeGame {
+                    margin: 5px 0;
+                }
+            }
+        }
     }
 }
 
