@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import socketIOClient from 'socket.io-client';
 
-const socket = socketIOClient("127.0.0.1:3000", {transports: ['websocket']});
+const socket = socketIOClient(`${import.meta.env.VITE_IP}:3000`, {transports: ['websocket']});
 
 function PingHandler(): JSX.Element {
   const [isConnected, setIsConnected] = useState<Boolean>(socket.connected);
