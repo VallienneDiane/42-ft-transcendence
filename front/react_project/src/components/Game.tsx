@@ -231,10 +231,16 @@ const Game: React.FC = () => {
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
     
-    const quitSpectator = () => {
+    const quitCurrentMatch = () => {
         if (socketGame !== null) {
-            socketGame.emit('Quit_spectator');
-            console.log("quit spectator send")
+            if (specMode.active === true) {
+                socketGame.emit('Quit_Spectator');
+                console.log("quit spectator send")
+            }
+            else {
+                socketGame.emit('Quit_Match');
+                console.log("quit match send")    
+            }
         }
         setWaitMatch(false);
         setMatchInProgress(false);
@@ -607,7 +613,8 @@ const Game: React.FC = () => {
                         {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
-                    {specMode.active ? <div id="quit_spectator" onClick={quitSpectator}>Quit spectator mode</div> : null}
+                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
+                    {matchInProgress ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Match ?</div> : null}
                     
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
@@ -638,7 +645,7 @@ const Game: React.FC = () => {
                                 <FontAwesomeIcon className="arrow" icon={faArrowDown} />
                                 <div></div>
                             </div>
-                            <p>Move your paddle up</p>
+                            <p>Move your paddle down</p>
                         </div>
                     </div>
                 </div>
