@@ -525,6 +525,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = game.spectators[index2];
         if (spec === client) {
           this.server.to(game.players[0].id).emit('Spectator_Disconnection');
+          spec.leave(game.players[0].id);
           game.spectators.splice(index2, 1);
           console.log("leaving find_and_remove function finding a spectator to be removed");
           return;
