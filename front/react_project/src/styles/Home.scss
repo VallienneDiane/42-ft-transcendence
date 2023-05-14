@@ -31,30 +31,30 @@
                 box-shadow: 0px -10px 40px 10px rgba(0, 0, 0, 0.28);
                 border-radius: 20px;
                 transition: filter 120ms ease-out;
-                &::after {
-                    content: '';
-                    position: absolute;
-                    top: 3px;
-                    left: 1px;
-                    width: 8px;
-                    height: 20px;
-                    background-color: #33469c67;
-                    transform: rotate(45deg);
-                    z-index: -1;
-                    transition: filter 120ms ease-out;
-                }
-                &::before {
-                    content: '';
-                    position: absolute;
-                    top: 10px;
-                    right: -6px;
-                    width: 20px;
-                    height: 8px;
-                    background-color: #33469c67;
-                    transform: rotate(45deg);
-                    z-index: -1;
-                    transition: filter 120ms ease-out;
-                }
+                // &::after {
+                //     content: '';
+                //     position: absolute;
+                //     top: 3px;
+                //     left: 1px;
+                //     width: 8px;
+                //     height: 20px;
+                //     background-color: #33469c67;
+                //     transform: rotate(45deg);
+                //     z-index: -1;
+                //     transition: filter 120ms ease-out;
+                // }
+                // &::before {
+                //     content: '';
+                //     position: absolute;
+                //     top: 10px;
+                //     right: -6px;
+                //     width: 20px;
+                //     height: 8px;
+                //     background-color: #33469c67;
+                //     transform: rotate(45deg);
+                //     z-index: -1;
+                //     transition: filter 120ms ease-out;
+                // }
             }
             & h1 {
                 position: relative;
@@ -156,30 +156,30 @@
                 box-shadow: 0px -10px 40px 10px rgba(0, 0, 0, 0.28);
                 border-radius: 20px;
                 transition: all 120ms ease;
-                &::after {
-                    content: '';
-                    position: absolute;
-                    top: 3px;
-                    left: 1px;
-                    width: 8px;
-                    height: 20px;
-                    background-color: #33469c67;
-                    transform: rotate(45deg);
-                    z-index: -1;
-                    transition: all 100ms ease;
-                }
-                &::before {
-                    content: '';
-                    position: absolute;
-                    top: 10px;
-                    right: -6px;
-                    width: 20px;
-                    height: 8px;
-                    background-color: #33469c67;
-                    transform: rotate(45deg);
-                    z-index: -1;
-                    transition: all 100ms ease;
-                }
+                // &::after {
+                //     content: '';
+                //     position: absolute;
+                //     top: 3px;
+                //     left: 1px;
+                //     width: 8px;
+                //     height: 20px;
+                //     background-color: #33469c67;
+                //     transform: rotate(45deg);
+                //     z-index: -1;
+                //     transition: all 100ms ease;
+                // }
+                // &::before {
+                //     content: '';
+                //     position: absolute;
+                //     top: 10px;
+                //     right: -6px;
+                //     width: 20px;
+                //     height: 8px;
+                //     background-color: #33469c67;
+                //     transform: rotate(45deg);
+                //     z-index: -1;
+                //     transition: all 100ms ease;
+                // }
             }
         }
     }
