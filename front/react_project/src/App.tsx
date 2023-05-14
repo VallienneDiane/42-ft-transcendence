@@ -24,7 +24,7 @@ function App() {
   const [socket, setSocket] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
 
   function createSocket() {
-    const newSocket = io('127.0.0.1:3000/chat', {
+    const newSocket = io(`${import.meta.env.VITE_IP}:3000/chat`, {
       transports: ['websocket'],
       auth: { token: accountService.getToken() },
     });
@@ -35,7 +35,7 @@ function App() {
   const [socketGame, setSocketGame] = useState<Socket<DefaultEventsMap, DefaultEventsMap>>(null!);
 
   function createSocketGame() {
-    const newSocket = io('127.0.0.1:3000', {
+    const newSocket = io(`${import.meta.env.VITE_IP}:3000`, {
       transports: ['websocket'],
       auth: { token: accountService.getToken() },
     });

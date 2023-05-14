@@ -70,9 +70,9 @@ export class ChatService {
         let newUser = roomHandler.addUser(user.id, user.login, client, "00000000-0000-0000-0000-000000000000", true, false, false, false);
         this.goBackToGeneral(client);
         if (newUser) {
-            chatNamespace.sockets.forEach( (socket) => {
-                socket.emit('userConnected', {userId: user.id, userLogin: user.login});
-            })
+            roomHandler.socketMap.sockets.forEach( ({}, socket) => {
+                socket.emit('userConnected', {userId: user.id, userLogin: user.login});                
+            });
             logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
         }
     }
@@ -80,7 +80,7 @@ export class ChatService {
     public disconnectEvent(client: Socket, user: UserEntity, chatNamespace: Namespace, roomHandler: UserRoomHandler, logger: Logger) {
         chatNamespace.sockets.delete(user.id);
         if (roomHandler.delSocket(client)) {
-            chatNamespace.sockets.forEach( (socket) => {
+            roomHandler.socketMap.sockets.forEach( ({}, socket) => {
                 socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
             })
             logger.log(`${user.login} as id ${user.id} is disconnected`);

@@ -141,6 +141,8 @@ export class AuthController {
   @Post('auth/is2faActiveSettings')
   async is2faActiveSettings(@Body() data: idDto) {
     const validUser = await this.userService.findById(data.id);
+    if (!validUser)
+      return {};
     const is2faActive = validUser.isTwoFactorEnabled;
     const qrcode = validUser.qrCode;
     return {is2faActive, qrcode};

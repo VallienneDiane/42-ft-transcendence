@@ -43,6 +43,8 @@ services:
       - "8000:8000"
     networks:
       - transcendence_network
+    env_file:
+      - .env
     volumes:
       - ./front:/usr/src/app
 ########################################## PGADMIN  ########################################

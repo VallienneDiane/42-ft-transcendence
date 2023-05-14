@@ -8,6 +8,7 @@ import { accountService } from "../services/account.service"
 import { userService } from "../services/user.service"
 import { User } from "../models"
 import { JwtPayload } from "jsonwebtoken"
+import { faLeaf } from "@fortawesome/free-solid-svg-icons"
 
 interface invitation {
     for: string,
@@ -25,6 +26,7 @@ interface invite {
 
 
 const PopUp: React.FC = () => {
+    let skip: boolean = false;
     const navigate = useNavigate();
     let user: User;
     const { socketGame } = React.useContext(SocketContext);
@@ -79,10 +81,54 @@ const PopUp: React.FC = () => {
                 console.log("user login", user.login)
                 console.log("invitation received", invitation)
 
+                // setInvites(invites!.filter(invite => (invite.status !== "notSend" && invite.status !== "declined" && invite.status !== "you_are_in_match")))
+
+                invitesRef.current!.map((invite) => {
+                    console.log("ICI 1");
+                    if ((invite.by === invitation.by && invite.for === invitation.for) || (invite.by === invitation.for && invite.for === invitation.by)) {
+                        console.log("ICI 2");
+                        setInvites((prevInvites) =>
+                        prevInvites!.map((invite) => {
+                            if (invite.by === user.login || invite.for === user.login) {
+                                if (invitation.by === user.login) {
+                                    console.log("j'envoie linvitation", invite.for, user.login)
+                                    return {
+                                        for: invitation.for,
+                                        by: invitation.by,
+                                        status: invitation.send === true ? "send" : "notSend",
+                                        super_game_mode: invitation.super_game_mode
+                                    };
+                                }
+                                else {
+                                    console.log("je recois", invite.for, user.login)
+                                    return {
+                                        for: invitation.for,
+                                        by: invitation.by,
+                                        status: "received",
+                                        super_game_mode: invitation.super_game_mode
+                                    };
+                                }
+                            }
+                            else {
+                                return invite;
+                            }
+                        }))
+                        console.log("Je veux return");
+                        skip = true;
+                        return;
+                    }
+                })
+
+                if (skip == true) {
+                    skip = false;
+                    return;
+                }
+                console.log("ICI 3");
+
                 if (invitation.for === user?.login) {
                     console.log("Cette invitation m'est destinee");
-                    if (invitesRef.current != null) {
-                        invitesRef.current.map((inviteRef) => {
+                    // if (invitesRef.current != null) {
+                        invites!.map((inviteRef) => {
                             if (inviteRef.by === invitation.by && inviteRef.for === invitation.for) {
                                 // invitesRef.current = invitesRef.current!.filter(inviteRef => inviteRef.by === invitation.by && inviteRef.for === invitation.for)
                                 setInvites(invites!.filter(invite => invite.by === invitation.by && invite.for === invitation.for));
@@ -90,38 +136,35 @@ const PopUp: React.FC = () => {
                                 return ;
                             }
                         })
-                    }
-                    // console.log("invites", invites);
-                    // console.log("invitesRef", invitesRef);
-                    // console.log("invitesRef.current", invitesRef.current);
-                    // console.log(invitation);
-                    // console.log("Retour du find : ", invitesRef.current?.find(invite => invite.by === invitation.by && invite.for === invitation.for))
-                    // if (invitesRef.current?.find(invite => invite.by === invitation.by && invite.for === invitation.for) === undefined) {
-                        setInvites((prevInvites) => {
-                            const newInvite = {
-                                for: invitation.for,
-                                by: invitation.by,
-                                status: "received",
-                                super_game_mode: invitation.super_game_mode
-                            };
-
-                            invitesRef.current?.map((invite) => {
-                                if (invite.by === invitation.by && invite.for === invitation.for) {
-                                    return;
-                                }
-                            })
-                            
-                            // console.log("Invitation Received", invitation);
-                            if (prevInvites === null) {
-                                console.log("Premiere invite ajoutee");
-                                return [newInvite]; // Initialize the array with the new invite
-                            }
-                            else {
-                                console.log("Invite ajoutee au tab d'invites");
-                                return [...prevInvites, newInvite]; // Add the new invite to the existing array
-                            }
-                        });
                     // }
+
+
+
+
+                    setInvites((prevInvites) => {
+                        const newInvite = {
+                            for: invitation.for,
+                            by: invitation.by,
+                            status: "received",
+                            super_game_mode: invitation.super_game_mode
+                        };
+
+                        invitesRef.current?.map((invite) => {
+                            if (invite.by === invitation.by && invite.for === invitation.for) {
+                                return;
+                            }
+                        })
+                        
+                        // console.log("Invitation Received", invitation);
+                        if (prevInvites === null) {
+                            console.log("Premiere invite ajoutee");
+                            return [newInvite]; // Initialize the array with the new invite
+                        }
+                        else {
+                            console.log("Invite ajoutee au tab d'invites");
+                            return [...prevInvites, newInvite]; // Add the new invite to the existing array
+                        }
+                    });
                 }
                 
                 if (invitation.by === user.login) {
@@ -146,38 +189,6 @@ const PopUp: React.FC = () => {
                     });
 
                 }
-
-
-                // setInvites((prevInvites) =>
-                //     prevInvites!.map((invite) => {
-                //         if (invitation.send === true && invitation.by === user?.login) {
-                //             console.log("Invitation successfuly sent", invitation);
-                //             return {
-                //                 ...invite,
-                //                 status: "send",
-                //             };
-                //         }
-                //         else if (invitation.send === false && invitation.by === user?.login) {
-                //             console.log("Invitation not send", invitation);
-                //             return {
-                //                 ...invite,
-                //                 status: "notSend",
-                //             };
-                //         }
-                //         else {
-                //             return invite;
-                //         }
-                //     })
-                // )
-
-                // if (invitation.send === true && invitation.by === user?.login) {
-                //     setInvite({for: invitation.for, by: invitation.by, status: "send", super_game_mode: invitation.super_game_mode});
-                //     console.log("Invitation successfuly sent" , invitation);
-                // }
-                // if (invitation.send === false && invitation.by === user?.login) {
-                //     setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
-                //     console.log("Invitation not send", invitation);
-                // }
             });
 
             socketGame.on("Players", () => {
@@ -247,8 +258,10 @@ const PopUp: React.FC = () => {
             })
 
             socketGame.on("Clear_Invite", (invitation: invitation) => {
-                console.log("clear invite request");
-                setInvites(invites!.filter(invite => invite.by === invitation.by && invite.for === invitation.for));
+                console.log("clear invite request", invitation);
+                console.log("clear invite request", invites);
+                console.log("clear invite request", invitesRef.current);
+                setInvites(invitesRef.current!.filter(invite => !(invite.by === invitation.by && invite.for === invitation.for)));
                 // invitesRef.current = invitesRef.current!.filter(inviteRef => inviteRef.by === invitation.by && inviteRef.for === invitation.for)
                 // setInvite(null);
                 // invitesRef.current = null;
@@ -260,13 +273,14 @@ const PopUp: React.FC = () => {
         if (invites) {
             setPopUpContents([]);
             invites?.map((invite) => {
+                let key: number = 0;
                 console.log("add html to popup list. status is :", invite.status);
                 console.log("invites lenght", invites.length);
                 switch (invite?.status) {
                     case "received":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={invite.by}>
+                            <div className="container" key={key}>
                                 <div>{invite?.by} invites you to play a game</div>
                                 <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>Accept</div>
                                 <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>Decline</div>
@@ -277,7 +291,7 @@ const PopUp: React.FC = () => {
                     case "send":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={invite.by}>
+                            <div className="container" key={key}>
                                 <div>Invitation successfully sent to {invite?.for}</div>
                                 <div data-key={JSON.stringify(invite)} onClick={cancelInvitation}>Cancel invitation</div>
                             </div>
@@ -287,7 +301,7 @@ const PopUp: React.FC = () => {
                     case "notSend":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={invite.by}>
+                            <div className="container" key={key}>
                                 <div>{invite?.for} is not available</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -297,7 +311,7 @@ const PopUp: React.FC = () => {
                     case "declined":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={invite.by}>
+                            <div className="container" key={key}>
                                 <div>{invite?.for} declined your invitation</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -307,7 +321,7 @@ const PopUp: React.FC = () => {
                     case "you_are_in_match":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={invite.by}>
+                            <div className="container" key={key}>
                                 <div>You are already in a match</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -316,7 +330,9 @@ const PopUp: React.FC = () => {
 
                     default:
                         break;
-                }
+
+                    }
+                key++;
             })
         }
     }, [invites])
