@@ -4,7 +4,6 @@ import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
 import { LoginSettingsForm } from "../../models";
 import { useForm } from "react-hook-form";
-import Auth2faSettings from "./Auth2faSettings";
 
 const AvatarNameSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
@@ -14,6 +13,7 @@ const AvatarNameSettings: React.FC = () => {
     const [avatar, setAvatar] = useState<string>('');
     const [login, setLogin] = useState<string>('');
     const [error, setError] = useState<boolean>(false);
+    const [error_alpha, setError_alpha] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
     const { handleSubmit } = useForm<LoginSettingsForm>({}); 
 
@@ -82,6 +82,10 @@ const AvatarNameSettings: React.FC = () => {
             setError(true);
             return;
         }
+        if(!login.match(/^[0-9a-z]+$/)) {
+            setError_alpha(true);
+            return;
+        }
         await accountService.isUniqueLogin(login!)
         .then(loginUnique => {
             if(loginUnique.data == true) {
@@ -108,6 +112,7 @@ const AvatarNameSettings: React.FC = () => {
         setLogin(event.target.value);
         setIsUniqueLogin(true);
         setError(false);
+        setError_alpha(false);
     }
 
     return (
@@ -123,12 +128,13 @@ const AvatarNameSettings: React.FC = () => {
                     <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                        { error_alpha ? <p className="error">Only alphanumeric characters allowed</p> : null}
                         { error ? <p className="error">Login must be at least 3 characters </p> : null }
                     </div>
                 </form>
             </div>
             <div id="avatar">
-                <form onSubmit={avatarSubmit}>
+                <form onSubmit={handleSubmit(avatarSubmit)}>
                     <div id="picture">
                         <h2>Upload a new avatar </h2>
                         <img id="profilePicture" src={avatar} />
