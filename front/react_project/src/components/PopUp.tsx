@@ -273,14 +273,14 @@ const PopUp: React.FC = () => {
         if (invites) {
             setPopUpContents([]);
             invites?.map((invite) => {
-                let key: number = 0;
+                // let key: number = 0;
                 console.log("add html to popup list. status is :", invite.status);
                 console.log("invites lenght", invites.length);
                 switch (invite?.status) {
                     case "received":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={key}>
+                            <div className="container" key={invite.by}>
                                 <div>{invite?.by} invites you to play a game</div>
                                 <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>ACCEPT</div>
                                 <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>DECLINE</div>
@@ -291,7 +291,7 @@ const PopUp: React.FC = () => {
                     case "send":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={key}>
+                            <div className="container" key={invite.by}>
                                 <div>Invitation successfully sent to {invite?.for}</div>
                                 <div id="cancel_invit" data-key={JSON.stringify(invite)} onClick={cancelInvitation}>CANCEL INVITATION</div>
                             </div>
@@ -301,7 +301,7 @@ const PopUp: React.FC = () => {
                     case "notSend":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={key}>
+                            <div className="container" key={invite.by}>
                                 <div>{invite?.for} is not available</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -311,7 +311,7 @@ const PopUp: React.FC = () => {
                     case "declined":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={key}>
+                            <div className="container" key={invite.by}>
                                 <div>{invite?.for} declined your invitation</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -321,7 +321,7 @@ const PopUp: React.FC = () => {
                     case "you_are_in_match":
                         setPopUpContents((prevContents) => [
                             ...prevContents,
-                            <div className="container" key={key}>
+                            <div className="container" key={invite.by}>
                                 <div>You are already in a match</div>
                                 <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
                             </div>
@@ -332,7 +332,7 @@ const PopUp: React.FC = () => {
                         break;
 
                     }
-                key++;
+                // key++;
             })
         }
     }, [invites])
