@@ -240,9 +240,9 @@ const Game: React.FC = () => {
     
     useEffect(() => {
         if (socketGame) {
-            // socketGame.emit('Get_Status');
+            socketGame.emit('Get_Status');
+            console.log("ASK FOR STATUS");
             socketGame.emit('Get_Matches');
-            // console.log("ASK FOR STATUS");
             console.log("ASK FOR MATCHS");
         }
     }, [socketGame])
@@ -444,6 +444,10 @@ const Game: React.FC = () => {
                 setButtonReady(true);
                 ready = true;
                 clearGame = false;
+            })
+
+            socketGame.on('spectator', () => {
+                
             })
         }
     }, [socketGame]);
