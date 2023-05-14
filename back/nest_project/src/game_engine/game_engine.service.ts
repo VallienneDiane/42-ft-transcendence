@@ -238,11 +238,20 @@ export class GameEngineService {
 		}
 	  }
 	
+	  remove_the_match_the_client_is_in(client_login: string) {
+        for (let index = 0; index < this.ms.length; index++) {
+            const element = this.ms[index];
+            if (element.player1_login === client_login) {
+                this.ms.splice(index, 1);
+            }
+        }
+    }
 	/**
 	 * save the players score in the data base
 	 */
 	async close_the_game() {
 		console.log("entering close_the_game");
+		this.remove_the_match_the_client_is_in(this.user1.login);
 		let match: CreateMatchDto = new CreateMatchDto();
 		match.score_winner = Math.max(this.pl1_score, this.pl2_score);
 		match.score_loser = Math.min(this.pl1_score, this.pl2_score);
