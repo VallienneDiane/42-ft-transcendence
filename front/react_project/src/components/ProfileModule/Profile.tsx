@@ -93,14 +93,13 @@ export default function Profile() {
             if (currentUser.length > 15) {
                 userService.getUserWithAvatar(currentUser)
                 .then(response => {
-                    console.log(response);
                     if (response.data === "") {
                         navigate('/profile');
                     }
                     setUser(response.data);
                 })
                 .catch(error => {
-                    console.log(error);
+                    navigate('/profile');
                 });
             }
             else {
