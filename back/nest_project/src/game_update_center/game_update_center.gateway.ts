@@ -715,7 +715,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       let all_waiter_socket: string[] = this.get_all_socket_of_user(body.player1_login);
       for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
         const waiter = all_waiter_socket[index2];
-        if (private_room.waiting_client_socket.id === waiter && private_room.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+        if (private_room.waiting_client_socket.id === waiter && private_room.target_client_login === user.login) {
           console.log("a private match to delet has been found");
           let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
           for (let index3 = 0; index3 < all_target_socket.length; index3++) {
