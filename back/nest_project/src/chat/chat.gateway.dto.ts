@@ -1,7 +1,7 @@
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, IsUUID, Max, MaxLength } from "class-validator";
 
 export class addMessageDto {
-    @IsNotEmpty() @IsString() readonly message: string;
+    @IsNotEmpty() @IsString() @MaxLength(2048) readonly message: string;
 };
 
 export class changeLocDto {
