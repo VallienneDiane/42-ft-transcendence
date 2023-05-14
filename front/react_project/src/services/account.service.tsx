@@ -17,7 +17,6 @@ let signUp = (credentials: SignUpForm) => {
  * @returns 
  */
 let login = (credentials: LogInForm) => {
-    console.log("request login ", credentials);
     return Axios.post('auth/login', credentials);
 }
 /**
@@ -25,10 +24,6 @@ let login = (credentials: LogInForm) => {
  * @param file 
  * @returns 
  */
-// let uploadAvatar = (file: string) => {
-//     const user: JwtPayload = accountService.readPayload()!;
-//     return Axios.post('user/uploadAvatar', {id: user.sub, file});
-// }
  /**
   * Get Avatar picture
   * @param id 

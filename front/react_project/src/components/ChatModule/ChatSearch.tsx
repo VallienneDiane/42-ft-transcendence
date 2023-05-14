@@ -42,8 +42,8 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
             if (offSocket) {
-                socket.off("wincorrectPasswordrong");
                 socket.off("incorrectPassword");
+                socket.off("correctPassword");
             }
         }
     }, [ref]);
@@ -165,7 +165,6 @@ class SearchChat extends React.Component<{ privateMsgs: {userName: string, userI
                     newUserList.push({id: id, name: login, isChannel: false, password: false, isClickable: true});
             });
             newUserList.sort((a, b) => {return a.name.localeCompare(b.name);});
-            // console.log("fetchUsers", newUserList);
             this.setState({users: newUserList});
         })
         .catch(error => { console.log(error); })
