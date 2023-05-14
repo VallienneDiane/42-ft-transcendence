@@ -123,9 +123,6 @@
                     visibility: hidden;
                 }
             }
-            & .hovered {
-                background-color: var(--second-color);
-            }
         }
         & label {
             min-width: 100px;
@@ -159,4 +156,7 @@
         }
     }
 }
-   
+
+.hovered {
+    background-color: #dbb8d9e1;
+}
