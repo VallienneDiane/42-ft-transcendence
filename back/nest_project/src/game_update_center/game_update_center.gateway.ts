@@ -783,10 +783,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (!user)
         return;
       this.logger.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
-      let user_login = this.socketID_UserEntity.get(client.id).login;
+      let users = this.socketID_UserEntity.get(client.id);
+      if (!users) {
+        this.logger.debug("disconnection to fast ?");
+        return;
+      }
       this.find_and_remove(client);
-      let nbr_of_socket = this.login_to_nbr_of_active_socket.get(user_login);
-      console.log("client id : " + client.id + "witch is login : " + user_login + "has : ", this.login_to_nbr_of_active_socket.get(user_login));
+      let nbr_of_socket = this.login_to_nbr_of_active_socket.get(users.login);
+      console.log("client id : " + client.id + "witch is login : " + users.login + "has : ", this.login_to_nbr_of_active_socket.get(users.login));
       if (nbr_of_socket <= 1) {
         this.find_and_remove_private(client);
         this.waiting_on_match.delete(this.socketID_UserEntity.get(client.id).login);
@@ -795,7 +799,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       // else {
       //   // console.log("LOGICAL ERROR, should never be display, unless we try to remove a user.id from the waiting[]/ongoing match socket[] where he was not");
       // }
-      this.login_to_nbr_of_active_socket.set(user_login, --nbr_of_socket)
+      this.login_to_nbr_of_active_socket.set(users.login, --nbr_of_socket)
       this.socketID_UserEntity.delete(client.id)
       // if (this.socketID_UserEntity.delete(client.id) === false) {
       //   this.logger.debug("Critical logic error, trying to removed a client that doesn't exist, should never display");
