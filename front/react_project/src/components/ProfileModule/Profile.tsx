@@ -30,7 +30,7 @@ function OtherProfile(props: {userId: string, userName: string}) {
     const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
         if (event.currentTarget.getAttribute('data-type') === "normal")
             socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: false});
-        else if (event.currentTarget.getAttribute('data-type') === "normal")
+        else if (event.currentTarget.getAttribute('data-type') === "super")
             socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: true});
     }
 
