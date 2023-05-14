@@ -1,8 +1,9 @@
 import axios from "axios";
 import { accountService } from "./account.service";
 
+const ip = import.meta.env.VITE_IP;
 const Axios = axios.create({
-    baseURL: 'http://localhost:3000'
+    baseURL: ip + ':3000'
 })
 
 // Intercepteur pour le token
