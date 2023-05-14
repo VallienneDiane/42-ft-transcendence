@@ -176,7 +176,6 @@ export default function FriendManagement() {
     }
 
     const proposeGame = (event: any) => {
-        console.log(event.target.value);
         if (event.currentTarget.getAttribute('data-type') === "normal")
             socketGame.emit("Private_Matchmaking", {target: event.target.value, super_game_mode: false});
         else if (event.currentTarget.getAttribute('data-type') === "super")
