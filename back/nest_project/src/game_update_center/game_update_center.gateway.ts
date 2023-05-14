@@ -134,7 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
     
     //this.transfer_all_match(client);
-    console.log("in hadle connection nbr_of socket vaut : ", nbr_of_socket);
+    console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
     this.server.to(client.id).emit("Connection_Accepted");
   }
@@ -142,24 +142,21 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   @SubscribeMessage("Ask_Invitation") // lors d'un refresh de page pour reafficher la popup
   handle_resend_invite(@ConnectedSocket() client: Socket, @MessageBody() body: SpectatorRequestDTO) {
     this.logger.debug("received Ask_Invitation message of : ", client.id);
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("error with login null");
+      return;
+    }
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
-      let login = this.socketID_UserEntity.get(client.id);
-      if (!login) {
-        this.logger.debug("error with login null");
-        return;
-      }
-      if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
+      if (element.target_client_login === user.login) {
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
+        continue;
       }
-      let all_soket_of_waiter: string[] = this.get_all_socket_of_user(body.player1_login);
-      for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {
-        const element2 = all_soket_of_waiter[index2];
-        if (client.id === element2) {
-          this.logger.debug("sending Invitation to a waiter socket");
-          this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
-        }
+      else if (element.waiter_login === user.login) {
+        this.logger.debug("sending Invitation to a waiter socket");
+        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
       }
     }
   }
@@ -383,6 +380,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
  @SubscribeMessage("Ready")
  handleReady(@ConnectedSocket() client: Socket) {
    console.log("JUST RECEIVED READY EVENT -------------------------------------------------------------------------------------");
+   this.clean_old_socket();
    let user = this.socketID_UserEntity.get(client.id);
    if (!user) {
      this.logger.debug("user is not yet recognize");
@@ -686,7 +684,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.waiting_on_match.add(this.socketID_UserEntity.get(client.id).login);
     //this.logger.debug("resulting in this object: super_game_mode: ", private_room.super_game_mode, "\n waiting socket", private_room.waiting_client_socket.id, "\n target : ", private_room.target_client_login);
     this.private_space.push(private_room);
-    let all_waiter_socket: string[] = this.get_all_socket_of_user(this.socketID_UserEntity.get(client.id).login);
+    let all_waiter_socket: string[] = this.get_all_socket_of_user(user.login);
     for (let index = 0; index < all_waiter_socket.length; index++) {
       const waiter = all_waiter_socket[index];
       console.log("posting invite: sending to a waiter socket");
