@@ -282,8 +282,8 @@ const PopUp: React.FC = () => {
                             ...prevContents,
                             <div className="container" key={invite.by}>
                                 <div>{invite?.by} invites you to play a game</div>
-                                <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>Accept</div>
-                                <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>Decline</div>
+                                <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>ACCEPT</div>
+                                <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>DECLINE</div>
                             </div>
                         ])
                         break;
@@ -293,7 +293,7 @@ const PopUp: React.FC = () => {
                             ...prevContents,
                             <div className="container" key={invite.by}>
                                 <div>Invitation successfully sent to {invite?.for}</div>
-                                <div data-key={JSON.stringify(invite)} onClick={cancelInvitation}>Cancel invitation</div>
+                                <div id="cancel_invit" data-key={JSON.stringify(invite)} onClick={cancelInvitation}>CANCEL INVITATION</div>
                             </div>
                         ])
                         break;
