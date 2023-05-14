@@ -561,6 +561,25 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
+  remove_from_all_invite(login: string) {
+    for (let index1 = this.private_space.length - 1; index1 >= 0; index1--) {
+      const private_room = this.private_space[index1];
+      if (private_room.waiter_login === login || private_room.target_client_login === login) {
+        let all_waiter_socket: string[] = this.get_all_socket_of_user(private_room.waiter_login);
+        let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
+        for (let index2 = 0; index2 < all_target_socket.length; index2++) {
+          const target = all_target_socket[index2];
+          this.server.to(target).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode})
+        }
+        for (let index3 = 0; index3 < all_waiter_socket.length; index3++) {
+          const waiter = all_waiter_socket[index3];
+          this.server.to(waiter).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode})
+        }
+        this.private_space.splice(index1, 1);
+      }
+    }
+  }
+
   /**
    * handle private invitation
    * @param body a PrivateGameRequestDTO containing a non empty target string and a super_game_mode boolean
@@ -568,7 +587,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @returns nothing
    */
   @SubscribeMessage("Private_Matchmaking") // post et acceptation d'une invitation
-  handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
+  async handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
     
     this.clean_match();
@@ -615,7 +634,8 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           this.find_and_remove_spect(client);
           this.find_and_remove_spect(private_room.waiting_client_socket);
           this.StartGameRoom(private_room.waiting_client_socket, client, private_room.super_game_mode);
-          this.private_space.splice(i, 1);
+          this.remove_from_all_invite(private_room.target_client_login);
+          //this.private_space.splice(i, 1);
           console.log("leaving handlePrivateMatching function afte a match started");
           return;
         }
@@ -629,6 +649,16 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     
+    let all_blocked_by = await this.userservice.getBlockedMeList(user.id)
+    for (let index = 0; index < all_blocked_by.length; index++) {
+      const one_user = all_blocked_by[index];
+      if (one_user.name === body.target) {
+        console.log("invitation not posted because of blocked by target");
+        this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
+        return;
+      }
+    }
+
     // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
     let private_room = new Waiting_Socket();
