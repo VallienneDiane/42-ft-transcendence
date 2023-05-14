@@ -134,7 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
     
     //this.transfer_all_match(client);
-    console.log("in handle connection nbr_of socket vaut : ", nbr_of_socket);
+    console.log("in hadle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
     this.server.to(client.id).emit("Connection_Accepted");
   }
@@ -810,30 +810,41 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // this.logger.debug(`${id}`)
     return this.userservice.findById(id);    
   }
-
+  
   clean_old_socket() {
-    for (let [key, value] of this.socketID_UserEntity.entries()) {
+    console.log("entering clean old socket");
+    for (let index1 = this.private_space.length - 1; index1 >= 0; index1--) {
+      const private_space = this.private_space[index1];
       let already_seen = false;
-      for (let index1 = 0; index1 < this.private_space.length; index1++) {
-        const private_space = this.private_space[index1];
+      for (let [key, value] of this.socketID_UserEntity.entries()) {
         if (key === private_space.waiting_client_socket.id){
           already_seen = true;
           break;
         }
       }
       if (!already_seen) {
-        for (let index2 = 0; index2 < this.public_space.length; index2++) {
-          const public_space = this.public_space[index2];
-          if (key === public_space.waiting_client_socket.id){
-            already_seen = true;
-            break;
-          }
+        console.log("found an old socket : ", private_space.waiting_client_socket.id, "of : ", private_space.waiter_login);
+        this.waiting_on_match.delete(private_space.waiter_login);
+        this.private_space.splice(index1, 1);
+      }
+    }
+    console.log("first forllop past");
+    for (let index1 = this.public_space.length - 1; index1 >= 0; index1--) {
+      const public_space = this.public_space[index1];
+      let already_seen = false;
+      for (let [key, value] of this.socketID_UserEntity.entries()) {
+        if (key === public_space.waiting_client_socket.id){
+          already_seen = true;
+          break;
         }
       }
       if (!already_seen) {
-        this.socketID_UserEntity.delete(key);
+        console.log("found an old socket : ", public_space.waiting_client_socket.id, "of : ", public_space.waiter_login);
+        this.waiting_on_match.delete(public_space.waiter_login);
+        this.public_space.splice(index1, 1);
       }
     }
+    console.log("end of function");
   }
 
   /**

@@ -248,6 +248,7 @@ const Game: React.FC = () => {
     }, [socketGame])
     
     useEffect(() => {
+        toggleSpecMode(false, null);
         console.log(location.state);
         if (location.state != null && location.state.from === "invitation") {
             console.log("Je viens d'invitation");
@@ -619,3 +620,5 @@ const Game: React.FC = () => {
 }
 
 export default Game;
+
+// Quit_Spectator
