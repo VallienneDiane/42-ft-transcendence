@@ -24,6 +24,7 @@ const SignupPage: React.FC = () => {
 
   const signUp = async (data: SignUpForm) => {
     const avatar = generateRandomAvatarOptions();
+    console.log("avatar: ", avatar);
     const svgString = ReactDOMServer.renderToString(avatar);
 
     setError(false);
