@@ -231,6 +231,34 @@ const Game: React.FC = () => {
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
     
+    const quitCurrentMatch = () => {
+        if (socketGame !== null) {
+            if (specMode.active === true) {
+                socketGame.emit('Quit_Spectator');
+                console.log("quit spectator send")
+            }
+            else {
+                socketGame.emit('Quit_Match');
+                console.log("quit match send")    
+            }
+        }
+        setWaitMatch(false);
+        setMatchInProgress(false);
+        setTimer(false);
+        setCountdown(3);
+        setPlayerReady(false);
+        setButtonReady(false);
+        setPlayers(null);
+        setSpecMode({active: false, player1_login: null});
+        ready = false;
+        clearGame = true;
+        setGameState({
+            BallPosition: null,
+            paddleOne: null,
+            paddleTwo: null
+        })
+    }
+    
     // useEffect(() => {
         //     let { from } = location.state;
         //     if (from != null && from === "invitation") {
@@ -240,9 +268,9 @@ const Game: React.FC = () => {
     
     useEffect(() => {
         if (socketGame) {
-            // socketGame.emit('Get_Status');
+            socketGame.emit('Get_Status');
+            console.log("ASK FOR STATUS");
             socketGame.emit('Get_Matches');
-            // console.log("ASK FOR STATUS");
             console.log("ASK FOR MATCHS");
         }
     }, [socketGame])
@@ -384,11 +412,6 @@ const Game: React.FC = () => {
                 setSpecMode({active: false, player1_login: null});
                 ready = false;
                 clearGame = true;
-                // setClearGame(true);
-                // const canvas = canvasRef.current;
-                // const context = canvas!.getContext("2d")!;
-                // console.log('context', context);
-                // context.clearRect(0, 0, gameWidth, gameHeight);
                 setGameState({
                     BallPosition: null,
                     paddleOne: null,
@@ -412,7 +435,7 @@ const Game: React.FC = () => {
                 setButtonReady(false);
                 ready = false;
             })
-
+            
             socketGame.on('ready in match', (ask_by: string) => {
                 if (accountService.isLogged() && user === null) {
                     let decodedToken: JwtPayload = accountService.readPayload()!;
@@ -444,6 +467,15 @@ const Game: React.FC = () => {
                 setButtonReady(true);
                 ready = true;
                 clearGame = false;
+            })
+            
+            socketGame.on('spectator', () => {
+                console.log("spectator status received");
+                setWaitMatch(false);
+                setMatchInProgress(true);
+                setButtonReady(false);
+                ready = false;
+                toggleSpecMode(true, null);
             })
         }
     }, [socketGame]);
@@ -581,6 +613,9 @@ const Game: React.FC = () => {
                         {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
+                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
+                    {matchInProgress ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Match ?</div> : null}
+                    
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
                 <div id="instructions">
@@ -610,7 +645,7 @@ const Game: React.FC = () => {
                                 <FontAwesomeIcon className="arrow" icon={faArrowDown} />
                                 <div></div>
                             </div>
-                            <p>Move your paddle up</p>
+                            <p>Move your paddle down</p>
                         </div>
                     </div>
                 </div>

@@ -205,7 +205,7 @@ class ChannelDMList extends React.Component<{
             {displayDM && (
                 <React.Fragment>
                     <h2>DMs</h2>
-                    <ul className="channelListDM">
+                    <ul className="channelList">
                     {this.state.privateMsgs.map((dm, id) => {
                     if (this.state.me.sub !== dm.userId) {
                         return (
@@ -251,7 +251,8 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     handleNewMessageOnHistory(newMessage: IMessage) {
-        let save: IMessage[] = [...this.state.history!];
+        const save: IMessage[] = this.state.history!;
+        save.reverse();
         save.push(newMessage);
         this.setState({
             history: save,
