@@ -608,6 +608,52 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
   }
 
+  @SubscribeMessage("Accept_Invite")
+  handle_accept_invite(@ConnectedSocket() client: Socket) {
+    console.log("entering accept invite function");
+    this.clean_match();
+    this.clean_old_socket();
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("to fast private matchmaking request");
+      return;
+    }
+    // check the existing waiting socket to find a potential match
+    for (let i = 0; i < this.private_space.length; i++) {
+      const private_room = this.private_space[i];
+      // if match and target not occupied
+      if (private_room.target_client_login === user.login) {
+        this.logger.debug("private matchmaking found");
+        console.log("sending invitation accepted to the waiter socket");
+        this.server.to(private_room.waiting_client_socket.id).emit("Invitation_Accepted");
+        this.server.to(client.id).emit("Invitation_Accepted");
+        let all_waiter_socket: string[] = this.get_all_socket_of_user(private_room.waiter_login);
+        for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
+          const waiter2 = all_waiter_socket[index2];
+          if (waiter2 != private_room.waiting_client_socket.id) {
+            console.log("sending clear_invite to a waiter socket that is not the original");
+            this.server.to(waiter2).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
+          }
+        }
+        let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
+        for (let index3 = 0; index3 < all_target_socket.length; index3++) {
+          const accepter = all_target_socket[index3];
+          if (accepter != client.id) {
+            console.log("private matchmaking happenning: sending to a target socket Clear_Invite");
+            this.server.to(accepter).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
+          }
+        }
+        this.find_and_remove_spect(client);
+        this.find_and_remove_spect(private_room.waiting_client_socket);
+        this.StartGameRoom(private_room.waiting_client_socket, client, private_room.super_game_mode);
+        this.remove_from_all_invite(private_room.target_client_login);
+        this.private_space.splice(i, 1);
+        console.log("leaving handlePrivateMatching function afte a match started");
+        return;
+      }
+    }
+  }
+      
   /**
    * handle private invitation
    * @param body a PrivateGameRequestDTO containing a non empty target string and a super_game_mode boolean
@@ -625,59 +671,20 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.logger.debug("to fast private matchmaking request");
       return;
     }
-    this.remove_if_invited(user.login);
     // check if client is already in a waiting queu or game
-    if (this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
+    if (this.waiting_on_match.has(user.login)) {
       this.logger.debug("client is already in waiting on match : ", client.id);
       this.server.to(client.id).emit("You_Are_Occupied");
       return;
     }
     
-    
-    // check the existing waiting socket to find a potential match
-    for (let i = 0; i < this.private_space.length; i++) {
-      const private_room = this.private_space[i];
-      // if match and target not occupied
-      let all_waiter_socket: string[] = this.get_all_socket_of_user(body.target);
-      for (let index1 = 0; index1 < all_waiter_socket.length; index1++) {
-        const waiter = all_waiter_socket[index1];
-        if (private_room.waiting_client_socket.id === waiter && private_room.target_client_login === this.socketID_UserEntity.get(client.id).login) {
-          this.logger.debug("private matchmaking found");
-          console.log("sending invitation accepted to the waiter socket");
-          this.server.to(private_room.waiting_client_socket.id).emit("Invitation_Accepted");
-          this.server.to(client.id).emit("Invitation_Accepted");
-          for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
-            const waiter2 = all_waiter_socket[index2];
-            if (waiter2 != private_room.waiting_client_socket.id) {
-              console.log("sending clear_invite to a waiter socket that is not the original");
-              this.server.to(waiter2).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
-            }
-          }
-          let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
-          for (let index3 = 0; index3 < all_target_socket.length; index3++) {
-            const accepter = all_target_socket[index3];
-            if (accepter != client.id) {
-              console.log("private matchmaking happenning: sending to a target socket Clear_Invite");
-              this.server.to(accepter).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
-            }
-          }
-          this.find_and_remove_spect(client);
-          this.find_and_remove_spect(private_room.waiting_client_socket);
-          this.StartGameRoom(private_room.waiting_client_socket, client, private_room.super_game_mode);
-          this.remove_from_all_invite(private_room.target_client_login);
-          //this.private_space.splice(i, 1);
-          console.log("leaving handlePrivateMatching function afte a match started");
-          return;
-        }
-      }
-      
-    }
     // check if the target is connected
     if (!(this.get_socketid_by_login(this.socketID_UserEntity, body.target) && !this.waiting_on_match.has(body.target)))
     {
       this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
       return;
     }
+    this.remove_if_invited(user.login);
     
     let all_blocked_by = await this.userservice.getBlockedMeList(user.id)
     for (let index = 0; index < all_blocked_by.length; index++) {
