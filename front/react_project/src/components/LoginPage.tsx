@@ -42,7 +42,6 @@ const LoginPage: React.FC = () => {
                     navigate("/verifyCode2fa", { state: { login: res.data.login } });
                 }
                 else {
-                    console.log("LoginPage 47: ", data.id, data.login);
                     accountService.generateToken(res.data.id)
                     .then(response_token => {
                         accountService.saveToken(response_token.data.access_token);
