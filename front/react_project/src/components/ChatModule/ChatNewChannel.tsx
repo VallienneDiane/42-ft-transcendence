@@ -75,8 +75,8 @@ export function Popup(props: {handleClose: any}) {
                     type="text"
                     placeholder=""
                     />
-                    {errors.name && <div className="logError">Channel name is required</div>}
                 </section>
+                    {errors.name && <div className="logError">Invalid channel name</div>}
                 <div className="rawCheckbox">
                     <section>
                         <input type="checkbox" {...register("password")} checked={isPassword} onChange={changeStatePassword}/>

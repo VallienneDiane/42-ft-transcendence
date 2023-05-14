@@ -34,7 +34,6 @@ const LoginPage: React.FC = () => {
      * @param data 
      */
     const onSubmit = async (data: LogInForm) => {
-        console.log("LoginPage 37 : LogInform : ", data);
         accountService.login(data)
         .then(res => {
             accountService.is2faActive(data.id)
@@ -43,7 +42,6 @@ const LoginPage: React.FC = () => {
                     navigate("/verifyCode2fa", { state: { login: res.data.login } });
                 }
                 else {
-                    console.log("LoginPage 47: ", data.id, data.login);
                     accountService.generateToken(res.data.id)
                     .then(response_token => {
                         accountService.saveToken(response_token.data.access_token);

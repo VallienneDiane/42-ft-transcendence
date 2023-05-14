@@ -172,7 +172,7 @@ export class SendMessageForm extends React.Component<{dest: IDest}, {text: strin
         return (
             <div id="sendMessage">
                 <form className="sendMessageForm" onSubmit={this.sendMessage}>
-                    <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} />
+                    <input type="textarea" placeholder="Type your message..." value={this.state.text} onChange={this.handleMessage} maxLength={2048}/>
                     <button className="send">
                         <FontAwesomeIcon className="svgSend" icon={faPaperPlane} />
                     </button>
