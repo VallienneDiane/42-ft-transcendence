@@ -709,7 +709,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
             const waiter2 = all_waiter_socket[index4];
-            this.server.to(waiter2).emit("Invite_Declined");
+            this.server.to(waiter2).emit("Invite_Declined", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
           }
           this.waiting_on_match.delete(private_room.waiter_login)
           this.private_space.splice(index1, 1);
