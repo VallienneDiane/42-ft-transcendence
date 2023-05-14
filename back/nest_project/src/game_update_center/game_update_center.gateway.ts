@@ -297,6 +297,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("JUST RECEIVED PUBLIC REQUEST EVENT -------------------------------------------------------------------------------------");
     // check if client is already in a waiting queu or game
     this.clean_match();
+    this.clean_old_socket();
     let user = this.socketID_UserEntity.get(client.id);
     if (!user) {
       this.logger.debug("to fast publick matchmaking request");
@@ -409,6 +410,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("entering find_and_remove_private function");
     
     this.clean_match();
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      this.logger.debug("avoid a crash");
+      return;
+    }
     // if the client was waiting for a private match or is the target of a match
     for (let i = 0; i < this.private_space.length; i++) {
       const ws = this.private_space[i];
@@ -530,6 +536,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
   @SubscribeMessage("Cancel_Invitation") // losrqu'on a fait une invitation et qu'on veut la cancel, une seul invitation par login est possible
   handle_canceled(@ConnectedSocket() client: Socket) {
     console.log("entering cancel invitation by : ", client.id);
+    this.clean_old_socket();
     let user = this.socketID_UserEntity.get(client.id);
     if (!user) {
       this.logger.debug("user is not yet recognize");
@@ -591,6 +598,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     console.log("entering handlePrivateMatching function");
     
     this.clean_match();
+    this.clean_old_socket();
     let user = this.socketID_UserEntity.get(client.id);
     if (!user) {
       this.logger.debug("to fast private matchmaking request");
@@ -692,6 +700,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.logger.debug("user is not yet recognize");
       return;
     }
+    this.clean_old_socket();
     for (let index1 = 0; index1 < this.private_space.length; index1++) {
       const private_room = this.private_space[index1];
       let all_waiter_socket: string[] = this.get_all_socket_of_user(body.player1_login);
@@ -800,6 +809,31 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let id = this.extractUserId(client);
     // this.logger.debug(`${id}`)
     return this.userservice.findById(id);    
+  }
+
+  clean_old_socket() {
+    for (let [key, value] of this.socketID_UserEntity.entries()) {
+      let already_seen = false;
+      for (let index1 = 0; index1 < this.private_space.length; index1++) {
+        const private_space = this.private_space[index1];
+        if (key === private_space.waiting_client_socket.id){
+          already_seen = true;
+          break;
+        }
+      }
+      if (!already_seen) {
+        for (let index2 = 0; index2 < this.public_space.length; index2++) {
+          const public_space = this.public_space[index2];
+          if (key === public_space.waiting_client_socket.id){
+            already_seen = true;
+            break;
+          }
+        }
+      }
+      if (!already_seen) {
+        this.socketID_UserEntity.delete(key);
+      }
+    }
   }
 
   /**
