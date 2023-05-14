@@ -40,7 +40,6 @@ export default function MatchHistory(props: {userId: string}) {
                 else
                     ++loose;
             });
-            console.log("win: ", win, ", loose: ", loose);
             setMatchWon(win);
             setMatchLost(loose);
             setHistory(data);

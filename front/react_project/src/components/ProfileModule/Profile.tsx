@@ -90,7 +90,6 @@ export default function Profile() {
     
     useEffect(() => {
         if (currentUser !== undefined) {
-            console.log(currentUser, currentUser.length);
             if (currentUser.length > 15) {
                 userService.getUserWithAvatar(currentUser)
                 .then(response => {
@@ -106,7 +105,6 @@ export default function Profile() {
             else {
                 userService.getUserWithAvatarUsingLogin(currentUser)
                 .then(response => {
-                    console.log(response);
                     if (response.data === "") {
                         navigate('/profile');
                     }
