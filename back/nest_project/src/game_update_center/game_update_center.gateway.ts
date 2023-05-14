@@ -184,6 +184,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       this.logger.debug("user is not yet recognize");
       return;
     }
+    for (let index1 = 0; index1 < this.game_instance.length; index1++) {
+      const game = this.game_instance[index1];
+      for (let index2 = 0; index2 < game.spectators.length; index2++) {
+        const spec = game.spectators[index2];
+        if (spec === client) {
+          this.server.to(client.id).emit("spectator");
+        }
+      }
+    }
     if (!this.waiting_on_match.has(this.socketID_UserEntity.get(client.id).login)) {
       this.logger.debug("leaving get_status sending : nothing");
       this.server.to(client.id).emit("nothing");
