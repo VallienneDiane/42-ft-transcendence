@@ -77,6 +77,7 @@ const PopUp: React.FC = () => {
 
             socketGame.on("Invitation", (invitation: invitation) => {
 
+
                 console.log("invitesRef.current", invitesRef.current)
                 console.log("user login", user.login)
                 console.log("invitation received", invitation)
@@ -138,9 +139,9 @@ const PopUp: React.FC = () => {
                         })
                     // }
 
+                    
 
-
-
+                    
                     setInvites((prevInvites) => {
                         const newInvite = {
                             for: invitation.for,
@@ -148,7 +149,7 @@ const PopUp: React.FC = () => {
                             status: "received",
                             super_game_mode: invitation.super_game_mode
                         };
-
+                        
                         invitesRef.current?.map((invite) => {
                             if (invite.by === invitation.by && invite.for === invitation.for) {
                                 return;
@@ -187,8 +188,9 @@ const PopUp: React.FC = () => {
                             return [...prevInvites, newInvite]; // Add the new invite to the existing array
                         }
                     });
-
+                    
                 }
+                setInvites(invites!.filter(invite => (invite.status !== "notSend" && invite.status !== "declined" && invite.status !== "you_are_in_match")))
             });
 
             socketGame.on("Players", () => {
@@ -340,7 +342,8 @@ const PopUp: React.FC = () => {
     const acceptInvitation = (event: React.MouseEvent<HTMLDivElement>) => {
         let data: invite = JSON.parse(event.currentTarget.getAttribute('data-key')!);
         console.log("accept invite");
-        socketGame.emit("Private_Matchmaking", { target: data.by, super_game_mode: data.super_game_mode });
+        socketGame.emit("Accept_Invite");
+        // socketGame.emit("Private_Matchmaking", { target: data.by, super_game_mode: data.super_game_mode });
         setInvites([]);
         // invitesRef.current = null;
         navigate("/game", { state: { from: "invitation" } });
