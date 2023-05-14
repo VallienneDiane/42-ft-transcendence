@@ -126,7 +126,6 @@ let getToken = () => {
  * When user logout, request send to inform server and destroy token
  */
 let logout = () => {
-    Axios.post('/auth/logout');
     sessionStorage.removeItem('token');
 }
 /**
