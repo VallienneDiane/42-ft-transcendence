@@ -17,9 +17,9 @@ interface invitation {
 }
 
 interface invite {
-    for: string,
-    by: string,
-    status: string,
+    for: string | null,
+    by: string | null,
+    status: string | null,
     super_game_mode: boolean,
 }
 
@@ -27,12 +27,12 @@ interface invite {
 const PopUp: React.FC = () => {
     const navigate = useNavigate();
     let user: User;
-    const {socketGame} = React.useContext(SocketContext);
-    const [invite, setInvite] = useState<invite | null>();
-    const inviteRef = useRef<invite | null>(null);
-    const [popUpContent, setPopUpContent] = useState<JSX.Element>();
+    const { socketGame } = React.useContext(SocketContext);
+    const [invites, setInvites] = useState<invite[] | null>([]);
+    const invitesRef = useRef<invite[] | null>([]);
+    const [popUpContents, setPopUpContents] = useState<JSX.Element[]>([]);
 
-    
+
     ////// TODO
     // useEffect(() => {
     //     console.log("ask invite function");
@@ -41,16 +41,20 @@ const PopUp: React.FC = () => {
     //         console.log("ask invite send");
     //     }
     // }, [socketGame])
-    
+
     useEffect(() => {
-        if (invite) {
-            console.log("invite status", invite.status);
+
+        if (invites) {
+            console.log("Changes on invites")
+            invitesRef.current = invites;
+            console.log("invitesRef", invitesRef)
+            // console.log("invite status", invite.status);
         }
-        if (invite?.status === "received") {
-            inviteRef.current = invite;
-        }
-    }, [invite])
-    
+        // if (invite?.status === "received") {
+        //     invitesRef.current = invite;
+        // }
+    }, [invites])
+
     useEffect(() => {
         if (socketGame) {
             socketGame.on("Connection_Accepted", () => {
@@ -58,163 +62,304 @@ const PopUp: React.FC = () => {
                     let decodedToken: JwtPayload = accountService.readPayload()!;
                     const id = decodedToken.sub;
                     userService.getUserWithAvatar(id!)
-                    .then(response => {
-                        user = response.data;
-                        socketGame.emit("Ask_Invitation", {player1_login: user.login});
-                        console.log("ask invite send");
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
+                        .then(response => {
+                            user = response.data;
+                            socketGame.emit("Ask_Invitation", { player1_login: user.login });
+                            console.log("ask invite send");
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
                 }
             });
 
             socketGame.on("Invitation", (invitation: invitation) => {
-                
-                console.log("inviteRef.current", inviteRef.current)
+
+                console.log("invitesRef.current", invitesRef.current)
                 console.log("user login", user.login)
                 console.log("invitation received", invitation)
-                if (inviteRef.current != null && invitation.by === inviteRef.current!.by && invitation.for === inviteRef.current!.for) {
-                    setInvite(null);
-                    inviteRef.current = null;
-                    console.log("Invitation has been canceled by asker", invitation);
+
+                if (invitation.for === user?.login) {
+                    console.log("Cette invitation m'est destinee");
+                    if (invitesRef.current != null) {
+                        invitesRef.current.map((inviteRef) => {
+                            if (inviteRef.by === invitation.by && inviteRef.for === invitation.for) {
+                                // invitesRef.current = invitesRef.current!.filter(inviteRef => inviteRef.by === invitation.by && inviteRef.for === invitation.for)
+                                setInvites(invites!.filter(invite => invite.by === invitation.by && invite.for === invitation.for));
+                                console.log("Invitation has been canceled by asker", invitation);
+                                return ;
+                            }
+                        })
+                    }
+                    // console.log("invites", invites);
+                    // console.log("invitesRef", invitesRef);
+                    // console.log("invitesRef.current", invitesRef.current);
+                    // console.log(invitation);
+                    // console.log("Retour du find : ", invitesRef.current?.find(invite => invite.by === invitation.by && invite.for === invitation.for))
+                    // if (invitesRef.current?.find(invite => invite.by === invitation.by && invite.for === invitation.for) === undefined) {
+                        setInvites((prevInvites) => {
+                            const newInvite = {
+                                for: invitation.for,
+                                by: invitation.by,
+                                status: "received",
+                                super_game_mode: invitation.super_game_mode
+                            };
+
+                            invitesRef.current?.map((invite) => {
+                                if (invite.by === invitation.by && invite.for === invitation.for) {
+                                    return;
+                                }
+                            })
+                            
+                            // console.log("Invitation Received", invitation);
+                            if (prevInvites === null) {
+                                console.log("Premiere invite ajoutee");
+                                return [newInvite]; // Initialize the array with the new invite
+                            }
+                            else {
+                                console.log("Invite ajoutee au tab d'invites");
+                                return [...prevInvites, newInvite]; // Add the new invite to the existing array
+                            }
+                        });
+                    // }
                 }
-                else if (invitation.for === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "received", super_game_mode: invitation.super_game_mode});
-                    console.log("Invitation Received", invitation);
+                
+                if (invitation.by === user.login) {
+                    console.log("J'ai envoye cette invite");
+                    setInvites((prevInvites) => {
+                        const newInvite = {
+                            for: invitation.for,
+                            by: invitation.by,
+                            status: invitation.send === true ? "send" : "notSend",
+                            super_game_mode: invitation.super_game_mode
+                        };
+                        
+                        // console.log("Invitation Received", invitation);
+                        if (prevInvites === null) {
+                            console.log("Premiere invite ajoutee");
+                            return [newInvite]; // Initialize the array with the new invite
+                        }
+                        else {
+                            console.log("Invite ajoutee au tab d'invites");
+                            return [...prevInvites, newInvite]; // Add the new invite to the existing array
+                        }
+                    });
+
                 }
-                if (invitation.send === true && invitation.by === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "send", super_game_mode: invitation.super_game_mode});
-                    console.log("Invitation successfuly sent" , invitation);
-                }
-                if (invitation.send === false && invitation.by === user?.login) {
-                    setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
-                    console.log("Invitation not send", invitation);
-                }
+
+
+                // setInvites((prevInvites) =>
+                //     prevInvites!.map((invite) => {
+                //         if (invitation.send === true && invitation.by === user?.login) {
+                //             console.log("Invitation successfuly sent", invitation);
+                //             return {
+                //                 ...invite,
+                //                 status: "send",
+                //             };
+                //         }
+                //         else if (invitation.send === false && invitation.by === user?.login) {
+                //             console.log("Invitation not send", invitation);
+                //             return {
+                //                 ...invite,
+                //                 status: "notSend",
+                //             };
+                //         }
+                //         else {
+                //             return invite;
+                //         }
+                //     })
+                // )
+
+                // if (invitation.send === true && invitation.by === user?.login) {
+                //     setInvite({for: invitation.for, by: invitation.by, status: "send", super_game_mode: invitation.super_game_mode});
+                //     console.log("Invitation successfuly sent" , invitation);
+                // }
+                // if (invitation.send === false && invitation.by === user?.login) {
+                //     setInvite({for: invitation.for, by: invitation.by, status: "notSend", super_game_mode: invitation.super_game_mode});
+                //     console.log("Invitation not send", invitation);
+                // }
             });
-            
+
             socketGame.on("Players", () => {
                 console.log('Player info received');
             })
-            
-            socketGame.on("Invite_Declined", () => {
+
+            socketGame.on("Invite_Declined", (invitation: invitation) => {
                 console.log("invite declined request");
-            // if (invite?.status === "send") {
-                setInvite((prevState) => ({
-                    ...prevState!,
-                    status: "declined",
-                }));
+                // setInvites(invites!.filter(invite => (invite.status !== "notSend" && invite.status !== "declined" && invite.status !== "you_are_in_match")))
+                setInvites((prevInvites) =>
+                    prevInvites!.map((invite) => {
+                        // if (invite.status === "notSend" || invite.status === "declined" || invite.status === "you_are_in_match") {
+                        //     return {
+                        //         ...invite,
+                        //         by: null,
+                        //         for: null,
+                        //         status: null,
+                        //     };
+                        // }
+                        if (invite.by === invitation.by && invite.for === invitation.for) {
+                            return {
+                                ...invite,
+                                status: "declined",
+                            };
+                        }
+                        else {
+                            return invite;
+                        }
+                    }))
+
+                // setInvite((prevState) => ({
+                //     ...prevState!,
+                //     status: "declined",
+                // }));
+
                 // }
             })
-            
+
             socketGame.on('Already_On_Match', () => {
                 console.log('Already on match');
-                setInvite((prevState) => ({
-                    ...prevState!,
-                    status: "you_are_in_match",
-                }));
+                setInvites(
+                    [
+                        {
+                            by: "",
+                            for: "",
+                            status: "you_are_in_match",
+                            super_game_mode: false,
+                        }
+                    ]
+                );
+                // setInvites((prevState) => ({
+                //     ...prevState!,
+                //     status: "you_are_in_match",
+                // }));
             });
-            
+
             socketGame.on("Invitation_Accepted", () => {
-            // if (invite?.status === "send") {
+                // if (invite?.status === "send") {
                 console.log("invite has been accepted by target");
-                setInvite(null);
-                inviteRef.current = null;
-                navigate("/game", {state : {from : "invitation"}});
+                setInvites([]);
+                // invitesRef.current = null;
+                navigate("/game", { state: { from: "invitation" } });
+                // setInvites(null);
+                // invitesRef.current = null;
+                // navigate("/game", {state : {from : "invitation"}});
                 // }
             })
-            
-            socketGame.on("Clear_Invite", () => {
+
+            socketGame.on("Clear_Invite", (invitation: invitation) => {
                 console.log("clear invite request");
-                setInvite(null);
-                inviteRef.current = null;
+                setInvites(invites!.filter(invite => invite.by === invitation.by && invite.for === invitation.for));
+                // invitesRef.current = invitesRef.current!.filter(inviteRef => inviteRef.by === invitation.by && inviteRef.for === invitation.for)
+                // setInvite(null);
+                // invitesRef.current = null;
             })
         }
     }, [socketGame]);
 
     useEffect(() => {
-        if (invite) {
-            switch (invite?.status) {
-                case "received":
-                    setPopUpContent(
-                        <div className="container">
-                        <div>{invite?.by} invites you to play a game</div>
-                        <div id="accept" onClick={acceptInvitation}>Accept</div>
-                        <div id="decline" onClick={declineInvitation}>Decline</div>
-                    </div>
-                  );
-                  break;
-                  
-                  case "send":
-                      setPopUpContent(
-                    <div className="container">
-                        <div>Invitation successfully sent to {invite?.for}</div>
-                        <div onClick={cancelInvitation}>Cancel invitation</div>
-                    </div>
-                  );
-                  break;
-                  
-                  case "notSend":
-                      setPopUpContent(
-                          <div className="container">
-                        <div>{invite?.for} is not available</div>
-                        <div id="close_popUp" onClick={closePopUp}>X</div>
-                    </div>
-                  );
-                  break;
+        if (invites) {
+            setPopUpContents([]);
+            invites?.map((invite) => {
+                console.log("add html to popup list. status is :", invite.status);
+                console.log("invites lenght", invites.length);
+                switch (invite?.status) {
+                    case "received":
+                        setPopUpContents((prevContents) => [
+                            ...prevContents,
+                            <div className="container" key={invite.by}>
+                                <div>{invite?.by} invites you to play a game</div>
+                                <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>Accept</div>
+                                <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>Decline</div>
+                            </div>
+                        ])
+                        break;
 
-                case "declined":
-                  setPopUpContent(
-                    <div className="container">
-                      <div>{invite?.for} declined your invitation</div>
-                      <div id="close_popUp" onClick={closePopUp}>X</div>
-                    </div>
-                  );
-                  break;
+                    case "send":
+                        setPopUpContents((prevContents) => [
+                            ...prevContents,
+                            <div className="container" key={invite.by}>
+                                <div>Invitation successfully sent to {invite?.for}</div>
+                                <div data-key={JSON.stringify(invite)} onClick={cancelInvitation}>Cancel invitation</div>
+                            </div>
+                        ])
+                        break;
 
-                case "you_are_in_match":
-                  setPopUpContent(
-                    <div className="container">
-                      <div>You are already in a match</div>
-                      <div id="close_popUp" onClick={closePopUp}>X</div>
-                    </div>
-                  );
-                  break;
+                    case "notSend":
+                        setPopUpContents((prevContents) => [
+                            ...prevContents,
+                            <div className="container" key={invite.by}>
+                                <div>{invite?.for} is not available</div>
+                                <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
+                            </div>
+                        ])
+                        break;
 
-                default:
-                    break;
+                    case "declined":
+                        setPopUpContents((prevContents) => [
+                            ...prevContents,
+                            <div className="container" key={invite.by}>
+                                <div>{invite?.for} declined your invitation</div>
+                                <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
+                            </div>
+                        ])
+                        break;
+
+                    case "you_are_in_match":
+                        setPopUpContents((prevContents) => [
+                            ...prevContents,
+                            <div className="container" key={invite.by}>
+                                <div>You are already in a match</div>
+                                <div id="close_popUp" data-key={JSON.stringify(invite)} onClick={closePopUp}>X</div>
+                            </div>
+                        ])
+                        break;
+
+                    default:
+                        break;
                 }
+            })
         }
-    }, [invite])
-    
-    const acceptInvitation = () => {
+    }, [invites])
+
+    const acceptInvitation = (event: React.MouseEvent<HTMLDivElement>) => {
+        let data: invite = JSON.parse(event.currentTarget.getAttribute('data-key')!);
         console.log("accept invite");
-        socketGame.emit("Private_Matchmaking", {target: invite?.by, super_game_mode: invite?.super_game_mode});
-        setInvite(null);
-        inviteRef.current = null;
-        navigate("/game", {state : {from : "invitation"}});
+        socketGame.emit("Private_Matchmaking", { target: data.by, super_game_mode: data.super_game_mode });
+        setInvites([]);
+        // invitesRef.current = null;
+        navigate("/game", { state: { from: "invitation" } });
     }
     
-    const declineInvitation = () => {
+    const declineInvitation = (event: React.MouseEvent<HTMLDivElement>) => {
+        let data: invite = JSON.parse(event.currentTarget.getAttribute('data-key')!);
         console.log("decline invite");
-        socketGame.emit("Decline_Invitation", {player1_login: invite?.by})
-        setInvite(null);
-        inviteRef.current = null;
+        socketGame.emit("Decline_Invitation", { player1_login: data.by })
+        setInvites(invites!.filter(invite => !(invite.by === data.by && invite.for === data.for)));
+        // invitesRef.current = null;
     }
     
-    const cancelInvitation = () => {
+    const cancelInvitation = (event: React.MouseEvent<HTMLDivElement>) => {
+        console.log("cancel invite", JSON.parse(event.currentTarget.getAttribute('data-key')!));
+        let data: invite = JSON.parse(event.currentTarget.getAttribute('data-key')!);
         console.log("cancel invite");
         socketGame.emit("Cancel_Invitation")
-        setInvite(null);
+        setInvites(invites!.filter(invite => !(invite.by === data.by && invite.for === data.for)));
+        // setInvite(null);
     }
     
-    const closePopUp = () => {
-        setInvite(null);
+    const closePopUp = (event: React.MouseEvent<HTMLDivElement>) => {
+        let data: invite = JSON.parse(event.currentTarget.getAttribute('data-key')!);
+        setInvites(invites!.filter(invite => !(invite.by === data.by && invite.for === data.for)));
+        // setInvite(null);
     }
-    
+
     return (
-        <div id="PopUp" className={invite == null ? "hide" : ""}>
-            {popUpContent}
+        <div id="PopUp" className={invites?.length === 0 ? "hide" : ""}>
+            {
+                popUpContents.map((popUp) => {
+                    return popUp;
+                })
+            }
         </div>
     )
 }
