@@ -34,7 +34,6 @@ const LoginPage: React.FC = () => {
      * @param data 
      */
     const onSubmit = async (data: LogInForm) => {
-        console.log("LoginPage 37 : LogInform : ", data);
         accountService.login(data)
         .then(res => {
             accountService.is2faActive(data.id)

@@ -24,7 +24,6 @@ const SignupPage: React.FC = () => {
 
   const signUp = async (data: SignUpForm) => {
     const avatar = generateRandomAvatarOptions();
-    console.log("avatar: ", avatar);
     const svgString = ReactDOMServer.renderToString(avatar);
 
     setError(false);
@@ -34,7 +33,6 @@ const SignupPage: React.FC = () => {
       if(loginUnique.data == true) {
         accountService.signUp(data)
         .then(res => {
-          console.log(res.data);
           accountService.saveToken(res.data.access_token);
           navigate("/");
         })
