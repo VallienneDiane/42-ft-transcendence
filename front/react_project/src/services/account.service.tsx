@@ -123,7 +123,7 @@ let getToken = () => {
     return sessionStorage.getItem('token');
 }
 /**
- * When user logout, request send to inform server and destroy token
+ * When user logout, destroy token
  */
 let logout = () => {
     sessionStorage.removeItem('token');

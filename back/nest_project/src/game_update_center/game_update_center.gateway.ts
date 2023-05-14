@@ -587,7 +587,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @returns nothing
    */
   @SubscribeMessage("Private_Matchmaking") // post et acceptation d'une invitation
-  handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
+  async handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
     
     this.clean_match();
@@ -649,6 +649,16 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     
+    let all_blocked_by = await this.userservice.getBlockedMeList(user.id)
+    for (let index = 0; index < all_blocked_by.length; index++) {
+      const one_user = all_blocked_by[index];
+      if (one_user.name === body.target) {
+        console.log("invitation not posted because of blocked by target");
+        this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
+        return;
+      }
+    }
+
     // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
     let private_room = new Waiting_Socket();
@@ -699,7 +709,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
             const waiter2 = all_waiter_socket[index4];
-            this.server.to(waiter2).emit("Invite_Declined");
+            this.server.to(waiter2).emit("Invite_Declined", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
           }
           this.waiting_on_match.delete(private_room.waiter_login)
           this.private_space.splice(index1, 1);

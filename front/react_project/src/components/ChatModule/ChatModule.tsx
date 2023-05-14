@@ -209,7 +209,7 @@ class ChannelDMList extends React.Component<{
             {displayDM && (
                 <React.Fragment>
                     <h2>DMs</h2>
-                    <ul className="channelList">
+                    <ul className="channelListDM">
                     {this.state.privateMsgs.map((dm, id) => {
                     if (this.state.me.sub !== dm.userId) {
                         return (
