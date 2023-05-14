@@ -59,7 +59,6 @@ function SearchbarFriend(props: {
                     newUserList.push({id: id, login: login});
             });
             newUserList.sort((a, b) => {return a.login.localeCompare(b.login);});
-            // console.log("fetchUsers", newUserList);
             setFiltered(newUserList);
         })
         .catch(error => { console.log(error); })
@@ -136,7 +135,6 @@ export default function FriendManagement() {
     const fetchFriends = () => {
         Axios.get("listFriends/" + me.sub)
         .then((response) => {
-            console.log(response);
             let friendsArray: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean}[] = [];
             for (let elt of response.data) {
                 let toPush: {friendshipId: string, friendId: string, friendName: string, isConnected: boolean} = {
@@ -149,7 +147,6 @@ export default function FriendManagement() {
             friendsArray.sort((a, b) => {return a.friendName.localeCompare(b.friendName)})
             setFriends(friendsArray);
             setFetch(true);
-            console.log("friends array: ", friendsArray);
         })
         .catch(error => { console.log(error); });
     }
@@ -211,7 +208,6 @@ export default function FriendManagement() {
     }
 
     const askIfConnected = () => {
-        console.log("in Ask", friends)
         if (friends.length) {
             let arrayToAskIfConnected: {userId: string}[] = [];
             friends.forEach((friend) => {
@@ -236,7 +232,6 @@ export default function FriendManagement() {
 
     useEffect(() => {
         if (socket) {
-            console.log(askIfConnectedDone, fetchDone, friends);
             if (!fetchDone)
                 fetchFriends();
             if (fetchDone && !askIfConnectedDone)
@@ -255,7 +250,6 @@ export default function FriendManagement() {
     useEffect(() => {
         if (socket) {
             socket.on("newFriend", (friendshipId: string, id: string, name: string) => {
-                console.log("new friend: ", friendshipId, id, name);
                 let newFriend: {key: string, friendshipId: string, friendId: string, friendName: string, isConnected: boolean} =
                     {
                         key: id,

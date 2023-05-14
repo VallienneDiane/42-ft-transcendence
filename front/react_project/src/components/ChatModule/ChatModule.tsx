@@ -53,7 +53,6 @@ class ChannelDMList extends React.Component<{
 
     checkOnline() {
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
-            // console.log("userConnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -71,7 +70,6 @@ class ChannelDMList extends React.Component<{
 
     checkOffline() {
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
-            // console.log("userDisconnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -133,7 +131,6 @@ class ChannelDMList extends React.Component<{
         this.setMyChannels();
         // this.checkOnline();
         this.context.socket.on("userConnected", (user: {userId: string, userLogin: string}) => {
-            // console.log("userConnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -149,7 +146,6 @@ class ChannelDMList extends React.Component<{
         })
         // this.checkOffline();
         this.context.socket.on("userDisconnected", (user: {userId: string, userLogin: string}) => {
-            // console.log("userDisconnected: ", user);
             let sorted = new Map<string, {userName: string, connected: boolean, waitingMsg: boolean}>();
             for (let elt of this.state.privateMsgs) {
                 sorted.set(elt.userId, {userName: elt.userName, connected: elt.connected, waitingMsg: elt.waitingMsg});
@@ -284,7 +280,6 @@ export default class ChatModule extends React.Component<{}, {
 
         this.context.socket.emit('myDM');
         this.context.socket.on('listMyDM', (strs: {userName: string, userId: string, connected: boolean}[]) => {
-            console.log("listMyDM")
             let listDM: {userName: string, userId: string, connected: boolean, waitingMsg: boolean}[] = [];
             strs.forEach((elt) => {
                 listDM.push({userName: elt.userName, userId: elt.userId, connected: elt.connected, waitingMsg: false});
@@ -297,14 +292,12 @@ export default class ChatModule extends React.Component<{}, {
         this.previousContext = this.context;
         if (this.context.socket !== null) {
             this.context.socket.emit("whereIam");
-            console.log("componentDidMount")
             this.initList();
         }
     }
 
     componentDidUpdate() {
         if (this.previousContext !== this.context) {
-            console.log("componentDidUpdate")
             this.initList();
         }
         this.previousContext = this.context;
@@ -318,7 +311,6 @@ export default class ChatModule extends React.Component<{}, {
 
     render() {
         if (this.context.socket != null && this.state.show) {
-            console.log("blop", this.state.dms);
             return (
                 <div id="chat_page">
                     <div className="card">

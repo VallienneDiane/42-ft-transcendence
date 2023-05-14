@@ -106,7 +106,6 @@ const HomePageSettings: React.FC = () => {
                 })
                 if (imgFiles.length > 0) {
                     setSelectedFile(imgFiles[0]);
-                    console.log(selectedFile);
                 }
             }
         }
