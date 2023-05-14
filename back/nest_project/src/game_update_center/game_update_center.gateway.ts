@@ -134,7 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
     
     //this.transfer_all_match(client);
-    console.log("in hadle connection nbr_of socket vaut : ", nbr_of_socket);
+    console.log("in hndle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
     this.server.to(client.id).emit("Connection_Accepted");
   }
@@ -152,7 +152,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       if (element.target_client_login === this.socketID_UserEntity.get(client.id).login) {
         this.logger.debug("sending Invitation to a target soket");
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
-        return;
       }
       let all_soket_of_waiter: string[] = this.get_all_socket_of_user(body.player1_login);
       for (let index2 = 0; index2 < all_soket_of_waiter.length; index2++) {

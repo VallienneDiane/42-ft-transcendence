@@ -67,7 +67,6 @@ const AvatarNameSettings: React.FC = () => {
                 })
                 if (imgFiles.length > 0) {
                     setSelectedFile(imgFiles[0]);
-                    console.log(selectedFile);
                 }
             }
         }
@@ -100,7 +99,6 @@ const AvatarNameSettings: React.FC = () => {
     }
 
     const avatarSubmit = () => {
-        console.log("JE RECHAAAAAARGE");
         const user = {
             id: id,
             avatarSvg: avatar,

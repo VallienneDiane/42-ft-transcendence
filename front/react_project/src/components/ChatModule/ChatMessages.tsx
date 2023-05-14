@@ -122,7 +122,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     }
 
     render() {
-        let tmpList: IMessage[] = [...this.props.history!];
+        const tmpList: IMessage[] = this.props.history!;
         let listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
             const block = this.checkBlock(message.senderName);
             if (block === false) {

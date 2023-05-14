@@ -183,15 +183,20 @@ export class ChatService {
                         client.emit('checkNewDM', {id: tropdevariables.id, login: tropdevariables.login}, connected);
                     }
                 )
-                if (connected) {
-                    dest.socks.emit('checkNewDM', {id: user.id, login: user.login}, true);
-                    dest.socks.sockets.forEach((data, socket) => {
-                        if (!data.isChannel && data.room == user.id)
-                            socket.emit("newMessage", toSend);
-                        else
-                            socket.emit("pingedBy", user.id);
-                    })
-                }
+                this.userService.getBlockList(room.room)
+                .then((blocks) => {
+                    if (blocks.findIndex(block => block.id == user.id) == -1) {
+                        if (connected) {
+                            dest.socks.emit('checkNewDM', {id: user.id, login: user.login}, true);
+                            dest.socks.sockets.forEach((data, socket) => {
+                                if (!data.isChannel && data.room == user.id)
+                                    socket.emit("newMessage", toSend);
+                                else
+                                    socket.emit("pingedBy", user.id);
+                            })
+                        }
+                    }
+                })
             }
         }
         else

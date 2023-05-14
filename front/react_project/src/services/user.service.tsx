@@ -13,7 +13,6 @@ let getUserWithAvatar = (id: string) => {
 }
 
 let getUserWithAvatarUsingLogin = (login: string) => {
-    console.log(login);
     return Axios.get("userWithAvatarUsingLogin/" + login);
 }
 
