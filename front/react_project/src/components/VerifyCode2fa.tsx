@@ -42,12 +42,14 @@ const VerifyCode2fa:React.FC = () => {
     
 return (
     <div className="verifycode">
-        <form onSubmit={handleSubmit(verifySubmittedCode)}>
-        <h2>Check your Google Authentificator application</h2>
-            <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
-            {errors.code && <p className="errors">{errors.code.message}</p>}
-            <button type="submit">Submit</button>
-        </form>
+        <div>
+            <form onSubmit={handleSubmit(verifySubmittedCode)}>
+            <h2>Check your Google Authentificator application</h2>
+                <input type="text" {...register("code")} name="code" placeholder="Enter the code"/>
+                {errors.code && <p className="errors">{errors.code.message}</p>}
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </div>
     )
 }
