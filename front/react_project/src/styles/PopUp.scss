@@ -2,39 +2,50 @@
 
 #PopUp {
     display: flex;
+    align-items: center;
     flex-direction: column;
-    background-color: rgb(98, 144, 243);
-    // flex: 1;
-    height: 40px;
-    
-    // position: absolute;
-    // top: 0;
+    background-color: rgb(165, 211, 252);
+    overflow-y: scroll;
+    height: 5%;
+    max-height: 300px;
     
     & .container {
-        // background-color: rgb(31, 73, 164);
         width: 70%;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-around;
-        // padding: 0 10vw;
         max-width: 700px;
-        
+        min-width:300px;
+        text-align: center;
         z-index: 3;
+        font-weight: bold;
         
-        & #accept {
-            background-color: rgb(98, 243, 141);
+        & #accept, #decline, #cancel_invit {
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            border: 1px solid;
+            margin: 5px 5px;
+            height: 35px;
+            min-width: 80px;
+            max-width: 250px;
+            padding:8px;
+            font-weight: 400;
+            transition: all 150ms ease-in-out;
+            font-family: Arial;
         }
-        
-        & #decline {
-            background-color: rgb(243, 108, 98);
+        & #accept {
+            background-color: rgb(176, 251, 139);
+        }
+        & #decline, #cancel_invit {
+            background-color: rgb(253, 142, 134);
         }
     
         & #accept, #decline {
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 50px;
             color: rgb(49, 49, 49);
             cursor: pointer;
             width: 15%;
