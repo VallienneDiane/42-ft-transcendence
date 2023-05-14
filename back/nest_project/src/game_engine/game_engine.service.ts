@@ -320,7 +320,7 @@ export class GameEngineService {
 				this.update_match_state();
 			}
 			// if end of game save score and quit
-			if ((this.pl1_score > 0 || this.pl2_score > 0) && !this.game_must_stop) { /////////////////// A REMTTRE A 4 (alexi)
+			if ((this.pl1_score > 4 || this.pl2_score > 4) && !this.game_must_stop) { /////////////////// A REMTTRE A 4 (alexi)
 				this.game_must_stop = true;
 				this.close_the_game();
 				console.log("past close_the_game");
