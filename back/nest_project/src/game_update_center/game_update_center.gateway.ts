@@ -649,6 +649,17 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     
+    let all_blocked_by = this.userservice.getBlockedMeList(user.id)
+    .then((user_tab) => {
+      for (let index = 0; index < user_tab.length; index++) {
+        const one_user = user_tab[index];
+        if (one_user.name === user.login) {
+          this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
+          return;
+        }
+      }
+    });
+
     // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
     let private_room = new Waiting_Socket();
