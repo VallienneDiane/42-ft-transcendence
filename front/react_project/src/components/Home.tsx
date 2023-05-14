@@ -311,8 +311,9 @@ const Home: React.FC = () => {
             if(pageElements[0].hit === true) {
                 h1_title.current.classList.add('hit');
                 setTimeout(() => {
-                    
-                    h1_title.current!.classList.remove('hit');
+                    if (h1_title.current) {
+                        h1_title.current.classList.remove('hit');
+                    }
                     pageElements[0].hit = false;
                 }, 120); 
             }
