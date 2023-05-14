@@ -115,20 +115,22 @@ function SearchbarGame() {
     }
 
     useEffect(() => {
-        socket.on("allConnectedUsers", (users: {userId: string, userLogin: string}[]) => {
-            const payload: JwtPayload = accountService.readPayload()!;
-            let newUserList: { id: string, login: string }[] = [];
-            users.forEach((user) => {
-                if (payload.sub != user.userId)
-                    newUserList.push({id: user.userId, login: user.userLogin});
-            });
-            newUserList.sort((a, b) => {return a.login.localeCompare(b.login);});
-            // console.log("fetchUsers", newUserList);
-            setFiltered(newUserList);
-        })
-
-        return () =>  {
-            socket.off("allConnectedUsers");
+        if (socket) {
+            socket.on("allConnectedUsers", (users: {userId: string, userLogin: string}[]) => {
+                const payload: JwtPayload = accountService.readPayload()!;
+                let newUserList: { id: string, login: string }[] = [];
+                users.forEach((user) => {
+                    if (payload.sub != user.userId)
+                        newUserList.push({id: user.userId, login: user.userLogin});
+                });
+                newUserList.sort((a, b) => {return a.login.localeCompare(b.login);});
+                // console.log("fetchUsers", newUserList);
+                setFiltered(newUserList);
+            })
+    
+            return () =>  {
+                socket.off("allConnectedUsers");
+            }
         }
     }, [socket]);
 
