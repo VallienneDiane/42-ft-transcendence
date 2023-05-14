@@ -587,7 +587,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
    * @returns nothing
    */
   @SubscribeMessage("Private_Matchmaking") // post et acceptation d'une invitation
-  handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
+  async handlePrivateMatchmaking(@MessageBody() body: PrivateGameRequestDTO, @ConnectedSocket() client: Socket) {
     console.log("entering handlePrivateMatching function");
     
     this.clean_match();
@@ -649,16 +649,15 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     
-    let all_blocked_by = this.userservice.getBlockedMeList(user.id)
-    .then((user_tab) => {
-      for (let index = 0; index < user_tab.length; index++) {
-        const one_user = user_tab[index];
-        if (one_user.name === user.login) {
-          this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
-          return;
-        }
+    let all_blocked_by = await this.userservice.getBlockedMeList(user.id)
+    for (let index = 0; index < all_blocked_by.length; index++) {
+      const one_user = all_blocked_by[index];
+      if (one_user.name === body.target) {
+        console.log("invitation not posted because of blocked by target");
+        this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
+        return;
       }
-    });
+    }
 
     // if no match where found add the private game request to the queu
     this.logger.debug("no match where found, socket is now waiting for target to accept invit in a super_game_mode : ", body.super_game_mode);
