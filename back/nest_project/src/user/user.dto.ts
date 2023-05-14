@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber, IsOptional } from "class-validator";
+import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber, IsOptional, IsAlpha, IsAlphanumeric } from "class-validator";
 import { Optional } from "@nestjs/common";
 import { Match } from "src/match/Match";
 import { ChannelDto } from "src/chat/channel/channel.dto";
@@ -12,9 +12,9 @@ import { AvatarEntity } from "./avatar/avatar.entity";
 export class UserDto {
     @IsUUID() readonly id: string;
     @IsString() readonly id42: string;
-    @IsNotEmpty() @IsString() readonly login: string;
-    @IsNotEmpty() @IsEmail() readonly email: string;
-    @IsNotEmpty() @IsString() @MinLength(8) password: string;
+    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsEmail()  @MaxLength(50) readonly email: string;
+    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     readonly channelsAsNormal: ChannelDto[];
     readonly channelsAsOp: ChannelDto[];
     readonly channelsAsGod: ChannelDto[];
@@ -36,20 +36,20 @@ export class UserDto {
 }
 
 export class SignUpDto {
-    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
-    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(10) password: string;
+    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     @IsOptional() @IsString() avatarSvg: string;
 }
 
 export class LoginDto {
-    @IsNotEmpty() @IsString() readonly login: string;
-    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(10) password: string;
+    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
 }
 
 export class SignUp42Dto {
     @IsNotEmpty() @IsString() readonly id42: string;
-    @IsNotEmpty() @IsString() readonly login: string;
+    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() avatarSvg: string;
 }
