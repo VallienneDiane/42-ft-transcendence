@@ -233,7 +233,7 @@ const Game: React.FC = () => {
     
     const quitSpectator = () => {
         if (socketGame !== null) {
-            socketGame.emit('Quit_spectator');
+            socketGame.emit('Quit_Spectator');
             console.log("quit spectator send")
         }
         setWaitMatch(false);
