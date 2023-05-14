@@ -39,6 +39,17 @@
     }
 }
 
+@media (max-width: 500px) {
+    #navbar {
+        position: relative;
+        display: flex;
+        align-items: center;
+        & > #logo {
+            font-size: 1.5em;
+        }
+    }
+}
+
 @media (max-width: 1350px) {
     #navbar {
         position: relative;
@@ -104,6 +115,7 @@
         }
     }
 }
+
 
 @keyframes barAnim {
     0% { transform: translateY(0); }
