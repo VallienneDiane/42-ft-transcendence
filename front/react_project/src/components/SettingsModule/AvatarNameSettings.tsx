@@ -95,7 +95,8 @@ const AvatarNameSettings: React.FC = () => {
         .catch(error => {console.log(error);});
     }
 
-    const avatarSubmit = async () => {
+    const avatarSubmit = () => {
+        console.log("JE RECHAAAAAARGE");
         const user = {
             id: id,
             avatarSvg: avatar,
