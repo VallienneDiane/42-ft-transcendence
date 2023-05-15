@@ -71,7 +71,7 @@ export function Popup(props: {handleClose: any}) {
             <form className="formNewChannel" onSubmit={handleSubmit(onSubmit)}>
                 <section>
                     <label className="labelName">Channel Name</label>
-                    <input {...register("name", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
+                    <input {...register("name", { required: true, minLength: 2, maxLength: 15, pattern: /^[A-Za-z0-9]+$/i })}
                     type="text"
                     placeholder=""
                     />
