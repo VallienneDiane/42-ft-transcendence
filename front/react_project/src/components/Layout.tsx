@@ -20,8 +20,10 @@ const Layout = () => {
     return (
         <div>
             <PopUp/>
-            <NavBar />
-            <Outlet />
+            <div>
+                <NavBar />
+                <Outlet />
+            </div>
         </div>
     )
 }
