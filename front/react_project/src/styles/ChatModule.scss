@@ -443,12 +443,15 @@
 									flex-direction: column;
 									background-color: #33469c1a;
 									& ul {
-										padding: 0 1.5rem 0.3rem 1.5rem;
+										padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+										overflow-y: scroll;
+										max-height: 200px;
 										& li {
 											display: flex;
 											justify-content: space-between;
 											text-align: start;
 											font-size: 15px;
+											padding-top: 2px;
 											& button {
 												&:hover {
 													font-weight: bolder;
