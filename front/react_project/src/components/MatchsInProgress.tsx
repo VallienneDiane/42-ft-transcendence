@@ -6,6 +6,10 @@ import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { User } from "../models";
+import { accountService } from "../services/account.service";
+import { JwtPayload } from "jsonwebtoken";
+import { userService } from "../services/user.service";
 
 
 interface MatchState {
@@ -44,6 +48,8 @@ interface inProgressProps {
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
+    let user: User | null = null;
+
     const [matchs, setMatchs] = useState<MatchState[]>([]);
     const matchsRef = useRef<MatchState[]>([]);
     
@@ -69,23 +75,34 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
             props.socket.on('Match_Update', (matchUpdate: Match_Update) => {
                 console.log('match update in MatchInProgress');
-                if (matchUpdate.login === null) {
-                    setMatchs(prevMatchs => {
-                        const updatedMatchs = prevMatchs.map(match => {
-                          if (match.player1_login === matchUpdate.match.player1_login) {
-                              return {
-                                  ...match,
-                                  player1_score: matchUpdate.match.player1_score,
-                                  player2_score: matchUpdate.match.player2_score,
-                                };
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                        .then(response => {
+                            user = response.data;
+                            if (matchUpdate.login === null || matchUpdate.login === user?.login) {
+                                setMatchs(prevMatchs => {
+                                    const updatedMatchs = prevMatchs.map(match => {
+                                      if (match.player1_login === matchUpdate.match.player1_login) {
+                                          return {
+                                              ...match,
+                                              player1_score: matchUpdate.match.player1_score,
+                                              player2_score: matchUpdate.match.player2_score,
+                                            };
+                                        }
+                                        return match;
+                                    });
+                                    if (!updatedMatchs.some(match => match.player1_login === matchUpdate.match.player1_login)) {
+                                        return [...updatedMatchs, matchUpdate.match];
+                                    }
+                                    return updatedMatchs;
+                                });
                             }
-                            return match;
+                        })
+                        .catch(error => {
+                            console.log(error);
                         });
-                        if (!updatedMatchs.some(match => match.player1_login === matchUpdate.match.player1_login)) {
-                            return [...updatedMatchs, matchUpdate.match];
-                        }
-                        return updatedMatchs;
-                    });
                 }
             })
 
