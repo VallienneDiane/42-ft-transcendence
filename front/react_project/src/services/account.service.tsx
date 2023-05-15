@@ -24,10 +24,6 @@ let login = (credentials: LogInForm) => {
  * @param file 
  * @returns 
  */
-// let uploadAvatar = (file: string) => {
-//     const user: JwtPayload = accountService.readPayload()!;
-//     return Axios.post('user/uploadAvatar', {id: user.sub, file});
-// }
  /**
   * Get Avatar picture
   * @param id 
