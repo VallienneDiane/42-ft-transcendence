@@ -159,10 +159,10 @@
             }
             & #quit_spectator {
                 font-size: large;
-                border-radius: 20px;
+                border-radius: 10px;
                 background-color:  rgba(255, 255, 255, 0.719);
                 margin: 10px 0;
-                padding: 10px 10px;
+                padding: 10px 15px;
                 box-shadow: 0px -3px 23px -010px var(--second-color);
                 &:hover {
                     background-color: var(--third-color);
@@ -176,10 +176,10 @@
             }
             & #quit_game {
                 font-size: large;
-                border-radius: 20px;
+                border-radius: 10px;
                 background-color:  rgba(255, 255, 255, 0.719);
                 margin-top: 10px;
-                padding: 10px 10px;
+                padding: 10px 15px;
                 box-shadow: 0px -3px 23px -010px var(--second-color);
                 &:hover {
                     background-color: var(--third-color);
