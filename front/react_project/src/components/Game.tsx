@@ -382,7 +382,7 @@ const Game: React.FC = () => {
             });
             
             socketGame.on('Match_Update', (matchUpdate: MatchState) => {
-                clearGame = false;
+                // clearGame = false;
                 console.log("Match Update received", matchUpdate)
                 // if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
                     // console.log("Players set"),
