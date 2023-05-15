@@ -39,7 +39,7 @@ const LoginPage: React.FC = () => {
             accountService.is2faActive(data.id)
             .then(response_2fa => {
                 if(response_2fa.data.is2faActive == true) {
-                    navigate("/verifyCode2fa", { state: { login: res.data.login } });
+                    navigate("/verifyCode2fa", { state: { id: res.data.id } });
                 }
                 else {
                     accountService.generateToken(res.data.id)
