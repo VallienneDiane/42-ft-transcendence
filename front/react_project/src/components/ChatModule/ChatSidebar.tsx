@@ -50,7 +50,7 @@ function ModifyChannel(props: {channel: IChannel}) {
             {showChannelPass && (
                 <li>
                     <input className="inputPassword" {...register("channelPass", { required: true, minLength: 2, maxLength: 20, pattern: /^[A-Za-z0-9]+$/i })}
-                        type="password"
+                        // type="password"
                         placeholder=""
                     /> 
                 </li>)}
