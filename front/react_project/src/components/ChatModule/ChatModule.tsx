@@ -196,13 +196,15 @@ class ChannelDMList extends React.Component<{
             displayDM = true;
         return (
             <div id="channelListWrapper">
-            <h2>Channels</h2>
-            <ul className="channelList">
-                { this.state.channels.map((channel) => { 
-                   return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({loc: channel.channel.id!, isChannel: true})}>{channel.channel.name}</button></li> ) }
-                )}
-            </ul>
-            {displayDM && (
+                <div id="channelsDiv">
+                    <h2>Channels</h2>
+                    <ul className="channelList">
+                        { this.state.channels.map((channel) => { 
+                           return (<li key={channel.channel.id}><button onClick={() => this.changeLoc({loc: channel.channel.id!, isChannel: true})}>{channel.channel.name}</button></li> ) }
+                        )}
+                    </ul>
+                </div>
+            {displayDM && <div id="DMDiv"> 
                 <React.Fragment>
                     <h2>DMs</h2>
                     <ul className="channelList">
@@ -222,7 +224,7 @@ class ChannelDMList extends React.Component<{
                     })}
                 </ul>
                 </React.Fragment>
-            )}
+            </div>}
         </div>
         )
     }

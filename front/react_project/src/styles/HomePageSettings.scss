@@ -1,145 +1,178 @@
+@import url("Base.css");
+
 #homePageSettings {
     display: flex;
-    justify-content: center;
     flex-direction: column;
     align-items: center;
-    width: 40%;
-    min-width: 350px;
-    max-width: 600px;
-    max-height: 80%;
-    min-height: 800px;
-    margin: 60px 15px;
-    padding-top: 50px;
-    border-radius: 20px;
-    background-color:  rgba(255, 255, 255, 0.596);
-    box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
-    & #name {
+    height: 100%;
+
+    & .card {
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
-        padding-bottom: 1.5em;
-        margin: 1em;
-        & h2 {
-            text-align: center;
-            margin-bottom: 1.2em;
-            color: var(--text-color);
+        width: 90%;
+        height: 90%;
+        max-width: 500px;
+        min-height:600px;
+        margin: 60px 15px;
+        padding-top: 50px;
+        border-radius: 20px;
+        background-color:  rgba(255, 255, 255, 0.596);
+        box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
+        overflow-y: scroll;
+        & h1 {
+            margin-top: 10px;
+            margin-bottom: 30px;
+            font-size: 2.7em;
         }
-        & input {
-            width: 200px;
-            height: 40px;
-            font-size: 1.2em;
-            background: #c1bbd877;
-            color: var(--text-color);
-            padding: 0.5rem 1rem 0.5rem 1rem;
-            border: none;
-			outline: none;
-			border-radius: 2rem;
-            text-align: center;
-        }
-    }
-    & #avatar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        & h2 {
-            margin-bottom: 1.2em;
-            color: var(--text-color);
-        }
-        & #picture {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        & #profilePicture {
-            margin: 15px 15px 0px 15px;
-            object-fit: cover;
-            aspect-ratio: 1 /1;
-            max-width: 190px;
-            max-height: 190px;
-            border-radius: 100%;
-        }
-    }
-    & form {
-        height:100%;
-        & #inputDiv {
-            width: 110%;
-            aspect-ratio: 1;
-            display: flex;
-            flex-direction: column;
-            margin: 50px 0;
-            border: 2px dashed var(--second-color);
-            color: var(--text-color);
-            border-radius: 15px;
+        & #name {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            & > p {
-                background-color: transparent;
+            padding-bottom: 1.5em;
+            margin: 1em;
+            & h2 {
+                font-size:1.9em;
+                text-align: center;
+                margin-bottom: 1em;
+                color: var(--text-color);
             }
-            & .or {
-                margin: 10px 0;
-            }
-            & #files {
-                color: transparent;
-                width: 130px;
-                height: 35px;
-                display: flex;
-                background: transparent;
-                &::before {
-                    color: var(--text-color);
-                    text-align: center;
-                    content: 'Select file';
-                    display: inline-block;
-                    background: transparent;
-                    border: 1px solid #999;
-                    border-radius: 3px;
-                    padding: 5px 8px;
-                    outline: none;
-                    white-space: nowrap;
-                    cursor: pointer;
-                }
-                &:hover::before {
-                    background-color: var(--second-color);
-                }
-                &::-webkit-file-upload-button {
-                    visibility: hidden;
-                }
-            }
-            & .hovered {
-                background-color: var(--second-color);
+            & input {
+                width: 200px;
+                height: 40px;
+                font-size: 1.2em;
+                background: #c1bbd877;
+                color: var(--text-color);
+                padding: 0.5rem 1rem 0.5rem 1rem;
+                border: none;
+                outline: none;
+                border-radius: 2rem;
+                text-align: center;
             }
         }
-        & label {
-            min-width: 100px;
-            margin-bottom: 5px;
-            color: var(--text-color);
-        }
-        & .saveZone {
+        & #avatar {
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 80px;
-            margin-top: 2em;
-            & #save {
-                border-radius: 10px;
-                background-color: #dbb8d9e1;
-                min-width: 150px;
-                padding: 5px 10px;
-                font-size: 1.2em;
-                &:hover {
-                    background-color: var(--third-color);
-                    font-weight: bolder;
-				    color: white;
+            justify-content: center;
+            & h2 {
+                font-size:1.9em;
+                margin-bottom: 0.8em;
+                color: var(--text-color);
+            }
+            & #picture {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            & #profilePicture {
+                margin: 15px 15px 0px 15px;
+                object-fit: cover;
+                aspect-ratio: 1 /1;
+                max-width: 240px;
+                max-height: 240px;
+                border-radius: 100%;
+            }
+        }
+        & form {
+            width:90%;
+            height:90%;
+            & #inputDiv {
+                width: 80%;
+                aspect-ratio: 1;
+                display: flex;
+                flex-direction: column;
+                margin: 40px 0;
+                border: 2px dashed var(--second-color);
+                color: var(--text-color);
+                border-radius: 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                & > p {
+                    background-color: transparent;
+                }
+                & .or {
+                    margin: 10px 0;
+                }
+                & #files {
+                    color: transparent;
+                    width: 130px;
+                    height: 35px;
+                    display: flex;
+                    background: transparent;
+                    &::before {
+                        color: var(--text-color);
+                        text-align: center;
+                        content: 'Select file';
+                        display: inline-block;
+                        background: transparent;
+                        border: 1px solid #999;
+                        border-radius: 3px;
+                        padding: 5px 8px;
+                        outline: none;
+                        white-space: nowrap;
+                        cursor: pointer;
+                    }
+                    &:hover::before {
+                        background-color: var(--second-color);
+                    }
+                    &::-webkit-file-upload-button {
+                        visibility: hidden;
+                    }
+                }
+                & .hovered {
+                    background-color: var(--second-color);
                 }
             }
-            & .error {
-                margin-top: 10px;
-                color: red;
-                font-weight: bold;
+            & label {
+                min-width: 100px;
+                margin-bottom: 5px;
+                color: var(--text-color);
+            }
+            & .saveZone {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                height: 80px;
+                margin-top: 2em;
+                & #save {
+                    border-radius: 10px;
+                    background-color: #dbb8d9e1;
+                    min-width: 150px;
+                    padding: 5px 10px;
+                    font-size: 1.2em;
+                    &:hover {
+                        background-color: var(--third-color);
+                        font-weight: bolder;
+                        color: white;
+                    }
+                }
+                & .error {
+                    margin-top: 10px;
+                    color: red;
+                    font-weight: bold;
+                }
             }
         }
     }
 }
+
+@media (max-width: 600px) {
+    #homePageSettings {
+        & .card {
+            min-width: 300px;
+            width: 90%;
+            height:90%;
+            min-height:600px;
+            & h1 {
+                font-size: 2.3em;
+            }
+            & form {
+                max-height: 800px;
+            }
+        }
+    }
+  }
