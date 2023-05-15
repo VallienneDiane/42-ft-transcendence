@@ -401,7 +401,7 @@ const Game: React.FC = () => {
                     .then(response => {
                         user = response.data;
                         console.log(specModeRef.current);
-                        if (match.login === user!.login && (specModeRef.current.active === true && specModeRef.current.player1_login === match.match.player1_login) || match.match.player1_login === user?.login || match.match.player2_login === user?.login) {
+                        if (match.login === user!.login || (specModeRef.current.active === true && specModeRef.current.player1_login === match.match.player1_login) || (match.match.player1_login === user?.login && match.login === null) || (match.match.player2_login === user?.login && match.login === null)) {
                             console.log("Je met a jou les scores")
                             setPlayers(prevPlayers => {
                                 return {
