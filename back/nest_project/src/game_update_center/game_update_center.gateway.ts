@@ -185,7 +185,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = game.spectators[index2];
         if (spec === client) {
           this.logger.debug("leaving get_status sending : spectator");
-          this.server.to(client.id).emit("spectator", user.login);
+          this.server.to(client.id).emit("spectator", this.socketID_UserEntity.get(game.players[0].id).login);
           return;
         }
       }
