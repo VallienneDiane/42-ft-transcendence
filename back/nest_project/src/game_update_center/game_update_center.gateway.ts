@@ -745,13 +745,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     let all_waiter_socket: string[] = this.get_all_socket_of_user(user.login);
     for (let index = 0; index < all_waiter_socket.length; index++) {
       const waiter = all_waiter_socket[index];
-      console.log("posting invite: sending to a waiter socket");
+      console.log("posting invite: sending to a waiter socket", {for: body.target, by: user.login, send: true, super_game_mode: body.super_game_mode}, "emited to the socket : " + waiter);
       this.server.to(waiter).emit("Invitation", {for: body.target, by: user.login, send: true, super_game_mode: body.super_game_mode})
     }
     let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
     for (let index = 0; index < all_target_socket.length; index++) {
       const target = all_target_socket[index];
-      console.log("posting invite: sending to a receiver socket");
+      console.log("posting invite: sending to a receiver socket", {for: body.target, by: user.login, send: true, super_game_mode: body.super_game_mode}, "emited to the socket : " + target);
       this.server.to(target).emit("Invitation", {for: body.target, by: user.login, send: true, super_game_mode: body.super_game_mode});
     }
     console.log("leaving handlePrivateMatching function after posting an invite");
