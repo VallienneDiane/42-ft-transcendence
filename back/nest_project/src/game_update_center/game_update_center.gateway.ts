@@ -1013,7 +1013,6 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let index = 0; index < this.all_the_match.length; index++) {
       const match = this.all_the_match[index];
       this.server.to(client.id).emit("Match_Update", {match: match, login: user.login});
-      this.server.to(client.id).emit("Match_Update", {match: match, login: null});
     }
   }
  
