@@ -13,7 +13,8 @@ const AvatarNameSettings: React.FC = () => {
     const [avatar, setAvatar] = useState<string>('');
     const [login, setLogin] = useState<string>('');
     const [error, setError] = useState<boolean>(false);
-    const [error_alpha, setError_alpha] = useState<boolean>(false);
+    const [errorAlpha, setErrorAlpha] = useState<boolean>(false);
+    const [errorMaxSize, setErrorMaxSize] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
     const { handleSubmit } = useForm<LoginSettingsForm>({}); 
 
@@ -81,8 +82,12 @@ const AvatarNameSettings: React.FC = () => {
             setError(true);
             return;
         }
-        if(!login.match(/^[0-9a-z]+$/)) {
-            setError_alpha(true);
+        if(!login.match(/^[a-zA-Z0-9-_]+$/)) {
+            setErrorAlpha(true);
+            return;
+        }
+        if(login.length > 15) {
+            setErrorMaxSize(true);
             return;
         }
         await accountService.isUniqueLogin(login!)
@@ -111,7 +116,8 @@ const AvatarNameSettings: React.FC = () => {
         setLogin(event.target.value);
         setIsUniqueLogin(true);
         setError(false);
-        setError_alpha(false);
+        setErrorAlpha(false);
+        setErrorMaxSize(false);
     }
 
     return (
@@ -127,7 +133,8 @@ const AvatarNameSettings: React.FC = () => {
                     <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
-                        { error_alpha ? <p className="error">Only alphanumeric characters allowed</p> : null}
+                        { errorAlpha ? <p className="error">Only alphanumeric characters & underscore allowed</p> : null}
+                        { errorMaxSize ? <p className="error">Login must not exceed 15 characters</p> : null}
                         { error ? <p className="error">Login must be at least 3 characters </p> : null }
                     </div>
                 </form>

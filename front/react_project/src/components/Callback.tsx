@@ -1,9 +1,8 @@
 import { accountService } from "../services/account.service";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { GridLoader, SyncLoader } from 'react-spinners';
+import { GridLoader } from 'react-spinners';
 import "../styles/Callback.scss"
-import { userService } from "../services/user.service";
 
 const Callback: React.FC = () => {
     const navigate = useNavigate();
@@ -61,7 +60,7 @@ const Callback: React.FC = () => {
         <div id="loadingPage">
             <div className="spinner">
                 <p>Loading</p>
-                <GridLoader size="28px" color="#33469c77" loading={true}/>
+                <GridLoader size="35px" color="#33469c77" loading={true}/>
             </div>
         </div>
     );
