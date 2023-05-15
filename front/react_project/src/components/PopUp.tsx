@@ -273,7 +273,7 @@ const PopUp: React.FC = () => {
 
     useEffect(() => {
         if (invites) {
-            setPopUpContents([]);
+            // setPopUpContents([]);
             invites?.map((invite) => {
                 // let key: number = 0;
                 console.log("add html to popup list. status is :", invite.status);
