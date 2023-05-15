@@ -1005,9 +1005,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
   transfer_all_match(@ConnectedSocket() client: Socket) { //utility function
     this.logger.debug("transfering all the match to : ", client.id, this.all_the_match);
+    let user = this.socketID_UserEntity.get(client.id);
+    if (!user) {
+      console.log("Avoiding death");
+      return;
+    }
     for (let index = 0; index < this.all_the_match.length; index++) {
       const match = this.all_the_match[index];
-      this.server.to(client.id).emit("Match_Update", match);
+      this.server.to(client.id).emit("Match_Update", {match: match, login: user.login});
     }
   }
  
