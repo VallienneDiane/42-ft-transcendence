@@ -19,7 +19,7 @@ import PopUp from "./PopUp";
 const Layout = () => {
     return (
         <div>
-            {/* <PopUp/> */}
+            <PopUp/>
             <NavBar />
             <Outlet />
         </div>

@@ -39,7 +39,7 @@ export class makeHimNoOpDto {
 }
 
 export class createChannelDto {
-	@IsNotEmpty() @IsString() readonly name: string;
+	@IsNotEmpty() @IsString() @MaxLength(15) readonly name: string;
 	@IsNotEmpty() @IsBoolean() readonly password: boolean;
 	@IsString() readonly channelPass: string;
 	@IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
@@ -47,7 +47,7 @@ export class createChannelDto {
 
 export class modifyChannelDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
-    @IsNotEmpty() @IsString() readonly name: string;
+    @IsNotEmpty() @IsString() @MaxLength(15) readonly name: string;
     @IsNotEmpty() @IsBoolean() readonly password: boolean;
     @IsOptional() @IsString() readonly channelPass: string;
     @IsNotEmpty() @IsBoolean() readonly inviteOnly: boolean;
