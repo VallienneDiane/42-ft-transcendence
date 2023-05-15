@@ -81,7 +81,7 @@ function SearchbarGame() {
 
     const showSearchList = (event: any) => {
         socket.emit("listConnectedUsers");
-        setIsDropdown(!isDropdown);
+        setIsDropdown(true);
         displayList(event);
     }
 
@@ -101,12 +101,12 @@ function SearchbarGame() {
     const resetFiltered = () => {
         setText("");
         setFiltered([]);
-        setIsDropdown(!isDropdown);
+        setIsDropdown(false);
     }
 
     const closeSearchList = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
-            setIsDropdown(!isDropdown);
+            setIsDropdown(false);
         }
     }
 
@@ -604,10 +604,10 @@ const Game: React.FC = () => {
                         {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
-                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
-                    {waitMatch ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                 </div>
                 <div id="instructions">
+                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
+                    {waitMatch ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                     <SearchbarGame />
                     <div id="gameModes">
                         <h2>Game Modes</h2>
