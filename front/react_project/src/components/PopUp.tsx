@@ -125,7 +125,11 @@ const PopUp: React.FC = () => {
                                     status: "send",
                                     super_game_mode: invitation.super_game_mode,
                                 }
-
+                                
+                            }
+                            else if (invite.by === invitation.by) {
+                                console.log("J'ai deja une invite de cette personne. CE MESSAGE NE DEVRAIT PAS ARRIVER")
+                                return invite;
                             }
                             else {
                                 console.log("J'ai deja des popup mais pas le meme couple d'invite")
