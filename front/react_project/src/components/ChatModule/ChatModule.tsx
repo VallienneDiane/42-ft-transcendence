@@ -251,8 +251,7 @@ export default class ChatModule extends React.Component<{}, {
     }
 
     handleNewMessageOnHistory(newMessage: IMessage) {
-        const save: IMessage[] = this.state.history!;
-        save.reverse();
+        let save: IMessage[] = [...this.state.history!];
         save.push(newMessage);
         this.setState({
             history: save,
