@@ -497,15 +497,30 @@ const Game: React.FC = () => {
                 clearGame = false;
             })
             
-            socketGame.on('spectator', () => {
+            socketGame.on('spectator', (player1_login: string) => {
                 console.log("spectator status received");
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(false);
                 ready = false;
-                toggleSpecMode(true, null);
+                toggleSpecMode(true, player1_login);
             })
+            return () => {
+                socketGame.off('Connection_Accepted');
+                socketGame.off('Players');
+                socketGame.off('Match_Update');
+                socketGame.off('Match_End');
+                socketGame.off('nothing');
+                socketGame.off('in matchmaking');
+                socketGame.off('ongoing match');
+                socketGame.off('ready in match');
+                socketGame.off('in_match');
+                socketGame.off('spectator');
+    
+            }
         }
+
+        
     }, [socketGame]);
     
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
