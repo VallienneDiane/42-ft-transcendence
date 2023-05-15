@@ -197,6 +197,9 @@ const Game: React.FC = () => {
  
     
     const toggleSpecMode = (toggle: boolean, player1_login: string | null) => {
+        if (waitMatch === true || playerReady === true) {
+            return
+        }
         console.log("TOGGLE SPEC MODE FUNCTION")
         specModeActive = toggle;
         specMatchLogin = player1_login;
@@ -578,7 +581,7 @@ const Game: React.FC = () => {
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
             {/* <h1>Game Page</h1> */}
-            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode}/>
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch}/>
             <div id="gameContainer">
                 <div id="gamePanel">
                     {(matchInProgress || specMode.active) ?
@@ -614,7 +617,7 @@ const Game: React.FC = () => {
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
                     {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
-                    {matchInProgress ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Match ?</div> : null}
+                    {waitMatch ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                     
                     {/* <button onClick={TEST}>TEST</button> */}
                 </div>
