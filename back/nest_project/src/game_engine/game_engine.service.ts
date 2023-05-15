@@ -55,6 +55,7 @@ interface MatchState {
  */
 interface MatchEnd {
     player1_login: string;
+	player2_login: string;
     winner: string;
     disconnection_occure: boolean;
 }
@@ -128,7 +129,7 @@ export class GameEngineService {
 									{x: this.ballz[1].position.x, y: this.ballz[1].position.y, r: this.ballz[1].r}],
 		paddleOne: { x: this.wallz[0].x_position - 0.015, y: this.wallz[0].y_position + this.wallz[0].length/2 },
 		paddleTwo: { x: this.wallz[1].x_position + 0.015, y: this.wallz[1].y_position + this.wallz[0].length/2 } };
-		this.match_end_state = {player1_login: "", winner: "", disconnection_occure: false};
+		this.match_end_state = {player1_login: "", player2_login: "", winner: "", disconnection_occure: false};
 		console.log("from game engine service player are :", this.pl1, "and", this.pl2);
 
 	}
@@ -162,6 +163,7 @@ export class GameEngineService {
 		this.game_instance = GI;
         this.update_match_state();
         this.match_end_state.player1_login = this.user1.login;
+        this.match_end_state.player2_login = this.user2.login;
 	}
 
 	update_match_state() {
