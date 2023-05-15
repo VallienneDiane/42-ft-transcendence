@@ -364,11 +364,13 @@
 									flex-direction: column;
 									background-color: #33469c1a;
 									padding: 0.3rem 1rem;
+									padding-top: 8px;
 									& > li {
 										display: flex;
 										justify-content: space-between;
 										text-align: start;
 										font-size: 15px;
+										padding-bottom: 3px;
 										& .iconStatus {
 											width: 13px;
 											padding-left: 7px;
@@ -443,12 +445,15 @@
 									flex-direction: column;
 									background-color: #33469c1a;
 									& ul {
-										padding: 0 1.5rem 0.3rem 1.5rem;
+										padding: 0.5rem 1.5rem 0.5rem 1.5rem;
+										overflow-y: auto;
+										max-height: 200px;
 										& li {
 											display: flex;
 											justify-content: space-between;
 											text-align: start;
 											font-size: 15px;
+											padding-top: 2px;
 											& button {
 												&:hover {
 													font-weight: bolder;
@@ -469,10 +474,10 @@
 										align-items: center;
 										justify-content: space-between;
 										font-size: 15px;
-										padding: 0.3rem 1.5rem;
+										padding: 0.2rem 1.2rem;
 										& > button {
-											padding: 2px 15px 2px 15px;
-											margin-top: 2px;
+											padding: 7px 15px 7px 15px;
+											margin: 5px 0;
 											border-radius: 10px;
 											background-color: #dbb8d9e1;
 											&:hover {

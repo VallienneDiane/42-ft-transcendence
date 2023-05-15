@@ -26,7 +26,7 @@ function SearchbarFriend(props: {
 
     const showSearchList = (event: any) => {
         fetchUsers();
-        setIsDropdown(!isDropdown);
+        setIsDropdown(true);
         displayList(event);
     }
 
@@ -80,12 +80,12 @@ function SearchbarFriend(props: {
     const resetFiltered = () => {
         setText("");
         setFiltered([]);
-        setIsDropdown(!isDropdown);
+        setIsDropdown(false);
     }
 
     const closeSearchList = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
-            setIsDropdown(!isDropdown);
+            setIsDropdown(false);
         }
     }
 
