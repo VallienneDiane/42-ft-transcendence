@@ -78,7 +78,7 @@ const PopUp: React.FC = () => {
 
             socketGame.on("Invitation", (invitation: invitation) => {
 
-                if (invites!.length > 0) {
+                if (invitesRef.current!.length > 0) {
                     console.log("J'ai deja des popUp")
                     setInvites((prevInvites) =>
                         prevInvites!.map((invite) => {
@@ -87,6 +87,7 @@ const PopUp: React.FC = () => {
                                 if (invite.status === "send") {
                                     console.log("J'etais l'envoyeur, je suis maintenant le receveur")
                                     return {
+                                        ...invite,
                                         by: invitation.by,
                                         for: invitation.for,
                                         status: "received",
@@ -96,17 +97,63 @@ const PopUp: React.FC = () => {
                                 else if (invite.status === "received") {
                                     console.log("J'etais le receveur, je suis maintenant l'envoyeur")
                                     return {
+                                        ...invite,
                                         by: invitation.by,
                                         for: invitation.for,
                                         status: "send",
                                         super_game_mode: invitation.super_game_mode,
                                     }
                                 }
+                                else if (invite.status === "declined") {
+                                    return {
+                                        ...invite,
+                                        by: invitation.by,
+                                        for: invitation.for,
+                                        status: "received",
+                                        super_game_mode: invitation.super_game_mode,
+                                    }
+                                }
                                 else {
+                                    console.log("popup inchangee")
                                     return invite
                                 }
                             }
+                            else if (invite.by === invitation.by && invite.for === invitation.for && invite.status === "declined") {
+                                console.log("J'avais deja exactement le meme couple d'invite, avec status declined")
+                                return {
+                                    ...invite,
+                                    status: "send",
+                                    super_game_mode: invitation.super_game_mode,
+                                }
+
+                            }
                             else {
+                                console.log("J'ai deja des popup mais pas le meme couple d'invite")
+                                if (invitation.for === user.login) {
+                                    console.log("Cette invite m'est destinee")
+                                    setInvites((prevInvites) => {
+                                        const newInvite = {
+                                            for: invitation.for,
+                                            by: invitation.by,
+                                            status: "received",
+                                            super_game_mode: invitation.super_game_mode
+                                        };
+                                        return [newInvite]
+                                    })
+                                }
+                                else if (invitation.by === user.login) {
+                                    console.log("J'ai envoye cette invite")
+                                    setInvites(() => {
+                                        const newInvite = {
+                                            for: invitation.for,
+                                            by: invitation.by,
+                                            status: "send",
+                                            super_game_mode: invitation.super_game_mode
+                                        };
+                                        return [newInvite]
+                                    })
+                                }
+                                console.log("popup inchangee")
                                 return invite
                             }
                         }))
@@ -303,9 +350,10 @@ const PopUp: React.FC = () => {
     }, [socketGame]);
 
     useEffect(() => {
+        console.log("JE VEUX AJOUTER DU HTML 1");
         if (invites) {
-            console.log("JE VEUX AJOUTER DU HTML");
-            // setPopUpContents([]);
+            console.log("JE VEUX AJOUTER DU HTML 2", invitesRef.current);
+            setPopUpContents([]);
             invitesRef.current!.map((invite) => {
                 // let key: number = 0;
                 console.log("add html to popup list. status is :", invite.status);

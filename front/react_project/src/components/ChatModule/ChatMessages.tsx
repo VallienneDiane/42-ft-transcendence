@@ -99,7 +99,8 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
 
         this.context.socket.on('notice', (data: string) => {
             let date = new Date();
-            this.props.handleHistory({id: date.toString(), content: data, senderName: "WARNING"});
+            console.log(date.toISOString());
+            this.props.handleHistory({id: date.toISOString(), content: data, senderName: "WARNING"});
         })
     }
 
