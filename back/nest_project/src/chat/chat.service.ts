@@ -646,31 +646,40 @@ export class ChatService {
                 if (!link || link.status != "god")
                     client.emit("notice", "You can't do that");
                 else {
-                    if (data.password === true) {
-                        const saltOrRounds = 10;
-                        bcrypt.hash(data.channelPass, saltOrRounds)
-                        .then((hash: string) => {
-                            const updateChannel: modifyChannelDto = {
-                                id: data.id,
-                                name: data.name,
-                                password: data.password,
-                                channelPass: hash,
-                                inviteOnly: data.inviteOnly,
-                            };
-                            this.channelService.updateById(data.id, updateChannel).then(() =>
-                                roomHandler.socketMap.sockets.forEach((user, socket) => {
-                                    this.listChannelEvent(socket, user.userId);
-                                })
-                            )
-                        })
-                    }
-                    else {
-                        this.channelService.updateById(data.id, data).then(() =>
-                            roomHandler.socketMap.sockets.forEach((user, socket) => {
-                                this.listChannelEvent(socket, user.userId);
-                            })
-                        )
-                    }
+                    this.channelService.getOneByName(data.name)
+                    .then(
+                        (found) => {
+                            if (!found) {
+                                if (data.password === true) {
+                                    const saltOrRounds = 10;
+                                    bcrypt.hash(data.channelPass, saltOrRounds)
+                                    .then((hash: string) => {
+                                        const updateChannel: modifyChannelDto = {
+                                            id: data.id,
+                                            name: data.name,
+                                            password: data.password,
+                                            channelPass: hash,
+                                            inviteOnly: data.inviteOnly,
+                                        };
+                                        this.channelService.updateById(data.id, updateChannel).then(() =>
+                                            roomHandler.socketMap.sockets.forEach((user, socket) => {
+                                                this.listChannelEvent(socket, user.userId);
+                                            })
+                                        )
+                                    })
+                                }
+                                else {
+                                    this.channelService.updateById(data.id, data).then(() =>
+                                        roomHandler.socketMap.sockets.forEach((user, socket) => {
+                                            this.listChannelEvent(socket, user.userId);
+                                        })
+                                    )
+                                }
+                            }
+                            else
+                                client.emit("notice", "This name already exists");
+                        }
+                    )
                 }
             })
         }

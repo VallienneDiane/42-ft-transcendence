@@ -99,7 +99,8 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
 
         this.context.socket.on('notice', (data: string) => {
             let date = new Date();
-            this.props.handleHistory({id: date.toString(), content: data, senderName: "WARNING"});
+            console.log(date.toISOString());
+            this.props.handleHistory({id: date.toISOString(), content: data, senderName: "WARNING"});
         })
     }
 
@@ -122,7 +123,7 @@ export class MessageList extends React.Component<{history: IMessage[], handleHis
     }
 
     render() {
-        const tmpList: IMessage[] = this.props.history!;
+        let tmpList: IMessage[] = [...this.props.history!];
         let listItems: JSX.Element[] = tmpList.reverse().reduce((acc: JSX.Element[], message: IMessage, index: number, tmpList: IMessage[]) => {
             const block = this.checkBlock(message.senderName);
             if (block === false) {
