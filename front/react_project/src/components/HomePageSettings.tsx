@@ -22,6 +22,8 @@ const HomePageSettings: React.FC = () => {
     const [uniqueId42, setIsUniqueId42] = useState<boolean>(true);
     const [selectedFile, setSelectedFile] = useState<Blob | null>(null);
     const [isHovered, setIsHovered] = useState<boolean>(false);
+    const [errorAlpha, setErrorAlpha] = useState<boolean>(false);
+    const [errorSize, setErrorSize] = useState<boolean>(false);
     const { register, handleSubmit, formState: { errors }} = useForm<SettingsForm>({
         resolver: yupResolver(userSchema)
     });
@@ -57,6 +59,14 @@ const HomePageSettings: React.FC = () => {
             login: login,
             email: email,
             avatarSvg: avatar,
+        }
+        if((login && login.length > 15) || (login && login.length < 3)) {
+            setErrorSize(true);
+            return;
+        }
+        if(!login.match(/^[a-zA-Z0-9-_]+$/)) {
+            setErrorAlpha(true);
+            return;
         }
         await accountService.isUniqueLogin(user.login)
         .then(loginUnique => {
@@ -146,6 +156,8 @@ const HomePageSettings: React.FC = () => {
                             {errors.login && <p className="error">{errors.login.message}</p>}
                             { uniqueLogin ? null : <p className="error">This login already exist</p> }
                             { uniqueId42 ? null : <p className="error">You are already register with 42</p> }
+                            { errorAlpha ? <p className="error">Only alphanumeric characters & underscore & dash allowed</p> : null}
+                            { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
                         </div>
                     </div>
                 </form>

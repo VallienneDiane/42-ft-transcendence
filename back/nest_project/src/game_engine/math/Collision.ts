@@ -16,7 +16,6 @@ export class Collision {
 
         if (b1.r + b2.r >= (b1.position.sub(b2.position)).mag())
         {
-            console.log("collision");
             return true;
         }
         return false;
@@ -89,7 +88,6 @@ export class Collision {
 
         let closest_dist_vec = Collision.closest_point_bw(b, w).sub(b.position);
         if (closest_dist_vec.mag() <= b.r) {
-            console.log("colission detected with a wall");
             return true;
         }
         return false;
