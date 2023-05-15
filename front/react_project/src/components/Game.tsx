@@ -39,6 +39,11 @@ interface MatchState {
     game_has_started: boolean;
 }
 
+interface Match_Update {
+    match: MatchState;
+    login: string;
+}
+
 interface MatchEnd {
     player1_login: string;
     player2_login: string;
@@ -386,9 +391,9 @@ const Game: React.FC = () => {
                 }
             });
             
-            socketGame.on('Match_Update', (matchUpdate: MatchState) => {
+            socketGame.on('Match_Update', (match: Match_Update) => {
                 // clearGame = false;
-                console.log("Match Update received", matchUpdate)
+                console.log("Match Update received", match)
                 if (accountService.isLogged()) {
                     let decodedToken: JwtPayload = accountService.readPayload()!;
                     const id = decodedToken.sub;
@@ -396,14 +401,15 @@ const Game: React.FC = () => {
                     .then(response => {
                         user = response.data;
                         console.log(specModeRef.current);
-                        if ((specModeRef.current.active === true && specModeRef.current.player1_login === matchUpdate.player1_login) || matchUpdate.player1_login === user?.login || matchUpdate.player2_login === user?.login) {
+                        if (match.login === user!.login || (specModeRef.current.active === true && specModeRef.current.player1_login === match.match.player1_login) || (match.match.player1_login === user?.login && match.login === null) || (match.match.player2_login === user?.login && match.login === null)) {
+                            console.log("Je met a jou les scores")
                             setPlayers(prevPlayers => {
                                 return {
                                     ...prevPlayers!,
-                                    player1_login: matchUpdate.player1_login,
-                                    player2_login: matchUpdate.player2_login,
-                                    player1_score: matchUpdate.player1_score,
-                                    player2_score: matchUpdate.player2_score,
+                                    player1_login: match.match.player1_login,
+                                    player2_login: match.match.player2_login,
+                                    player1_score: match.match.player1_score,
+                                    player2_score: match.match.player2_score,
                                 }
                             })
                         }
