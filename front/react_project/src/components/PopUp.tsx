@@ -367,7 +367,6 @@ const PopUp: React.FC = () => {
                         setPopUpContents((prevContents) => [
                             ...prevContents,
                             <div className="container" key={invite.by}>
-                                console.log("coucou !!!");
                                 <div>{invite?.by} invites you to play a game</div>
                                 <div id="accept" data-key={JSON.stringify(invite)} onClick={acceptInvitation}>ACCEPT</div>
                                 <div id="decline" data-key={JSON.stringify(invite)} onClick={declineInvitation}>DECLINE</div>
