@@ -42,8 +42,8 @@ function ModifyChannel(props: {channel: IChannel}) {
                     type="text"
                     placeholder=""
                 />
-                {errors.name && <div className="logError">Channel name is required</div>}
             </li>
+            <li>{errors.name && <div className="logError">Invalid channel name</div>}</li>
             <li>Password
                 <input type="checkbox" {...register("password")} onChange={changeState}/>
             </li>
@@ -54,7 +54,7 @@ function ModifyChannel(props: {channel: IChannel}) {
                         placeholder=""
                     /> 
                 </li>)}
-            {showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}
+                <li>{showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}</li>
             <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
             <li><button type="submit">Save</button></li>
         </form>

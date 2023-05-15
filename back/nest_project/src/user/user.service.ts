@@ -97,7 +97,6 @@ export class UserService {
         return toReturn;
     }
     async findByIdWithAvatar(id: string): Promise<{id: string, login: string, email: string, avatarSvg: AvatarEntity}> {
-        console.log("findByIdWithAvatar");
         return await this.usersRepository
             .createQueryBuilder("user")
             .innerJoinAndSelect("user.avatarSvg", "avatar")
