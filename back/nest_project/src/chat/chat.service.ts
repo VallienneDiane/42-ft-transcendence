@@ -794,10 +794,6 @@ export class ChatService {
     public listBlockEvent(client: Socket, userId: string) {
         this.userService.getBlockList(userId)
         .then((array) => {
-<<<<<<< HEAD
-=======
-            //console.log("blockArray: ", array);
->>>>>>> f191ac3bd3a294d42c8ebadd38abe8fba1632c4c
             client.emit("listBlock", array);
         })
     }
