@@ -606,8 +606,11 @@ const Game: React.FC = () => {
                     </div>
                 </div>
                 <div id="instructions">
-                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
-                    {waitMatch ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
+                    <div className="bloc">
+                        {specMode.active ? <div className="quit" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
+                        {waitMatch ? <div className="quit" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
+                    </div>
+                    <div className="bloc">
                     <SearchbarGame />
                     <div id="gameModes">
                         <h2>Game Modes</h2>
@@ -636,6 +639,7 @@ const Game: React.FC = () => {
                             </div>
                             <p>Move your paddle down</p>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
