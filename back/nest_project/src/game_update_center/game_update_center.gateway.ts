@@ -185,14 +185,14 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = game.spectators[index2];
         if (spec === client) {
           this.logger.debug("leaving get_status sending : spectator");
-          this.server.to(client.id).emit("spectator");
+          this.server.to(client.id).emit("spectator", user.login);
           return;
         }
       }
     }
     if (!this.waiting_on_match.has(user.login)) {
       this.logger.debug("leaving get_status sending : nothing");
-      this.server.to(client.id).emit("nothing");
+      this.server.to(client.id).emit("nothing", user.login);
       return;
     }
     for (let index = 0; index < this.public_space.length; index++) {
@@ -209,16 +209,16 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         let player = element.players[0] === client ? 0 : 1;
         if (element.game_engine.pl1_ready && element.game_engine.pl2_ready) {
           this.server.to(client.id).emit("ongoing match", user.login);
-          this.logger.debug("leaving get_status sending : ongoing match");
+          this.logger.debug("leaving get_status sending : ongoing match", user.login);
           return;
         }
         if ((player === 0 && element.game_engine.pl1_ready) || (player === 1 && element.game_engine.pl2_ready)) {
           this.server.to(client.id).emit("ready in match", user.login);
-          this.logger.debug("leaving get_status sending : ready in math");
+          this.logger.debug("leaving get_status sending : ready in math", user.login);
           return;
         }
         this.server.to(client.id).emit("in match", user.login);
-        this.logger.debug("leaving get_status sending : in match");
+        this.logger.debug("leaving get_status sending : in match", user.login);
         return;
       }
     }
@@ -740,7 +740,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     if (!(this.get_socketid_by_login(this.socketID_UserEntity, body.target) && !this.waiting_on_match.has(body.target)))
     {
       this.logger.debug("sending to : " + client.id + "invitation false because target is either occupied or not connected");
-      this.server.to(client.id).emit("Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
+      this.server.to(client.id).emit("Clear_Invite");//"Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
       return;
     }
     
