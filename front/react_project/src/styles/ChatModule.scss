@@ -535,7 +535,7 @@
 				flex-direction: column-reverse;
 				height: 100%;
 				background-color: #c8c3dd77;
-				padding: 1.5rem;
+				padding: 0 1.5rem 1rem 1rem;
 				overflow-y: auto;
 				font-size: 15px;
 				& .message {
@@ -602,6 +602,7 @@
 					width: 100%;
 					padding-right: 3rem;
 					& input {
+						font-size: 15px;
 						width: 100%;
 						background-color: #c8c3dd77;
 						color: var(--text-color);
