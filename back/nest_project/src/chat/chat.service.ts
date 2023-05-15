@@ -552,6 +552,7 @@ export class ChatService {
                                 client.emit("notice", "Only god can kick an operator.");
                             else {
                                 this.delUserFromChannel(userToKick, channelId, roomHandler);
+                                client.emit("notice", `user ${linkToKick.user.login} kicked`);
                             }
                         });
             });
@@ -659,6 +660,7 @@ export class ChatService {
                                         this.channelService.updateById(data.id, updateChannel).then(() =>
                                             roomHandler.socketMap.sockets.forEach((user, socket) => {
                                                 this.listChannelEvent(socket, user.userId);
+                                                client.emit("notice", "update succeed !");
                                             })
                                         )
                                     })
