@@ -50,7 +50,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     private tokenChecker(client: Socket): Promise<UserEntity> {
         let id = this.extractUserId(client);
-        // this.logger.debug(`${id}`)
         return this.userService.findById(id);    
     }
 
@@ -61,10 +60,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     handleConnection(client: Socket) {
-        // this.logger.debug(`${client.id} tente de se connecter`)
         this.tokenChecker(client)
         .then( (user) => {
-            // this.logger.debug(`${client.id} est connecté`)
             if (user != null)
                 this.chatService.connectEvent(client, user, this.chatNamespace, this.chatRoomHandler, this.logger);
             else
@@ -114,7 +111,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug('changeLoc event : ');
                 this.chatService.changeLocEvent(client, user.id, data.loc, data.isChannel, this.chatRoomHandler);
             }
             else
@@ -127,7 +123,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug('whereIamEvent : ');
                 this.chatService.whereIamEvent(client, user.id, this.chatRoomHandler);
             }
             else
@@ -144,7 +139,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`${client.id} : listChannel`)
                 this.chatService.listChannelEvent(client, user.id);
             }
         })
@@ -196,7 +190,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('modifyChannel')
     handleModifyChannel(@MessageBody() data: modifyChannelDto, @ConnectedSocket() client: Socket) {
-        this.logger.debug(`modifyChannel Event`);
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
@@ -241,7 +234,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('makeHimOp')
     handleMakeHimOp(@MessageBody() data: makeHimOpDto, @ConnectedSocket() client: Socket) {
-        this.logger.debug("OP");
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
@@ -271,7 +263,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`${user.id} : listMyChannels`)
                 this.chatService.listMyChannelEvent(client, user.id);
             }
         })
@@ -286,7 +277,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`${user.id} : listMyDMs`)
                 this.chatService.listMyDMEvent(client, user, this.chatRoomHandler);
             }
         })
@@ -358,7 +348,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`block event`);
                 this.chatService.blockUserEvent(client, user, data.id, this.chatRoomHandler);
             }
         })
@@ -369,7 +358,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`block event`);
                 this.chatService.unblockUserEvent(client, user, data.id, this.chatRoomHandler);
             }
         })
@@ -380,7 +368,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`listBlock event`);
                 this.chatService.listBlockEvent(client, user.id);
             }
         })
@@ -391,7 +378,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`ban event`);
                 this.chatService.banUserEvent(client, user.id, data.id, data.channelId, this.logger, this.chatRoomHandler);
             }
         })
@@ -412,7 +398,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`ban event`);
                 this.chatService.unbanUserEvent(client, user.id, data.userId, data.channelId, this.logger, this.chatRoomHandler);
             }
         })
@@ -423,7 +408,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`mute event`);
                 this.chatService.muteUserEvent(client, user.id, data.id, data.channelId, data.minutes);
             }
         })
@@ -434,7 +418,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null) {
-                this.logger.debug(`listMuted Event`);
                 this.chatService.listMutedUsersEvent(client, this.chatRoomHandler);
             }
         })
