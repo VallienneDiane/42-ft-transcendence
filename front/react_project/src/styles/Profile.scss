@@ -335,7 +335,7 @@
                     font-size: larger;
                 }
                 & ul {
-                    overflow-y: scroll;
+                    overflow-y: auto;
                 }
                 & #historyElement {
                     display: flex;
