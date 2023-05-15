@@ -6,6 +6,7 @@ export interface LogInForm {
 
 export interface VerifyCodeForm {
     code: string,
+    id: string,
 }
 
 export interface SignUpForm { 
