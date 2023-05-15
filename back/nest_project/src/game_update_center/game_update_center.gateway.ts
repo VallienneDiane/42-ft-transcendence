@@ -729,7 +729,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
 
     // if no cross invitation free eventual waiter
     this.remove_if_invited(user.login);
-    
+
     if (this.waiting_on_match.has(user.login)) {
       this.logger.debug("client is already in waiting on match : " + client.id);
       this.server.to(client.id).emit("You_Are_Occupied");
@@ -832,7 +832,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           const target = all_target_socket[index3];
           if (target != client.id) {
             this.logger.debug("emiting clear invite to a target socket : " + target);
-            this.server.to(target).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode})
+            this.server.to(target).emit("Clear_Invite")
           }
         }
         this.waiting_on_match.delete(private_room.waiter_login);
