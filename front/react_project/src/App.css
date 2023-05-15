@@ -44,12 +44,20 @@ button:hover {
   align-items: center;
 }
 
-.App > div > #navbar {
+.App > div > div {
+  width: 100%;
+  height: 95%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.App > div > div > #navbar {
   width: 100%;
   height: 90px;
 }
 
-.App > div > div {
+.App > div > div > div {
   width: 100%;
   height: 92%;
   display: flex;
