@@ -116,7 +116,7 @@ export class PongEngineService {
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
         this.match_end_state = {player1_login: "", player2_login: "", winner: "", disconnection_occure: false};
-        console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
+        //console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
     }
 
     /**
@@ -139,14 +139,14 @@ export class PongEngineService {
         this.update_match_state();
         this.match_end_state.player1_login = this.user1.login;
         this.match_end_state.player2_login = this.user2.login;
-        console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
+        //console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
     }
 
     update_match_state() {
         let match = this.find_the_match_the_client_is_in(this.user1.login);
         match = {player1_login: this.user1.login, player2_login: this.user2.login, player1_score: this.pl1_score, player2_score: this.pl2_score, super_game_mode: false, game_has_started: this.pl1_ready && this.pl2_ready};
-        // console.log("in update match state this.pl1.id : ", this.pl1.id);
-        this.server.emit("Match_Update", match);
+        // //console.log("in update match state this.pl1.id : ", this.pl1.id);
+        this.server.emit("Match_Update", {match: match, login: null});
     }
     
     /**
@@ -155,7 +155,7 @@ export class PongEngineService {
      * @param input the key pressed in a GameInputDTO format
      */
     process_input (client: Socket, input: GameInputDTO) {
-        //console.log("key received", input);
+        ////console.log("key received", input);
         if (client === this.pl1) {
             this.p1.process_input(input);
         }
@@ -191,18 +191,18 @@ export class PongEngineService {
         if (this.pl1_ready && this.pl2_ready && this.ongoing_match === false) {
             let thiss = this;
             this.ongoing_match = true;
-            // console.log("room to emit", thiss.server);
+            // //console.log("room to emit", thiss.server);
             //thiss.server.emit("Match_Update", this.ms);
-            console.log(thiss.pl1.rooms, thiss.pl2.rooms);
+            ////console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
-                    console.log("clear pong");
+                    //console.log("clear pong");
                     clearInterval(thiss.loop);
                 }
                 thiss.main_loop();
                 thiss.server.to(thiss.pl1.id).emit("Game_Update", thiss.gs);
-                // console.log("sending : ", thiss.gs);
-                //console.log("JUST PONG EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
+                // //console.log("sending : ", thiss.gs);
+                ////console.log("JUST PONG EMITE GAME UPDATE EVENT -------------------------------------------------------------------------------------");
             }, 1000/60);
         }
     }
@@ -229,7 +229,7 @@ export class PongEngineService {
 	 * save the players score in the data base
 	 */
     async close_the_game() {
-        console.log("entering close_the_game");
+        //console.log("entering close_the_game");
         this.remove_the_match_the_client_is_in(this.user1.login);
         let match: CreateMatchDto = new CreateMatchDto();
         match.score_winner = Math.max(this.pl1_score, this.pl2_score);
@@ -237,18 +237,18 @@ export class PongEngineService {
         match.winner = this.pl1_score > this.pl2_score ? this.user1 : this.user2;
 		this.match_end_state.winner = match.winner.login;
         match.loser = this.pl1_score < this.pl2_score ? this.user1 : this.user2;
-        //console.log("the match to be register should be : ", match);
+        ////console.log("the match to be register should be : ", match);
 		this.game_instance.game_has_ended = true;
         if (this.waiting.delete(this.user1.login)) {
-            console.log("removed from waiting in pong engin close_the_game function");
+            //console.log("removed from waiting in pong engin close_the_game function");
         }
         if (this.waiting.delete(this.user2.login)) {
-            console.log("removed from waiting in pong engin close_the_game function");
+            //console.log("removed from waiting in pong engin close_the_game function");
         }
 		this.server.emit("Match_End", this.match_end_state);
         await this.matchservice.createMatch(match);
         // let result = await this.matchservice.findMatch();
-        // console.log("the score should be save and the match history is :", result);
+        // //console.log("the score should be save and the match history is :", result);
     }
 
     /**
@@ -287,7 +287,7 @@ export class PongEngineService {
         if (this.pl1_score > 4 || this.pl2_score > 4) { // if end of match then save the score and close the game ///////////////////////// A REMTTRE A 0 (alexi)
             this.game_must_stop = true;
             this.close_the_game();
-            console.log("past close_game");
+            //console.log("past close_game");
             return;
         }
 

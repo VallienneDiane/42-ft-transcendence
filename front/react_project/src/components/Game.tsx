@@ -39,6 +39,11 @@ interface MatchState {
     game_has_started: boolean;
 }
 
+interface Match_Update {
+    match: MatchState;
+    login: string;
+}
+
 interface MatchEnd {
     player1_login: string;
     player2_login: string;
@@ -191,6 +196,7 @@ const Game: React.FC = () => {
     const [gameState, setGameState] = useState<gameState>();
     const [inputState, setInputState] = useState<inputState>({ up: false, down: false });
     const [specMode, setSpecMode] = useState<SpecMode>({active: false, player1_login: null});
+    const specModeRef = useRef<SpecMode>({active: false, player1_login: null});
     let specModeActive: boolean = false;
     let specMatchLogin: string | null = null;
     const [winner, setWinner] = useState<string>();
@@ -269,6 +275,10 @@ const Game: React.FC = () => {
             //         console.log("Je viens depuis invite");
             //     }
     // }, [from])
+
+    useEffect(() => {
+        specModeRef.current = specMode;
+    }, [specMode])
     
     useEffect(() => {
         if (socketGame) {
@@ -381,47 +391,65 @@ const Game: React.FC = () => {
                 }
             });
             
-            socketGame.on('Match_Update', (matchUpdate: MatchState) => {
-                clearGame = false;
-                console.log("Match Update received", matchUpdate)
-                // if (playersRef.current?.player1_login === matchUpdate.player1_login || specMode.player1_login === matchUpdate.player1_login || specMatchLogin === matchUpdate.player1_login) {
-                    // console.log("Players set"),
-                    // console.log(matchUpdate.player1_login),
-                    // console.log(matchUpdate.player2_login),
-                    // console.log(matchUpdate.player1_score),
-                    // console.log(matchUpdate.player2_score),
-                    setPlayers(prevPlayers => {
-                        return {
-                            ...prevPlayers!,
-                            player1_login: matchUpdate.player1_login,
-                            player2_login: matchUpdate.player2_login,
-                            player1_score: matchUpdate.player1_score,
-                            player2_score: matchUpdate.player2_score,
+            socketGame.on('Match_Update', (match: Match_Update) => {
+                // clearGame = false;
+                console.log("Match Update received", match)
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                    .then(response => {
+                        user = response.data;
+                        console.log(specModeRef.current);
+                        if (match.login === user!.login || (specModeRef.current.active === true && specModeRef.current.player1_login === match.match.player1_login) || (match.match.player1_login === user?.login && match.login === null) || (match.match.player2_login === user?.login && match.login === null)) {
+                            console.log("Je met a jou les scores")
+                            setPlayers(prevPlayers => {
+                                return {
+                                    ...prevPlayers!,
+                                    player1_login: match.match.player1_login,
+                                    player2_login: match.match.player2_login,
+                                    player1_score: match.match.player1_score,
+                                    player2_score: match.match.player2_score,
+                                }
+                            })
                         }
                     })
-                    // playersRef.current! = matchUpdate;
-                    // console.log("playersRef apres l'avoir set normalement...", playersRef);
-                // }
+                    .catch(error => {
+                        console.log(error);
+                    });
+                }
             })
             
             socketGame.on('Match_End', (matchEnd: MatchEnd) => {
-                if ((specMode.active === true && specMode.player1_login === matchEnd.player1_login) || matchEnd.player1_login === user?.login || matchEnd.player2_login === user?.login) {
-                    setWaitMatch(false);
-                    setMatchInProgress(false);
-                    setTimer(false);
-                    setCountdown(3);
-                    setPlayerReady(false);
-                    setButtonReady(false);
-                    setPlayers(null);
-                    setWinner(matchEnd.winner);
-                    setSpecMode({active: false, player1_login: null});
-                    ready = false;
-                    clearGame = true;
-                    setGameState({
-                        BallPosition: null,
-                        paddleOne: null,
-                        paddleTwo: null
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                    .then(response => {
+                        user = response.data;
+                        console.log("Match End received in game", matchEnd, user?.login, specMode)
+                        if ((specModeRef.current.active === true && specModeRef.current.player1_login === matchEnd.player1_login) || matchEnd.player1_login === user?.login || matchEnd.player2_login === user?.login) {
+                            setWaitMatch(false);
+                            setMatchInProgress(false);
+                            setTimer(false);
+                            setCountdown(3);
+                            setPlayerReady(false);
+                            setButtonReady(false);
+                            setPlayers(null);
+                            setWinner(matchEnd.winner);
+                            setSpecMode({active: false, player1_login: null});
+                            ready = false;
+                            clearGame = true;
+                            setGameState({
+                                BallPosition: null,
+                                paddleOne: null,
+                                paddleTwo: null
+                            })
+                        }
                     })
+                    .catch(error => {
+                        console.log(error);
+                    });
                 }
             })
             
@@ -475,15 +503,30 @@ const Game: React.FC = () => {
                 clearGame = false;
             })
             
-            socketGame.on('spectator', () => {
+            socketGame.on('spectator', (player1_login: string) => {
                 console.log("spectator status received");
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(false);
                 ready = false;
-                toggleSpecMode(true, null);
+                toggleSpecMode(true, player1_login);
             })
+            return () => {
+                socketGame.off('Connection_Accepted');
+                socketGame.off('Players');
+                socketGame.off('Match_Update');
+                socketGame.off('Match_End');
+                socketGame.off('nothing');
+                socketGame.off('in matchmaking');
+                socketGame.off('ongoing match');
+                socketGame.off('ready in match');
+                socketGame.off('in_match');
+                socketGame.off('spectator');
+    
+            }
         }
+
+        
     }, [socketGame]);
     
     const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
