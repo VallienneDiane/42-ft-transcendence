@@ -17,6 +17,7 @@
         backdrop-filter: blur(7px);
         background-color:  rgba(255, 255, 255, 0.51);
         h2 {
+            font-size: 1.4em;
             text-align: center;
             margin-bottom: 50px;
             color: var(--text-color);
@@ -33,7 +34,7 @@
 			outline: none;
 			border-radius: 2rem;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
         button {
             background-color: #dbb8d9e1;
@@ -49,7 +50,7 @@
         }
         .errors {
             margin-bottom: 1em;
-            font-size: 1.3em;
+            font-size: 1.1em;
             color: red;
         }
     }
