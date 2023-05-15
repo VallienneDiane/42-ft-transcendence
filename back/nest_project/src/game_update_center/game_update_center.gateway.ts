@@ -385,8 +385,9 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
             return;
           }
         }
+        this.find_and_remove_spect(client);
         game.spectators.push(client);
-        //console.log("join in spec mod the same game");
+        console.log("join in spec mod the same game");
         client.join(game.players[0].id);
         game.game_engine.update_match_state();
       }
