@@ -65,7 +65,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                     userService.getUserWithAvatar(id!)
                         .then(response => {
                             user = response.data;
-                            if (matchUpdate.login === null || matchUpdate.login === user?.login) {
+                            if ((matchUpdate.login === null || matchUpdate.login === user?.login) && (matchUpdate.match.player1_score !== 5 && matchUpdate.match.player2_score !== 5)) {
                                 setMatchs(prevMatchs => {
                                     const updatedMatchs = prevMatchs.map(match => {
                                         if (match.player1_login === matchUpdate.match.player1_login) {
