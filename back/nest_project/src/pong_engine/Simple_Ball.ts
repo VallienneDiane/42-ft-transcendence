@@ -93,8 +93,8 @@ export class Simple_ball {
             this.alive = false;
             return 1;
         }
-        this.x_speed *=1.0001;
-        this.y_speed *=1.0001;
+        this.x_speed *=1.0003;
+        this.y_speed *=1.0003;
         return 0;
     }
 }
