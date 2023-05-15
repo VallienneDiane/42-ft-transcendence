@@ -193,7 +193,7 @@ export class PongEngineService {
             this.ongoing_match = true;
             // console.log("room to emit", thiss.server);
             //thiss.server.emit("Match_Update", this.ms);
-            console.log(thiss.pl1.rooms, thiss.pl2.rooms);
+            //console.log(thiss.pl1.rooms, thiss.pl2.rooms);
             this.loop = setInterval(function() {
                 if (thiss.game_must_stop) {
                     console.log("clear pong");
