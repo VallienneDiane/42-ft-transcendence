@@ -73,7 +73,6 @@ export class ChatService {
             roomHandler.socketMap.sockets.forEach( ({}, socket) => {
                 socket.emit('userConnected', {userId: user.id, userLogin: user.login});                
             });
-            logger.log(`${user.login} as id : ${user.id} is connected, ${client.id}`);
         }
     }
 
@@ -83,7 +82,6 @@ export class ChatService {
             roomHandler.socketMap.sockets.forEach( ({}, socket) => {
                 socket.emit('userDisconnected', {userId: user.id, userLogin: user.login});
             })
-            logger.log(`${user.login} as id ${user.id} is disconnected`);
         }
     }
 
@@ -139,13 +137,11 @@ export class ChatService {
     }
 
     public newMessageEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, message: string) {
-        logger.debug(`${user.login} send : ${message}`);
         let room = roomHandler.socketMap.sockets.get(client);
         if (room != undefined) {
             let toSend: IMessageToSend = {date: new Date(), senderId: user.id, senderName: user.login, content: message};
             if (room.isChannel) {
                     if (room.room != "00000000-0000-0000-0000-000000000000") {
-                        logger.debug(`${message} to stock in ${room.room}`);
                         this.channelService.getOneById(room.room)
                         .then((channId) => {
                             this.muteService.findMuteRelation(user.id, room.room)
@@ -459,7 +455,6 @@ export class ChatService {
     }
 
     public leaveChannelEvent(client: Socket, user: UserEntity, roomHandler: UserRoomHandler, logger: Logger, channelId: string) {
-        logger.debug('leave channel request');
         this.channelService.getUserInChannel(channelId, user.id)
         .then( (found) => {
             if (found != null && found.status != "god") {
@@ -649,7 +644,7 @@ export class ChatService {
                     this.channelService.getOneByName(data.name)
                     .then(
                         (found) => {
-                            if (!found) {
+                            if (!found || found.id == data.id) {
                                 if (data.password === true) {
                                     const saltOrRounds = 10;
                                     bcrypt.hash(data.channelPass, saltOrRounds)
