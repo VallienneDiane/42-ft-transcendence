@@ -1,39 +1,50 @@
-.verifycode {
+.verifycode div {
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    width:100%;
     form {
-        border: 2px white solid;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        height:50%;
-        width:50%;
+        border-radius: 20px;
+        box-shadow: 0px 0px 50px 0px rgba(0, 0, 0, 0.16);
+        height:30%;
+        width:40%;
+        max-width:600px;
+        min-width:250px;
+        backdrop-filter: blur(7px);
+        background-color:  rgba(255, 255, 255, 0.51);
         h2 {
-            margin-bottom: 100px;
+            text-align: center;
+            margin-bottom: 50px;
             color: var(--text-color);
         }
         input {
-            font-size: 1.3em;
+            width: 50%;
+            min-width: 240px;
+            height: 40px;
+            font-size: 1.2em;
+            background: #c1bbd877;
+            color: var(--text-color);
+            padding: 0.5rem 1rem 0.5rem 1rem;
+            border: none;
+			outline: none;
+			border-radius: 2rem;
             text-align: center;
-            border-radius: 2%;
-            height: 50px;
-            width: 300px;
-            background-color: rgb(255, 255, 255);
-            color: rgb(0, 0, 0);
-            margin-bottom:10px;
+            margin-bottom: 40px;
         }
         button {
-            margin-top: 20px;
-            background: transparent;
-            color: var(--text-color);
-            font-size: 1.3em;
-            border: 1px solid var(--text-color);
+            background-color: #dbb8d9e1;
+            border-radius: 10px;
             min-width: 150px;
             padding: 5px 10px;
+            font-size: 1.2em;
             &:hover {
-                background-color: var(--second-color); 
+                background-color: var(--third-color);
+                font-weight: bolder;
+                color: white;
             }
         }
         .errors {

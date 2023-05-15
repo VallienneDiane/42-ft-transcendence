@@ -42,8 +42,8 @@ function JoinChannelPopUp(props: {handleClose: any, channelId: string, channelNa
             document.removeEventListener("mousedown", handleClickOutside);
             document.removeEventListener("keydown", onKeyPress);
             if (offSocket) {
-                socket.off("wincorrectPasswordrong");
                 socket.off("incorrectPassword");
+                socket.off("correctPassword");
             }
         }
     }, [ref]);

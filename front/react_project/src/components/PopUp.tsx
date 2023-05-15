@@ -49,6 +49,7 @@ const PopUp: React.FC = () => {
         if (invites) {
             console.log("Changes on invites")
             invitesRef.current = invites;
+            console.log("invites", invites)
             console.log("invitesRef", invitesRef)
             // console.log("invite status", invite.status);
         }
@@ -138,10 +139,6 @@ const PopUp: React.FC = () => {
                             }
                         })
                     // }
-
-                    
-
-                    
                     setInvites((prevInvites) => {
                         const newInvite = {
                             for: invitation.for,
@@ -162,10 +159,11 @@ const PopUp: React.FC = () => {
                             return [newInvite]; // Initialize the array with the new invite
                         }
                         else {
-                            console.log("Invite ajoutee au tab d'invites");
+                            console.log("Invite ajoutee au tab d'invites", newInvite);
                             return [...prevInvites, newInvite]; // Add the new invite to the existing array
                         }
                     });
+                    // invitesRef.current = invites;
                 }
                 
                 if (invitation.by === user.login) {
@@ -184,13 +182,13 @@ const PopUp: React.FC = () => {
                             return [newInvite]; // Initialize the array with the new invite
                         }
                         else {
-                            console.log("Invite ajoutee au tab d'invites");
+                            console.log("Invite ajoutee au tab d'invites", newInvite);
                             return [...prevInvites, newInvite]; // Add the new invite to the existing array
                         }
                     });
                     
                 }
-                setInvites(invites!.filter(invite => (invite.status !== "notSend" && invite.status !== "declined" && invite.status !== "you_are_in_match")))
+                // setInvites(invites!.filter(invite => (invite.status !== "notSend" && invite.status !== "declined" && invite.status !== "you_are_in_match")))
             });
 
             socketGame.on("Players", () => {
@@ -263,7 +261,8 @@ const PopUp: React.FC = () => {
                 console.log("clear invite request", invitation);
                 console.log("clear invite request", invites);
                 console.log("clear invite request", invitesRef.current);
-                setInvites(invitesRef.current!.filter(invite => !(invite.by === invitation.by && invite.for === invitation.for)));
+                // setInvites(invitesRef.current!.filter(invite => !(invite.by === invitation.by && invite.for === invitation.for)));
+                setInvites([]);
                 // invitesRef.current = invitesRef.current!.filter(inviteRef => inviteRef.by === invitation.by && inviteRef.for === invitation.for)
                 // setInvite(null);
                 // invitesRef.current = null;
@@ -273,8 +272,9 @@ const PopUp: React.FC = () => {
 
     useEffect(() => {
         if (invites) {
-            setPopUpContents([]);
-            invites?.map((invite) => {
+            console.log("JE VEUX AJOUTER DU HTML");
+            // setPopUpContents([]);
+            invitesRef.current!.map((invite) => {
                 // let key: number = 0;
                 console.log("add html to popup list. status is :", invite.status);
                 console.log("invites lenght", invites.length);
