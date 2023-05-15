@@ -68,14 +68,16 @@ export default function MatchHistory(props: {userId: string}) {
                 </div>
             </div>
             <div id="history">
+                {history.length > 0 && <>
                     <h2>Match history</h2>
-            {history.length > 0 && <ul id="matchList">
-                <div id="firstRow" className="scoreTab">
-                    <span>Winner</span>
-                    <span>Scores</span>
-                    <span>Loser</span>
-                </div>
-                {history.map((elt) => (
+                    <div id="matchList">
+                    <div id="firstRow" className="scoreTab">
+                        <span>Winner</span>
+                        <span>Scores</span>
+                        <span>Loser</span>
+                    </div>
+                    <ul>
+                    {history.map((elt) => (
                     <li id="historyElement" className="scoreTab" key={elt.matchId}>
                         <div className="row winner">
                             <span id="name" >{elt.winnerLogin}</span>
@@ -87,7 +89,9 @@ export default function MatchHistory(props: {userId: string}) {
                         </div>
                     </li>
                 ))}
-            </ul>}
+            </ul>
+            </div>
+            </>}
             </div>
         </div>
     )
