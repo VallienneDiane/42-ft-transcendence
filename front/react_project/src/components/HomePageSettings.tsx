@@ -118,35 +118,38 @@ const HomePageSettings: React.FC = () => {
 
     return (
         <div id="homePageSettings">
-            <form onSubmit={handleSubmit(userSubmit)}>
-                <div id="name">
-                    <h2>Choose your login </h2>
-                        <input className="form_element" 
-                            {...register("login")}
-                            value={login}
-                            type="text"
-                            onChange={onChangeLogin}
-                        />
-                </div>
-                <div id="avatar">
-                    <div id="picture">
-                        <h2>Upload your avatar </h2>
-                        <img id="profilePicture" src={avatar} />
+            <div className="card">
+                <h1>Account Settings</h1>
+                <form onSubmit={handleSubmit(userSubmit)}>
+                    <div id="name">
+                        <h2>Choose your login </h2>
+                            <input className="form_element" 
+                                {...register("login")}
+                                value={login}
+                                type="text"
+                                onChange={onChangeLogin}
+                            />
                     </div>
-                    <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
-                        <p>Drop file here</p>
-                        <p className="or">OR</p>
-                        <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
+                    <div id="avatar">
+                        <div id="picture">
+                            <h2>Upload your avatar </h2>
+                            <img id="profilePicture" src={avatar} />
+                        </div>
+                        <div id="inputDiv" className={isHovered ? "hovered" : ""} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
+                            <p>Drop file here</p>
+                            <p className="or">OR</p>
+                            <input type="file" name="" id="files" accept="image/*" onChange={avatarSelected} />
+                        </div>
+                        <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
+                        <div className="saveZone">
+                            <button id="save" type="submit">SAVE</button>
+                            {errors.login && <p className="error">{errors.login.message}</p>}
+                            { uniqueLogin ? null : <p className="error">This login already exist</p> }
+                            { uniqueId42 ? null : <p className="error">You are already register with 42</p> }
+                        </div>
                     </div>
-                    <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
-                    <div className="saveZone">
-                        <button id="save" type="submit">SAVE</button>
-                        {errors.login && <p className="error">{errors.login.message}</p>}
-                        { uniqueLogin ? null : <p className="error">This login already exist</p> }
-                        { uniqueId42 ? null : <p className="error">You are already register with 42</p> }
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     )
 }
