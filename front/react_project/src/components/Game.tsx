@@ -427,8 +427,8 @@ const Game: React.FC = () => {
                     userService.getUserWithAvatar(id!)
                     .then(response => {
                         user = response.data;
-                        console.log("Match End received in game", matchEnd, user?.login)
-                        if ((specMode.active === true && specMode.player1_login === matchEnd.player1_login) || matchEnd.player1_login === user?.login || matchEnd.player2_login === user?.login) {
+                        console.log("Match End received in game", matchEnd, user?.login, specMode)
+                        if ((specModeRef.current.active === true && specModeRef.current.player1_login === matchEnd.player1_login) || matchEnd.player1_login === user?.login || matchEnd.player2_login === user?.login) {
                             setWaitMatch(false);
                             setMatchInProgress(false);
                             setTimer(false);
