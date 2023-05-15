@@ -41,6 +41,7 @@ interface MatchState {
 
 interface MatchEnd {
     player1_login: string;
+    player2_login: string;
     winner: string;
     disconnection_occure: boolean;
 }
@@ -404,22 +405,24 @@ const Game: React.FC = () => {
             })
             
             socketGame.on('Match_End', (matchEnd: MatchEnd) => {
-                setWaitMatch(false);
-                setMatchInProgress(false);
-                setTimer(false);
-                setCountdown(3);
-                setPlayerReady(false);
-                setButtonReady(false);
-                setPlayers(null);
-                setWinner(matchEnd.winner);
-                setSpecMode({active: false, player1_login: null});
-                ready = false;
-                clearGame = true;
-                setGameState({
-                    BallPosition: null,
-                    paddleOne: null,
-                    paddleTwo: null
-                })
+                if ((specMode.active === true && specMode.player1_login === matchEnd.player1_login) || matchEnd.player1_login === user?.login || matchEnd.player2_login === user?.login) {
+                    setWaitMatch(false);
+                    setMatchInProgress(false);
+                    setTimer(false);
+                    setCountdown(3);
+                    setPlayerReady(false);
+                    setButtonReady(false);
+                    setPlayers(null);
+                    setWinner(matchEnd.winner);
+                    setSpecMode({active: false, player1_login: null});
+                    ready = false;
+                    clearGame = true;
+                    setGameState({
+                        BallPosition: null,
+                        paddleOne: null,
+                        paddleTwo: null
+                    })
+                }
             })
             
             socketGame.on('nothing', () => {
