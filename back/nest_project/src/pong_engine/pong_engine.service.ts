@@ -53,6 +53,7 @@ class Game_Instance {
  */
 interface MatchEnd {
     player1_login: string;
+    player2_login: string;
     winner: string;
     disconnection_occure: boolean;
 }
@@ -114,7 +115,7 @@ export class PongEngineService {
         this.gs = {BallPosition: [{x: this.ball.x_position, y: this.ball.y_position, r: this.ball.r}],
         paddleOne: {x: this.p1.x_position - 0.015, y: this.p1.y_position + this.p1.length/2},
         paddleTwo: {x: this.p2.x_position + 0.015, y: this.p2.y_position + this.p1.length/2}};
-        this.match_end_state = {player1_login: "", winner: "", disconnection_occure: false};
+        this.match_end_state = {player1_login: "", player2_login: "", winner: "", disconnection_occure: false};
         console.log("from pong engine service player are :", this.pl1, "and ", this.pl2);
     }
 
@@ -137,6 +138,7 @@ export class PongEngineService {
         this.game_instance = GI;
         this.update_match_state();
         this.match_end_state.player1_login = this.user1.login;
+        this.match_end_state.player2_login = this.user2.login;
         console.log("2 player has been set the match can start player 1 : ", this.pl1.id, "player 2 : ", this.pl2.id);
     }
 

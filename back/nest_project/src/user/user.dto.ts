@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber, IsOptional, IsAlpha, IsAlphanumeric } from "class-validator";
+import { IsNotEmpty, IsString, IsEmail, IsUUID, MinLength, MaxLength, IsBoolean, IsNumber, IsOptional, IsAlpha, IsAlphanumeric, Matches } from "class-validator";
 import { Optional } from "@nestjs/common";
 import { Match } from "src/match/Match";
 import { ChannelDto } from "src/chat/channel/channel.dto";
@@ -12,7 +12,7 @@ import { AvatarEntity } from "./avatar/avatar.entity";
 export class UserDto {
     @IsUUID() readonly id: string;
     @IsString() readonly id42: string;
-    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @Matches('^[a-zA-Z0-9-_]+$') @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail()  @MaxLength(50) readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     readonly channelsAsNormal: ChannelDto[];
@@ -36,27 +36,27 @@ export class UserDto {
 }
 
 export class SignUpDto {
-    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     @IsOptional() @IsString() avatarSvg: string;
 }
 
 export class LoginDto {
-    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
 }
 
 export class SignUp42Dto {
     @IsNotEmpty() @IsString() readonly id42: string;
-    @IsNotEmpty() @IsString() @IsAlphanumeric() @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail() readonly email: string;
     @IsNotEmpty() avatarSvg: string;
 }
 
 export class UpdateLoginDto {
     @IsNotEmpty() @IsUUID() readonly id: string;
-    @IsNotEmpty() @IsString() login: string;
+    @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) login: string;
 }
 
 export class UpdateAvatarDto {
@@ -88,5 +88,5 @@ export class VerifyCodeDto42 {
 
 export class VerifyCodeDto {
     @IsNotEmpty() @IsString() code: string
-    @IsNotEmpty() @IsString() id: string
+    @IsNotEmpty() @IsUUID() id: string
 }
