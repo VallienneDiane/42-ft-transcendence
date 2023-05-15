@@ -150,14 +150,10 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
     for (let index = 0; index < this.private_space.length; index++) {
       const element = this.private_space[index];
-      if (element.target_client_login === user.login) {
-        this.logger.debug("sending Invitation to a target soket", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
+      if (element.target_client_login === user.login || element.waiter_login === user.login) {
+        this.logger.debug("resending Invitation to a socket", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
         this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
-        continue;
-      }
-      else if (element.waiter_login === user.login) {
-        this.logger.debug("sending Invitation to a waiter socket", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
-        this.server.to(client.id).emit("Invitation", {for: element.target_client_login, by: element.waiter_login, send: true, super_game_mode: element.super_game_mode});
+        return;
       }
     }
     console.log("end of ASK INVITATION");
@@ -599,13 +595,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           for (let index3 = 0; index3 < all_target_socket.length; index3++) {
             const element2 = all_target_socket[index3];
             this.logger.debug("emitting clear invite for a target socket : " + element2);
-            this.server.to(element2).emit("Clear_Invite", {for: element.target_client_login, by: user.login, send: true, super_game_mode: element.super_game_mode});
+            this.server.to(element2).emit("Clear_Invite");
           }
           for (let index4 = 0; index4 < all_waiter_socket.length; index4++) {
             const element2 = all_waiter_socket[index4];
             if (element2 != client.id) {
               console.log("emiting clear_invite to a waiter socket : " + element2);
-              this.server.to(element2).emit("Clear_Invite", {for: element.target_client_login, by: user.login, send: true, super_game_mode: element.super_game_mode});
+              this.server.to(element2).emit("Clear_Invite");
             }
           }
           this.waiting_on_match.delete(user.login);
@@ -665,7 +661,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           const waiter2 = all_waiter_socket[index2];
           if (waiter2 != private_room.waiting_client_socket.id) {
             console.log("sending clear_invite to a waiter socket that is not the original : " + waiter2);
-            this.server.to(waiter2).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
+            this.server.to(waiter2).emit("Clear_Invite");
           }
         }
         let all_target_socket: string[] = this.get_all_socket_of_user(private_room.target_client_login);
@@ -673,7 +669,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           const accepter = all_target_socket[index3];
           if (accepter != client.id) {
             console.log("sending clear_invite to a target socket");
-            this.server.to(accepter).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode});
+            this.server.to(accepter).emit("Clear_Invite");
           }
         }
         this.find_and_remove_spect(client);
@@ -706,7 +702,34 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       return;
     }
     // exit the function if the client is already occupied
+
+    // check for special case of cross invitation
+    for (let index1 = 0; index1 < this.private_space.length; index1++) {
+      const private_room = this.private_space[index1];
+      if (private_room.target_client_login === user.login && private_room.waiter_login === body.target) {
+        console.log("special case of cross matchmaking");
+        let all_new_target: string[] = this.get_all_socket_of_user(private_room.waiter_login);
+        let all_new_waiter: string[] = this.get_all_socket_of_user(private_room.target_client_login);
+        for (let index2 = 0; index2 < all_new_target.length; index2++) {
+          const new_target = all_new_target[index2];
+          console.log("senfing invitation to all new target that was before waiter");
+          this.server.to(new_target).emit("Invitation", { for: private_room.waiter_login, by: private_room.target_client_login, send: true, super_game_mode: private_room.super_game_mode});
+        }
+        for (let index3 = 0; index3 < all_new_waiter.length; index3++) {
+          const new_waiter = all_new_waiter[index3];
+          console.log("senfing invitation to all new waiter that was before target");
+          this.server.to(new_waiter).emit("Invitation", { for: private_room.waiter_login, by: private_room.target_client_login, send: true, super_game_mode: private_room.super_game_mode});
+        }
+        private_room.target_client_login = private_room.waiter_login;
+        private_room.waiter_login = user.login;
+        private_room.waiting_client_socket = client;
+        return;
+      }
+    }
+
+    // if no cross invitation free eventual waiter
     this.remove_if_invited(user.login);
+    
     if (this.waiting_on_match.has(user.login)) {
       this.logger.debug("client is already in waiting on match : " + client.id);
       this.server.to(client.id).emit("You_Are_Occupied");
@@ -770,10 +793,11 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         for (let index3 = 0; index3 < all_target_socket.length; index3++) {
           const target = all_target_socket[index3];
           console.log("sending Clear_Invite");
-          this.server.to(target).emit("Clear_Invite", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode})
+          this.server.to(target).emit("Clear_Invite")
         }
         for (let index2 = 0; index2 < all_waiter_socket.length; index2++) {
           const waiter = all_waiter_socket[index2];
+          console.log("sending invite_declined to waiter in remove if invite");
           this.server.to(waiter).emit("Invite_Declined", {for: private_room.target_client_login, by: private_room.waiter_login, send: true, super_game_mode: private_room.super_game_mode})
         }
         this.waiting_on_match.delete(private_room.waiter_login);
