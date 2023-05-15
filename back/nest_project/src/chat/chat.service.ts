@@ -644,7 +644,7 @@ export class ChatService {
                     this.channelService.getOneByName(data.name)
                     .then(
                         (found) => {
-                            if (!found) {
+                            if (!found || found.id == data.id) {
                                 if (data.password === true) {
                                     const saltOrRounds = 10;
                                     bcrypt.hash(data.channelPass, saltOrRounds)
