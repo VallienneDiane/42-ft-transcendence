@@ -740,8 +740,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     if (!(this.get_socketid_by_login(this.socketID_UserEntity, body.target) && !this.waiting_on_match.has(body.target)))
     {
       this.logger.debug("sending to : " + client.id + "invitation false because target is either occupied or not connected");
-      this.server.to(client.id).emit("Clear_Invite");//"Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
-      return;
+      let all_waiter_socket: string[] = this.get_all_socket_of_user(user.login);
+      for (let index5 = 0; index5 < all_waiter_socket.length; index5++) {
+        const waiter = all_waiter_socket[index5];
+        this.server.to(waiter).emit("Clear_Invite");
+        return;
+      }
+      //"Invitation", {for: body.target, by: user.login, send: false, super_game_mode: body.super_game_mode})
     }
     
     let all_blocked_by = await this.userservice.getBlockedMeList(user.id)
