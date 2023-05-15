@@ -32,6 +32,7 @@ interface inProgressProps {
     socket: Socket<DefaultEventsMap, DefaultEventsMap>,
     setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>,
     toggleSpecMode: (toggle: boolean, player1_login: string | null) => void,
+    waitMatch: boolean,
     // specModeActive: boolean,
     // specMatchLogin: string | null
 }
@@ -95,8 +96,10 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     }, [props.socket]);
 
     const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
-        props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key')),
-        props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')});
+        props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key'));
+        if (props.waitMatch === false) {
+            props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')});
+        }
     }
 
     return (
@@ -129,37 +132,6 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                 </div>
                 }
             </div>
-            {/* <table>
-                <thead>
-                    <tr>
-                        <th colSpan={4}>Matchs in progress</th>
-                    </tr>
-                    <tr>
-                        <th colSpan={1}>PLAYER 1</th>
-                        <th colSpan={2}>SCORE</th>
-                        <th colSpan={1}>PLAYER 2</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {matchs.length > 0 ?
-                    
-                    matchs.map((match: MatchState) => {
-                        return (
-                            <tr>
-                                <td>{match.player1_login}</td>
-                                <td>{match.player1_score}</td>
-                                <td>{match.player2_score}</td>
-                                <td>{match.player2_login}</td>
-                            </tr>
-                        )
-                    })
-                :
-                <div id="noMatch">
-                    No Match in progress
-                </div>
-                }
-                </tbody>
-            </table> */}
         </div>
     )
 }
