@@ -1,11 +1,15 @@
 import "../styles/Base.css"
 import "../styles/MatchInProgress.scss"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircle } from "@fortawesome/free-solid-svg-icons";
+import { User } from "../models";
+import { accountService } from "../services/account.service";
+import { JwtPayload } from "jsonwebtoken";
+import { userService } from "../services/user.service";
 
 
 interface MatchState {
@@ -15,6 +19,11 @@ interface MatchState {
     player2_score: number;
     super_game_mode: boolean;
     game_has_started: boolean;
+}
+
+interface Match_Update {
+    match: MatchState;
+    login: string;
 }
 
 interface MatchEnd {
@@ -39,20 +48,16 @@ interface inProgressProps {
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
-    const [matchs, setMatchs] = useState<MatchState[]>([
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiiifez", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-    ]);
+    let user: User | null = null;
 
+    const [matchs, setMatchs] = useState<MatchState[]>([]);
+    const matchsRef = useRef<MatchState[]>([]);
     
 
-    // useEffect(() => {
-    //     console.log("display matchs", matchs);
-    // }, [matchs])
+    useEffect(() => {
+        console.log("matchs in progress updated");
+        matchsRef.current = matchs;
+    }, [matchs])
 
         
     // useEffect(() => {
@@ -68,29 +73,42 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         // triggered when receiving socket data, update match list
         if (props.socket) {
 
-            props.socket.on('Match_Update', (matchUpdate: MatchState) => {
+            props.socket.on('Match_Update', (matchUpdate: Match_Update) => {
                 console.log('match update in MatchInProgress');
-                setMatchs(prevMatchs => {
-                    const updatedMatchs = prevMatchs.map(match => {
-                      if (match.player1_login === matchUpdate.player1_login) {
-                          return {
-                              ...match,
-                              player1_score: matchUpdate.player1_score,
-                              player2_score: matchUpdate.player2_score,
-                            };
-                        }
-                        return match;
-                    });
-                    if (!updatedMatchs.some(match => match.player1_login === matchUpdate.player1_login)) {
-                        return [...updatedMatchs, matchUpdate];
-                    }
-                    return updatedMatchs;
-                });
+                if (accountService.isLogged()) {
+                    let decodedToken: JwtPayload = accountService.readPayload()!;
+                    const id = decodedToken.sub;
+                    userService.getUserWithAvatar(id!)
+                        .then(response => {
+                            user = response.data;
+                            if (matchUpdate.login === null || matchUpdate.login === user?.login) {
+                                setMatchs(prevMatchs => {
+                                    const updatedMatchs = prevMatchs.map(match => {
+                                      if (match.player1_login === matchUpdate.match.player1_login) {
+                                          return {
+                                              ...match,
+                                              player1_score: matchUpdate.match.player1_score,
+                                              player2_score: matchUpdate.match.player2_score,
+                                            };
+                                        }
+                                        return match;
+                                    });
+                                    if (!updatedMatchs.some(match => match.player1_login === matchUpdate.match.player1_login)) {
+                                        return [...updatedMatchs, matchUpdate.match];
+                                    }
+                                    return updatedMatchs;
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.log(error);
+                        });
+                }
             })
 
             props.socket.on('Match_End', (matchEnd: MatchEnd) =>  {
                 console.log('match end', matchEnd);
-                setMatchs(matchs.filter(match => match.player1_login !== matchEnd.player1_login));
+                setMatchs(matchsRef.current.filter(match => match.player1_login !== matchEnd.player1_login));
             })
         }
     }, [props.socket]);
