@@ -42,8 +42,6 @@ interface inProgressProps {
     setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>,
     toggleSpecMode: (toggle: boolean, player1_login: string | null) => void,
     waitMatch: boolean,
-    // specModeActive: boolean,
-    // specMatchLogin: string | null
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
@@ -52,29 +50,15 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
     const [matchs, setMatchs] = useState<MatchState[]>([]);
     const matchsRef = useRef<MatchState[]>([]);
-    
+
 
     useEffect(() => {
-        console.log("matchs in progress updated");
         matchsRef.current = matchs;
     }, [matchs])
 
-        
-    // useEffect(() => {
-    //     setMatchs([]);
-    //     if (props.socket !== null) {
-    //         console.log("ASK FOR MATCHS");
-    //         props.socket.emit('Get_Matches');      
-    //     }
-    // }, []);
-
-
     useEffect(() => {
-        // triggered when receiving socket data, update match list
         if (props.socket) {
-
             props.socket.on('Match_Update', (matchUpdate: Match_Update) => {
-                console.log('match update in MatchInProgress');
                 if (accountService.isLogged()) {
                     let decodedToken: JwtPayload = accountService.readPayload()!;
                     const id = decodedToken.sub;
@@ -84,11 +68,11 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                             if (matchUpdate.login === null || matchUpdate.login === user?.login) {
                                 setMatchs(prevMatchs => {
                                     const updatedMatchs = prevMatchs.map(match => {
-                                      if (match.player1_login === matchUpdate.match.player1_login) {
-                                          return {
-                                              ...match,
-                                              player1_score: matchUpdate.match.player1_score,
-                                              player2_score: matchUpdate.match.player2_score,
+                                        if (match.player1_login === matchUpdate.match.player1_login) {
+                                            return {
+                                                ...match,
+                                                player1_score: matchUpdate.match.player1_score,
+                                                player2_score: matchUpdate.match.player2_score,
                                             };
                                         }
                                         return match;
@@ -106,8 +90,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                 }
             })
 
-            props.socket.on('Match_End', (matchEnd: MatchEnd) =>  {
-                console.log('match end', matchEnd);
+            props.socket.on('Match_End', (matchEnd: MatchEnd) => {
                 setMatchs(matchsRef.current.filter(match => match.player1_login !== matchEnd.player1_login));
             })
         }
@@ -116,7 +99,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
         props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key'));
         if (props.waitMatch === false) {
-            props.socket.emit('Spectator_Request', {player1_login: event.currentTarget.getAttribute('data-key')});
+            props.socket.emit('Spectator_Request', { player1_login: event.currentTarget.getAttribute('data-key') });
         }
     }
 
@@ -131,23 +114,22 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
                 </div>
             </div>
             <div id="content">
-            {matchs.length > 0 ?
-                    
+                {matchs.length > 0 ?
                     matchs.map((match: MatchState) => {
                         return (
                             <div className="match" key={match.player1_login} data-key={match.player1_login} onClick={watchMatch}>
                                 <div><span>{match.player1_login}</span></div>
                                 <div><span>{match.player1_score}</span></div>
-                                <div className="watchMatch">Watch in direct<FontAwesomeIcon icon={faCircle} className="redDot"/></div>
+                                <div className="watchMatch">Watch in direct<FontAwesomeIcon icon={faCircle} className="redDot" /></div>
                                 <div><span>{match.player2_score}</span></div>
                                 <div><span>{match.player2_login}</span></div>
                             </div>
                         )
                     })
-                :
-                <div id="noMatch">
-                    <p>No Match in progress</p>
-                </div>
+                    :
+                    <div id="noMatch">
+                        <p>No Match in progress</p>
+                    </div>
                 }
             </div>
         </div>
