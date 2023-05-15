@@ -157,38 +157,8 @@
                     }
                 }
             }
-            & #quit_spectator {
-                font-size: large;
-                border-radius: 10px;
-                background-color:  rgba(255, 255, 255, 0.719);
-                margin: 10px 0;
-                padding: 10px 15px;
-                box-shadow: 0px -3px 23px -010px var(--second-color);
-                &:hover {
-                    background-color: var(--third-color);
-                    font-style: oblique;
-                    color: white;
-                }
-                &.push {
-                    background-color: #ff0000;
-                    color: white;
-                }
-            }
-            & #quit_game {
-                font-size: large;
-                border-radius: 10px;
-                background-color:  rgba(255, 255, 255, 0.719);
-                margin-top: 10px;
-                padding: 10px 15px;
-                box-shadow: 0px -3px 23px -010px var(--second-color);
-                &:hover {
-                    background-color: var(--third-color);
-                    font-style: oblique;
-                    color: white;
-                }
-            }
         }
-
+        
         & #instructions {
             min-width: 200px;
             height: 98%;
@@ -206,6 +176,36 @@
                 clip-path: inset(1px 2px -15px 1px);
                 margin: 10px;
                 margin-bottom: 20px;
+            }
+            & #quit_spectator {
+                font-size: x-large;
+                border-radius: 10px;
+                background-color:  rgba(255, 255, 255, 0.719);
+                margin: 10px 0;
+                padding: 20px 25px;
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                &:hover {
+                    background-color: var(--third-color);
+                    font-style: oblique;
+                    color: white;
+                }
+                &.push {
+                    background-color: #ff0000;
+                    color: white;
+                }
+            }
+            & #quit_game {
+                font-size: x-large;
+                border-radius: 10px;
+                background-color:  rgba(255, 255, 255, 0.797);
+                margin-top: 2rem;
+                padding: 20px 25px;
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                &:hover {
+                    background-color: var(--third-color);
+                    font-style: oblique;
+                    color: white;
+                }
             }
             & #gameModes, #controls, #proposeGame {
                 display: flex;
@@ -276,6 +276,7 @@
                     position: absolute;
                     z-index: 9;
                     width: 220px;
+                    max-height: 300px;
                     margin: 34px 0;
                     padding: 0.3rem 1rem;
                     background-color: rgb(255, 255, 255);
