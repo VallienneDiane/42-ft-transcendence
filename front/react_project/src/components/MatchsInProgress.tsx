@@ -17,6 +17,11 @@ interface MatchState {
     game_has_started: boolean;
 }
 
+interface Match_Update {
+    match: MatchState;
+    login: string;
+}
+
 interface MatchEnd {
     player1_login: string;
     winner: string;
@@ -62,24 +67,26 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
         // triggered when receiving socket data, update match list
         if (props.socket) {
 
-            props.socket.on('Match_Update', (matchUpdate: MatchState) => {
+            props.socket.on('Match_Update', (matchUpdate: Match_Update) => {
                 console.log('match update in MatchInProgress');
-                setMatchs(prevMatchs => {
-                    const updatedMatchs = prevMatchs.map(match => {
-                      if (match.player1_login === matchUpdate.player1_login) {
-                          return {
-                              ...match,
-                              player1_score: matchUpdate.player1_score,
-                              player2_score: matchUpdate.player2_score,
-                            };
+                if (matchUpdate.login === null) {
+                    setMatchs(prevMatchs => {
+                        const updatedMatchs = prevMatchs.map(match => {
+                          if (match.player1_login === matchUpdate.match.player1_login) {
+                              return {
+                                  ...match,
+                                  player1_score: matchUpdate.match.player1_score,
+                                  player2_score: matchUpdate.match.player2_score,
+                                };
+                            }
+                            return match;
+                        });
+                        if (!updatedMatchs.some(match => match.player1_login === matchUpdate.match.player1_login)) {
+                            return [...updatedMatchs, matchUpdate.match];
                         }
-                        return match;
+                        return updatedMatchs;
                     });
-                    if (!updatedMatchs.some(match => match.player1_login === matchUpdate.player1_login)) {
-                        return [...updatedMatchs, matchUpdate];
-                    }
-                    return updatedMatchs;
-                });
+                }
             })
 
             props.socket.on('Match_End', (matchEnd: MatchEnd) =>  {
