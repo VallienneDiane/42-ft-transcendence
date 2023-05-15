@@ -23,6 +23,7 @@ const Auth2faSettings: React.FC = () => {
     const [qrcode, setQrcode] = useState<string>("null");
     const [qrLoad, setQrLoad] = useState<boolean>(false)
     const [is2faActive, setActivate2fa] = useState<boolean>(false);
+    const [errorCode, setErrorCode] = useState<boolean>(false);
     const [user, setUser] = useState<User>();
 
     const { register, handleSubmit, formState: { errors } } = useForm<VerifyCodeForm>({
@@ -35,6 +36,7 @@ const Auth2faSettings: React.FC = () => {
                 setActivate2fa(response.data.is2faActive);
                 setchecked(response.data.is2faActive);
                 setQrcode(response.data.qrcode);
+                setErrorCode(false);
             })
             .catch(error => console.log(error));
     }
@@ -48,33 +50,36 @@ const Auth2faSettings: React.FC = () => {
             .catch(error => {
                 console.log(error);
             });
-    }, [])
-
+        }, [])
+        
     const verifySubmittedCode = (data: VerifyCodeForm) => {
         schema.validate(data);
         accountService.verifyCode2faSettings(data)
-            .then(response => {
-                setActivate2fa(response.data.is2faActive);
-            })
-            .catch(error => console.log(error));
+        .then(response => {
+            setActivate2fa(response.data.is2faActive);
+        })
+        .catch(error => {
+            setErrorCode(true);
+            console.log(error);
+        });
     }
 
     const handleChange = (value: boolean) => {
         setchecked(!checked);
         if (value == true) {
             accountService.enable2fa()
-                .then(response => {
-                    setQrcode(response.data.qrcode);
-                    setQrLoad(true);
-                })
-                .catch(error => console.log(error));
+            .then(response => {
+                setQrcode(response.data.qrcode);
+                setQrLoad(true);
+            })
+            .catch(error => console.log(error));
         }
         if (value == false) {
             accountService.disable2fa()
-                .then(response => {
-                    setActivate2fa(response.data.is2faActive);
-                    setQrLoad(false);
-                })
+            .then(response => {
+                setActivate2fa(response.data.is2faActive);
+                setQrLoad(false);
+            })
                 .catch(error => console.log(error));
         }
     }
@@ -99,6 +104,7 @@ const Auth2faSettings: React.FC = () => {
                         <input type="text" {...register("code")} name="code" placeholder="Enter the code" />
                         <div id="validateForm">
                             {errors.code && <p className="errors">{errors.code.message}</p>}
+                            {errorCode ? <p className="errors">Wrong code entered</p> : null}
                             <button type="submit">Submit</button>
                         </div>
                     </form>
