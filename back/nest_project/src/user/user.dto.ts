@@ -12,7 +12,7 @@ import { AvatarEntity } from "./avatar/avatar.entity";
 export class UserDto {
     @IsUUID() readonly id: string;
     @IsString() readonly id42: string;
-    @IsNotEmpty() @IsString() @Matches('^[a-zA-Z0-9-_]+$') @MinLength(3) @MaxLength(15) readonly login: string;
+    @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) readonly login: string;
     @IsNotEmpty() @IsEmail()  @MaxLength(50) readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     readonly channelsAsNormal: ChannelDto[];
