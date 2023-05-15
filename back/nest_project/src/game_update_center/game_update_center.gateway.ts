@@ -379,13 +379,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     for (let index = 0; index < this.game_instance.length; index++) {
       const game = this.game_instance[index];
       if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
+        this.find_and_remove_spect(client);
         for (let index = 0; index < game.spectators.length; index++) {
           const spec = game.spectators[index];
           if (spec.id === client.id) {
             return;
           }
         }
-        this.find_and_remove_spect(client);
         game.spectators.push(client);
         console.log("join in spec mod the same game");
         client.join(game.players[0].id);
