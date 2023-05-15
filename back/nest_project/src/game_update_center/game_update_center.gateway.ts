@@ -134,7 +134,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     this.login_to_nbr_of_active_socket.set(user_entity.login, ++nbr_of_socket);
     
     //this.transfer_all_match(client);
-    console.log("i hndle connection nbr_of socket vaut : ", nbr_of_socket);
+    console.log("i handle connection nbr_of socket vaut : ", nbr_of_socket);
     this.logger.debug("client Connected---------------- socket id : " + client.id + " client login" + user_entity.login);
     this.server.to(client.id).emit("Connection_Accepted");
   }
@@ -185,7 +185,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         const spec = game.spectators[index2];
         if (spec === client) {
           this.logger.debug("leaving get_status sending : spectator");
-          this.server.to(client.id).emit("spectator", user.login);
+          this.server.to(client.id).emit("spectator", this.socketID_UserEntity.get(game.players[0].id).login);
           return;
         }
       }

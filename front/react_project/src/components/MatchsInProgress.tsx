@@ -1,7 +1,7 @@
 import "../styles/Base.css"
 import "../styles/MatchInProgress.scss"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -39,20 +39,14 @@ interface inProgressProps {
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
-    const [matchs, setMatchs] = useState<MatchState[]>([
-        // {player1_login: "JOUEUR1", player2_login: "JOUEUR2", player1_score: 3, player2_score: 1, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Rorger", player2_login: "Conrnard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Roger", player2_login: "Connard", player1_score: 2, player2_score: 0, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiii", player2_login: "Michellangelloooooooooooooooooooooooooooooooooooooiiiiiifez", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangelloooooooooooiiiiii", player2_login: "Oui", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-        // {player1_login: "Michellangeiiii", player2_login: "Ouiii", player1_score: 0, player2_score: 10, super_game_mode: false, game_has_started: true},
-    ]);
-
+    const [matchs, setMatchs] = useState<MatchState[]>([]);
+    const matchsRef = useRef<MatchState[]>([]);
     
 
-    // useEffect(() => {
-    //     console.log("display matchs", matchs);
-    // }, [matchs])
+    useEffect(() => {
+        console.log("matchs in progress updated");
+        matchsRef.current = matchs;
+    }, [matchs])
 
         
     // useEffect(() => {
@@ -90,7 +84,7 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
 
             props.socket.on('Match_End', (matchEnd: MatchEnd) =>  {
                 console.log('match end', matchEnd);
-                setMatchs(matchs.filter(match => match.player1_login !== matchEnd.player1_login));
+                setMatchs(matchsRef.current.filter(match => match.player1_login !== matchEnd.player1_login));
             })
         }
     }, [props.socket]);
