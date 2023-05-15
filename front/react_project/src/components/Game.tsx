@@ -593,7 +593,7 @@ const Game: React.FC = () => {
                             :
                             <div id="gameSelector">
                                 {winner != null ? <div id="winner">Winner: {winner} !</div> : null}
-                                <h2>Select your game</h2>
+                                <h2>Select your game mode</h2>
                                 <div id="gameButtons">
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>

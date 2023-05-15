@@ -10,7 +10,7 @@ import { accountService } from '../services/account.service';
 import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
 
 const userSchema = yup.object().shape({
-  login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") .max(15, "Login must not exceed 15 characters") .matches(/^[a-zA-Z0-9-_]+$/, "Only alphanumeric characters & underscore allowed"),
+  login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") .max(15, "Login must not exceed 15 characters") .matches(/^[a-zA-Z0-9-_]+$/, "Only alphanumeric characters & underscore & dash allowed"),
   email: yup.string().required("Email is required").email("Invalid email format").matches(/(.fr|.com)$/, "Invalid email format") .max(50, "Too long email"),
   password: yup.string().required("Password is required") .min(6, "Password must be at least 6 characters") .max(100, "Password is 100 characters maximum"),
 })
