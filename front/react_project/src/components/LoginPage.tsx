@@ -38,7 +38,6 @@ const LoginPage: React.FC = () => {
         .then(res => {
             accountService.is2faActive(data.id)
             .then(response_2fa => {
-                console.log("response 2fA ", response_2fa);
                 if(response_2fa.data.is2faActive == true) {
                     navigate("/verifyCode2fa", { state: { id: res.data.id } });
                 }

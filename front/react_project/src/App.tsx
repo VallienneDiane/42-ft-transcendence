@@ -64,8 +64,8 @@ function App() {
               <Route path="/callback/"element={<Callback />}/>
               <Route path='/homeSettings' element={ accountService.isLogged() ? <Navigate to="/"/> : (<HomeSettings/>) }/>
               <Route element={<Layout />}>
-                <Route path='/login' element={<LoginPage />} />
-                <Route path='/signup' element={<SignupPage />} />
+                <Route path='/login' element={ accountService.isLogged() ? <Navigate to="/"/> : (<LoginPage/>) } />
+                <Route path='/signup' element={ accountService.isLogged() ? <Navigate to="/"/> : (<SignupPage/>) } />
                 <Route path='/verifyCode2fa' element={<VerifyCode2fa />} />
                 <Route element={<ProtectedRoutes />}>
                   <Route path='*' element={<NotFound />}/>

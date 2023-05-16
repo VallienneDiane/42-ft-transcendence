@@ -138,7 +138,6 @@ let readPayload = () => {
             return (parseToken.payloadObj);
         }
         catch (error) {
-            console.log('Error parsing JWT: ', error)
             return (null);
         }
     }
