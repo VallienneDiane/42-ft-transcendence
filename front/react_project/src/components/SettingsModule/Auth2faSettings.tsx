@@ -80,7 +80,7 @@ const Auth2faSettings: React.FC = () => {
                 setActivate2fa(response.data.is2faActive);
                 setQrLoad(false);
             })
-                .catch(error => console.log(error));
+            .catch(error => console.log(error));
         }
     }
 

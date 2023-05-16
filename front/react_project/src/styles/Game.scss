@@ -50,6 +50,14 @@
                         border-radius: 50px 0px 0px 0px; 
                         background-color: var(--third-color);
                     }
+
+                    & .login {
+                        width: 80%;
+                    }
+
+                    & .score {
+                        width: 20%;
+                    }
                 } 
                 & #separator {
                     width: 10%;
