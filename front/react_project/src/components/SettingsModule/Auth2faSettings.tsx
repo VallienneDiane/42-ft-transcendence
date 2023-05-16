@@ -56,6 +56,7 @@ const Auth2faSettings: React.FC = () => {
         schema.validate(data);
         accountService.verifyCode2faSettings(data)
         .then(response => {
+            console.log("auth2fa verifysubmitcode settings ? bool ", response);
             setActivate2fa(response.data.is2faActive);
         })
         .catch(error => {
@@ -80,7 +81,7 @@ const Auth2faSettings: React.FC = () => {
                 setActivate2fa(response.data.is2faActive);
                 setQrLoad(false);
             })
-                .catch(error => console.log(error));
+            .catch(error => console.log(error));
         }
     }
 

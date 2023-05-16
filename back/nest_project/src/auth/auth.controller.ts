@@ -104,6 +104,7 @@ export class AuthController {
    */
   @Post('auth/verifyCode')
   async verifyCode2fa(@Body() data: VerifyCodeDto) {
+    console.log("verify code 2fa", data);
     const user = await this.userService.findById(data.id);
     const isCodeValid = await this.authService.is2faCodeValid(data.code, user.twoFactorSecret);
     const is2faActive = await this.userService.turnOn2fa(user);
@@ -142,7 +143,7 @@ export class AuthController {
   async is2faActiveSettings(@Body() data: idDto) {
     const validUser = await this.userService.findById(data.id);
     if (!validUser)
-      return {};
+    return {};
     const is2faActive = validUser.isTwoFactorEnabled;
     const qrcode = validUser.qrCode;
     return {is2faActive, qrcode};
@@ -151,11 +152,12 @@ export class AuthController {
    * Check if two factor auth is active
    * @param data 
    * @returns 
-   */
-  @Post('auth/is2faActive')
-  async is2faActive(@Body() data: idDto) {
-    const validUser = await this.userService.findById(data.id);
-    const is2faActive = validUser.isTwoFactorEnabled;
+  */
+ @Post('auth/is2faActive')
+ async is2faActive(@Body() data: idDto) {
+   const validUser = await this.userService.findById(data.id);
+   const is2faActive = validUser.isTwoFactorEnabled;
+   console.log("is 2fa active data ? ", validUser, " ", is2faActive);
     return {is2faActive};
   }
   @Post('auth/is2faActive42')
