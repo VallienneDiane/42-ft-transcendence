@@ -14,7 +14,7 @@ const AvatarNameSettings: React.FC = () => {
     const [login, setLogin] = useState<string>('');
     const [error, setError] = useState<boolean>(false);
     const [errorAlpha, setErrorAlpha] = useState<boolean>(false);
-    const [errorMaxSize, setErrorMaxSize] = useState<boolean>(false);
+    const [errorSize, setErrorSize] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
     const { handleSubmit } = useForm<LoginSettingsForm>({}); 
 
@@ -86,8 +86,8 @@ const AvatarNameSettings: React.FC = () => {
             setErrorAlpha(true);
             return;
         }
-        if(login.length > 15) {
-            setErrorMaxSize(true);
+        if(login.length > 15 || login.length < 4) {
+            setErrorSize(true);
             return;
         }
         await accountService.isUniqueLogin(login!)
@@ -117,7 +117,7 @@ const AvatarNameSettings: React.FC = () => {
         setIsUniqueLogin(true);
         setError(false);
         setErrorAlpha(false);
-        setErrorMaxSize(false);
+        setErrorSize(false);
     }
 
     return (
@@ -134,7 +134,7 @@ const AvatarNameSettings: React.FC = () => {
                         <button id="save" type="submit">SAVE</button>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
                         { errorAlpha ? <p className="error">Only alphanumeric characters & underscore allowed</p> : null}
-                        { errorMaxSize ? <p className="error">Login must not exceed 15 characters</p> : null}
+                        { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
                         { error ? <p className="error">Login must be at least 3 characters </p> : null }
                     </div>
                 </form>
