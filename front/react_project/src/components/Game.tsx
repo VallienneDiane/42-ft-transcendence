@@ -347,6 +347,9 @@ const Game: React.FC = () => {
                         paddleTwo: { x: gameState.paddleTwo!.x / (16 / 9), y: gameState.paddleTwo!.y }
                     }));
                 }
+                else {
+                    clearGame = false;
+                }
             });
 
             socketGame.on('Match_Update', (match: Match_Update) => {
@@ -570,7 +573,7 @@ const Game: React.FC = () => {
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} />
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} buttonReady={buttonReady}/>
             <div id="gameContainer">
                 <div id="gamePanel">
                     {(matchInProgress || specMode.active) ?

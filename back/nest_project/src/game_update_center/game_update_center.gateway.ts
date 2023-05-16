@@ -978,10 +978,10 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     .then((user) => {
       if (!user)
         return;
-      //console.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
+      //console.log('----------------------------client Disconnected: ' + client.id + "---------------------------");
       let users = this.socketID_UserEntity.get(client.id);
       if (!users) {
-        //this.logger.debug("disconnection to fast ?");
+        //this.logger.debug("disconection to fast ?");
         return;
       }
       this.find_and_remove(client);
