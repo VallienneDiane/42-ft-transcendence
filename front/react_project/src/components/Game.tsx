@@ -81,7 +81,7 @@ function SearchbarGame() {
 
     const showSearchList = (event: any) => {
         socket.emit("listConnectedUsers");
-        setIsDropdown(!isDropdown);
+        setIsDropdown(true);
         displayList(event);
     }
 
@@ -101,12 +101,12 @@ function SearchbarGame() {
     const resetFiltered = () => {
         setText("");
         setFiltered([]);
-        setIsDropdown(!isDropdown);
+        setIsDropdown(false);
     }
 
     const closeSearchList = (e: any) => {
         if (ref.current && !ref.current.contains(e.target)) {
-            setIsDropdown(!isDropdown);
+            setIsDropdown(false);
         }
     }
 
@@ -593,7 +593,7 @@ const Game: React.FC = () => {
                             :
                             <div id="gameSelector">
                                 {winner != null ? <div id="winner">Winner: {winner} !</div> : null}
-                                <h2>Select your game</h2>
+                                <h2>Select your game mode</h2>
                                 <div id="gameButtons">
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchClassic}>CLASSIC</button>
                                     <button className={`gameButton ${waitMatch || matchInProgress ? "locked" : ""}`} onClick={launchGame}>SUPER</button>
@@ -604,10 +604,13 @@ const Game: React.FC = () => {
                         {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
-                    {specMode.active ? <div id="quit_spectator" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
-                    {waitMatch ? <div id="quit_game" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                 </div>
                 <div id="instructions">
+                    <div className="bloc">
+                        {specMode.active ? <div className="quit" onClick={quitCurrentMatch}>Quit spectator mode</div> : null}
+                        {waitMatch ? <div className="quit" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
+                    </div>
+                    <div className="bloc">
                     <SearchbarGame />
                     <div id="gameModes">
                         <h2>Game Modes</h2>
@@ -636,6 +639,7 @@ const Game: React.FC = () => {
                             </div>
                             <p>Move your paddle down</p>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>

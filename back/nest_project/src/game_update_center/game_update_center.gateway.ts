@@ -723,6 +723,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
         private_room.target_client_login = private_room.waiter_login;
         private_room.waiter_login = user.login;
         private_room.waiting_client_socket = client;
+        private_room.super_game_mode = body.super_game_mode;
         return;
       }
     }
