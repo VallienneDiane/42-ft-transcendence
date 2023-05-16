@@ -75,12 +75,10 @@ const BallContainer = (props: BallContainerProps) => {
                 <radialGradient id="grad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
                     <stop offset="0%" stopColor={ballColor} stopOpacity={1} />
                     <stop offset="95%" stopColor={ballShadowColor} stopOpacity={1} />
-                    {/* <stop offset="100%" stopColor="#000" stopOpacity={1} /> */}
                 </radialGradient>
                 <radialGradient id="grad2" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
                     <stop offset="0%" stopColor={"#ca507fe1"} stopOpacity={1} />
                     <stop offset="95%" stopColor={ballShadowColor} stopOpacity={1} />
-                    {/* <stop offset="100%" stopColor="#000" stopOpacity={1} /> */}
                 </radialGradient>
             </defs>
         </svg>
@@ -97,11 +95,11 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
         const bottom = CONTAINER_HEIGHT - ball.r;
         const left_wall = -CONTAINER_WIDTH / 2 + ball.r;
         const right_wall = CONTAINER_WIDTH / 2 - ball.r;
-        ball.vy += gravity;// * dt;
+        ball.vy += gravity;
         ball.vx *= frottement;
         ball.vy *= frottement;
-        ball.x += ball.vx;// * dt;
-        ball.y += ball.vy;// * dt;
+        ball.x += ball.vx;
+        ball.y += ball.vy;
 
         ///////// COLLISION WITH ELEMENTS
         for (let j = 0; j < pageElements.length; j++) {
@@ -166,13 +164,6 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
             let r = (Math.random() * 5) + 15;
-            // // let vy = 0;
-
-            // let x = 0 * (CONTAINER_WIDTH - BALL_RADIUS / 2) + BALL_RADIUS / 2;
-            // let y = 150;
-            // let vx = 6;
-            // let vy = 0;
-            // let r = 15;
             balls.push({id, x, y, vx, vy, r });
         }
     }
@@ -199,10 +190,10 @@ const updateBalls = (balls: BallProps[], CONTAINER_HEIGHT: number, CONTAINER_WID
                 const nx = dx / dist;
                 const ny = dy / dist;
                 const p = 2.2 * (balls[i].vx * nx + balls[i].vy * ny - balls[j].vx * nx - balls[j].vy * ny) / (balls[i].r + balls[j].r);
-                balls[i].vx -= p * (balls[j].r * 0.80) * nx;//* balls[j].r * nx;
-                balls[i].vy -= p * (balls[j].r * 0.80) * ny;//* balls[j].r * ny;
-                balls[j].vx += p * (balls[i].r * 0.80) * nx;//* balls[i].r * nx;
-                balls[j].vy += p * (balls[i].r * 0.80) * ny;//* balls[i].r * ny;
+                balls[i].vx -= p * (balls[j].r * 0.80) * nx;
+                balls[i].vy -= p * (balls[j].r * 0.80) * ny;
+                balls[j].vx += p * (balls[i].r * 0.80) * nx;
+                balls[j].vy += p * (balls[i].r * 0.80) * ny;
             }
         }
     }
@@ -248,11 +239,6 @@ const Home: React.FC = () => {
     }, [hover])
 
     useEffect(() => {
-        // setPageElements([
-        //     { element: titleBox!, hit: pageElements !== undefined ? false : pageElements[0].hit },
-        //     { element: linkGameBox!, hit: pageElements !== undefined ? false : pageElements[1].hit },
-        //     { element: linkChatBox!, hit: pageElements !== undefined ? false : pageElements[2].hit }
-        // ]);
         setPageElements([
             { element: titleBox!, hit: false},
             { element: linkGameBox!, hit: false},
@@ -285,7 +271,6 @@ const Home: React.FC = () => {
             let vx = (Math.random() - 0.5) * 8;
             let vy = (Math.random() - 0.5) * 2;
             let r = (Math.random() * 5) + 15;
-            // let vy = 0;
             initBalls.push({id, x, y, vx, vy, r });
         }
         setBalls(initBalls);
@@ -323,7 +308,6 @@ const Home: React.FC = () => {
     
 
     const onHoverTitle = () => {
-        // pageElements.splice(0, 1);
         pageElements[0] = {element: null, hit: false};
     }
 
