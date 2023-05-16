@@ -42,6 +42,7 @@ interface inProgressProps {
     setSpecMode: React.Dispatch<React.SetStateAction<SpecMode>>,
     toggleSpecMode: (toggle: boolean, player1_login: string | null) => void,
     waitMatch: boolean,
+    buttonReady: boolean,
 }
 
 const MatchsInProgress: React.FC<inProgressProps> = (props) => {
@@ -97,8 +98,8 @@ const MatchsInProgress: React.FC<inProgressProps> = (props) => {
     }, [props.socket]);
 
     const watchMatch = (event: React.MouseEvent<HTMLDivElement>) => {
-        props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key'));
-        if (props.waitMatch === false) {
+        if (props.waitMatch === false && props.buttonReady === false) {
+            props.toggleSpecMode(true, event.currentTarget.getAttribute('data-key'));
             props.socket.emit('Spectator_Request', { player1_login: event.currentTarget.getAttribute('data-key') });
         }
     }
