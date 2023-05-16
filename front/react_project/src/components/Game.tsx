@@ -575,7 +575,7 @@ const Game: React.FC = () => {
 
     return (
         <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} buttonReady={buttonReady}/>
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} buttonReady={buttonReady} specMode={specMode}/>
             <div id="gameContainer">
                 <div id="gamePanel">
                     {(matchInProgress || specMode.active) ?
