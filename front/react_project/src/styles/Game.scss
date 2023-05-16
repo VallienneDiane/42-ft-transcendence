@@ -157,38 +157,8 @@
                     }
                 }
             }
-            & #quit_spectator {
-                font-size: large;
-                border-radius: 10px;
-                background-color:  rgba(255, 255, 255, 0.719);
-                margin: 10px 0;
-                padding: 10px 15px;
-                box-shadow: 0px -3px 23px -010px var(--second-color);
-                &:hover {
-                    background-color: var(--third-color);
-                    font-style: oblique;
-                    color: white;
-                }
-                &.push {
-                    background-color: #ff0000;
-                    color: white;
-                }
-            }
-            & #quit_game {
-                font-size: large;
-                border-radius: 10px;
-                background-color:  rgba(255, 255, 255, 0.719);
-                margin-top: 10px;
-                padding: 10px 15px;
-                box-shadow: 0px -3px 23px -010px var(--second-color);
-                &:hover {
-                    background-color: var(--third-color);
-                    font-style: oblique;
-                    color: white;
-                }
-            }
         }
-
+        
         & #instructions {
             min-width: 200px;
             height: 98%;
@@ -206,6 +176,21 @@
                 clip-path: inset(1px 2px -15px 1px);
                 margin: 10px;
                 margin-bottom: 20px;
+            }
+            & .quit {
+                font-size: x-large;
+                border-radius: 10px;
+                background-color:  rgba(255, 255, 255, 0.719);
+                padding: 20px 25px;
+                box-shadow: 0px -3px 23px -010px var(--second-color);
+                &:hover {
+                    background-color: var(--third-color);
+                    font-style: oblique;
+                    color: white;
+                }
+            }
+            & .bloc {
+                gap: 10px;
             }
             & #gameModes, #controls, #proposeGame {
                 display: flex;
@@ -257,7 +242,6 @@
                 display: flex;
                 flex-direction: column;
                 & input {
-                    width: 100%;
                     background: #c1bbd877;
                     color: var(--text-color);
                     padding: 0.5rem 2rem 0.5rem 1rem;
@@ -276,6 +260,7 @@
                     position: absolute;
                     z-index: 9;
                     width: 220px;
+                    max-height: 300px;
                     margin: 34px 0;
                     padding: 0.3rem 1rem;
                     background-color: rgb(255, 255, 255);
@@ -335,15 +320,23 @@
             flex-direction: column;
             padding-top: 10px;
             & #instructions {
-                width: 80%;
+                display: flex;
+                flex-direction: column;
+                width: 90%;
                 justify-content: space-around;
-                & #gameModes, #controls, #proposeGame {
-                    flex: none;
-                    width: 40%;
-                    min-width: 250px;
-                    height: 80%;
-                    max-height: 300px;
-                    margin: 35px 0;
+                & .bloc {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-around;
+                    & #gameModes, #controls, #proposeGame {
+                        flex: none;
+                        width: 40%;
+                        min-width: 250px;
+                        height: 80%;
+                        max-height: 300px;
+                        margin: 35px 0;
+                    }
                 }
             }
         }
@@ -363,22 +356,42 @@
             display: flex;
             align-content: flex-start;
             height:70%;
-            width:480px;
+            width: 480px;
             & #gameField {
                 min-width: 100%;
             }
             & #instructions {
                 height:100%;
+                max-height: 90%;
                 display: flex;
                 justify-content: center;
                 align-items: center;
+                flex-direction: row;
                 flex-wrap: wrap;
                 overflow-y: scroll;
                 align-items: center;
-                max-height: 90%;
-                gap:10px;
-                & #gameModes, #controls, #proposeGame {
-                    margin: 5px 0;
+                gap: 10px;
+                width: 90%;
+                & .bloc {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-around;
+                    align-items: center;
+                    & .quit {
+                        display: flex;
+                        justify-content: center;
+                        width: 70%;
+                        &:hover {
+                            background-color: var(--third-color);
+                            font-style: oblique;
+                            color: white;
+                        }
+                    }
+                    & #gameModes, #controls, #proposeGame {
+                        margin: 5px 0;
+                        width: 70%;
+                    }
                 }
             }
         }
