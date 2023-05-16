@@ -23,7 +23,6 @@ interface invite {
     super_game_mode: boolean,
 }
 
-
 const PopUp: React.FC = () => {
     const navigate = useNavigate();
     let user: User;
@@ -172,16 +171,6 @@ const PopUp: React.FC = () => {
             })
 
             socketGame.on('Already_On_Match', () => {
-                setInvites(
-                    [
-                        {
-                            by: "",
-                            for: "",
-                            status: "you_are_in_match",
-                            super_game_mode: false,
-                        }
-                    ]
-                );
             });
 
             socketGame.on("Invitation_Accepted", () => {

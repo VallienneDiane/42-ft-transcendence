@@ -61,7 +61,6 @@
             padding: 50px;
         }
         & #profilePicture {
-            border: 1px solid var(--second-color);
             margin: 15px 15px 0px 15px;
             object-fit: cover;
             aspect-ratio: 1 /1;
@@ -135,6 +134,15 @@
             align-items: center;
             height: 10%;
             margin-top: 1em;
+            & .saved {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            & .icon {
+                padding-left: 15px;
+                font-size: 35px;
+            }
             & #save {
                 border-radius: 10px;
                 background-color: #dbb8d9e1;
