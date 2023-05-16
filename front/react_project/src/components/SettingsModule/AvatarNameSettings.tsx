@@ -4,6 +4,8 @@ import { accountService } from "../../services/account.service";
 import { userService } from "../../services/user.service";
 import { LoginSettingsForm } from "../../models";
 import { useForm } from "react-hook-form";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 const AvatarNameSettings: React.FC = () => {
     let decodedToken: JwtPayload = accountService.readPayload()!;
@@ -14,11 +16,13 @@ const AvatarNameSettings: React.FC = () => {
     const [login, setLogin] = useState<string>('');
     const [errorAlpha, setErrorAlpha] = useState<boolean>(false);
     const [errorSize, setErrorSize] = useState<boolean>(false);
+    const [savedName, setSaveName] = useState<boolean>(false);
+    const [savedAvatar, setSaveAvatar] = useState<boolean>(false);
     const [uniqueLogin,setIsUniqueLogin] = useState<boolean>(true);
     const { handleSubmit } = useForm<LoginSettingsForm>({}); 
 
     useEffect(() => {
-        userService.getUser(id!)
+        userService.getUserWithAvatar(id!)
             .then(response => {
                 setAvatar(response.data.avatarSvg);
                 setLogin(response.data.login);
@@ -43,6 +47,7 @@ const AvatarNameSettings: React.FC = () => {
         const files = event.target.files;
         if (files && files.length > 0) {
             setSelectedFile(files[0]);
+            setSaveAvatar(false);
         }
     }
 
@@ -67,6 +72,7 @@ const AvatarNameSettings: React.FC = () => {
                 })
                 if (imgFiles.length > 0) {
                     setSelectedFile(imgFiles[0]);
+                    setSaveAvatar(false);
                 }
             }
         }
@@ -85,16 +91,10 @@ const AvatarNameSettings: React.FC = () => {
             setErrorAlpha(true);
             return;
         }
-<<<<<<< HEAD
-        if(login.length > 15 || login.length < 4) {
-            setErrorSize(true);
-            return;
-        }
-=======
->>>>>>> a03269c2f5c9b49144a4e9489a4e63362deb2069
         await accountService.isUniqueLogin(login!)
         .then(loginUnique => {
             if(loginUnique.data == true) {
+                setSaveName(true);
                 accountService.updateLogin(user)
                 .catch(error => {console.log(error);});
             }
@@ -110,6 +110,7 @@ const AvatarNameSettings: React.FC = () => {
             id: id,
             avatarSvg: avatar,
         }
+        setSaveAvatar(true);
         accountService.updateAvatar(user)
         .catch(error => {console.log(error);});
     }
@@ -119,6 +120,7 @@ const AvatarNameSettings: React.FC = () => {
         setIsUniqueLogin(true);
         setErrorAlpha(false);
         setErrorSize(false);
+        setSaveName(false);
     }
 
     return (
@@ -132,16 +134,13 @@ const AvatarNameSettings: React.FC = () => {
                         onChange={onChangeLogin}
                     />
                     <div className="saveZone">
-                        <button id="save" type="submit">SAVE</button>
+                        <div className="saved">
+                            <button id="save" type="submit">SAVE</button>
+                            { savedName && uniqueLogin && errorAlpha == false && errorSize == false ? <FontAwesomeIcon className="icon" icon={faCircleChevronDown} style={{color: "#17c41a",}} /> : null}
+                        </div>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
-<<<<<<< HEAD
-                        { errorAlpha ? <p className="error">Only alphanumeric characters & underscore allowed</p> : null}
-                        { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
-                        { error ? <p className="error">Login must be at least 3 characters </p> : null }
-=======
                         { errorAlpha ? <p className="error">Only alphanumeric characters & underscore & dash allowed</p> : null}
                         { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
->>>>>>> a03269c2f5c9b49144a4e9489a4e63362deb2069
                     </div>
                 </form>
             </div>
@@ -158,7 +157,10 @@ const AvatarNameSettings: React.FC = () => {
                     </div>
                     <label htmlFor="">{selectedFile ? selectedFile.name : "No file selected..."}</label>
                     <div className="saveZone">
-                        <button id="save" type="submit">SAVE</button>
+                        <div className="saved">
+                            <button id="save" type="submit">SAVE</button>
+                            { savedAvatar ? <FontAwesomeIcon className="icon" icon={faCircleChevronDown} style={{color: "#17c41a",}} /> : null}
+                        </div>
                     </div>
                 </form>
             </div>
