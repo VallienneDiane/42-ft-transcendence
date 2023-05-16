@@ -189,6 +189,9 @@
                     color: white;
                 }
             }
+            & .bloc {
+                gap: 10px;
+            }
             & #gameModes, #controls, #proposeGame {
                 display: flex;
                 flex-direction: column;
