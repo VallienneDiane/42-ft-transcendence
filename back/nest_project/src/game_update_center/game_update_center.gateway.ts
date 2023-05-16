@@ -303,6 +303,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     // check if client is already in a waiting queu or game
     this.clean_match();
     this.clean_old_socket();
+    this.find_and_remove_spect(client);
     let user = this.socketID_UserEntity.get(client.id);
     if (!user) {
       //this.logger.debug("to fast publick matchmaking request");
@@ -358,9 +359,27 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
       //this.logger.debug("user is not yet recognize");
       return;
     }
+    //if socket is in public space
+    for (let index1 = 0; index1 < this.public_space.length; index1++) {
+      const public_space = this.public_space[index1];
+      if (public_space.waiting_client_socket === client) {
+        return;
+      }
+    }
+    //if socket is in game
+    for (let index2 = 0; index2 < this.game_instance.length; index2++) {
+      const game = this.game_instance[index2];
+      for (let index3 = 0; index3 < game.players.length; index3++) {
+        const player = game.players[index3];
+        if (player === client) {
+          return;
+        }
+      }
+    }
     for (let index = 0; index < this.game_instance.length; index++) {
       const game = this.game_instance[index];
       if (this.socketID_UserEntity.get(game.players[0].id).login === body.player1_login) {
+        this.find_and_remove_spect(client);
         for (let index = 0; index < game.spectators.length; index++) {
           const spec = game.spectators[index];
           if (spec.id === client.id) {
@@ -551,14 +570,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
     for (let index1 = 0; index1 < this.game_instance.length; index1++) {
       const game = this.game_instance[index1];
-      for (let index2 = 0; index2 < game.spectators.length; index2++) {
+      for (let index2 = game.spectators.length - 1; index2 >= 0; index2--) {
         const spec = game.spectators[index2];
         if (spec === client) {
           this.server.to(game.players[0].id).emit('--------------Spectator_Disconnection');
           spec.leave(game.players[0].id);
           game.spectators.splice(index2, 1);
           //console.log("leaving find_and_remove function finding a spectator to be removed");
-          return;
         }
       }
     }

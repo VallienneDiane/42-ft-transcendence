@@ -135,6 +135,15 @@
             align-items: center;
             height: 10%;
             margin-top: 1em;
+            & .saved {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            & .icon {
+                padding-left: 15px;
+                font-size: 35px;
+            }
             & #save {
                 border-radius: 10px;
                 background-color: #dbb8d9e1;
