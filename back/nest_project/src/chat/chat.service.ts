@@ -375,6 +375,7 @@ export class ChatService {
                                             if (alreadyHere == null) {
                                                 this.channelService.addNormalUser(userEntity, channelId)
                                                 .then( () => {
+                                                    client.emit("notice", `Invite of ${userEntity.login} done.`);
                                                     let room = roomHandler.roomMap.of(channelId);
                                                     if (room != undefined)
                                                         room.emit("newUserInChannel", userEntity.id, userEntity.login);
@@ -420,6 +421,7 @@ export class ChatService {
                                                         if (alreadyHere == null) {
                                                             this.channelService.addNormalUser(userEntity, channelId)
                                                             .then( () => {
+                                                                client.emit("notice", `Invite of ${userEntity.login} done.`);
                                                                 let room = roomHandler.roomMap.of(channelId);
                                                                 if (room != undefined)
                                                                     room.emit("newUserInChannel", userEntity.id, userEntity.login);
@@ -493,6 +495,7 @@ export class ChatService {
                                             this.listUsersInChannel(socket, channelId, roomHandler);
                                         })
                                     }
+                                    client.emit("notice", `User ${linkToOp.user.login} is now operator.`);
                                 })
                             }
                         });
@@ -527,6 +530,7 @@ export class ChatService {
                                                 this.listUsersInChannel(socket, channelId, roomHandler);
                                             })
                                         }
+                                        client.emit("notice", `User ${linkToDeOp.user.login} is no longer operator.`);
                                     }
                                 )
                             }
@@ -552,6 +556,7 @@ export class ChatService {
                                 client.emit("notice", "Only god can kick an operator.");
                             else {
                                 this.delUserFromChannel(userToKick, channelId, roomHandler);
+                                client.emit("notice", `user ${linkToKick.user.login} kicked`);
                             }
                         });
             });
@@ -656,18 +661,23 @@ export class ChatService {
                                             channelPass: hash,
                                             inviteOnly: data.inviteOnly,
                                         };
-                                        this.channelService.updateById(data.id, updateChannel).then(() =>
+                                        this.channelService.updateById(data.id, updateChannel).then(() => {
+                                            client.emit("notice", "update succeed !");
                                             roomHandler.socketMap.sockets.forEach((user, socket) => {
+                                                this.listMyChannelEvent(socket, user.userId);
                                                 this.listChannelEvent(socket, user.userId);
                                             })
-                                        )
+                                        })
                                     })
                                 }
                                 else {
-                                    this.channelService.updateById(data.id, data).then(() =>
+                                    this.channelService.updateById(data.id, data).then(() => {
+                                        client.emit("notice", "update succeed !");
                                         roomHandler.socketMap.sockets.forEach((user, socket) => {
+                                            this.listMyChannelEvent(socket, user.userId);
                                             this.listChannelEvent(socket, user.userId);
                                         })
+                                    }
                                     )
                                 }
                             }
@@ -769,7 +779,6 @@ export class ChatService {
     }
 
     public unfriendEvent(client: Socket, me: UserEntity, friendshipId: string, roomHandler: UserRoomHandler) {
-        client.emit("supressFriend", "wefnwkgnasgfs");
         this.friendService.findByIdWithRelation(friendshipId)
         .then((request: FriendEntity) => {
             if (request) {
@@ -889,6 +898,7 @@ export class ChatService {
                                         this.channelService.addBannedUser(userIdToBan, channelId)
                                         .then(() => {
                                             roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
+                                            client.emit("notice", `user ${userEntity.login} is now ban from this channel.`);
                                         });
                                     })
                                 }
@@ -897,6 +907,7 @@ export class ChatService {
                                 .then(() => {
                                     this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId);
                                     roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
+                                    client.emit("notice", `user ${userEntity.login} is ban from this channel.`);
                                 })
                             }
                             else
@@ -927,6 +938,7 @@ export class ChatService {
                                 this.channelService.delBannedUser(userEntity.id, channelId)
                                 .then(() => {
                                     roomHandler.roomMap.of(channelId).emit("newUnban", userEntity.id);
+                                    client.emit("notice", `User ${userEntity.login} is unban.`);
                                 });
                         })
                     }
@@ -961,6 +973,7 @@ export class ChatService {
                         client.emit("notice", "User not belong to this channel");
                     else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
                         this.muteService.muteUser(userIdToMute, channelId, minutes);
+                        client.emit("notice", `User ${muteLink.channel.name} is now muted`);
                     }
                     else
                         client.emit("notice", "Only the channel owner can mute operators");

@@ -126,6 +126,7 @@
 					position: absolute;
 					z-index: 9;
 					width: 260px;
+                    max-height: 300px;
 					margin: 34px 0;
 					padding: 0.3rem 1rem;
 					background-color: rgb(255, 255, 255);
@@ -268,7 +269,7 @@
         flex-direction: column;
         width: 50%;
         min-width: 350px;
-        min-height: 700px;
+        // min-height: 1000px;
         height: fit-content;
         border-radius: 20px;
         background-color:  rgba(255, 255, 255, 0.582);
@@ -324,7 +325,7 @@
                 background-color: #c8c3dd77;
                 border-radius: 5px;
                 margin-top: 15px;
-                height: 500px;
+                max-height: 600px;
                 margin-bottom: 1rem;
                 & #firstRow{
                     display: flex;
@@ -335,7 +336,7 @@
                     font-size: larger;
                 }
                 & ul {
-                    overflow-y: scroll;
+                    overflow-y: auto;
                 }
                 & #historyElement {
                     display: flex;
