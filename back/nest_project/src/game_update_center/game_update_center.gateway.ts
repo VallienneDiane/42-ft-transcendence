@@ -387,7 +387,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           }
         }
         game.spectators.push(client);
-        console.log("join in spec mod the same game");
+        //console.log("join in spec mod the same game");
         client.join(game.players[0].id);
         game.game_engine.update_match_state();
       }
@@ -576,7 +576,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
           this.server.to(game.players[0].id).emit('--------------Spectator_Disconnection');
           spec.leave(game.players[0].id);
           game.spectators.splice(index2, 1);
-          console.log("leaving find_and_remove function finding a spectator to be removed");
+          //console.log("leaving find_and_remove function finding a spectator to be removed");
         }
       }
     }
@@ -997,10 +997,10 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     .then((user) => {
       if (!user)
         return;
-      //console.log('------------------------------client Disconnected: ' + client.id + "---------------------------");
+      //console.log('----------------------------client Disconnected: ' + client.id + "---------------------------");
       let users = this.socketID_UserEntity.get(client.id);
       if (!users) {
-        //this.logger.debug("disconnection to fast ?");
+        //this.logger.debug("disconection to fast ?");
         return;
       }
       this.find_and_remove(client);
