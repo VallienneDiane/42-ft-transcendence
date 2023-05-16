@@ -1,4 +1,4 @@
-import React, { ContextType, useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom"
 import { User } from "../../models";
 import "../../styles/Profile.scss"
@@ -12,63 +12,18 @@ import MatchHistory from "./MatchHistory";
 import FriendManagement from "./FriendManagement";
 import Axios from "../../services/caller.service";
 
-// class OtherProfile extends React.Component<{userId: string, userName: string}, {
-//     me: JwtPayload, 
-//     isBlock: boolean, 
-//     isFriend: boolean
-// }> {
-//     constructor(props: {userId: string, userName: string}) {
-//         super(props);
-//         this.state = { me: accountService.readPayload()!,
-//         isBlock: false, 
-//         isFriend: false };
-//         this.blockUser = this.blockUser.bind(this);
-//         this.proposeGame = this.proposeGame.bind(this);
-//     }
-//     static contextType = SocketContext;
-//     declare context: ContextType<typeof SocketContext>;
-
-//     blockUser() {
-//         this.context.socket.emit("blockUser", {id: this.props.userId});
-//     }
-
-//     proposeGame(event: React.MouseEvent<HTMLButtonElement>) {
-//         if (event.currentTarget.getAttribute('data-type') === "normal")
-//             this.context.socketGame.emit("Private_Matchmaking", {target: this.props.userName, super_game_mode: false});
-//         else if (event.currentTarget.getAttribute('data-type') === "super")
-//             this.context.socketGame.emit("Private_Matchmaking", {target: this.props.userName, super_game_mode: true});
-//     }
-    
-//     render() {
-//         if (this.context.socket) {
-//             return (
-//                 <div id="actionProfile">
-//                     <ul className="buttonList">
-//                     <li>
-//                         Propose a game<br></br>
-//                         <button onClick={this.proposeGame} data-type="normal">normal</button>
-//                         <FontAwesomeIcon className="iconAction" icon={faGamepad} />
-//                         <button onClick={this.proposeGame} data-type="super">super</button>
-//                     </li>
-//                     <li onClick={this.blockUser}>Block</li>
-//                     </ul>
-//                 </div>
-//             )
-//         }
-//     }
-// }
-
 function OtherProfile(props: {userId: string, userName: string}) {
     const {socket} = useContext(SocketContext);
     const {socketGame} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
-    const [isBlock, setIsBlock] = useState<boolean>(false);
-
-    const [ friendList, setFriendList ] = useState<any[]>([]);
-    const [ pendingFriendRequests, setPendingFriendRequests ] = useState<any[]>([]);
-
-    const isFriend = !!friendList.find(({ friendId }) => friendId === props.userId) ||
-        !!pendingFriendRequests.find(({ friendId }) => friendId === props.userId);
+    
+    const [friendList, setFriendList] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
+    const [pendingFriendRequests, setPendingFriendRequests] = useState<{friendshipId: string, friendId: string, friendName: string}[]>([]);
+    const [blockedList, setBlockedList] = useState<{id: string, name: string}[]>([]);
+    
+    const isFriend: boolean = !!friendList.find(({ friendId }) => friendId === props.userId) ||
+    !!pendingFriendRequests.find(({ friendId }) => friendId === props.userId);
+    const isBlock: boolean = !!blockedList.find(({ id }) => id === props.userId)
 
     const addFriend = () => {
         socket.emit("friendRequest", {userId: props.userId});
@@ -81,7 +36,7 @@ function OtherProfile(props: {userId: string, userName: string}) {
     const proposeGame = (event: React.MouseEvent<HTMLButtonElement>) => {
         if (event.currentTarget.getAttribute('data-type') === "normal")
             socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: false});
-        else if (event.currentTarget.getAttribute('data-type') === "normal")
+        else if (event.currentTarget.getAttribute('data-type') === "super")
             socketGame.emit("Private_Matchmaking", {target: props.userName, super_game_mode: true});
     }
 
@@ -89,18 +44,15 @@ function OtherProfile(props: {userId: string, userName: string}) {
         if (socket) {
             socket.emit("listBlock");
             socket.on("listBlock", (data: {id: string, name: string}[]) => {
-                data.forEach((user) => {
-                    if (user.id === props.userId)
-                        setIsBlock(true);
-                })
+                setBlockedList(data);
             });
 
             Axios.get("listFriends/" + me.sub)
-                .then(friends => setFriendList(friends.data as any[]))
+                .then(friends => setFriendList(friends.data as {friendshipId: string, friendId: string, friendName: string}[]))
                 .catch(error => console.log(error));
 
             Axios.get("listRequestsPendingSend/" + me.sub)
-                .then(pending => setPendingFriendRequests(pending.data as any[]))
+                .then(pending => setPendingFriendRequests(pending.data as {friendshipId: string, friendId: string, friendName: string}[]))
                 .catch(error => console.log(error));
     
             return () => {
@@ -112,7 +64,7 @@ function OtherProfile(props: {userId: string, userName: string}) {
     return (
         <div id="actionProfile">
             <ul className="buttonList">
-                {!isFriend && <li onClick={addFriend}>Add Friend</li>}
+                {!isFriend && !isBlock && <li onClick={addFriend}>Add Friend</li>}
                 <li>Propose a game<br></br>
                     <button onClick={proposeGame} data-type="normal">normal</button>
                     <FontAwesomeIcon className="iconAction" icon={faGamepad} />

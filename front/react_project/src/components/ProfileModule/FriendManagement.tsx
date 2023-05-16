@@ -343,6 +343,9 @@ export default function FriendManagement() {
                 setPendings(pendings.filter((elt) => {
                     return elt.friendshipId != friendshipId;
                 }))
+                setRequests(requests.filter((elt) => {
+                    return elt.friendshipId != friendshipId;
+                }));
                 setBugReactHook(!bugReactHook);
             });
     
