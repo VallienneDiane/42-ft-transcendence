@@ -85,13 +85,6 @@ const AvatarNameSettings: React.FC = () => {
             setErrorAlpha(true);
             return;
         }
-<<<<<<< HEAD
-        if(login.length > 15 || login.length < 4) {
-            setErrorSize(true);
-            return;
-        }
-=======
->>>>>>> a03269c2f5c9b49144a4e9489a4e63362deb2069
         await accountService.isUniqueLogin(login!)
         .then(loginUnique => {
             if(loginUnique.data == true) {
@@ -134,14 +127,8 @@ const AvatarNameSettings: React.FC = () => {
                     <div className="saveZone">
                         <button id="save" type="submit">SAVE</button>
                         { uniqueLogin ? null : <p className="error">This login already exist</p> }
-<<<<<<< HEAD
-                        { errorAlpha ? <p className="error">Only alphanumeric characters & underscore allowed</p> : null}
-                        { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
-                        { error ? <p className="error">Login must be at least 3 characters </p> : null }
-=======
                         { errorAlpha ? <p className="error">Only alphanumeric characters & underscore & dash allowed</p> : null}
                         { errorSize ? <p className="error">Login must be between 3 and 15 characters</p> : null}
->>>>>>> a03269c2f5c9b49144a4e9489a4e63362deb2069
                     </div>
                 </form>
             </div>

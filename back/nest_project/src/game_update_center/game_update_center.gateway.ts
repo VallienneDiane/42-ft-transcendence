@@ -570,14 +570,13 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     }
     for (let index1 = 0; index1 < this.game_instance.length; index1++) {
       const game = this.game_instance[index1];
-      for (let index2 = 0; index2 < game.spectators.length; index2++) {
+      for (let index2 = game.spectators.length - 1; index2 >= 0; index2--) {
         const spec = game.spectators[index2];
         if (spec === client) {
           this.server.to(game.players[0].id).emit('--------------Spectator_Disconnection');
           spec.leave(game.players[0].id);
           game.spectators.splice(index2, 1);
-          //console.log("leaving find_and_remove function finding a spectator to be removed");
-          return;
+          console.log("leaving find_and_remove function finding a spectator to be removed");
         }
       }
     }
