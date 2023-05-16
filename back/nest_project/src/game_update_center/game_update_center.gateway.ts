@@ -313,7 +313,7 @@ export class GameUpdateCenterGateway implements OnGatewayInit, OnGatewayConnecti
     //console.log("waiting on game set containe before : ", this.waiting_on_match);
     if (this.waiting_on_match.has(user.login)) {
       //console.log("check is waiting true");
-      this.server.to(client.id).emit("Already_On_Match");
+      //this.server.to(client.id).emit("Already_On_Match");
       //console.log("waiting on game set containe in already waiting : ", this.waiting_on_match);
       return;
     }
