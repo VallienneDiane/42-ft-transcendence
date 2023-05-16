@@ -720,8 +720,8 @@ export class ChatService {
                 }
                 if (!found) {
                     this.friendService.checkRequest(client, sender.id, receiverId)
-                    .then((check: boolean) => {
-                        if (check) {
+                    .then((check: {state: number, requestId: string}) => {
+                        if (check.state == 0) {
                             this.userService.findById(receiverId)
                             .then((receiver: UserEntity) => {
                                 this.friendService.create(sender, receiver)
@@ -737,6 +737,29 @@ export class ChatService {
                                         receiverSockets.socks.emit("newFriendRequestReceived", friendship.id, sender.id, sender.login);
                                 })
                             })
+                        }
+                        else if (check.state  == 1) {
+                            client.emit("notice", "You're already friends.");
+                        }
+                        else if (check.state  == 2) {
+                            client.emit("notice", "You've already sent a friend request to this user.");
+                        }
+                        else if (check.state  == 3) {
+                            client.emit("notice", "You're already friends.");
+                        }
+                        else if (check.state  == 4) {
+                            this.friendService.updateRequest(check.requestId)
+                            .then(() => {
+                                this.userService.findById(receiverId)
+                                .then((receiver: UserEntity) => {
+                                    let receiverSockets = roomHandler.userMap.get(receiver.id);
+                                    if (receiverSockets != undefined)
+                                        receiverSockets.socks.emit("newFriend", check.requestId, sender.id, sender.login);
+                                    let senderSockets = roomHandler.userMap.get(sender.id);
+                                    if (senderSockets != undefined)
+                                        senderSockets.socks.emit("newFriend", check.requestId, receiver.id, receiver.login);
+                                })
+                            }) 
                         }
                     })
                 }

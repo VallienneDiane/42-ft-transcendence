@@ -40,31 +40,29 @@ export class FriendService {
 		return data;
 	}
 
-	async checkRequest(client: Socket, idA: string, idB: string): Promise<boolean> {
-		let state: boolean = true;
+	async checkRequest(client: Socket, idA: string, idB: string): Promise<{state: number, requestId: string}> {
+		let state: number = 0;
+		let requestId: string = "";
 		const requestsSend: IRequest[] = await this.userService.getFriendRequestsSend(idA);
 		const requestsReceived: IRequest[] = await this.userService.getFriendRequestsReceived(idA);
 		requestsSend.forEach((request) => {
 			if (request.receiverId === idB && request.state == "friend") {
-				state = false;
-				client.emit("notice", "You're already friends.");
+				state = 1;
 			}
 			else if (request.receiverId === idB) {
-				state = false;
-				client.emit("notice", "You've already sent a friend request to this user.");
+				state = 2;
 			}
 		})
 		requestsReceived.forEach((request) => {
 			if (request.senderId === idB && request.state == "friend") {
-				state = false;
-				client.emit("notice", "You're already friends.");
+				state = 3;
 			}
 			else if (request.senderId === idB) {
-				state = false;
-				this.updateRequest(request.id);
+				state = 4;
+				requestId = request.id;
 			}
 		})
-		return state;
+		return {state, requestId};
 	}
 
 	async getFriendsList(id: string): Promise<{friendshipId: string, friendId: string, friendName: string}[]> {
