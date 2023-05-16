@@ -63,7 +63,12 @@ function OtherProfile(props: {userId: string, userName: string}) {
     const {socketGame} = useContext(SocketContext);
     const me: JwtPayload = accountService.readPayload()!;
     const [isBlock, setIsBlock] = useState<boolean>(false);
-    const [isFriend, setIsFriend] = useState<boolean>(false);
+
+    const [ friendList, setFriendList ] = useState<any[]>([]);
+    const [ pendingFriendRequests, setPendingFriendRequests ] = useState<any[]>([]);
+
+    const isFriend = !!friendList.find(({ friendId }) => friendId === props.userId) ||
+        !!pendingFriendRequests.find(({ friendId }) => friendId === props.userId);
 
     const addFriend = () => {
         socket.emit("friendRequest", {userId: props.userId});
@@ -88,23 +93,15 @@ function OtherProfile(props: {userId: string, userName: string}) {
                     if (user.id === props.userId)
                         setIsBlock(true);
                 })
-            })
+            });
+
             Axios.get("listFriends/" + me.sub)
-            .then((friends) => {
-                Axios.get("listRequestsPendingSend/" + me.sub)
-                .then((pending) => {
-                    for (let elt of friends.data) {
-                        if (elt.friendId === props.userId)
-                            setIsFriend(true);
-                    }
-                    for (let elt of pending.data) {
-                        if (elt.friendId === props.userId)
-                            setIsFriend(true);
-                    }
-                })
-                .catch(error => { console.log(error); })
-            })
-            .catch(error => { console.log(error); })
+                .then(friends => setFriendList(friends.data as any[]))
+                .catch(error => console.log(error));
+
+            Axios.get("listRequestsPendingSend/" + me.sub)
+                .then(pending => setPendingFriendRequests(pending.data as any[]))
+                .catch(error => console.log(error));
     
             return () => {
                 socket.off("listBlock");
