@@ -1,6 +1,5 @@
 import "../styles/Base.css"
 import "../styles/MatchInProgress.scss"
-
 import React, { useState, useEffect, useRef } from 'react'
 import { Socket } from 'socket.io-client'
 import { DefaultEventsMap } from "@socket.io/component-emitter";
@@ -10,7 +9,6 @@ import { User } from "../models";
 import { accountService } from "../services/account.service";
 import { JwtPayload } from "jsonwebtoken";
 import { userService } from "../services/user.service";
-
 
 interface MatchState {
     player1_login: string;

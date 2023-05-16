@@ -23,7 +23,6 @@ interface invite {
     super_game_mode: boolean,
 }
 
-
 const PopUp: React.FC = () => {
     const navigate = useNavigate();
     let user: User;

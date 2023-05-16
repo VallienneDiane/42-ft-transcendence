@@ -221,6 +221,7 @@ const Game: React.FC = () => {
             socketGame.emit('Ready');
         }
         setPlayerReady(true);
+        canvasRef.current!.focus();
         document.getElementById('readyButton')?.classList.replace('notReady', 'ready');
     }
 
@@ -420,6 +421,7 @@ const Game: React.FC = () => {
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(false);
+                canvasRef.current!.focus();
                 ready = false;
             })
 
@@ -579,13 +581,13 @@ const Game: React.FC = () => {
                     {(matchInProgress || specMode.active) ?
                         <div id="players">
                             <div className="player">
-                                <div>{players?.player1_login}</div>
-                                <div>{players?.player1_score}</div>
+                                <div className="login">{players?.player1_login}</div>
+                                <div className="score">{players?.player1_score}</div>
                             </div>
                             <div id="separator"></div>
                             <div className="player">
-                                <div>{players?.player2_score}</div>
-                                <div>{players?.player2_login}</div>
+                                <div className="score">{players?.player2_score}</div>
+                                <div className="login">{players?.player2_login}</div>
                             </div>
                         </div>
                         : null}
@@ -603,7 +605,7 @@ const Game: React.FC = () => {
                                 </div>
                             </div>
                         }
-                        {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponnent ...</div> : null}
+                        {waitMatch ? <div id="waitingMsg">Waiting for a worthy opponent ...</div> : null}
                         {buttonReady ? <button id="readyButton" className="notReady" onClick={informReady}>{playerReady ? "Game will start soon !" : "READY ?"}</button> : null}
                         {timer ? <div ref={countDownDiv} id="countDown">{countdown}</div> : null}
                     </div>
