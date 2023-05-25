@@ -37,7 +37,7 @@ export class UserDto {
 
 export class SignUpDto {
     @IsNotEmpty() @IsString() @Matches(/^[a-zA-Z0-9-_]+$/) @MinLength(3) @MaxLength(15) readonly login: string;
-    @IsNotEmpty() @IsEmail() readonly email: string;
+    @IsNotEmpty() @IsEmail() @MaxLength(100) readonly email: string;
     @IsNotEmpty() @IsString() @MinLength(6) @MaxLength(100) password: string;
     @IsOptional() @IsString() avatarSvg: string;
 }

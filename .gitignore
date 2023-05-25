@@ -1,8 +1,0 @@
-pgadmin/
-postgres/
-data/
-nodes_modules/
-docker-compose.*
-Makefile
-.env
-**/nodes_modules/**

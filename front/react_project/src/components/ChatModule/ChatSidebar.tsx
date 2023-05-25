@@ -503,7 +503,7 @@ export function SidebarChannel(props: {dest: IDest, handleClose: any}) {
                         }
                     </React.Fragment>
                 ) : null }
-                {props.dest.status !== "normal" ? (
+                {props.dest.status == "god" ? (
                     <React.Fragment>
                         <li onClick={showSettings}>Settings</li>
                         {onClickSettings && (

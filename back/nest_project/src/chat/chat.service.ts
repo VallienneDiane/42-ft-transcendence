@@ -996,7 +996,7 @@ export class ChatService {
                         client.emit("notice", "User not belong to this channel");
                     else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
                         this.muteService.muteUser(userIdToMute, channelId, minutes);
-                        client.emit("notice", `User ${muteLink.channel.name} is now muted`);
+                        client.emit("notice", `User is now muted`);
                     }
                     else
                         client.emit("notice", "Only the channel owner can mute operators");
