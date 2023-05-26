@@ -11,7 +11,7 @@ import { userService } from "../../services/user.service";
 
 function ModifyChannel(props: {channel: IChannel}) {
     const {socket} = useContext(SocketContext);
-    const { register, formState: { errors }, handleSubmit } = useForm<IChannel>({ 
+    const { register, formState: { errors }, setValue, handleSubmit } = useForm<IChannel>({ 
         defaultValues: { 
         id: props.channel.id,
         name: props.channel.name,
@@ -20,17 +20,34 @@ function ModifyChannel(props: {channel: IChannel}) {
         inviteOnly: props.channel.inviteOnly } 
     });
     const [showChannelPass, setShowChannelPass] = useState<boolean>(false);
+    const [isPassword, setIsPassword] = useState<boolean>(false);
+    const [isInviteOnly, setIsInviteOnly] = useState<boolean>(false);
 
-    const changeState = (event: any) => {
+    const changeStatePassword = (event: any) => {
         setShowChannelPass(event.target.checked);
+        setIsPassword(event.target.checked);
+        setIsInviteOnly(false);
+        setValue("password", event.target.checked);
+        setValue("inviteOnly", false);
+    }
+
+    const changeStateInviteOnly = (event: any) => {
+        setShowChannelPass(false);
+        setIsPassword(false);
+        setIsInviteOnly(event.target.checked);
+        setValue("password", false);
+        setValue("inviteOnly", event.target.checked);
     }
 
     const onSubmit = (data: IChannel) => {
+        let channPass: string = "";
+        if (data.inviteOnly == false)
+            channPass = data.channelPass!;
         socket.emit('modifyChannel', {
             id: props.channel.id,
             name: data.name,
             password: data.password,
-            channelPass: data.channelPass,
+            channelPass: channPass,
             inviteOnly: data.inviteOnly
         });
     };
@@ -45,7 +62,9 @@ function ModifyChannel(props: {channel: IChannel}) {
             </li>
             <li>{errors.name && <div className="logError">Invalid channel name</div>}</li>
             <li>Password
-                <input type="checkbox" {...register("password")} onChange={changeState}/>
+                <input type="checkbox" {...register("password")}
+                    checked={isPassword} onChange={changeStatePassword}
+                />
             </li>
             {showChannelPass && (
                 <li>
@@ -54,8 +73,13 @@ function ModifyChannel(props: {channel: IChannel}) {
                         placeholder=""
                     /> 
                 </li>)}
-                <li>{showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}</li>
-            <li>Invite Only<input type="checkbox" {...register("inviteOnly")}/></li>
+            <li>{showChannelPass && errors.channelPass && <div className="logError">Your password is not valid</div>}</li>
+            <section>OR</section>
+            <li>Invite Only
+                <input type="checkbox" {...register("inviteOnly")}
+                    checked={isInviteOnly} onChange={changeStateInviteOnly}
+                />
+            </li>
             <li><button type="submit">Save</button></li>
         </form>
     )
@@ -257,10 +281,10 @@ function MemberList(props: {dest: IDest}) {
     
                     if (member.user.id !== me.sub) {
                         if (props.dest.status == "normal")
-                            return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                            return (<li key={id}><div><NavLink className="name" to={`/profile/${member.user.id}`}>{member.user.login}</NavLink>{iconStatus}</div></li>)
                         else if (props.dest.status == "op") {
                             if (member.status == "normal")
-                                return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                                return (<li key={id}><div><NavLink className="name" to={`/profile/${member.user.id}`}>{member.user.login}</NavLink>{iconStatus}</div>
                                         <div>
                                             <button className="memberButton" data-hover-text="Mute" value={member.user.id} onClick={showMuteFor}>
                                                 <FontAwesomeIcon className="iconAction" icon={faCommentSlash} />
@@ -273,10 +297,10 @@ function MemberList(props: {dest: IDest}) {
                                             </button>
                                         </div></li>)
                             else if (member.status == "op" || member.status == "god")
-                                return (<li key={id}><div>{member.user.login}{iconStatus}</div></li>)
+                                return (<li key={id}><div><NavLink className="name" to={`/profile/${member.user.id}`}>{member.user.login}</NavLink>{iconStatus}</div></li>)
                         }
                         else if (props.dest.status == "god")
-                            return (<li key={id}><div>{member.user.login}{iconStatus}</div>
+                            return (<li key={id}><div><NavLink className="name" to={`/profile/${member.user.id}`}>{member.user.login}</NavLink>{iconStatus}</div>
                             <div>
                                 { member.status == "op" ? 
                                 (<button className="memberButton" data-hover-text="Downgrade" value={member.user.id} onClick={deOp}>
@@ -337,7 +361,12 @@ class InviteUser extends React.Component<{dest: IDest}, {
     
     inviteUser(event: any) {
         event.preventDefault();
-        this.context.socket.emit('inviteUser', {userToInvite: event.target.value, channelId: this.props.dest.id});
+        let user: string = "";
+        if (event.target.value == undefined)
+            user = this.state.userToInvite;
+        else
+            user = event.target.value;
+        this.context.socket.emit('inviteUser', {userToInvite: user, channelId: this.props.dest.id});
         this.setState({ userToInvite: "", onClickInvite: !this.state.onClickInvite });
     }
     
@@ -557,7 +586,7 @@ export function SidebarUser(props: {handleClose: any, dest: IDest}) {
             <div className="navRight">
                 <h1>{props.dest.name}</h1>
                 <ul className="paramMenu">
-                    <li><NavLink id="navlink" to={`/profile/${props.dest.name}`}>See profile</NavLink></li>
+                    <NavLink className="seeProfile" to={`/profile/${props.dest.name}`}><li>See profile</li></NavLink>
                     <li onClick={addFriend}>Add Friend</li>
                     <li>Propose a game<br></br>
                         <button onClick={proposeGame} data-type="normal">normal</button>
