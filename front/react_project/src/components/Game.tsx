@@ -62,12 +62,9 @@ interface SpecMode {
     player1_login: string | null
 }
 
-function SearchbarGame() {
+function ProposeGame() {
     const { socket } = useContext(SocketContext);
     const { socketGame } = useContext(SocketContext);
-    const ref = useRef<HTMLUListElement>(null);
-    const [text, setTexti] = useState<string>("hello");
-    const [isDropdown, setIsDropdown] = useState<boolean>(false);
     const [filtered, setFiltered] = useState<{ id: string, login: string }[]>([]);
     const [gameType, setGameType] = useState<string>("normal");
 
@@ -76,39 +73,6 @@ function SearchbarGame() {
             socketGame.emit("Private_Matchmaking", { target: event.target.value, super_game_mode: false });
         else if (gameType === "super")
             socketGame.emit("Private_Matchmaking", { target: event.target.value, super_game_mode: true });
-        resetFiltered();
-    }
-
-    const showSearchList = (event: any) => {
-        socket.emit("listConnectedUsers");
-        setIsDropdown(true);
-        displayList(event);
-    }
-
-    const displayList = (event: any) => {
-        console.log("blop");
-        setTexti(event.target.value);
-
-        if (event.target.value) {
-            setFiltered(() => {
-                const filteredUsers: { id: string, login: string }[] =
-                    filtered.filter((user: { id: string, login: string }) =>
-                        user.login.startsWith(event.target.value));
-                return filteredUsers;
-            });
-        }
-    }
-
-    const resetFiltered = () => {
-        setTexti("");
-        setFiltered([]);
-        setIsDropdown(false);
-    }
-
-    const closeSearchList = (e: any) => {
-        if (ref.current && !ref.current.contains(e.target)) {
-            setIsDropdown(false);
-        }
     }
 
     const changeType = (e: any) => {
@@ -116,8 +80,11 @@ function SearchbarGame() {
     }
 
     useEffect(() => {
+        console.log("blop")
         if (socket) {
+            socket.emit("listConnectedUsers");
             socket.on("allConnectedUsers", (users: { userId: string, userLogin: string }[]) => {
+                console.log("blop2")
                 const payload: JwtPayload = accountService.readPayload()!;
                 let newUserList: { id: string, login: string }[] = [];
                 users.forEach((user) => {
@@ -125,6 +92,7 @@ function SearchbarGame() {
                         newUserList.push({ id: user.userId, login: user.userLogin });
                 });
                 newUserList.sort((a, b) => { return a.login.localeCompare(b.login); });
+                console.log(newUserList);
                 setFiltered(newUserList);
             })
 
@@ -134,13 +102,6 @@ function SearchbarGame() {
         }
     }, [socket]);
 
-    useEffect(() => {
-        document.addEventListener("mousedown", closeSearchList);
-        return () => {
-            document.removeEventListener("mousedown", closeSearchList);
-        }
-    }, [ref]);
-
     return (
         <div id="proposeGame">
             <h2>Propose a game</h2>
@@ -149,20 +110,13 @@ function SearchbarGame() {
                 <FontAwesomeIcon className="iconAction" icon={faGamepad} />
                 <button className={gameType == "super" ? "button push" : "button"} value="super" onClick={changeType}>super</button>
             </div>
-            <div id="searchbarWrapper">
-                <div className="searchbar">
-                    <input type="text" onChange={displayList} onClick={showSearchList} value={text} placeholder="Search..." />
-                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-                </div>
-                {(filtered.length != 0 && isDropdown) &&
-                    <ul ref={ref}>
-                        {filtered.map((elt: { id: string, login: string }, id: number) => (
-                            <li className="searchElement" key={elt.id}>
-                                <button value={elt.login} onClick={proposeGame}>{elt.login}</button>
-                            </li>
-                        ))}
-                    </ul>}
-            </div>
+                <ul>
+                    {filtered.map((elt: { id: string, login: string }, id: number) => (
+                         <li className="searchElement" key={elt.id}>
+                            <button value={elt.login} onClick={proposeGame}>{elt.login}</button>
+                        </li>
+                    ))}
+                </ul>
         </div>
     )
 }
@@ -617,7 +571,7 @@ const Game: React.FC = () => {
                         {waitMatch ? <div className="quit" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                     </div>
                     <div className="bloc">
-                    <SearchbarGame />
+                    <ProposeGame />
                     <div id="gameModes">
                         <h2>Game Modes</h2>
                         <div>
