@@ -226,7 +226,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         this.tokenChecker(client)
         .then((user) => {
             if (user != null)
-                this.chatService.kickUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId);
+                this.chatService.kickUserEvent(client, user.id, this.chatRoomHandler, this.logger, data.userToKick, data.channelId, true);
             else
                 client.emit('notice', 'Your token is invalid, please log out then sign in');
         })

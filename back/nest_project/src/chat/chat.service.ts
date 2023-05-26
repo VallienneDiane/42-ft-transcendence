@@ -538,7 +538,7 @@ export class ChatService {
             });
     }
 
-    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channelId: string) {
+    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channelId: string, displayDone: boolean) {
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
@@ -556,7 +556,8 @@ export class ChatService {
                                 client.emit("notice", "Only god can kick an operator.");
                             else {
                                 this.delUserFromChannel(userToKick, channelId, roomHandler);
-                                client.emit("notice", `user ${linkToKick.user.login} kicked`);
+                                if (displayDone)
+                                    client.emit("notice", `user ${linkToKick.user.login} kicked`);
                             }
                         });
             });
@@ -928,7 +929,7 @@ export class ChatService {
                                 else if (banLink.status == "normal" || (banLink.status == "op" && link.status == "god")) {
                                 this.channelService.addBannedUser(userIdToBan, channelId)
                                 .then(() => {
-                                    this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId);
+                                    this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId, false);
                                     roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
                                     client.emit("notice", `user ${userEntity.login} is ban from this channel.`);
                                 })
