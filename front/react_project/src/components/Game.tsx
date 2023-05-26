@@ -66,7 +66,7 @@ function SearchbarGame() {
     const { socket } = useContext(SocketContext);
     const { socketGame } = useContext(SocketContext);
     const ref = useRef<HTMLUListElement>(null);
-    const [text, setText] = useState<string>("");
+    const [text, setTexti] = useState<string>("hello");
     const [isDropdown, setIsDropdown] = useState<boolean>(false);
     const [filtered, setFiltered] = useState<{ id: string, login: string }[]>([]);
     const [gameType, setGameType] = useState<string>("normal");
@@ -86,7 +86,8 @@ function SearchbarGame() {
     }
 
     const displayList = (event: any) => {
-        setText(event.target.value);
+        console.log("blop");
+        setTexti(event.target.value);
 
         if (event.target.value) {
             setFiltered(() => {
@@ -99,7 +100,7 @@ function SearchbarGame() {
     }
 
     const resetFiltered = () => {
-        setText("");
+        setTexti("");
         setFiltered([]);
         setIsDropdown(false);
     }
