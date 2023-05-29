@@ -1,16 +1,17 @@
 import "../styles/Base.css"
 import "../styles/Game.scss"
-import React, { useContext, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from "react-router"
 import { accountService } from "../services/account.service";
 import MatchsInProgress from "./MatchsInProgress"
 import { SocketContext } from "./context"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowDown, faArrowUp, faGamepad, faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons"
+import { faArrowDown, faArrowUp } from "@fortawesome/free-solid-svg-icons"
 import { useLocation } from "react-router"
 import { User } from "../models"
 import { JwtPayload } from "jsonwebtoken"
 import { userService } from "../services/user.service"
+import SearchbarGame from "./SearchbarGame";
 
 interface ball {
     x: number,
@@ -62,109 +63,7 @@ interface SpecMode {
     player1_login: string | null
 }
 
-function SearchbarGame() {
-    const { socket } = useContext(SocketContext);
-    const { socketGame } = useContext(SocketContext);
-    const ref = useRef<HTMLUListElement>(null);
-    const [text, setText] = useState<string>("");
-    const [isDropdown, setIsDropdown] = useState<boolean>(false);
-    const [filtered, setFiltered] = useState<{ id: string, login: string }[]>([]);
-    const [gameType, setGameType] = useState<string>("normal");
 
-    const proposeGame = (event: any) => {
-        if (gameType === "normal")
-            socketGame.emit("Private_Matchmaking", { target: event.target.value, super_game_mode: false });
-        else if (gameType === "super")
-            socketGame.emit("Private_Matchmaking", { target: event.target.value, super_game_mode: true });
-        resetFiltered();
-    }
-
-    const showSearchList = (event: any) => {
-        socket.emit("listConnectedUsers");
-        setIsDropdown(true);
-        displayList(event);
-    }
-
-    const displayList = (event: any) => {
-        setText(event.target.value);
-
-        if (event.target.value) {
-            setFiltered(() => {
-                const filteredUsers: { id: string, login: string }[] =
-                    filtered.filter((user: { id: string, login: string }) =>
-                        user.login.startsWith(event.target.value));
-                return filteredUsers;
-            });
-        }
-    }
-
-    const resetFiltered = () => {
-        setText("");
-        setFiltered([]);
-        setIsDropdown(false);
-    }
-
-    const closeSearchList = (e: any) => {
-        if (ref.current && !ref.current.contains(e.target)) {
-            setIsDropdown(false);
-        }
-    }
-
-    const changeType = (e: any) => {
-        setGameType(e.target.value);
-    }
-
-    useEffect(() => {
-        if (socket) {
-            socket.on("allConnectedUsers", (users: { userId: string, userLogin: string }[]) => {
-                const payload: JwtPayload = accountService.readPayload()!;
-                let newUserList: { id: string, login: string }[] = [];
-                users.forEach((user) => {
-                    if (payload.sub != user.userId)
-                        newUserList.push({ id: user.userId, login: user.userLogin });
-                });
-                newUserList.sort((a, b) => { return a.login.localeCompare(b.login); });
-                setFiltered(newUserList);
-            })
-
-            return () => {
-                socket.off("allConnectedUsers");
-            }
-        }
-    }, [socket]);
-
-    useEffect(() => {
-        document.addEventListener("mousedown", closeSearchList);
-        return () => {
-            document.removeEventListener("mousedown", closeSearchList);
-        }
-    }, [ref]);
-
-    return (
-        <div id="proposeGame">
-            <h2>Propose a game</h2>
-            <div className="buttons">
-                <button className={gameType == "normal" ? "button push" : "button"} value="normal" onClick={changeType}>normal</button>
-                <FontAwesomeIcon className="iconAction" icon={faGamepad} />
-                <button className={gameType == "super" ? "button push" : "button"} value="super" onClick={changeType}>super</button>
-            </div>
-            <div id="searchbarWrapper">
-                <div className="searchbar">
-                    <input type="text" onChange={displayList} onClick={showSearchList} value={text} placeholder="Search..." />
-                    <FontAwesomeIcon className="svgSearch" icon={faMagnifyingGlass} />
-                </div>
-                {(filtered.length != 0 && isDropdown) &&
-                    <ul ref={ref}>
-                        {filtered.map((elt: { id: string, login: string }, id: number) => (
-                            <li className="searchElement" key={elt.id}>
-                                <button value={elt.login} onClick={proposeGame}>{elt.login}</button>
-                            </li>
-                        ))}
-                    </ul>}
-            </div>
-        </div>
-    )
-}
 
 const Game: React.FC = () => {
     let user: User | null = null;
@@ -448,20 +347,20 @@ const Game: React.FC = () => {
                 }
             })
 
-            socketGame.on('in match', () => {
-                setWaitMatch(false);
-                setMatchInProgress(true);
-                setButtonReady(true);
-                ready = true;
-                clearGame = false;
-            })
-
             socketGame.on('spectator', (player1_login: string) => {
                 setWaitMatch(false);
                 setMatchInProgress(true);
                 setButtonReady(false);
                 ready = false;
                 toggleSpecMode(true, player1_login);
+            })
+
+            socketGame.on('in match', () => {
+                setWaitMatch(false);
+                setMatchInProgress(true);
+                setButtonReady(true);
+                ready = true;
+                clearGame = false;
             })
             return () => {
                 socketGame.off('Connection_Accepted');
@@ -574,10 +473,10 @@ const Game: React.FC = () => {
     }, [gameState, gameWidth]);
 
     return (
-        <div id='Game' onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
-            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} buttonReady={buttonReady} specMode={specMode}/>
+        <div id='Game'>
+            <MatchsInProgress socket={socketGame} setSpecMode={setSpecMode} toggleSpecMode={toggleSpecMode} waitMatch={waitMatch} buttonReady={buttonReady} specMode={specMode} />
             <div id="gameContainer">
-                <div id="gamePanel">
+                <div id="gamePanel" onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
                     {(matchInProgress || specMode.active) ?
                         <div id="players">
                             <div className="player">
@@ -616,35 +515,35 @@ const Game: React.FC = () => {
                         {waitMatch ? <div className="quit" onClick={quitCurrentMatch}>Quit Waiting List ?</div> : null}
                     </div>
                     <div className="bloc">
-                    <SearchbarGame />
-                    <div id="gameModes">
-                        <h2>Game Modes</h2>
-                        <div>
-                            <h3>Classic</h3>
-                            <p>The original pong game from 1972</p>
-                        </div>
-                        <div>
-                            <h3>Super</h3>
-                            <p>Keep an eye on every moving objects !</p>
-                        </div>
-                    </div>
-                    <div id="controls">
-                        <h2>Controls</h2>
-                        <div>
-                            <div className="icon">
-                                <FontAwesomeIcon className="arrow" icon={faArrowUp} />
-                                <div></div>
+                        <SearchbarGame />
+                        <div id="gameModes">
+                            <h2>Game Modes</h2>
+                            <div>
+                                <h3>Classic</h3>
+                                <p>The original pong game from 1972</p>
                             </div>
-                            <p>Move your paddle up</p>
-                        </div>
-                        <div>
-                            <div className="icon">
-                                <FontAwesomeIcon className="arrow" icon={faArrowDown} />
-                                <div></div>
+                            <div>
+                                <h3>Super</h3>
+                                <p>Keep an eye on every moving objects !</p>
                             </div>
-                            <p>Move your paddle down</p>
                         </div>
-                    </div>
+                        <div id="controls">
+                            <h2>Controls</h2>
+                            <div>
+                                <div className="icon">
+                                    <FontAwesomeIcon className="arrow" icon={faArrowUp} />
+                                    <div></div>
+                                </div>
+                                <p>Move your paddle up</p>
+                            </div>
+                            <div>
+                                <div className="icon">
+                                    <FontAwesomeIcon className="arrow" icon={faArrowDown} />
+                                    <div></div>
+                                </div>
+                                <p>Move your paddle down</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
