@@ -51,13 +51,13 @@ function ProposeGame() {
                 <FontAwesomeIcon className="iconAction" icon={faGamepad} />
                 <button className={gameType == "super" ? "button push" : "button"} value="super" onClick={changeType}>super</button>
             </div>
-                <ul>
-                    {filtered.map((elt: { id: string, login: string }, id: number) => (
-                         <li className="searchElement" key={elt.id}>
-                            <button value={elt.login} onClick={proposeGame}>{elt.login}</button>
-                        </li>
-                    ))}
-                </ul>
+            <ul>
+                {filtered.map((elt: { id: string, login: string }, id: number) => (
+                    <li className="searchElement" key={elt.id}>
+                        <button value={elt.login} onClick={proposeGame}>{elt.login}</button>
+                    </li>
+                ))}
+            </ul>
         </div>
     )
 }
