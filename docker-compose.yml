@@ -47,6 +47,7 @@ services:
       - .env
     volumes:
       - ./front:/usr/src/app
+<<<<<<< HEAD
 ########################################## PGADMIN  ########################################
   # pgadmin:
   #   image: dpage/pgadmin4
@@ -69,6 +70,11 @@ volumes:
   #     type: none 
   #     o: bind
   #     device: /home/vallienne/42_Projects/transcendence/pgadmin
+=======
+########################################### VOLUMES  #########################################
+volumes:
+  database:
+>>>>>>> e2958adaa12f3fba3aa7bc050da2b1f9612ebc97
 ########################################## NETWORK  ########################################
 networks:
   transcendence_network:

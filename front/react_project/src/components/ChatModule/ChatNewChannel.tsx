@@ -55,10 +55,13 @@ export function Popup(props: {handleClose: any}) {
     }
 
     const onSubmit = (data: IChannel) => {
+        let channPass: string = "";
+        if (data.inviteOnly == false)
+            channPass = data.channelPass!;
         socket.emit('createChannel', {
             name: data.name,
             password: data.password,
-            channelPass: data.channelPass,
+            channelPass: channPass,
             inviteOnly: data.inviteOnly
         });
         props.handleClose();
