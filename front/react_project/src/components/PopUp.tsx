@@ -102,7 +102,6 @@ const PopUp: React.FC = () => {
                                 return invite;
                             }
                             else {
-                                console.log("J'ai deja des popup mais pas le meme couple d'invite")
                                 if (invitation.for === user.login) {
                                     setInvites((prevInvites) => {
                                         const newInvite = {

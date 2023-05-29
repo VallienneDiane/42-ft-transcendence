@@ -38,10 +38,10 @@ const Callback: React.FC = () => {
                 accountService.is2faActive42(res_user.data.id42)
                 .then(res_2fa => {
                     if(res_2fa.data.is2faActive == true) {
-                        navigate("/verifyCode2fa", { state: { id42: res_user.data.id42 } });
+                        navigate("/verifyCode2fa", { state: { id: res_2fa.data.id } });
                     }
                     else {
-                        accountService.generateToken42(res_user.data.id42)
+                        accountService.generateToken(res_2fa.data.id)
                         .then(res_token => {
                             accountService.saveToken(res_token.data.access_token);
                             const from = (location.state as any)?.from || "/";

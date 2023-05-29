@@ -538,7 +538,11 @@ export class ChatService {
             });
     }
 
+<<<<<<< HEAD
     public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channelId: string) {
+=======
+    public kickUserEvent(client: Socket, userId: string, roomHandler: UserRoomHandler, logger: Logger, userToKick: string, channelId: string, displayDone: boolean) {
+>>>>>>> e2958adaa12f3fba3aa7bc050da2b1f9612ebc97
         this.channelService.getUserInChannel(channelId, userId)
         .then(
             (link) => {
@@ -556,7 +560,12 @@ export class ChatService {
                                 client.emit("notice", "Only god can kick an operator.");
                             else {
                                 this.delUserFromChannel(userToKick, channelId, roomHandler);
+<<<<<<< HEAD
                                 client.emit("notice", `user ${linkToKick.user.login} kicked`);
+=======
+                                if (displayDone)
+                                    client.emit("notice", `user ${linkToKick.user.login} kicked`);
+>>>>>>> e2958adaa12f3fba3aa7bc050da2b1f9612ebc97
                             }
                         });
             });
@@ -928,7 +937,11 @@ export class ChatService {
                                 else if (banLink.status == "normal" || (banLink.status == "op" && link.status == "god")) {
                                 this.channelService.addBannedUser(userIdToBan, channelId)
                                 .then(() => {
+<<<<<<< HEAD
                                     this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId);
+=======
+                                    this.kickUserEvent(client, userId, roomHandler, logger, userIdToBan, channelId, false);
+>>>>>>> e2958adaa12f3fba3aa7bc050da2b1f9612ebc97
                                     roomHandler.roomMap.of(channelId).emit("newBan", userEntity.id, userEntity.login);
                                     client.emit("notice", `user ${userEntity.login} is ban from this channel.`);
                                 })
@@ -996,7 +1009,11 @@ export class ChatService {
                         client.emit("notice", "User not belong to this channel");
                     else if (muteLink.status == "normal" || (muteLink.status == "op" && link.status == "god")) {
                         this.muteService.muteUser(userIdToMute, channelId, minutes);
+<<<<<<< HEAD
                         client.emit("notice", `User ${muteLink.channel.name} is now muted`);
+=======
+                        client.emit("notice", `User is now muted`);
+>>>>>>> e2958adaa12f3fba3aa7bc050da2b1f9612ebc97
                     }
                     else
                         client.emit("notice", "Only the channel owner can mute operators");

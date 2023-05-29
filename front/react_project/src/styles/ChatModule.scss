@@ -9,7 +9,6 @@
 	& .card {
 		display: flex;
 		gap: 20px;
-		background: transparent;
 		padding: 0 1rem;
 		width: 90%;
 		height: 95%;
@@ -312,7 +311,7 @@
 				z-index: 9999;
 				top: 0;
 				right: 0;
-				width: 220px;
+				width: 260px;
 				height: 100%;
 				background: rgba(233, 230, 240, 0.95);
 				transition: transform 0.5s ease-in-out;
@@ -337,7 +336,7 @@
 							& .paramMenu {
 								display: flex;
 								flex-direction: column;
-								& > li {
+								& > li, .seeProfile {
 									padding: 0.7rem 1rem;
 									border-bottom: 2px solid rgb(202, 202, 202);
 									& > button {
@@ -376,6 +375,12 @@
 											width: 13px;
 											padding-left: 7px;
 											opacity: 70%;
+										}
+										& .name {
+											&:hover {
+												font-weight: bolder;
+												color: var(--third-color);
+											}
 										}
 									}
 								}
@@ -487,6 +492,11 @@
 												color: white;
 											}
 										}
+									}
+									& > section {
+										display: flex;
+										font-size: 13px;
+										padding: 0rem 1.2rem 0.2rem 1.2rem;
 									}
 									& .inputChannel {
 										outline: 0;
