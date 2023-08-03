@@ -3,16 +3,6 @@
 Implement a website where users can play Pong with each other. 
 There are a user interface, a chat and the games will be multiplayer online and in real time.
 
-Some rules :
-
-<p align="center">
-<img src="transcendence.png" width="1000">
-</p>
-
-<p align="center">
-<img src="https://www.bezkoder.com/wp-content/uploads/2020/03/react-node-express-postgresql-crud-example-architecture.png" width="500">
-</p>
-
 ## INSTALL FRAMEWORKS
 
 ## NODEJS
@@ -170,29 +160,6 @@ A provider can be injected as a dependency. This means objects can create relati
 A Service is a provider which use a decorator @Injectable(), it can have class and methods.
 
 
-## IMPLEMENT THE FEATURES
-
-## 1. AUTHENTIFICATION (get login and create JWT Token)
-
-### Login
-
-In React : create a form that allows the user to enter their login and password. When the form is submitted, dispatch an action that sends a request to the back-end to create a new user account.
-
-In Nest.js : create a controller that listens for the request from the front-end and creates a new user in the database. To interact with the database, use a database library such as TypeORM.
-
-In the controller, you can use the TypeORM Repository to insert a new user into the database. You can retrieve the login and password from the request body and use them to create a new instance of your User model. Then you can save the user to the database using the Repository.save() method.
-
-After the user is successfully saved, you can return a response to the front-end indicating that the account was created.
-
-https://medium.com/att-israel/authentication-authorization-using-react-nestjs-jwt-token-55f52070a3f2
-
-https://dev.to/hahnmatthieu/2fa-with-nestjs-passeport-using-google-authenticator-1l32
-
-
-## OAuth
-
-https://www.youtube.com/watch?v=Iv77m1mxAWE
-
 # SOURCES
 
 ## DOCUMENTATIONS
@@ -212,4 +179,6 @@ Use Forms React Hook Form : https://reactjs.org/docs/hooks-custom.html
 Use REST react-query : https://www.youtube.com/watch?v=novnyCaa7To
 
 Use Styling Materia UI : https://mui.com/
+
+https://www.youtube.com/watch?v=Iv77m1mxAWE
 
