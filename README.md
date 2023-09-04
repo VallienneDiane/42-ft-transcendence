@@ -5,7 +5,7 @@ There are a user interface, a chat and the games will be multiplayer online and 
 
 ## LAUNCH
 
-``` docker-compose up --build ```
+``` make OU docker-compose up --build ```
 
 and go on http://localhost:8000
 
