@@ -9,6 +9,29 @@ There are a user interface, a chat and the games will be multiplayer online and 
 
 and go on http://localhost:8000
 
+This project requires a .env which looks like :
+``` 
+PGADMIN_DEFAULT_EMAIL=
+PGADMIN_DEFAULT_PASSWORD=
+PGADMIN_DEFAULT_PASSWORD_FILE=
+PGADMIN_CONFIG_SERVER_MODE=
+
+POSTGRES_PASSWORD=
+POSTGRES_USER=
+POSTGRES_DB=
+
+VITE_IP=http://10.13.11.5
+
+USER=${USER}
+
+SECRET=
+TWOFACTOR_APP_NAME=transcendence
+
+API_CALLBACK_URL=http://10.13.11.5:8000/callback
+API_KEY=
+API_UID=
+
+```
 
 ## INSTALL FRAMEWORKS
 ## NODEJS
