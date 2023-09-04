@@ -3,8 +3,14 @@
 Implement a website where users can play Pong with each other. 
 There are a user interface, a chat and the games will be multiplayer online and in real time.
 
-## INSTALL FRAMEWORKS
+## LAUNCH
 
+``` make OU docker-compose up --build ```
+
+and go on http://localhost:8000
+
+
+## INSTALL FRAMEWORKS
 ## NODEJS
 
 <p align="center">
