@@ -16,7 +16,6 @@ import { AvatarEntity } from "./avatar/avatar.entity";
  * UsePipes()
  * Activate dto
  */
-
 @UsePipes(ValidationPipe)
 @Controller()
 export class UserController {
@@ -32,6 +31,7 @@ export class UserController {
      */
     @Post('user/signup') 
     async createUser(@Body() newUser: SignUpDto) {
+        console.log("newUser ===== ", newUser);
         const saltOrRounds = 10;
         const hash = await bcrypt.hash(newUser.password, saltOrRounds);
         newUser.password = hash;

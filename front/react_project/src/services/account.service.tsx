@@ -9,7 +9,7 @@ import * as jsrsasign from 'jsrsasign';
  * @returns 
  */
 let signUp = (credentials: SignUpForm) => {
-    return Axios.post('/user/signup', credentials);
+    return Axios.post('user/signup', credentials);
 }
 /**
  * Request to login
@@ -20,15 +20,10 @@ let login = (credentials: LogInForm) => {
     return Axios.post('auth/login', credentials);
 }
 /**
- * Upload Avatar picture
- * @param file 
+ * Get Avatar picture
+ * @param id 
  * @returns 
  */
- /**
-  * Get Avatar picture
-  * @param id 
-  * @returns 
-  */
 let getAvatar = (id: string) => {
     return Axios.get('getAvatar/' + id);
 }

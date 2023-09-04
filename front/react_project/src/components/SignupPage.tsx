@@ -7,7 +7,7 @@ import * as yup from "yup";
 import { NavLink, useNavigate } from 'react-router-dom';
 import { SignUpForm } from '../models'
 import { accountService } from '../services/account.service';
-import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
+// import { generateRandomAvatarOptions } from "../assets/avatarGenerator";
 
 const userSchema = yup.object().shape({
   login: yup.string().required("Login is required") .min(3, "Login must be at least 3 characters") .max(15, "Login must not exceed 15 characters") .matches(/^[a-zA-Z0-9-_]+$/, "Only alphanumeric characters & underscore & dash allowed"),
@@ -23,11 +23,11 @@ const SignupPage: React.FC = () => {
   });
 
   const signUp = async (data: SignUpForm) => {
-    const avatar = generateRandomAvatarOptions();
-    const svgString = ReactDOMServer.renderToString(avatar);
+    // const avatar = generateRandomAvatarOptions();
+    // const svgString = ReactDOMServer.renderToString(avatar);
 
     setError(false);
-    data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
+    // data.avatarSvg = 'data:image/svg+xml,' + encodeURIComponent(svgString);
     await accountService.isUniqueLogin(data.login)
     .then(loginUnique => {
       if(loginUnique.data == true) {
